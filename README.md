@@ -3,8 +3,8 @@
 
 ## PIs: 
 
-- Sparkle L. Malone
-- Jackie H. Matthes
+- Sparkle L. Malone, Assistant Professor, Yale University
+- Jackie H. Matthes, Senior Scientist, Harvard University
 
 
 ## Project Summary
