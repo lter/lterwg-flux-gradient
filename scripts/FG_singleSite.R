@@ -30,7 +30,15 @@ setwd(paste0(site.dir, "/filesToStack00200/"))
 hd.files <-list.files(pattern="\\.h5$")
 #grab attribute data
 attr.df <- SiteAttributes(hd.files, sitecode)
+#save df as csv
+#write.csv(attr.df, "HARV_202205_202207_attr.csv")
 #grab co2, h20, ch4 level 1 data at all 30min resolution tower heights along with level 4 co2, sensible heat, latent heat fluxes
+#NOTE these columns are of class character
 cont.df <- Site.DF(hd.files, sitecode)
+#save df as csv
+#write.csv(cont.df, "HARV_202205_202207_ch4co2h2oCont.csv")
 #calculate flux gradient
-mbr.df <- Flux_Gradient_MBR(cont.df, attr.df) #what do we want this end df to be used for? do we need to keep all the height concentrations?
+#select lower twoer height
+z1_height <- attr.df$DistZaxsLvlMeasTow[1]
+z2_height <- attr.df$DistZaxsLvlMeasTow[6]
+mbr.df <- Flux_Gradient_MBR(cont.df, attr.df, z1_height, z2_height)
