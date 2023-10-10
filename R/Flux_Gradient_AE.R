@@ -26,7 +26,7 @@ Flux_Gradient_AE <- function(cont.df, attr.df, z1_height, z2_height, z_height){
   h2o_min_col <- paste("h2o.000_0",site_min_height,"0_30m",sep="")
   
   #build df to fill with AE estimated fluxes
-  ae.df <- as.data.frame(matrix(NA, nrow = dim(cont.df)[1], ncol = 11))
+  ae.df <- as.data.frame(matrix(NA, nrow = dim(cont.df)[1], ncol = 12))
   #we want the measurement height to be part of the calculated flux col name for matching/validation
   F_ch4_AE <- paste0("F_ch4_AE_0", site_min_height, "0_0", site_max_height, "0_30m")
   F_ch4_AE_WP <- paste0("F_ch4_AE_WP_0", site_min_height, "0_0", site_max_height, "0_30m")
@@ -34,7 +34,7 @@ Flux_Gradient_AE <- function(cont.df, attr.df, z1_height, z2_height, z_height){
   F_co2_AE_WP <- paste0("F_co2_AE_WP_0", site_min_height, "0_0", site_max_height, "0_30m")
   F_LE_AE <- paste0("F_LE_AE_0", site_min_height, "0_0", site_max_height, "0_30m")
   F_LE_AE_WP <- paste0("F_LE_AE_WP_0", site_min_height, "0_0", site_max_height, "0_30m")
-  colnames(ae.df) <- c("timeEnd", "datetime", F_ch4_AE,  F_ch4_AE_WP, F_co2_AE, F_co2_AE_WP, F_LE_AE, F_LE_AE_WP, "F_co2", "F_H", "F_LE")
+  colnames(ae.df) <- c("timeEnd", "datetime", F_ch4_AE,  F_ch4_AE_WP, F_co2_AE, F_co2_AE_WP, F_LE_AE, F_LE_AE_WP, "F_co2", "F_H", "F_LE", "L")
   ae.df$timeEnd <- cont.df$timeEnd
   ae.df$datetime <- cont.df$datetime
   ae.df$F_co2 <- as.numeric(cont.df$F_co2)
@@ -47,6 +47,8 @@ Flux_Gradient_AE <- function(cont.df, attr.df, z1_height, z2_height, z_height){
   #calculate obukhov length: 0.4 = Von Karman constant, 9.8 = gravitational acceleration
   #need to check units of air temp, does this need to be in Kelvin?
   L <- ((-as.numeric(cont.df$uStar)^3)*as.numeric(cont.df$airtemp))/(0.4*9.8*as.numeric(cont.df$F_H))
+  #add to ae.df for classification of stability classes
+  ae.df$L <- as.numeric(L)
   #calculate obukhov stability param
   gamma <- as.numeric(z)/as.numeric(L)
   #calculate AE eddy diffusivity: 0.4 = Von Karman constant
