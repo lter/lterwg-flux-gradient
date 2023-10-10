@@ -40,5 +40,11 @@ cont.df <- Site.DF(hd.files, sitecode)
 #calculate flux gradient
 #select lower twoer height
 z1_height <- attr.df$DistZaxsLvlMeasTow[1]
+#select upper tower height
 z2_height <- attr.df$DistZaxsLvlMeasTow[6]
+#select tallest height for sonic anemometer
+z_height <- attr.df$DistZaxsLvlMeasTow[6]
+#calculate fluxes using Modified Bowan Ratio
 mbr.df <- Flux_Gradient_MBR(cont.df, attr.df, z1_height, z2_height)
+#calculate fluxes using aerodynamic profile and wind profile
+ae.df <- Flux_Gradient_AE(cont.df, attr.df, z1_height, z2_height, z_height)

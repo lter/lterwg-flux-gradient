@@ -5,7 +5,7 @@
 #' @param z2_height upper tower height (taken from attr.df$DistZaxsLvlMeasTow)
 #' @param attr.df df containing site measurment heights
 #'
-#' @return df with additional columns for MBR calculated ch4 fluxes
+#' @return df with additional columns for MBR calculated ch4, co2, h2o fluxes
 #'
 #' @author Alexis Helgeson
 Flux_Gradient_MBR <- function(cont.df, attr.df, z1_height, z2_height){
@@ -25,15 +25,13 @@ Flux_Gradient_MBR <- function(cont.df, attr.df, z1_height, z2_height){
   h2o_min_col <- paste("h2o.000_0",site_min_height,"0_30m",sep="")
   
   #build df to fill with MBR estimated fluxes
-  mbr.df <- as.data.frame(matrix(NA, nrow = dim(cont.df)[1], ncol = 11))
+  mbr.df <- as.data.frame(matrix(NA, nrow = dim(cont.df)[1], ncol = 9))
   #we want the measurement height to be part of the calculated flux col name for matching/validation
   F_ch4_MBR_co2 <- paste0("F_ch4_MBR_co2_0", site_min_height, "0_0", site_max_height, "0_30m")
-  F_ch4_MBR_H <- paste0("F_ch4_MBR_H_0", site_min_height, "0_0", site_max_height, "0_30m")
   F_ch4_MBR_LE <- paste0("F_ch4_MBR_LE_0", site_min_height, "0_0", site_max_height, "0_30m")
   F_co2_MBR_LE <- paste0("F_co2_MBR_LE_0", site_min_height, "0_0", site_max_height, "0_30m")
-  F_co2_MBR_H <- paste0("F_co2_MBR_H_0", site_min_height, "0_0", site_max_height, "0_30m")
-  F_h2o_MBR_co2 <- paste0("F_h2o_MBR_co2_0", site_min_height, "0_0", site_max_height, "0_30m")
-  colnames(mbr.df) <- c("timeEnd", "datetime", F_ch4_MBR_co2, F_ch4_MBR_H,  F_ch4_MBR_LE, F_co2_MBR_LE, F_co2_MBR_H, F_h2o_MBR_co2, "F_co2", "F_H", "F_LE")
+  F_LE_MBR_co2 <- paste0("F_LE_MBR_co2_0", site_min_height, "0_0", site_max_height, "0_30m")
+  colnames(mbr.df) <- c("timeEnd", "datetime", F_ch4_MBR_co2,  F_ch4_MBR_LE, F_co2_MBR_LE, F_LE_MBR_co2, "F_co2", "F_H", "F_LE")
   mbr.df$timeEnd <- cont.df$timeEnd
   mbr.df$datetime <- cont.df$datetime
   mbr.df$F_co2 <- as.numeric(cont.df$F_co2)
@@ -52,32 +50,23 @@ Flux_Gradient_MBR <- function(cont.df, attr.df, z1_height, z2_height){
   #grabs level 1 ch4 cont at max height for site
   Conc_CH4_z2<-as.numeric(cont.df[,which(names(cont.df) == ch4_max_col)])
   #calculate ch4 flux and add to df
-  mbr.df[,which(names(mbr.df) == F_ch4_MBR_co2)] <- Flux_co2*(Conc_CH4_z1-Conc_CH4_z2/Conc_co2_z1-Conc_co2_z2)                                                             
+  mbr.df[,which(names(mbr.df) == F_ch4_MBR_co2)] <- Flux_co2*(Conc_CH4_z1-Conc_CH4_z2/Conc_co2_z1-Conc_co2_z2)
   
-  #MBR ch4 flux using sensible heat flux
-  #grab NEON level 4 sensible heat flux 
-  Flux_H <- as.numeric(cont.df$F_H)
+  #MBR ch4 flux using latent heat flux
+  #grab NEON level 4 latent heat flux 
+  Flux_LE <- as.numeric(cont.df$F_LE)
   #grab NEON level 1 h2o stor at lowest height
   Conc_h2o_z1<-as.numeric(cont.df[,which(names(cont.df) == h2o_min_col)])
   #grab NEON level 1 h2o stor at max height
   Conc_h2o_z2<-as.numeric(cont.df[,which(names(cont.df) == h2o_max_col)])
   #calculate ch4 flux and add to df
-  mbr.df[,which(names(mbr.df) == F_ch4_MBR_H)] <- Flux_H*(Conc_CH4_z1-Conc_CH4_z2/Conc_h2o_z1-Conc_h2o_z2)
-  
-  #MBR ch4 flux using latent heat flux
-  #grab NEON level 4 sensible heat flux 
-  Flux_LE <- as.numeric(cont.df$F_LE)
-  #calculate ch4 flux and add to df
   mbr.df[,which(names(mbr.df) == F_ch4_MBR_LE)] <- Flux_LE*(Conc_CH4_z1-Conc_CH4_z2/Conc_h2o_z1-Conc_h2o_z2)
-  
-  #MBR co2 flux using sensible heat
-  mbr.df[,which(names(mbr.df) == F_co2_MBR_H)] <- Flux_H*(Conc_co2_z1-Conc_co2_z2/Conc_h2o_z1-Conc_h2o_z2)
   
   #MBR co2 flux using latent heat
   mbr.df[,which(names(mbr.df) == F_co2_MBR_LE)] <- Flux_LE*(Conc_co2_z1-Conc_co2_z2/Conc_h2o_z1-Conc_h2o_z2)
   
-  #MBR h2o flux using co2
-  mbr.df[,which(names(mbr.df) == F_h2o_MBR_co2)] <- Flux_co2*(Conc_h2o_z1-Conc_h2o_z2/Conc_co2_z1-Conc_co2_z2)
+  #MBR LE flux using co2
+  mbr.df[,which(names(mbr.df) == F_LE_MBR_co2)] <- Flux_co2*(Conc_h2o_z1-Conc_h2o_z2/Conc_co2_z1-Conc_co2_z2)
   
   return(mbr.df)
 }

@@ -79,23 +79,30 @@ hdf2df <- function(hd.file, sitecode){
   #grab NEON level 4 friction velocity for a given site
   Ufric  <- h5read(hd.file, paste("/", sitecode, "/dp04/data/fluxMome/turb", sep=""))
   
-  #grab NEON level 1 top of tower ratio dry mole H2O
-  #But we already grabbed this previously?
-  #r  <- h5read(hd.file, paste("/", sitecode, "/dp01/data/h2oTurb/",  heights[length(heights)], "/rtioMoleDryH2o", sep=""))
-  
   #grab NEON level 1 air pressure at 25m 30min resolution for a given site
   P  <- h5read(hd.file, paste("/", sitecode, "/dp01/data/presBaro/",max(test.df$name[test.df$group==paste("/", sitecode, "/dp01/data/presBaro", sep="")]),"/presAtm", sep=""))
   
   #grab NEON level 1 air temp at 10m 30min resolution for a given site
   temp  <- h5read(hd.file, paste("/", sitecode, "/dp01/data/tempAirLvl/000_010_30m/temp", sep=""))
-  
+  #grab NEON level 1 horizontal wind speed data from top of tower at 30min resolution for a given site
+  #hard coded top of tower might need to adjust for other heights
+  SoniWind  <- h5read(hd.file, paste("/", sitecode, "/dp01/data/soni/000_060_30m/veloXaxsYaxsErth", sep=""))
+  #grab NEON momentum roughness from footprint stats table
+  #which of these is momentum roughness? Assuming veloZaxsHorSd for now based on range and mean 
+  MomRough <- h5read(hd.file, paste("/", sitecode, "/dp04/data/foot/stat", sep=""))
   # Merge all data:
-  totF <- df_H2O %>% left_join(df_CO2, by= 'timeEnd') %>% left_join(df_CH4 , by= 'timeEnd') 
-  totF$veloFric <- Ufric$veloFric
-  #not sure why we are including this twice but keeping it named r in case this becomes important later
-  totF$r <- df_H2O$h2o.000_060_30m
-  totF$P <- P$mean
-  totF$temp <-temp$mean
+  totF <- df_H2O %>% left_join(df_CO2, by= 'timeEnd') %>% left_join(df_CH4 , by= 'timeEnd')
+  #ustar used in aerodynamic profile and wind profile method estimation of eddy diffusivity
+  totF$uStar <- Ufric$veloFric
+  #air pressure used in aerodynamic and wind profile FG calculation
+  totF$airpress <- P$mean
+  #surface air temperature used in aerodynamic profile method estimation of eddy diffusivity
+  totF$airtemp <-temp$mean
+  #mean wind speed at measurement height used for wind profile method
+  totF$uBar <- SoniWind$mean
+  #roughness length used for wind profile method
+  totF$z0 <- MomRough$veloZaxsHorSd
+  
   
   return(totF)
 }
