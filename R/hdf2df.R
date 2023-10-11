@@ -82,10 +82,9 @@ hdf2df <- function(hd.file, sitecode){
   #grab NEON level 1 air pressure at 25m 30min resolution for a given site
   P  <- h5read(hd.file, paste("/", sitecode, "/dp01/data/presBaro/",max(test.df$name[test.df$group==paste("/", sitecode, "/dp01/data/presBaro", sep="")]),"/presAtm", sep=""))
   
-  #grab NEON level 1 air temp at 10m 30min resolution for a given site
+  #grab NEON level 1 air temp at lowest tower position (assuming this is sruface air temp) 30min resolution for a given site
   temp  <- h5read(hd.file, paste("/", sitecode, "/dp01/data/tempAirLvl/000_010_30m/temp", sep=""))
   #grab NEON level 1 horizontal wind speed data from top of tower at 30min resolution for a given site
-  #hard coded top of tower might need to adjust for other heights
   SoniWind  <- h5read(hd.file, paste("/", sitecode, "/dp01/data/soni/000_060_30m/veloXaxsYaxsErth", sep=""))
   #grab NEON momentum roughness from footprint stats table
   #which of these is momentum roughness? Assuming veloZaxsHorSd for now based on range and mean 

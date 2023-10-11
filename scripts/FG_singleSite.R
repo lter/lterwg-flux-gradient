@@ -12,6 +12,12 @@ library(naniar)
 library(ggplot2)
 library(R.utils)
 library(gtools)
+#load in FG specific functions
+source("~/fluxGradient/lterwg-flux-gradient/R/SiteAttributes.R")
+source("~/fluxGradient/lterwg-flux-gradient/R/SiteDF.R")
+source("~/fluxGradient/lterwg-flux-gradient/R/hdf2df.R")
+source("~/fluxGradient/lterwg-flux-gradient/R/Flux_Gradient_MBR.R")
+source("~/fluxGradient/lterwg-flux-gradient/R/Flux_Gradient_AE.R")
 #set up dir to store data
 Main.Directory <- c('//corellia.environment.yale.edu/MaloneLab/alexis.helgeson/fluxGradient')
 #set desired site name and NEON code
@@ -31,12 +37,11 @@ hd.files <-list.files(pattern="\\.h5$")
 #grab attribute data
 attr.df <- SiteAttributes(hd.files, sitecode)
 #save df as csv
-#write.csv(attr.df, "HARV_202205_202207_attr.csv")
-#grab co2, h20, ch4 level 1 data at all 30min resolution tower heights along with level 4 co2, sensible heat, latent heat fluxes
-#NOTE these columns are of class character
+write.csv(attr.df, paste0(sitecode, "_", startdate, "_", enddate, "_attr.csv"))
+#grab co2, h20, ch4 level 1 data at all 30min resolution tower heights along with level 4 co2, sensible heat, latent heat fluxes, uStar, uBar, air temp, z0
 cont.df <- Site.DF(hd.files, sitecode)
 #save df as csv
-#write.csv(cont.df, "HARV_202205_202207_ch4co2h2oCont.csv")
+write.csv(cont.df, paste0(sitecode, "_", startdate, "_", enddate, "_cont.csv"))
 #calculate flux gradient
 #select lower twoer height
 z1_height <- attr.df$DistZaxsLvlMeasTow[1]
@@ -46,5 +51,9 @@ z2_height <- attr.df$DistZaxsLvlMeasTow[6]
 z_height <- attr.df$DistZaxsLvlMeasTow[6]
 #calculate fluxes using Modified Bowan Ratio
 mbr.df <- Flux_Gradient_MBR(cont.df, attr.df, z1_height, z2_height)
+#save df as csv
+write.csv(mbr.df, paste0(sitecode, "_", startdate, "_", enddate, "_mbr.csv"))
 #calculate fluxes using aerodynamic profile and wind profile
 ae.df <- Flux_Gradient_AE(cont.df, attr.df, z1_height, z2_height, z_height)
+#save df as csv
+write.csv(ae.df, paste0(sitecode, "_", startdate, "_", enddate, "_ae.csv"))
