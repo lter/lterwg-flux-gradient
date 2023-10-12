@@ -89,6 +89,8 @@ hdf2df <- function(hd.file, sitecode){
   #grab NEON momentum roughness from footprint stats table
   #which of these is momentum roughness? Assuming veloZaxsHorSd for now based on range and mean 
   MomRough <- h5read(hd.file, paste("/", sitecode, "/dp04/data/foot/stat", sep=""))
+  #grab NEON top of tower incoming solar radiation to be used in uStar filtering
+  Solar <- h5read(hd.file, paste("/", sitecode, "/dp01/data/radiNet/000_060_30m/radiSwIn", sep=""))
   # Merge all data:
   totF <- df_H2O %>% left_join(df_CO2, by= 'timeEnd') %>% left_join(df_CH4 , by= 'timeEnd')
   #ustar used in aerodynamic profile and wind profile method estimation of eddy diffusivity
@@ -101,6 +103,8 @@ hdf2df <- function(hd.file, sitecode){
   totF$uBar <- SoniWind$mean
   #roughness length used for wind profile method
   totF$z0 <- MomRough$veloZaxsHorSd
+  #incoming solar radiation to be used in uStar filtering
+  totF$radiSwIn <- Solar$mean
   
   
   return(totF)
