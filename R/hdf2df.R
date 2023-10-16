@@ -5,6 +5,7 @@
 #' @return data frame containing site co2, h2o, ch4 measurements at various tower heights
 #' @author Alexis Helgeson, David Reed, and Sparkle Malone
 #' 
+
 hdf2df <- function(hd.file, sitecode){
   
   #lists the contents of hdf5 file and returns a df with file contents
@@ -151,8 +152,7 @@ hdf2df <- function(hd.file, sitecode){
     left_join( Solar[,c('timeEnd','radiSwIn' )], by='timeEnd')%>% 
     left_join( Solar.qfqm[,c('timeEnd', 'radiSwIn_qfqm')], by='timeEnd')
   
-  
+
   
   return(totF)
 }
-
