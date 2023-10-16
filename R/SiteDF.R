@@ -6,7 +6,7 @@
 #' @return df containing site co2, h2o, ch4 measurements at various tower heights
 #' 
 #'
-#' @author Alexis Helgeson
+#' @author Alexis Helgeson, Sam Jurado, David Reed
 Site.DF <- function(hd.files, sitecode){
   
   ALL.data = data.frame()

@@ -5,7 +5,7 @@
 #'
 #' @return df containing site co2, h2o, ch4 measurements at various tower heights
 #'
-#' @author Alexis Helgeson
+#' @author Alexis Helgeson, Sam Jurado, David Reed
 hdf2df <- function(hd.file, sitecode){
   
   #lists the contents of hdf5 file and returns a df with file contents
@@ -123,23 +123,33 @@ hdf2df <- function(hd.file, sitecode){
   Solar.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp01/qfqm/radiNet/000_060_30m/radiSwIn", sep=""))
   # Merge all data:
   totF <- df_H2O %>% left_join(df_CO2, by= 'timeEnd') %>% left_join(df_CH4 , by= 'timeEnd')
-  #ustar used in aerodynamic profile and wind profile method estimation of eddy diffusivity
-  totF$uStar <- Ufric$veloFric
-  totF$uStar_qfqm <- Ufric.qfqm$qfFinl
-  #air pressure used in aerodynamic and wind profile FG calculation
-  totF$airpress <- P$mean
-  totF$airpress_qfqm <- P.qfqm$qfFinl
+  Ufric$uStar <- Ufric$veloFric
+  Ufric.qfqm$uStar_qfqm <- Ufric.qfqm$qfFinl
+  P$airpress <- P$mean
+  P.qfqm$airpress_qfqm <- P.qfqm$qfFinl
   #surface air temperature used in aerodynamic profile method estimation of eddy diffusivity
-  totF$airtemp <-temp$mean
-  totF$airtemp_qfqm <- temp.qfqm$qfFinl
+  temp$airtemp <-temp$mean
+  temp.qfqm$airtemp_qfqm <- temp.qfqm$qfFinl
   #mean wind speed at measurement height used for wind profile method
-  totF$uBar <- SoniWind$mean
-  totF$uBar_qfqm <- SoniWind.qfqm$qfFinl
+  SoniWind$uBar <- SoniWind$mean
+  SoniWind.qfqm$uBar_qfqm <- SoniWind.qfqm$qfFinl
   #roughness length used for wind profile method
-  totF$z0 <- MomRough$veloZaxsHorSd
+  MomRough$z0 <- MomRough$veloZaxsHorSd
   #incoming solar radiation to be used in uStar filtering
-  totF$radiSwIn <- Solar$mean
-  totF$radiSwIn_qfqm <- Solar.qfqm$qfFinl
+  Solar$radiSwIn <- Solar$mean
+  Solar.qfqm$radiSwIn_qfqm <- Solar.qfqm$qfFinl
+  
+  totF <- totF %>% left_join( Ufric[,c('timeEnd', 'uStar')], by='timeEnd') %>%
+    left_join( Ufric.qfqm[,c('timeEnd', 'uStar_qfqm')], by='timeEnd')%>%
+    left_join(P[,c('timeEnd', 'airpress')], by='timeEnd') %>% 
+    left_join(P.qfqm[,c('timeEnd', 'airpress_qfqm')], by='timeEnd') %>% 
+    left_join( temp[,c('timeEnd', 'airtemp')], by='timeEnd')%>% 
+    left_join( temp.qfqm[,c('timeEnd', 'airtemp_qfqm')], by='timeEnd')%>% 
+    left_join( SoniWind[,c('timeEnd', 'uBar')], by='timeEnd')%>% 
+    left_join( SoniWind.qfqm[,c('timeEnd', 'uBar_qfqm')], by='timeEnd')%>% 
+    left_join( MomRough[,c('timeEnd', 'z0')], by='timeEnd')%>% 
+    left_join( Solar[,c('timeEnd','radiSwIn' )], by='timeEnd')%>% 
+    left_join( Solar.qfqm[,c('timeEnd', 'radiSwIn_qfqm')], by='timeEnd')
   
   
   return(totF)

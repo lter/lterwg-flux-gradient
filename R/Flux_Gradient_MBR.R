@@ -7,7 +7,7 @@
 #'
 #' @return df with additional columns for MBR calculated ch4, co2, h2o fluxes
 #'
-#' @author Alexis Helgeson
+#' @author Alexis Helgeson, Sam Jurado, David Reed
 Flux_Gradient_MBR <- function(cont.df, attr.df, z1_height, z2_height){
   
   #set heights for grabbing cont
