@@ -5,7 +5,7 @@
 #'
 #' @return df containing site co2, h2o, ch4 measurements at various tower heights
 #'
-#' @author Alexis Helgeson, Sam Jurado, David Reed
+#' @author Alexis Helgeson, Sam Jurado, David Reed, and Sparkle Malone
 hdf2df <- function(hd.file, sitecode){
   
   #lists the contents of hdf5 file and returns a df with file contents

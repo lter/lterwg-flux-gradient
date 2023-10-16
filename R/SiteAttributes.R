@@ -5,7 +5,7 @@
 #'
 #' @return df containing site attributes
 #'
-#' @author Alexis Helgeson, Sam Jurado, David Reed
+#' @author Alexis Helgeson, Sam Jurado, David Reed, and Sparkle Malone
 SiteAttributes <- function(hd.files, sitecode){
   #all attributes grabbed are: "DistZaxsCnpy""DistZaxsDisp""DistZaxsGrndOfst""DistZaxsLvlMeasTow""DistZaxsTow""ElevRefeTow""LatTow""LonTow""LvlMeasTow""Pf.AngEnuXaxs""Pf.AngEnuYaxs""Pf.Ofst""TimeDiffUtcLt""TimeTube""TypeEco""ZoneTime""ZoneUtm"
   #we are only using "DistZaxsLvlMeasTow" (i.e. the measurement heights) in the MBR calculation
