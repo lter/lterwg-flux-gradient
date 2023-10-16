@@ -1,7 +1,7 @@
 #' Flux_Gradient_AE
 #'
 #' @param cont.df df containing site co2, h2o, ch4 measurements at various heights as well as uStar, air pressure, air temperature, uBar, z0
-#' @param attr.df df containing site measurment heights
+#' @param attr.df df containing site measurement heights
 #' @param z1_height lower tower height (taken from attr.df$DistZaxsLvlMeasTow)
 #' @param z2_height upper tower height (taken from attr.df$DistZaxsLvlMeasTow)
 #' @param z_height tallest tower height (i.e. location of sonic anemometer)
@@ -50,6 +50,7 @@ Flux_Gradient_AE <- function(cont.df, attr.df, z1_height, z2_height, z_height){
   ae.df$L <- as.numeric(L)
   #calculate obukhov stability param
   gamma <- as.numeric(z)/as.numeric(L)
+  
   #calculate AE eddy diffusivity: 0.4 = Von Karman constant
   ae.K <- (0.4*as.numeric(cont.df$uStar)*as.numeric(zG))/as.numeric(gamma)
   
@@ -92,6 +93,6 @@ Flux_Gradient_AE <- function(cont.df, attr.df, z1_height, z2_height, z_height){
   #calculate LE flux using WP
   #FG WP calculation: unit conversion constant for molar to mass mixing ratio for h2o is conversion from mmol to mol then multiply by ratio of dry air g/mol (28.96) and h2o g/mol (18.02), assuming rho (air density) is 1293 g m−3
   ae.df[,which(names(ae.df) == F_LE_AE_WP)] <- ((1/1000)*(28.96/18.02))*(1293*as.numeric(wp.K))*(Conc_h2o_z1-Conc_h2o_z2/z1-z2)
-  
+ 
   return(ae.df)
 }
