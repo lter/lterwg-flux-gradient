@@ -123,6 +123,8 @@ hdf2df <- function(hd.file, sitecode){
   Solar.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp01/qfqm/radiNet/000_060_30m/radiSwIn", sep=""))
   # Merge all data:
   totF <- df_H2O %>% left_join(df_CO2, by= 'timeEnd') %>% left_join(df_CH4 , by= 'timeEnd')
+  totF$timeEnd1 <- time.format(totF$timeEnd)  # Reformat the time and round it by one second
+  
   Ufric$uStar <- Ufric$veloFric
   Ufric.qfqm$uStar_qfqm <- Ufric.qfqm$qfFinl
   P$airpress <- P$mean
@@ -139,17 +141,32 @@ hdf2df <- function(hd.file, sitecode){
   Solar$radiSwIn <- Solar$mean
   Solar.qfqm$radiSwIn_qfqm <- Solar.qfqm$qfFinl
   
-  totF <- totF %>% left_join( Ufric[,c('timeEnd', 'uStar')], by='timeEnd') %>%
-    left_join( Ufric.qfqm[,c('timeEnd', 'uStar_qfqm')], by='timeEnd')%>%
-    left_join(P[,c('timeEnd', 'airpress')], by='timeEnd') %>% 
-    left_join(P.qfqm[,c('timeEnd', 'airpress_qfqm')], by='timeEnd') %>% 
-    left_join( temp[,c('timeEnd', 'airtemp')], by='timeEnd')%>% 
-    left_join( temp.qfqm[,c('timeEnd', 'airtemp_qfqm')], by='timeEnd')%>% 
-    left_join( SoniWind[,c('timeEnd', 'uBar')], by='timeEnd')%>% 
-    left_join( SoniWind.qfqm[,c('timeEnd', 'uBar_qfqm')], by='timeEnd')%>% 
-    left_join( MomRough[,c('timeEnd', 'z0')], by='timeEnd')%>% 
-    left_join( Solar[,c('timeEnd','radiSwIn' )], by='timeEnd')%>% 
-    left_join( Solar.qfqm[,c('timeEnd', 'radiSwIn_qfqm')], by='timeEnd')
+  # Format the time for the merge:
+  Ufric$timeEnd1 <- time.format(Ufric$timeEnd)
+  Ufric.qfqm$timeEnd1 <- time.format(Ufric.qfqm$timeEnd)
+  P$timeEnd1 <- time.format(P$timeEnd)
+  P.qfqm$timeEnd1 <- time.format(P.qfqm$timeEnd)
+  temp$timeEnd1 <- time.format(temp$timeEnd)
+  temp.qfqm$timeEnd1 <- time.format(temp.qfqm$timeEnd)
+  SoniWind$timeEnd1 <- time.format(SoniWind$timeEnd)
+  SoniWind.qfqm$timeEnd1 <- time.format(SoniWind.qfqm$timeEnd)
+  MomRough$timeEnd1 <- time.format(MomRough$timeEnd)
+  Solar$timeEnd1 <- time.format(Solar$timeEnd)
+  Solar.qfqm$timeEnd1 <- time.format(Solar.qfqm$timeEnd)
+  
+  
+  totF <- totF %>% left_join( Ufric[,c('timeEnd1', 'uStar')], by='timeEnd1') %>%
+    left_join( Ufric.qfqm[,c('timeEnd1', 'uStar_qfqm')], by='timeEnd1')%>%
+    left_join(P[,c('timeEnd1', 'airpress')], by='timeEnd1') %>% 
+    left_join(P.qfqm[,c('timeEnd1', 'airpress_qfqm')], by='timeEnd1') %>% 
+    left_join( temp[,c('timeEnd1', 'airtemp')], by='timeEnd1') %>% 
+    left_join( SoniWind[,c('timeEnd1', 'uBar')], by='timeEnd1')%>% 
+    left_join( SoniWind.qfqm[,c('timeEnd1', 'uBar_qfqm')], by='timeEnd1')%>% 
+    left_join( MomRough[,c('timeEnd1', 'z0')], by='timeEnd1')%>% 
+    left_join( Solar[,c('timeEnd1','radiSwIn' )], by='timeEnd1')%>% 
+    left_join( Solar.qfqm[,c('timeEnd1', 'radiSwIn_qfqm')], by='timeEnd1')
+  
+  try(totF <- totF %>%left_join( temp.qfqm[,c('timeEnd1', 'airtemp_qfqm')], by='timeEnd1'), silent = T)
   
   
   return(totF)
