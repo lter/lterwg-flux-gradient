@@ -25,13 +25,13 @@ Flux_Gradient_MBR <- function(cont.df, attr.df, z1_height, z2_height){
   h2o_min_col <- paste("h2o.000_0",site_min_height,"0_30m",sep="")
   
   #build df to fill with MBR estimated fluxes
-  mbr.df <- as.data.frame(matrix(NA, nrow = dim(cont.df)[1], ncol = 9))
+  mbr.df <- as.data.frame(matrix(NA, nrow = dim(cont.df)[1], ncol = 5))
   #we want the measurement height to be part of the calculated flux col name for matching/validation
   F_ch4_MBR_co2 <- paste0("F_ch4_MBR_co2_0", site_min_height, "0_0", site_max_height, "0_30m")
   F_ch4_MBR_LE <- paste0("F_ch4_MBR_LE_0", site_min_height, "0_0", site_max_height, "0_30m")
   F_co2_MBR_LE <- paste0("F_co2_MBR_LE_0", site_min_height, "0_0", site_max_height, "0_30m")
   F_LE_MBR_co2 <- paste0("F_LE_MBR_co2_0", site_min_height, "0_0", site_max_height, "0_30m")
-  colnames(mbr.df) <- c("timeEnd", "datetime", F_ch4_MBR_co2,  F_ch4_MBR_LE, F_co2_MBR_LE, F_LE_MBR_co2, "F_co2", "F_H", "F_LE")
+  colnames(mbr.df) <- c("timeEnd", F_ch4_MBR_co2,  F_ch4_MBR_LE, F_co2_MBR_LE, F_LE_MBR_co2)
   #add timeEnd for merging
   mbr.df$timeEnd <- cont.df$timeEnd
   
@@ -47,6 +47,8 @@ Flux_Gradient_MBR <- function(cont.df, attr.df, z1_height, z2_height){
   #grabs level 1 ch4 cont at max height for site
   Conc_CH4_z2<-as.numeric(cont.df[,which(names(cont.df) == ch4_max_col)])
   #calculate ch4 flux and add to df
+  # mbr.df[,which(names(mbr.df) == F_ch4_MBR_co2)] <- ((Conc_CH4_z1-Conc_CH4_z2)/(z2-z1))*(Flux_co2/((Conc_co2_z1-Conc_co2_z2)/(z2-z1)))
+  #checking if z2-z1 is better
   mbr.df[,which(names(mbr.df) == F_ch4_MBR_co2)] <- ((Conc_CH4_z1-Conc_CH4_z2)/(z2-z1))*(Flux_co2/((Conc_co2_z1-Conc_co2_z2)/(z2-z1)))
   
   #MBR ch4 flux using latent heat flux
