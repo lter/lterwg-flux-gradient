@@ -1,11 +1,19 @@
 #' hdf2df
 #'
 #' @param sitecode NEON site code
-#' @param hd.file file type h5 containg NEON site specific data
-#'
-#' @return df containing site co2, h2o, ch4 measurements at various tower heights
-#'
-#' @author Alexis Helgeson, Sam Jurado, David Reed, and Sparkle Malone
+#' @param hd.file file type h5 containing NEON site specific data
+#' @return data frame containing site co2, h2o, ch4 measurements at various tower heights
+#' @author Alexis Helgeson, David Reed, and Sparkle Malone
+#' 
+time.format <- function(x){
+  time <-as.data.frame(t(as.data.frame(strsplit(x, split = "T"))))
+  time$time <- substr(time$V2 ,1, 8)
+  time$timeEnd <- as.POSIXct(paste(time$V1, time$time, sep=" " ), tz='EST') 
+  time$timeEnd <- round_date(time$timeEnd, "30 minutes")
+  
+  return(time$timeEnd)
+}
+
 hdf2df <- function(hd.file, sitecode){
   
   #lists the contents of hdf5 file and returns a df with file contents
@@ -29,7 +37,7 @@ hdf2df <- function(hd.file, sitecode){
   df_CH4 =data.frame()
   df_CO2 =data.frame()
   df_H2O  =data.frame()
-
+  
   #loop over heights
   for(i in 1:length(heights)){
     #set the gas concentration dataset name to be used by h5read
@@ -112,6 +120,7 @@ hdf2df <- function(hd.file, sitecode){
   #grab NEON level 1 qfqm for surface air temperature
   temp.qfqm  <- h5read(hd.file, paste("/", sitecode, "/dp01/data/tempAirLvl/", heights[1] ,"/temp", sep=""))
   #grab NEON level 1 horizontal wind speed data from top of tower at 30min resolution for a given site
+ 
   SoniWind  <- h5read(hd.file, paste("/", sitecode, "/dp01/data/soni/",heights[ length(heights)] , "/veloXaxsYaxsErth", sep=""))
   #grab NEON level 1 qfqm for horizontal wind speed
   SoniWind.qfqm  <- h5read(hd.file, paste("/", sitecode, "/dp01/qfqm/soni/", heights[ length(heights)], "/veloXaxsYaxsErth", sep=""))
@@ -122,11 +131,11 @@ hdf2df <- function(hd.file, sitecode){
   #grab NEON top of tower incoming solar radiation to be used in uStar filtering
   Solar <- h5read(hd.file, paste("/", sitecode, "/dp01/data/radiNet/", heights[ length(heights)], "/radiSwIn", sep=""))
   Solar.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp01/qfqm/radiNet/", heights[ length(heights)], "/radiSwIn", sep=""))
-  
   # Merge all data:
+  
   totF <- df_H2O %>% left_join(df_CO2, by= 'timeEnd') %>% left_join(df_CH4 , by= 'timeEnd')
   totF$timeEnd1 <- time.format(totF$timeEnd)  # Reformat the time and round it by one second
-
+  
   Ufric$uStar <- Ufric$veloFric
   Ufric.qfqm$uStar_qfqm <- Ufric.qfqm$qfFinl
   P$airpress <- P$mean
@@ -168,9 +177,8 @@ hdf2df <- function(hd.file, sitecode){
     left_join( Solar[,c('timeEnd1','radiSwIn' )], by='timeEnd1')%>% 
     left_join( Solar.qfqm[,c('timeEnd1', 'radiSwIn_qfqm')], by='timeEnd1')
   
-  try(totF <- totF %>%left_join( temp.qfqm[,c('timeEnd1', 'airtemp_qfqm')], by='timeEnd1'), silent = T)
-  
+    try(totF <- totF %>%left_join( temp.qfqm[,c('timeEnd1', 'airtemp_qfqm')], by='timeEnd1'), silent = T)
+
   
   return(totF)
 }
-

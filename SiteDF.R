@@ -6,7 +6,8 @@
 #' @return df containing site co2, h2o, ch4 measurements at various tower heights
 #' 
 #'
-#' @author Alexis Helgeson, Sam Jurado, David Reed, and Sparkle Malone
+#' @author Alexis Helgeson
+
 Site.DF <- function(hd.files, sitecode){
   
   ALL.data = data.frame()
@@ -15,10 +16,8 @@ Site.DF <- function(hd.files, sitecode){
     print(i)
     month.data <- hdf2df(hd.files[i], sitecode)
     ALL.data <-smartbind(month.data,   ALL.data )
-    
+    rm( month.data)
   }
-  #remove looping variable
-  rm( month.data)
   #add date/time column
   ALL.data$datetime <- as.POSIXct(ALL.data$timeEnd, format = "%Y-%m-%dT%H:%M:%S", tz = "UTC") 
   

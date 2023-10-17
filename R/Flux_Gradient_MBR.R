@@ -32,11 +32,8 @@ Flux_Gradient_MBR <- function(cont.df, attr.df, z1_height, z2_height){
   F_co2_MBR_LE <- paste0("F_co2_MBR_LE_0", site_min_height, "0_0", site_max_height, "0_30m")
   F_LE_MBR_co2 <- paste0("F_LE_MBR_co2_0", site_min_height, "0_0", site_max_height, "0_30m")
   colnames(mbr.df) <- c("timeEnd", "datetime", F_ch4_MBR_co2,  F_ch4_MBR_LE, F_co2_MBR_LE, F_LE_MBR_co2, "F_co2", "F_H", "F_LE")
+  #add timeEnd for merging
   mbr.df$timeEnd <- cont.df$timeEnd
-  mbr.df$datetime <- cont.df$datetime
-  mbr.df$F_co2 <- as.numeric(cont.df$F_co2)
-  mbr.df$F_LE <- as.numeric(cont.df$F_LE)
-  mbr.df$F_H <- as.numeric(cont.df$F_H)
   
   #MBR ch4 flux using co2
   #grabs level 4 co2 flux
@@ -50,7 +47,7 @@ Flux_Gradient_MBR <- function(cont.df, attr.df, z1_height, z2_height){
   #grabs level 1 ch4 cont at max height for site
   Conc_CH4_z2<-as.numeric(cont.df[,which(names(cont.df) == ch4_max_col)])
   #calculate ch4 flux and add to df
-  mbr.df[,which(names(mbr.df) == F_ch4_MBR_co2)] <- Flux_co2*(Conc_CH4_z1-Conc_CH4_z2/Conc_co2_z1-Conc_co2_z2)
+  mbr.df[,which(names(mbr.df) == F_ch4_MBR_co2)] <- ((Conc_CH4_z1-Conc_CH4_z2)/(z2-z1))*(Flux_co2/((Conc_co2_z1-Conc_co2_z2)/(z2-z1)))
   
   #MBR ch4 flux using latent heat flux
   #grab NEON level 4 latent heat flux 
@@ -60,13 +57,13 @@ Flux_Gradient_MBR <- function(cont.df, attr.df, z1_height, z2_height){
   #grab NEON level 1 h2o stor at max height
   Conc_h2o_z2<-as.numeric(cont.df[,which(names(cont.df) == h2o_max_col)])
   #calculate ch4 flux and add to df: need to include unit conversion for h2O to get from W/m^2 to mmmol using latent heat of vaporization (2.26e3 J/g) and molar mass (10.02 g/mol)
-  mbr.df[,which(names(mbr.df) == F_ch4_MBR_LE)] <- Flux_LE*((1/2.26e3)*(1/18.02)*(1000))*(Conc_CH4_z1-Conc_CH4_z2/Conc_h2o_z1-Conc_h2o_z2)
+  mbr.df[,which(names(mbr.df) == F_ch4_MBR_LE)] <- ((Conc_CH4_z1-Conc_CH4_z2)/(z2-z1))*((Flux_LE/((1/2.26e3)*(1/18.02)*(1000)))*((Conc_h2o_z1-Conc_h2o_z2)/(z2-z1)))
   
   #MBR co2 flux using latent heat: need to include unit conversion for h2O to get from W/m^2 to mmmol using latent heat of vaporization (2.26e3 J/g) and molar mass (10.02 g/mol)
-  mbr.df[,which(names(mbr.df) == F_co2_MBR_LE)] <- Flux_LE*((1/2.26e3)*(1/18.02)*(1000))*(Conc_co2_z1-Conc_co2_z2/Conc_h2o_z1-Conc_h2o_z2)
+  mbr.df[,which(names(mbr.df) == F_co2_MBR_LE)] <- ((Conc_co2_z1-Conc_co2_z2)/(z2-z1))*((Flux_LE/((1/2.26e3)*(1/18.02)*(1000)))*((Conc_h2o_z1-Conc_h2o_z2)/(z2-z1)))
   
   #MBR LE flux using co2
-  mbr.df[,which(names(mbr.df) == F_LE_MBR_co2)] <- Flux_co2*(Conc_h2o_z1-Conc_h2o_z2/Conc_co2_z1-Conc_co2_z2)
+  mbr.df[,which(names(mbr.df) == F_LE_MBR_co2)] <- ((Conc_h2o_z1-Conc_h2o_z2)/(z2-z1))*(Flux_co2/((Conc_co2_z1-Conc_co2_z2)/(z2-z1)))
   
   return(mbr.df)
 }
