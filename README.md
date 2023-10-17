@@ -42,3 +42,10 @@ library(tidyverse)
 ## Supplementary Resources
 
 NCEAS Scientific Computing Support Team page [link](https://nceas.github.io/scicomp.github.io)
+
+## Description of Current Functions
+Function Name: Description
+SiteAttributes: Grab site tower measurement heights
+Site.DF: Grab site gas concentrations, CO2 H LE fluxes, uStar, uBar, airtemp, airpress, z0, radiSwIn
+Flux_Gradient_MBR: Use gas concentrations,  CO2 LE fluxes and tower measurement heights to estimate fluxes using modified bowen ratio
+Flux_Gradient_AE: Use gas concentrations, CO2 H LE fluxes, uStar, uBar, airtemp, z0, radiSwIn, and tower measurement heights using aerodynamic model and wind profile
