@@ -42,7 +42,9 @@ Flux_Gradient_AE <- function(cont.df, attr.df, z1_height, z2_height, z_height){
   #calculate geometric mean of upper and lower heights
   zG <- sqrt(z1*z2)
   #calculate obukhov length: 0.4 = Von Karman constant, 9.8 = gravitational acceleration, convert air temp from celcius to kelvin (T+273.15)
-  L <- ((-as.numeric(cont.df$uStar)^3)*(as.numeric(cont.df$airtemp)+273.15))/(0.4*9.8*as.numeric(cont.df$F_H))
+  #filter for acceptable sensible heat
+  F_H <- cont.df %>% filter(F_H_qfqm == "0") %>% select(F_H)
+  L <- ((-as.numeric(cont.df$uStar)^3)*(as.numeric(cont.df$airtemp)+273.15))/(0.4*9.8*as.numeric(F_H$F_H))
   #add to ae.df for classification of stability classes
   ae.df$L <- as.numeric(L)
   #calculate obukhov stability param
