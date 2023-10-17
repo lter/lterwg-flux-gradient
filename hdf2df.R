@@ -5,7 +5,6 @@
 #' @return data frame containing site co2, h2o, ch4 measurements at various tower heights
 #' @author Alexis Helgeson, David Reed, and Sparkle Malone
 #' 
-
 time.format <- function(x){
   time <-as.data.frame(t(as.data.frame(strsplit(x, split = "T"))))
   time$time <- substr(time$V2 ,1, 8)
