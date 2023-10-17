@@ -53,21 +53,29 @@ Flux_Gradient_AE <- function(cont.df, attr.df, z1_height, z2_height, z_height){
   #calculate AE eddy diffusivity: 0.4 = Von Karman constant
   ae.K <- (0.4*as.numeric(cont.df$uStar)*as.numeric(zG))/as.numeric(gamma)
   
+  #calculting air density using air pressure converts from kPan to Pa, air temp converted to Kelvin, and gas constant for dry air (287.058 J/kgK)
+  rho <- (((as.numeric(cont.df$airpress)*1000)/(287.058*(as.numeric(cont.df$airtemp)+273.15)))*1000)
+  #calculate conversion factor
+  #unit conversion constant for molar to mass mixing ratio for ch4 is conversion from umol to mol then multiply by ratio of dry air g/mol (28.96) and ch4 g/mol (16.04)
+  c_ch4 <- ((1/1000000)*(28.96/16.04))
+  #unit conversion constant for molar to mass mixing ratio for co2 is conversion from umol to mol then multiply by ratio of dry air g/mol (28.96) and c02 g/mol (44.01)
+  c_co2 <- ((1/1000000)*(28.96/44.01))
+  c_h2o <- ((1/1000)*(28.96/18.02))
   #calculate ch4 flux using AE
   #grabs level 1 ch4 cont at lowest height
   Conc_CH4_z1<-as.numeric(cont.df[,which(names(cont.df) == ch4_min_col)])
   #grabs level 1 ch4 cont at max height for site
   Conc_CH4_z2<-as.numeric(cont.df[,which(names(cont.df) == ch4_max_col)])
-  #FG AE calculation: unit conversion constant for molar to mass mixing ratio for ch4 is conversion from umol to mol then multiply by ratio of dry air g/mol (28.96) and ch4 g/mol (16.04), calculting air density using air pressure converts from kPan to Pa, air temp converted to Kelvin, and gas constant for dry air (287.058 J/kgK)
-  ae.df[,which(names(ae.df) == F_ch4_AE)] <- ((1/1000000)*(28.96/16.04))*((as.numeric(cont.df$airpress)*1000)/(287.058*(as.numeric(cont.df$airtemp)+273.15)))*(as.numeric(ae.K))*(Conc_CH4_z1-Conc_CH4_z2/z1-z2)
+  #FG AE calculation
+  ae.df[,which(names(ae.df) == F_ch4_AE)] <- as.numeric(c_ch4)*as.numeric(rho)*(as.numeric(ae.K))*(Conc_CH4_z1-Conc_CH4_z2/z1-z2)
   
   #calculate co2 flux using AE
   #grabs level 1 co2 stor at lowest height
   Conc_co2_z1<-as.numeric(cont.df[,which(names(cont.df) == co2_min_col)])
   #grabs level 1 co2 stor at max height for site
   Conc_co2_z2<-as.numeric(cont.df[,which(names(cont.df) == co2_max_col)])
-  #FG AE calculation: unit conversion constant for molar to mass mixing ratio for co2 is conversion from umol to mol then multiply by ratio of dry air g/mol (28.96) and c02 g/mol (44.01), assuming rho (air density) is 1293 g m−3
-  ae.df[,which(names(ae.df) == F_co2_AE)] <- ((1/1000000)*(28.96/44.01))*((as.numeric(cont.df$airpress)*1000)/(287.058*(as.numeric(cont.df$airtemp)+273.15)))*(as.numeric(ae.K))*(Conc_co2_z1-Conc_co2_z2/z1-z2)
+  #FG AE calculation:
+  ae.df[,which(names(ae.df) == F_co2_AE)] <- as.numeric(c_co2)*as.numeric(rho)*(as.numeric(ae.K))*(Conc_co2_z1-Conc_co2_z2/z1-z2)
   
   #calculate LE flux using AE
   #grab NEON level 1 h2o stor at lowest height
@@ -75,7 +83,7 @@ Flux_Gradient_AE <- function(cont.df, attr.df, z1_height, z2_height, z_height){
   #grab NEON level 1 h2o stor at max height
   Conc_h2o_z2<-as.numeric(cont.df[,which(names(cont.df) == h2o_max_col)])
   #FG AE calculation: unit conversion constant for molar to mass mixing ratio for h2o is conversion from mmol to mol then multiply by ratio of dry air g/mol (28.96) and h2o g/mol (18.02), assuming rho (air density) is 1293 g m−3
-  ae.df[,which(names(ae.df) == F_LE_AE)] <- ((1/1000)*(28.96/18.02))*((as.numeric(cont.df$airpress)*1000)/(287.058*(as.numeric(cont.df$airtemp)+273.15)))*(as.numeric(ae.K))*(Conc_h2o_z1-Conc_h2o_z2/z1-z2)
+  ae.df[,which(names(ae.df) == F_LE_AE)] <- as.numeric(c_h2o)*as.numeric(rho)*(as.numeric(ae.K))*(Conc_h2o_z1-Conc_h2o_z2/z1-z2)
   
   #calculate fluxes using WP estimation of eddy diffusivity
   #calculate WP eddy diffusivity, assuming neutral stability: 0.4 = Von Karman constant
@@ -83,15 +91,15 @@ Flux_Gradient_AE <- function(cont.df, attr.df, z1_height, z2_height, z_height){
   
   #calculate ch4 flux using WP
   #FG WP calculation: unit conversion constant for molar to mass mixing ratio for ch4 is conversion from umol to mol then multiply by ratio of dry air g/mol (28.96) and ch4 g/mol (16.04), assuming rho (air density) is 1293 g m−3
-  ae.df[,which(names(ae.df) == F_ch4_AE_WP)] <- ((1/1000000)*(28.96/16.04))*((as.numeric(cont.df$airpress)*1000)/(287.058*(as.numeric(cont.df$airtemp)+273.15)))*(as.numeric(wp.K))*(Conc_CH4_z1-Conc_CH4_z2/z1-z2)
+  ae.df[,which(names(ae.df) == F_ch4_AE_WP)] <- as.numeric(c_ch4)*as.numeric(rho)*(as.numeric(wp.K))*(Conc_CH4_z1-Conc_CH4_z2/z1-z2)
   
   #calculate co2 flux using WP
   #FG WP calculation: unit conversion constant for molar to mass mixing ratio for co2 is conversion from umol to mol then multiply by ratio of dry air g/mol (28.96) and c02 g/mol (44.01), assuming rho (air density) is 1293 g m−3
-  ae.df[,which(names(ae.df) == F_co2_AE_WP)] <- ((1/1000000)*(28.96/44.01))*((as.numeric(cont.df$airpress)*1000)/(287.058*(as.numeric(cont.df$airtemp)+273.15)))*(as.numeric(wp.K))*(Conc_co2_z1-Conc_co2_z2/z1-z2)
+  ae.df[,which(names(ae.df) == F_co2_AE_WP)] <- as.numeric(c_co2)*as.numeric(rho)*(as.numeric(wp.K))*(Conc_co2_z1-Conc_co2_z2/z1-z2)
   
   #calculate LE flux using WP
   #FG WP calculation: unit conversion constant for molar to mass mixing ratio for h2o is conversion from mmol to mol then multiply by ratio of dry air g/mol (28.96) and h2o g/mol (18.02), assuming rho (air density) is 1293 g m−3
-  ae.df[,which(names(ae.df) == F_LE_AE_WP)] <- ((1/1000)*(28.96/18.02))*((as.numeric(cont.df$airpress)*1000)/(287.058*(as.numeric(cont.df$airtemp)+273.15)))*(as.numeric(wp.K))*(Conc_h2o_z1-Conc_h2o_z2/z1-z2)
+  ae.df[,which(names(ae.df) == F_LE_AE_WP)] <- as.numeric(c_h2o)*as.numeric(rho)*(as.numeric(wp.K))*(Conc_h2o_z1-Conc_h2o_z2/z1-z2)
   
   return(ae.df)
 }
