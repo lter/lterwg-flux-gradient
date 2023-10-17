@@ -135,9 +135,8 @@ hdf2df <- function(hd.file, sitecode){
   # Merge all data:
   
   totF <- df_H2O %>% left_join(df_CO2, by= 'timeEnd') %>% left_join(df_CH4 , by= 'timeEnd')
-
   totF$timeEnd1 <- time.format(totF$timeEnd)  # Reformat the time and round it by one second
-
+  
   Ufric$uStar <- Ufric$veloFric
   Ufric.qfqm$uStar_qfqm <- Ufric.qfqm$qfFinl
   P$airpress <- P$mean
@@ -180,6 +179,7 @@ hdf2df <- function(hd.file, sitecode){
     left_join( Solar.qfqm[,c('timeEnd1', 'radiSwIn_qfqm')], by='timeEnd1')
   
     try(totF <- totF %>%left_join( temp.qfqm[,c('timeEnd1', 'airtemp_qfqm')], by='timeEnd1'), silent = T)
+
   
   return(totF)
 }
