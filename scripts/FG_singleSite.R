@@ -18,6 +18,7 @@ source("~/fluxGradient/lterwg-flux-gradient/R/SiteDF.R")
 source("~/fluxGradient/lterwg-flux-gradient/R/hdf2df.R")
 source("~/fluxGradient/lterwg-flux-gradient/R/Flux_Gradient_MBR.R")
 source("~/fluxGradient/lterwg-flux-gradient/R/Flux_Gradient_AE.R")
+source("~/fluxGradient/lterwg-flux-gradient/R/time_format.R")
 #set up dir to store data
 Main.Directory <- c('//corellia.environment.yale.edu/MaloneLab/alexis.helgeson/fluxGradient')
 #set desired site name and NEON code
