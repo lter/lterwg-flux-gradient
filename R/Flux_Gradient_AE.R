@@ -26,7 +26,7 @@ Flux_Gradient_AE <- function(cont.df, attr.df, z1_height, z2_height, z_height){
   h2o_min_col <- paste("h2o.000_0",site_min_height,"0_30m",sep="")
   
   #build df to fill with AE estimated fluxes
-  ae.df <- as.data.frame(matrix(NA, nrow = dim(cont.df)[1], ncol = 12))
+  ae.df <- as.data.frame(matrix(NA, nrow = dim(cont.df)[1], ncol = 8))
   #we want the measurement height to be part of the calculated flux col name for matching/validation
   F_ch4_AE <- paste0("F_ch4_AE_0", site_min_height, "0_0", site_max_height, "0_30m")
   F_ch4_AE_WP <- paste0("F_ch4_AE_WP_0", site_min_height, "0_0", site_max_height, "0_30m")
@@ -34,7 +34,7 @@ Flux_Gradient_AE <- function(cont.df, attr.df, z1_height, z2_height, z_height){
   F_co2_AE_WP <- paste0("F_co2_AE_WP_0", site_min_height, "0_0", site_max_height, "0_30m")
   F_LE_AE <- paste0("F_LE_AE_0", site_min_height, "0_0", site_max_height, "0_30m")
   F_LE_AE_WP <- paste0("F_LE_AE_WP_0", site_min_height, "0_0", site_max_height, "0_30m")
-  colnames(ae.df) <- c("timeEnd", "datetime", F_ch4_AE,  F_ch4_AE_WP, F_co2_AE, F_co2_AE_WP, F_LE_AE, F_LE_AE_WP, "F_co2", "F_H", "F_LE", "L")
+  colnames(ae.df) <- c("timeEnd", F_ch4_AE,  F_ch4_AE_WP, F_co2_AE, F_co2_AE_WP, F_LE_AE, F_LE_AE_WP, "L")
   #add timeEnd for merging
   ae.df$timeEnd <- cont.df$timeEnd
   
