@@ -42,7 +42,6 @@ attr.df <- SiteAttributes(hd.files, sitecode)
 # write.csv(attr.df, paste0(sitecode, "_", startdate, "_", enddate, "_attr.csv"))
 #grab co2, h20, ch4 level 1 data at all 30min resolution tower heights along with level 4 co2, sensible heat, latent heat fluxes, uStar, uBar, air temp, z0
 cont.df <- Site.DF(hd.files, sitecode, frequency = "high")
-
 #filter for good data
 h2o.qfqm.df <- cont.df %>% filter(h2o_qfqm.000_040_30m == "0") %>% filter(h2o_qfqm.000_060_30m == "0") %>% filter(F_co2_qfqm == "0")
 
