@@ -13,21 +13,21 @@ library(ggplot2)
 library(R.utils)
 library(gtools)
 #load in FG specific functions
-source("~/fluxGradient/lterwg-flux-gradient/R/SiteAttributes.R")
-source("~/fluxGradient/lterwg-flux-gradient/R/SiteDF.R")
-source("~/fluxGradient/lterwg-flux-gradient/R/hdf2df.R")
-source("~/fluxGradient/lterwg-flux-gradient/R/Flux_Gradient_MBR.R")
-source("~/fluxGradient/lterwg-flux-gradient/R/Flux_Gradient_AE.R")
-source("~/fluxGradient/lterwg-flux-gradient/R/time_format.R")
-source("~/fluxGradient/lterwg-flux-gradient/R/contHF.R")
+source(file.path("R/SiteAttributes.R"))
+source(file.path("R/SiteDF.R"))
+source(file.path("R/hdf2df.R"))
+source(file.path("R/Flux_Gradient_MBR.R"))
+source(file.path("R/Flux_Gradient_AE.R"))
+source(file.path("R/time_format.R"))
+source(file.path("R/contHF.R"))
 #set up dir to store data
-#Main.Directory <- c('//corellia.environment.yale.edu/MaloneLab/alexis.helgeson/fluxGradient')
+Main.Directory <- c(file.path("data/"))
 #set desired site name and NEON code
-sitename <- 'Harvard_Forest'
-sitecode <- 'HARV'
+sitename <- 'Konza Praire'
+sitecode <- 'KONZ'
 #set start and end date for obs
-startdate <- "2022-05"
-enddate <- "2022-07"
+startdate <- "2021-01"
+enddate <- "2023-09"
 #create site folders and setwd
 #site.dir <- paste(Main.Directory,"/",sitename, sep="")
 #if(!exists(site.dir)){dir.create(site.dir)}
