@@ -64,7 +64,7 @@ for(k in 1:length(gz.files)){
 }
 
 ## ------------------------------ ##
-  # Initial Processing Steps ----
+  # Extract HD5 Information ----
 ## ------------------------------ ##
 
 # Identify temporal resolution
@@ -83,6 +83,9 @@ attr <- data.frame(rhdf5::h5readAttributes(file.path(sitename, hd.files[1]),
 
 # Check that out
 dplyr::glimpse(attr)
+
+# Make an empty list for storage purposes
+tower_conc <- list()
 
 # Grab actual data in .hd5 files
 # for(g in 1:length(hd.files)){
@@ -154,35 +157,79 @@ for(g in 1){
     H2O.qfqm <- rhdf5::h5read(file = file.path(sitename, focal.hd), name = h2o.qfqm)
     
     # Combine data with QFQMs (and add tower position)
-    CH4_all <- dplyr::full_join(CH4, CH4.qfqm, by = c("timeBgn", "timeEnd")) %>%
-      dplyr::mutate(tower.position = height.number[position],
+    CH4.both <- dplyr::full_join(CH4, CH4.qfqm, by = c("timeBgn", "timeEnd")) %>%
+      dplyr::mutate(hd5.file = focal.hd,
+                    tower.position = height.number[position],
                     .before = dplyr::everything())
-    CO2_all <- dplyr::full_join(CO2, CO2.qfqm, by = c("timeBgn", "timeEnd")) %>%
-      dplyr::mutate(tower.position = height.number[position],
+    CO2.both <- dplyr::full_join(CO2, CO2.qfqm, by = c("timeBgn", "timeEnd")) %>%
+      dplyr::mutate(hd5.file = focal.hd,
+                    tower.position = height.number[position],
                     .before = dplyr::everything())
-    H2O_all <- dplyr::full_join(H2O, H2O.qfqm, by = c("timeBgn", "timeEnd")) %>%
-      dplyr::mutate(tower.position = height.number[position],
+    H2O.both <- dplyr::full_join(H2O, H2O.qfqm, by = c("timeBgn", "timeEnd")) %>%
+      dplyr::mutate(hd5.file = focal.hd,
+                    tower.position = height.number[position],
                     .before = dplyr::everything())
     
     # Combine with prior iterations of the loop (and arrange by beginning time)
-    df_CH4 <- dplyr::bind_rows(df_CH4, CH4_all) %>%
+    df_CH4 <- dplyr::bind_rows(df_CH4, CH4.both) %>%
       dplyr::arrange(timeBgn)
-    df_CO2 <- dplyr::bind_rows(df_CO2, CO2_all) %>%
+    df_CO2 <- dplyr::bind_rows(df_CO2, CO2.both) %>%
       dplyr::arrange(timeBgn)
-    df_H2O <- dplyr::bind_rows(df_H2O, H2O_all) %>%
+    df_H2O <- dplyr::bind_rows(df_H2O, H2O.both) %>%
       dplyr::arrange(timeBgn)
     
   } # Close tower position loop
   
   # Assemble that information into a list!
-  tower_conc = list(attr = attr, 
-                    CH4 = df_CH4, 
-                    CO2 = df_CO2, 
-                    H2O = df_H2O)
+  tower_conc[[paste0("attr_", g)]] <- attr
+  tower_conc[[paste0("CH4_", g)]] <- df_CH4
+  tower_conc[[paste0("CO2_", g)]] <- df_CO2
+  tower_conc[[paste0("H2O_", g)]] <- df_H2O
   
+} # Close loop across hd5 files
+
+## ------------------------------ ##
+# Process Data ----
+## ------------------------------ ##
+
+# Check out output list
+names(tower_conc)
+
+# Make a new list to store simplified outputs in
+result_list <- list()
+
+# Now (ironically) we'll use a loop to unlist what the first loop made
+for(data_type in c("attr", "CH4", "CO2", "H2O")){
   
+  # For each data type...
+  list_sub <- tower_conc %>%
+    # Identify all list elements that contain this type of data
+    purrr::keep(.p = stringr::str_detect(string = names(.),
+                                         pattern = data_type)) %>%
+    # Unlist by selecting all columns of each list element
+    purrr::list_rbind()
   
-}
+  # Add this to the simpler results list
+  result_list[[data_type]] <- list_sub
+  
+  # And print a message
+  message("Centralized dataframe for ", data_type, " extracted") }
+
+# Check out the simplified results list we're left with
+names(result_list)
+dplyr::glimpse(result_list)
+
+# Grab each bit as a dataframe for ease of further modification and/or export
+attr.total <- result_list[["attr"]]
+
+## For non-attribute data, also remove 'bad' data (based on quality flags)
+CH4.total <- result_list[["CH4"]] %>%
+  dplyr::filter(qfFinl == 0)
+CO2.total <- result_list[["CO2"]] %>%
+  dplyr::filter(qfFinl == 0)
+H2O.total <- result_list[["H2O"]] %>%
+  dplyr::filter(qfFinl == 0)
+
 
 
 # (vVv) BASEMENT (vVv) ----
