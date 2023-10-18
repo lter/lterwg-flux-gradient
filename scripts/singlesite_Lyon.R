@@ -69,10 +69,27 @@ for(k in 1:length(gz.files)){
 # Grab h5 files to be passed to SiteAttributes and SiteDF
 hd.files <- dir(path = file.path(sitename), pattern = "\\.h5$")
 
-# Grab attribute data
-attr.df <- SiteAttributes(hd.files, sitecode)
-#save df as csv
-# write.csv(attr.df, paste0(sitecode, "_", startdate, "_", enddate, "_attr.csv"))
+# Strip out attribute data
+attr <- data.frame(rhdf5::h5readAttributes(file.path(sitename, hd.files[1]),
+                                           name = paste0("/", sitecode))) %>%
+  # Pare down to only some needed columns
+  dplyr::select(DistZaxsLvlMeasTow, DistZaxsCnpy) %>%
+  # Generate a site column
+  dplyr::mutate(Site = sitecode, .before = dplyr::everything())
+
+# Check that out
+dplyr::glimpse(attr)
+
+
+
+
+# (vVv) BASEMENT (vVv) ----
+
+# Basement note:
+## Code "basements" are for storing code that hasn't been completely debugged
+
+
+
 #grab co2, h20, ch4 level 1 data at all 30min resolution tower heights along with level 4 co2, sensible heat, latent heat fluxes, uStar, uBar, air temp, z0
 cont.df <- Site.DF(hd.files, sitecode, frequency = "high")
 #filter for good data
