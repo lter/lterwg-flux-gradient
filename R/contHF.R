@@ -30,7 +30,7 @@ cont.HF <- function(hd.file, sitecode){
   # Get tower attributes
   attr <- data.frame(rhdf5::h5readAttributes(hd.file, name = paste0("/", sitecode)))
   attr <- dplyr::select(attr, DistZaxsLvlMeasTow, DistZaxsCnpy, TimeTube,
-                        ElevRefeTow, LatTow, LonTow, ZoneUtm, TypeEco, ZoneTime)
+                        ElevRefeTow, LatTow, LonTow, ZoneUtm, ZoneTime)
   
   #add NEON sitecide as column
   attr$Site <- sitecode 
