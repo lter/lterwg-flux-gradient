@@ -73,17 +73,36 @@ met.HF <- function(hd.file, sitecode){
   SoniWind.qfqm  <- h5read(hd.file, paste("/", sitecode, "/dp01/qfqm/soni/000_0", heights.sonic, "0_01m/veloXaxsYaxsErth", sep=""))
   Sonic.all <- left_join(SoniWind, SoniWind.qfqm, by = c("timeEnd", "timeBgn")) %>%
     mutate(TowerPosition = paste0(heights.sonic))
+  #grab 2D wind -> different DPI
   #grab NEON top of tower incoming solar radiation to be used in uStar filtering
-  Solar <- h5read(hd.file, paste("/", sitecode, "/dp01/data/radiNet/000_0", heights.solar, "0_01m/radiSwIn", sep=""))
-  Solar.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp01/qfqm/radiNet/000_0", heights.solar, "0_01m/radiSwIn", sep=""))
-  Solar.all <- left_join(Solar, Solar.qfqm, by = c("timeEnd", "timeBgn")) %>%
+  #grab all radiation terms
+  SWin <- h5read(hd.file, paste("/", sitecode, "/dp01/data/radiNet/000_0", heights.solar, "0_01m/radiSwIn", sep=""))
+  SWin.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp01/qfqm/radiNet/000_0", heights.solar, "0_01m/radiSwIn", sep=""))
+  SWout <- h5read(hd.file, paste("/", sitecode, "/dp01/data/radiNet/000_0", heights.solar, "0_01m/radiSwOut", sep=""))
+  SWout.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp01/qfqm/radiNet/000_0", heights.solar, "0_01m/radiSwOut", sep=""))
+  LWin <- h5read(hd.file, paste("/", sitecode, "/dp01/data/radiNet/000_0", heights.solar, "0_01m/radiLwIn", sep=""))
+  LWin.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp01/qfqm/radiNet/000_0", heights.solar, "0_01m/radiLwIn", sep=""))
+  LWout <- h5read(hd.file, paste("/", sitecode, "/dp01/data/radiNet/000_0", heights.solar, "0_01m/radiLwOut", sep=""))
+  LWout.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp01/qfqm/radiNet/000_0", heights.solar, "0_01m/radiLwOut", sep=""))
+  
+  
+  Solar.all <- SWin %>%
+    left_join(SWin.qfqm, by = c("timeEnd", "timeBgn")) %>%
+    left_join(SWout, by = c("timeEnd", "timeBgn")) %>%
+    left_join(SWout.qfqm, by = c("timeEnd", "timeBgn")) %>%
+    left_join(LWout, by = c("timeEnd", "timeBgn")) %>%
+    left_join(LWin.qfqm, by = c("timeEnd", "timeBgn")) %>%
+    left_join(LWout, by = c("timeEnd", "timeBgn")) %>%
+    left_join(LWout.qfqm, by = c("timeEnd", "timeBgn")) %>%
     mutate(TowerPosition = paste0(heights.solar))
+  #grab soil heat flux (G), add column for soil plot
+  
   
   # totMet <- df_temp %>% 
   #   left_join(P.all, by = c("timeEnd", "timeBgn")) %>%
   #   left_join(Sonic.all, by = c("timeEnd", "timeBgn")) %>%
   #   left_join(Solar.all, by = c("timeEnd", "timeBgn"))
-  met = list(Temp = df_temp, Press = P.all, Sonic = Sonic.all, Solar = Solar.all)
+  met = list(TAir = df_temp, Press = P.all, WS3D = Sonic.all, SWin = Solar.all)
   
   return(met)
 }
