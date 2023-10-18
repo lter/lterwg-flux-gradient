@@ -3,9 +3,9 @@
 #' @param sitecode NEON site code
 #' @param hd.file file type h5 containg NEON site specific data
 #'
-#' @return list with 3 data frames with 9m tower concentrations for CH4, CO2, H2O 
+#' @return list with 4 data frames with site attributes and 9m tower concentrations for CH4, CO2, H2O 
 #'
-#' @author Alexis Helgeson, Sam Jurado, David Reed, and Sparkle Malone
+#' @author Alexis Helgeson, Sam Jurado, David Reed, Sparkle Malone, Jackie Matthes
 cont.HF <- function(hd.file, sitecode){
   
   #lists the contents of hdf5 file and returns a df with file contents
@@ -26,6 +26,14 @@ cont.HF <- function(hd.file, sitecode){
   #subsets heights list grabbing only those at 9m/2m
   heights.9m <-heights <- as.numeric(substr(stringr::str_subset(unique(stringr::str_subset(heights.list, '000')),'09m'),6,6))
   #heights.2m <-unique(stringr::str_subset(heights.co2h2o, '000')) %>% stringr::str_subset( '2m')
+  
+  # Get tower attributes
+  attr <- data.frame(rhdf5::h5readAttributes(hd.file, name = paste0("/", sitecode)))
+  attr <- dplyr::select(attr, DistZaxsLvlMeasTow, DistZaxsCnpy, TimeTube,
+                        ElevRefeTow, LatTow, LonTow, ZoneUtm, TypeEco, ZoneTime)
+  
+  #add NEON sitecide as column
+  attr$Site <- sitecode 
   
   #Grab NEON level 1 CH4 cont, CO2 stor, H2O stor for each height
   df_CH4 =data.frame()
@@ -77,7 +85,7 @@ cont.HF <- function(hd.file, sitecode){
       df_H2O = dplyr::arrange(dplyr::bind_rows(df_H2O, H2O_all),timeBgn)
     }
   }
-  tower_conc = list(CH4 = df_CH4, CO2 = df_CO2, 
+  tower_conc = list(attr = attr, CH4 = df_CH4, CO2 = df_CO2, 
                     H2O = df_H2O)
   return(tower_conc)
 }
