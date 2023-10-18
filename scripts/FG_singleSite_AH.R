@@ -13,17 +13,15 @@ library(ggplot2)
 library(R.utils)
 library(gtools)
 #load in FG specific functions
-source("R/SiteAttributes.R")
-source("R/SiteDF.R")
-source("R/hdf2df.R")
-source("R/Flux_Gradient_MBR.R")
-source("R/Flux_Gradient_AE.R")
-source("R/time_format.R")
-source("R/cont.HF.R")
+source(file.path("R/SiteAttributes.R"))
+source(file.path("R/SiteDF.R"))
+source(file.path("R/hdf2df.R"))
+source(file.path("R/Flux_Gradient_MBR.R"))
+source(file.path("R/Flux_Gradient_AE.R"))
+source(file.path("R/time_format.R"))
+source(file.path("R/contHF.R"))
 #set up dir to store data
-Main.Directory <- file.path("Konza")
-#set up dir to store data
-Main.Directory <- c(file.path("data/"))
+Main.Directory <- c(file.path("data/Konza"))
 #set desired site name and NEON code
 sitename <- 'Konza Praire'
 sitecode <- 'KONZ'
@@ -37,14 +35,17 @@ enddate <- "2023-09"
 
 # Call Fcns to Calculate CH4 fluxes ---------------------------------------
 #grab h5 files to be passed to SiteAttributes and SiteDF
-hd.files <-list.files(path = Main.Directory, pattern="\\.h5$", full.names = TRUE)
+folders <- list.files(path = file.path("data","Konza", "NEON_eddy-flux"), pattern = "KONZ.DP4.00200.001", full.names = T)
+folders <- folders[8:33]
+hd.files <-list.files(path = file.path(folders[1]), pattern="\\.h5$", full.names = T)
+#select for 2021 july forward
 #grab attribute data
 attr.df <- SiteAttributes(hd.files, sitecode)
 #save df as csv
 # write.csv(attr.df, paste0(sitecode, "_", startdate, "_", enddate, "_attr.csv"))
 #grab co2, h20, ch4 level 1 data at all 30min resolution tower heights along with level 4 co2, sensible heat, latent heat fluxes, uStar, uBar, air temp, z0
 cont.df <- Site.DF(hd.files, sitecode, frequency = "high")
-
+cont.list <- cont.HF(hd.file = hd.files, sitecode = sitecode)
 #filter for good data
 h2o.qfqm.df <- cont.df %>% filter(h2o_qfqm.000_040_30m == "0") %>% filter(h2o_qfqm.000_060_30m == "0") %>% filter(F_co2_qfqm == "0")
 

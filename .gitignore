@@ -36,3 +36,7 @@ Konza
 # Data
 data/
 Data/
+
+# Ignore certain file types
+*.gz
+*.xml

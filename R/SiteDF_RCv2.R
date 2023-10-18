@@ -17,7 +17,7 @@ Site.DF <- function(hd.files, sitecode, frequency = "low"){
     for(i in 1:length(hd.files)){
       print(i)
       month.data <- hdf2df(hd.files[i], sitecode)
-      ALL.data <-bind_rows(ALL.data, month.data)
+      ALL.data <-bind_rows(ALL.data,month.data)
       
     }
     #remove looping variable
@@ -32,9 +32,8 @@ Site.DF <- function(hd.files, sitecode, frequency = "low"){
     for(i in 1:length(hd.files)){
       print(i)
       month.data <- cont.HF(hd.files[i], sitecode)
-      ALL.data <-bind_rows(ALL.data, month.data)
-      
-    }
+      ALL.data <- bind_rows(ALL.data,month.data)
+  }
     #remove looping variable
     rm(month.data)
     #add date/time column
