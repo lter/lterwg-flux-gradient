@@ -1,7 +1,7 @@
 # Data must already be unzipped
 # Make sure you source the functions concatAndFilterH5
-# source('./scripts/def.concat_from_h5.R')
-# source('./scripts/wrap.concatAndFilterH5.R')
+source('./scripts/def.concat_from_h5.R')
+source('./scripts/wrap.concatAndFilterH5.R')
 
 pathUnzipped <- 'C:/Users/csturtevant/Dropbox/Proposals/FluxGradient/unzippedFiles'
 sitecode <- 'JORN'
@@ -37,7 +37,7 @@ dirHdf5Qf <- c(paste0('/',sitecode,'/dp01/qfqm/ch4Conc/000_040_09m/rtioMoleDryCh
 )# array of paths
 
 # Variable of interest
-var <- 'rtioMoleDryCo2'
+var <- 'rtioMoleDryCh4'
 Levels <- c(1,2,3,4)
 
 # Do the stuff
