@@ -9,7 +9,8 @@
 
 # Load needed libraries
 # install.packages("librarian")
-librarian::shelf(neonUtilities, tidyverse, BiocManager, rhdf5, oce, naniar, gtools) 
+librarian::shelf(neonUtilities, tidyverse, BiocManager, rhdf5, oce,
+                 naniar, gtools, R.utils) 
 
 # Clear environment
 rm(list = ls())
@@ -19,21 +20,56 @@ for(fxn in dir(path = file.path("R"))){
   source(file = file.path("R", fxn ))
 }
 
-# Create needed folder(s)
-dir.create(path = file.path("data"), showWarnings = F)
-
 # Set desired site name and NEON code
 sitename <- 'Konza Praire'
 sitecode <- 'KONZ'
 
-# Set start and end date for obs
+# Create needed folder(s)
+dir.create(path = file.path("data"), showWarnings = F)
+dir.create(path = file.path(sitename), showWarnings = F)
+
+## ------------------------------ ##
+      # Download Data ----
+## ------------------------------ ##
+
+# Set start and end date for observations
 startdate <- "2021-01"
 enddate <- "2023-09"
 
-# Call Fcns to Calculate CH4 fluxes ---------------------------------------
-#grab h5 files to be passed to SiteAttributes and SiteDF
-hd.files <-list.files(pattern="\\.h5$")
-#grab attribute data
+# Download desired data file
+# neonUtilities::zipsByProduct(dpID = "DP4.00200.001", site = sitecode, 
+#                              startdate = "2021-11", enddate = "2023-08",
+#                              package = "basic", check.size = T,
+#                              savepath = file.path(sitename))
+
+# Identify names of downloaded ZIP files
+zip.files <- dir(path = file.path(sitename, "filesToStack00200"), pattern = ".zip")
+
+# Unzip those files!
+for(j in 1:length(zip.files)){
+  unzip(file.path(sitename, "filesToStack00200", zip.files[j]),
+        exdir = file.path(sitename, "filesToStack00200"))
+}
+
+# Identify the .gz files created by unzipping
+gz.files <- dir(path = file.path(sitename, "filesToStack00200"), pattern = ".gz")
+
+# Process those as well!
+for(k in 1:length(gz.files)){
+  R.utils::gunzip(file.path(sitename, "filesToStack00200", gz.files[k]), 
+                  destname = file.path(sitename,
+                                       gsub(pattern = ".gz", replacement = "", 
+                                            x = gz.files[k])), remove = F)
+}
+
+## ------------------------------ ##
+    # Calculate CH4 Fluxes ----
+## ------------------------------ ##
+
+# Grab h5 files to be passed to SiteAttributes and SiteDF
+hd.files <- dir(path = file.path(sitename), pattern = "\\.h5$")
+
+# Grab attribute data
 attr.df <- SiteAttributes(hd.files, sitecode)
 #save df as csv
 # write.csv(attr.df, paste0(sitecode, "_", startdate, "_", enddate, "_attr.csv"))
