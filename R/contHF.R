@@ -3,7 +3,7 @@
 #' @param sitecode NEON site code
 #' @param hd.file file type h5 containg NEON site specific data
 #'
-#' @return df containing high frequency site co2, h2o, ch4 measurements at various tower heights
+#' @return list with 3 data frames with 9m tower concentrations for CH4, CO2, H2O 
 #'
 #' @author Alexis Helgeson, Sam Jurado, David Reed, and Sparkle Malone
 cont.HF <- function(hd.file, sitecode){
@@ -77,6 +77,9 @@ cont.HF <- function(hd.file, sitecode){
       df_H2O = dplyr::arrange(dplyr::bind_rows(df_H2O, H2O_all),timeBgn)
     }
   }
+  tower_conc = list(CH4 = df_CH4, CO2 = df_CO2, 
+                    H2O = df_H2O)
+  return(tower_conc)
 }
   
     
