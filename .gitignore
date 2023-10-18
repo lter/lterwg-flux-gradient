@@ -43,3 +43,8 @@ vignettes/*.pdf
 
 # DS_Store (for Mac users)
 .DS_Store
+
+# Data
+data/
+Data/
+
