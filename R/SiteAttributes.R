@@ -11,7 +11,9 @@ SiteAttributes <- function(hd.files, sitecode){
   #we are only using "DistZaxsLvlMeasTow" (i.e. the measurement heights) in the MBR calculation
   #this fcn only uses 1st file in the list which corresponds to specific month, we are assuming all of these attributes are consistent across all months
   attr <- data.frame(rhdf5::h5readAttributes(hd.files[1], name = paste0("/", sitecode)))
-  attr <- dplyr::select(attr, DistZaxsLvlMeasTow, DistZaxsCnpy)
+  attr <- dplyr::select(attr, DistZaxsLvlMeasTow, DistZaxsCnpy, TimeTube,
+                        ElevRefeTow, LatTow, LonTow, ZoneUtm, ZoneTime)
+  attr$TowerPosition <- seq(1,dim(attr)[1], 1)
   #add NEON sitecide as column
   attr$Site <- sitecode 
   
