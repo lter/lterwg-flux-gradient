@@ -3,7 +3,7 @@
 #' @param sitecode NEON site code
 #' @param hd.file file type h5 containg NEON site specific data
 #'
-#' @return df containing site co2, h2o, ch4 measurements at various tower heights
+#' @return df containing high frequency site co2, h2o, ch4 measurements at various tower heights
 #'
 #' @author Alexis Helgeson, Sam Jurado, David Reed, and Sparkle Malone
 cont.HF <- function(hd.file, sitecode){
@@ -23,7 +23,7 @@ cont.HF <- function(hd.file, sitecode){
   heights.ch4 <- unique(test.df[which(test.df$group == paste( "/", sitecode,"/dp01/data/ch4Conc", sep="")),]$name)
   #grabs unique heights for co2/h2o concentrations
   heights.co2h2o <- unique(test.df[which(test.df$group == paste( "/", sitecode,"/dp01/data/co2Stor", sep="")),]$name)
-  #subsets heights list grabbing only those at 30m
+  #subsets heights list grabbing only those at 9m/2m
   heights.9m <-unique(stringr::str_subset(heights.ch4, '000')) %>% stringr::str_subset( '9m')
   heights.2m <-unique(stringr::str_subset(heights.co2h2o, '000')) %>% stringr::str_subset( '2m')
   
@@ -181,7 +181,7 @@ cont.HF <- function(hd.file, sitecode){
   
   # Merge all data:
   totF <- H2O.clean %>% left_join(CH4.clean, by= 'timeEnd') %>% left_join(CO2.clean, by= 'timeEnd')
-  #totF$timeEnd1 <- time.format(totF$timeEnd)  # Reformat the time and round it by one second
+  totF$timeEnd1 <- time.format(totF$timeEnd)  # Reformat the time and round it by one second
   
   return(totF)
 }
