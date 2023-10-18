@@ -24,10 +24,12 @@ downloadUnzipNEON <- function(sitecode, zip.dir, startdate, enddate){
     print(j)
     unzip(zip.files[j]) 
   }
-  gz.files <-list.files(pattern=".gz")
-  for(j in 1:length(gz.files)){
+  folders <- list.files(pattern = "KONZ.DP4.00200.001")
+ 
+  for(j in 3:length(folders)){
+    gz.files <-list.files(path = file.path(folders[j]), pattern=".gz", full.names = TRUE)
     print(j)
-    gunzip(gz.files[j], remove=FALSE)
+    gunzip(gz.files, remove=FALSE)
   }
   
   return(print(paste0("NEON files for ", sitecode, " are downloaded and unzipped h5 files can be found at ", zip.dir)))
