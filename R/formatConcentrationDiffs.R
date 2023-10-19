@@ -1,5 +1,5 @@
 # Pull data from google drive
-email <- 'csturtevant@battelleecology.org'
+email <- 'jaclyn_matthes@g.harvard.edu'
 site <- 'KONZ'
 
 # Authenticate with Google Drive and get site data
@@ -9,6 +9,7 @@ data_folder <- googledrive::drive_ls(path = drive_url)
 site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==site])
 dirTmp <- fs::path(tempdir(),site)
 dir.create(dirTmp)
+#focal_file = "KONZ_30m.zip"
 for(focal_file in site_folder$name){
   
   # Find the file identifier for that file
@@ -26,19 +27,16 @@ for(focal_file in site_folder$name){
   
 }
 
-
-
 # Extract 9 minute data
 fileIn <- fs::path(dirTmp,paste0(site,'_9m.Rdata'))
 load(fileIn)
 
-# Fudge for not having the updated file. Remove this block
-# CH4list <- lapply(m9.list$Cont,FUN=function(idx){idx$CH4})
-# CH4 <- do.call(rbind,CH4list)
-
 # For each concentration, compute difference in concentation among tower levels
 # m9.list <- list(Cont=list(CH4=CH4))
-m9Diff.list <- lapply(m9.list,FUN=function(var){
+list.idx = seq_len(length(m9.list))
+m9Diff.list <- lapply(list.idx,FUN=function(idx){
+  var = m9.list[[idx]]
+  scalar = names(m9.list)[idx]
   var$timeBgn <- as.POSIXct(strptime(var$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
   var$timeEnd <- as.POSIXct(strptime(var$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
   var <- dplyr::arrange(var,timeBgn)
@@ -60,7 +58,11 @@ m9Diff.list <- lapply(m9.list,FUN=function(var){
   
   # Apply quality control
   timeChk <- OUT$timeBgn_B-OUT$timeEnd_A # looking for short positive lag (flush time is 1 min)
-  bad <- timeChk < 45 | timeChk > 100 | OUT$qfFinl_A == 1 | OUT$qfFinl_B == 1
+  if(scalar == "CH4"){
+    bad <- timeChk < 45 | timeChk > 100 | OUT$qfFinl_A == 1 | OUT$qfFinl_B == 1
+  } else {
+    bad <- timeChk < 200 | timeChk > 300 | OUT$qfFinl_A == 1 | OUT$qfFinl_B == 1
+  }
   OUT <- OUT[!bad,]
   
   # Compute tower level diff A-B
@@ -80,3 +82,6 @@ m9Diff.list <- lapply(m9.list,FUN=function(var){
   
   return(OUT)
 })
+
+# Reassign names from original list
+names(m9Diff.list) = names(m9.list)
