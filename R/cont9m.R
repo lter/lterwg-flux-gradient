@@ -1,4 +1,4 @@
-#' cont.HF
+#' cont.9m
 #'
 #' @param sitecode NEON site code
 #' @param hd.file file type h5 containg NEON site specific data
@@ -6,7 +6,7 @@
 #' @return list with 4 data frames with site attributes and 9m tower concentrations for CH4, CO2, H2O 
 #'
 #' @author Alexis Helgeson, Sam Jurado, David Reed, Sparkle Malone, Jackie Matthes
-cont.HF <- function(hd.file, sitecode){
+cont.9m <- function(hd.file, sitecode){
   
   #lists the contents of hdf5 file and returns a df with file contents
   test.df <- rhdf5::h5ls(hd.file,
@@ -49,12 +49,12 @@ cont.HF <- function(hd.file, sitecode){
     #set the gas concentration dataset name to be used by h5read
     ch4.dir <- paste0("/", sitecode, '/dp01/data/ch4Conc/000_0',heights[i],'0_09m/rtioMoleDryCh4', sep="")
     co2.dir <- paste0("/", sitecode, '/dp01/data/isoCo2/000_0',heights[i], '0_09m/rtioMoleDryCo2', sep="")
-    h2o.dir <- paste0( "/", sitecode, '/dp01/data/isoH2o/000_0',heights[i], '0_09m/rtioMoleDryH2o', sep="")
+    h2o.dir <- paste0( "/", sitecode, '/dp01/data/isoCo2/000_0',heights[i], '0_09m/rtioMoleDryH2o', sep="")
 
     #set the qfqm dataset name to be used by h5read
     ch4.qfqm <- paste0("/", sitecode, '/dp01/qfqm/ch4Conc/000_0',heights[i],'0_09m/rtioMoleDryCh4', sep="")
     co2.qfqm <- paste0("/", sitecode, '/dp01/qfqm/isoCo2/000_0',heights[i], '0_09m/rtioMoleDryCo2', sep="")
-    h2o.qfqm <- paste0( "/", sitecode, '/dp01/qfqm/isoH2o/000_0',heights[i], '0_09m/rtioMoleDryH2o', sep="")
+    h2o.qfqm <- paste0( "/", sitecode, '/dp01/qfqm/isoCo2/000_0',heights[i], '0_09m/rtioMoleDryH2o', sep="")
 
     #h5read fcn reads a dataset in h5 file and returns an array containing data read, select for desired columns
       CH4 <- h5read(hd.file, ch4.dir) %>%
@@ -79,11 +79,11 @@ cont.HF <- function(hd.file, sitecode){
     #add to populated df
       df_CH4 <- bind_rows(df_CH4, CH4.all)
     #h5read fcn reads a dataset in h5 file and returns an array containing data read
-        CO2 <- h5read(hd.file, co2.dir)
-        H2O <- h5read(hd.file, h2o.dir)
-        #grad qfqm identifier
-        CO2.qfqm <- h5read(hd.file, co2.qfqm)
-        H2O.qfqm <- h5read(hd.file, h2o.qfqm)
+        # CO2 <- h5read(hd.file, co2.dir)
+        # H2O <- h5read(hd.file, h2o.dir)
+        # #grad qfqm identifier
+        # CO2.qfqm <- h5read(hd.file, co2.qfqm)
+        # H2O.qfqm <- h5read(hd.file, h2o.qfqm)
 
         #build CO2 df
         CO2 <- h5read(hd.file, co2.dir) %>%

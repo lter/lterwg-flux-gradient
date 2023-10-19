@@ -1,11 +1,13 @@
-#' met.HF
+#' met.1m
 #'
 #' @param hd.file file type h5 containg NEON site specific data
 #' @param sitecode NEON site code
+#' @param startdate data start date
+#' @param enddate data end date
 #'
 #' @return df containing high frequnecy site met
 #'
-met.HF <- function(hd.file, sitecode){
+met.1m <- function(hd.file, sitecode, startdate, enddate){
   #lists the contents of hdf5 file and returns a df with file contents
   test.df <- h5ls(hd.file,
                   recursive = TRUE,
@@ -66,14 +68,14 @@ met.HF <- function(hd.file, sitecode){
   #grab NEON level 1 qfqm for air pressure
   P.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp01/qfqm/presBaro/000_0", heights.press,"_01m/presAtm", sep=""))
   P.all <- left_join(P, P.qfqm, by = c("timeEnd", "timeBgn")) %>%
-    mutate(TowerPosition = paste0(heights.press))
+    mutate(TowerPosition = as.numeric(paste0(heights.press))/10)
   #grab NEON level 1 horizontal wind speed data from top of tower at 1min resolution for a given site
   SoniWind  <- h5read(hd.file, paste("/", sitecode, "/dp01/data/soni/000_0", heights.sonic, "0_01m/veloXaxsYaxsErth", sep=""))
   #grab NEON level 1 qfqm for horizontal wind speed
   SoniWind.qfqm  <- h5read(hd.file, paste("/", sitecode, "/dp01/qfqm/soni/000_0", heights.sonic, "0_01m/veloXaxsYaxsErth", sep=""))
   Sonic.all <- left_join(SoniWind, SoniWind.qfqm, by = c("timeEnd", "timeBgn")) %>%
     mutate(TowerPosition = paste0(heights.sonic))
-  #grab 2D wind -> different DPI
+  
   #grab NEON top of tower incoming solar radiation to be used in uStar filtering
   #grab all radiation terms
   SWin <- h5read(hd.file, paste("/", sitecode, "/dp01/data/radiNet/000_0", heights.solar, "0_01m/radiSwIn", sep=""))
@@ -95,14 +97,56 @@ met.HF <- function(hd.file, sitecode){
     left_join(LWout, by = c("timeEnd", "timeBgn")) %>%
     left_join(LWout.qfqm, by = c("timeEnd", "timeBgn")) %>%
     mutate(TowerPosition = paste0(heights.solar))
-  #grab soil heat flux (G), add column for soil plot
   
+  # #grab relative humidity
+  # RH <- loadByProduct("DP1.00098.001", site="KONZ", 
+  #                     timeIndex=1, package="basic", 
+  #                     startdate=startdate, enddate=enddate,
+  #                     check.size=F)
+  # RH <- RH$RH_1min %>% 
+  #   filter(horizontalPosition == "000") %>%
+  #   select(verticalPosition, startDateTime, endDateTime, RHMean, RHFinalQF)
   
-  # totMet <- df_temp %>% 
-  #   left_join(P.all, by = c("timeEnd", "timeBgn")) %>%
-  #   left_join(Sonic.all, by = c("timeEnd", "timeBgn")) %>%
-  #   left_join(Solar.all, by = c("timeEnd", "timeBgn"))
-  met = list(TAir = df_temp, Press = P.all, WS3D = Sonic.all, SWin = Solar.all)
+  #soil heat flux
+  plots.soil <- unique(test.df[which(test.df$group == paste( "/", sitecode,"/dp01/data/fluxHeatSoil", sep="")),]$name)
+  plots.soil <- unique(substr(plots.soil,1,3))
+  
+  #loop over all heights for soil heat flux
+  df_soil <- data.frame()
+  
+  for (k in 1:length(plots.soil)) {
+    # progress message
+    message("Processing height ", k, " (", length(plots.soil) - k, " remaining)")
+    
+    #set the air temp dataset name to be used by h5read
+    soil.dir <- paste("/", sitecode, "/dp01/data/fluxHeatSoil/", plots.soil[k], "_501_01m/fluxHeatSoil", sep="")
+    #set the qfqm dataset name to be used by h5read
+    soil.qfqm <- paste("/", sitecode, "/dp01/qfqm/fluxHeatSoil/", plots.soil[k], "_501_01m/fluxHeatSoil", sep="")
+    
+    #grab NEON level 1 air temp at lowest tower position (assuming this is surface air temp) 1min resolution for a given site
+    soil  <- h5read(hd.file, soil.dir)
+    #grab NEON level 1 qfqm for surface air temperature
+    qfqm  <- h5read(hd.file, soil.qfqm)
+    
+    #join datasets
+    soil.all <- left_join(soil, qfqm, by = c("timeEnd", "timeBgn")) %>%
+      mutate(Plot = paste0(plots.soil[k]))
+    #add to populated df
+    df_soil <- bind_rows(df_soil, soil.all)
+    
+  }
+  
+  #remove looping variable
+  rm(soil, qfqm)
+  
+
+  met = list(TAir = df_temp, Press = P.all, WS3D = Sonic.all, Rad = Solar.all, SoilHF = df_soil)
   
   return(met)
 }
+
+
+# totMet <- df_temp %>% 
+#   left_join(P.all, by = c("timeEnd", "timeBgn")) %>%
+#   left_join(Sonic.all, by = c("timeEnd", "timeBgn")) %>%
+#   left_join(Solar.all, by = c("timeEnd", "timeBgn"))
