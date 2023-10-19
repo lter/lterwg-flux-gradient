@@ -96,16 +96,76 @@ m9Diff.list <- lapply(list.idx,FUN=function(idx){
 # Reassign names from original list
 names(m9Diff.list) = names(m9.list)
 
+# Interpolate the flux data
+source('./R/interp_fluxes.R')
+
+# FC
+timeBgn <- as.POSIXct(strptime(m30.list$F_co2$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+timeEnd <- as.POSIXct(strptime(m30.list$F_co2$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+flux <- m30.list$F_co2$turb
+qf <- m30.list$F_co2$turb.qfFinl # filter
+flux[qf == 1] <- NA
+m9Diff.list <- lapply(m9Diff.list,FUN=function(var){
+  timePred <- var$timeMid
+  fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
+  var$FC_interp <- fluxPred
+  return(var)
+})
+
+# LE
+timeBgn <- as.POSIXct(strptime(m30.list$F_LE$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+timeEnd <- as.POSIXct(strptime(m30.list$F_LE$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+flux <- m30.list$F_LE$turb
+qf <- m30.list$F_LE$turb.qfFinl # filter
+flux[qf == 1] <- NA
+m9Diff.list <- lapply(m9Diff.list,FUN=function(var){
+  timePred <- var$timeMid
+  fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
+  var$LE_interp <- fluxPred
+  return(var)
+})
+
+# H
+timeBgn <- as.POSIXct(strptime(m30.list$F_H$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+timeEnd <- as.POSIXct(strptime(m30.list$F_H$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+flux <- m30.list$F_H$turb
+qf <- m30.list$F_H$turb.qfFinl # filter
+flux[qf == 1] <- NA
+m9Diff.list <- lapply(m9Diff.list,FUN=function(var){
+  timePred <- var$timeMid
+  fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
+  var$H_interp <- fluxPred
+  return(var)
+})
+
+
+
 # Filter for values between 4-3
 CO2 = m9Diff.list[["CO2"]][m9Diff.list[["CO2"]]$dLevelsAminusB=="4_3",]
 H2O = m9Diff.list[["H2O"]][m9Diff.list[["H2O"]]$dLevelsAminusB=="4_3",]
 CH4 = m9Diff.list[["CH4"]][m9Diff.list[["CH4"]]$dLevelsAminusB=="4_3",]
 
 # Combine data frames for two scalars
-scalar_combine = dplyr::full_join(CO2, H2O, by="timeMid")
-scalar_combine = dplyr::filter(scalar_combine, !is.na(dConc.x) & !is.na(dConc.y))
-
 scalar_combine = dplyr::full_join(CO2, CH4, by="match_time")
 scalar_combine = dplyr::filter(scalar_combine, !is.na(dConc.x) & !is.na(dConc.y))
 
+scalar_combine$ch4flux = scalar_combine$FC_interp.x*(scalar_combine$dConc.y/scalar_combine$dConc.x)
+scalar_combine$FC_interp.x <- scalar_combine$FC_interp.x/1000 #DELETE ME
+plot <- plotly::plot_ly(data=scalar_combine, x=~match_time, y=~ch4flux,  type='scatter', mode='lines') %>%
+  plotly::layout(margin = list(b = 50, t = 50, r=50),
+                 title = 'CH4 Flux',
+                 xaxis = list(title = base::paste0(c(rep("\n&nbsp;", 3),
+                                                     rep("&nbsp;", 20),
+                                                     paste0("Date-time"),
+                                                     rep("&nbsp;", 20)),
+                                                   collapse = ""),
+                              nticks=6,
+                              #range = c(1,48),
+                              zeroline=TRUE
+                 ),
+                 yaxis = list(title = ''),
+                 showlegend=TRUE) %>% 
+  plotly::add_trace(data=scalar_combine,x=~match_time, y=~FC_interp.x,mode='lines',name='CO2 flux')
 
+
+print(plot)
