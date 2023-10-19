@@ -88,14 +88,27 @@ met.1m <- function(hd.file, sitecode, startdate, enddate){
   LWout.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp01/qfqm/radiNet/000_0", heights.solar, "0_01m/radiLwOut", sep=""))
   
   
-  Solar.all <- SWin %>%
+  # Solar.all <- SWin %>%
+  #   left_join(SWin.qfqm, by = c("timeEnd", "timeBgn")) %>%
+  #   left_join(SWout, by = c("timeEnd", "timeBgn")) %>%
+  #   left_join(SWout.qfqm, by = c("timeEnd", "timeBgn")) %>%
+  #   left_join(LWout, by = c("timeEnd", "timeBgn")) %>%
+  #   left_join(LWin.qfqm, by = c("timeEnd", "timeBgn")) %>%
+  #   left_join(LWout, by = c("timeEnd", "timeBgn")) %>%
+  #   left_join(LWout.qfqm, by = c("timeEnd", "timeBgn")) %>%
+  #   mutate(TowerPosition = paste0(heights.solar))
+  
+  SWin.all <- SWin %>%
     left_join(SWin.qfqm, by = c("timeEnd", "timeBgn")) %>%
-    left_join(SWout, by = c("timeEnd", "timeBgn")) %>%
+    mutate(TowerPosition = paste0(heights.solar))
+  SWout.all <- SWout %>%
     left_join(SWout.qfqm, by = c("timeEnd", "timeBgn")) %>%
-    left_join(LWout, by = c("timeEnd", "timeBgn")) %>%
+    mutate(TowerPosition = paste0(heights.solar))
+  LWin.all <- LWin %>%
     left_join(LWin.qfqm, by = c("timeEnd", "timeBgn")) %>%
-    left_join(LWout, by = c("timeEnd", "timeBgn")) %>%
-    left_join(LWout.qfqm, by = c("timeEnd", "timeBgn")) %>%
+    mutate(TowerPosition = paste0(heights.solar))
+  LWout.all <- LWout %>%
+    left_join(LWin.qfqm, by = c("timeEnd", "timeBgn")) %>%
     mutate(TowerPosition = paste0(heights.solar))
   
   # #grab relative humidity
@@ -140,7 +153,7 @@ met.1m <- function(hd.file, sitecode, startdate, enddate){
   rm(soil, qfqm)
   
 
-  met = list(TAir = df_temp, Press = P.all, WS3D = Sonic.all, Rad = Solar.all, SoilHF = df_soil)
+  met = list(TAir = df_temp, Press = P.all, WS3D = Sonic.all, SWin = SWin.all, SWout = SWout.all, LWin = LWin.all, LWout = LWout.all, SoilHF = df_soil)
   
   return(met)
 }

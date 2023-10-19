@@ -166,23 +166,8 @@ met.cont.30m <- function(hd.file, sitecode, startdate, enddate){
     
   }
   
-  #Add NEON level 4 CO2, sensible heat, latent heat fluxes to df
-  F_co2 <- h5read(hd.file, paste("/", sitecode, "/dp04/data/fluxCo2/nsae", sep=""))
-  F_H <- h5read(hd.file, paste("/", sitecode, "/dp04/data/fluxTemp/nsae", sep=""))
-  F_LE <- h5read(hd.file, paste("/", sitecode, "/dp04/data/fluxH2o/nsae", sep=""))
-  #Add NEON level 4 CO2, sensisble heat, latent heat qfqm to df
-  F_co2.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp04/qfqm/fluxCo2/nsae", sep=""))
-  F_H.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp04/qfqm/fluxTemp/nsae", sep=""))
-  F_LE.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp04/qfqm/fluxH2o/nsae", sep=""))
-  df_CO2$F_co2 = F_co2$flux
-  df_CO2$F_co2_qfqm = F_co2.qfqm$qfFinl
-  df_H2O$F_H = F_H$flux
-  df_H2O$F_H_qfqm = F_H.qfqm$qfFinl
-  df_H2O$F_LE = F_LE$flux
-  df_H2O$F_LE_qfqm = F_LE.qfqm$qfFinl
-  
   #remove looping var and flux df
-  rm(CH4, CO2, F_co2, F_H, H2O, F_LE, F_co2.qfqm, F_H.qfqm, F_LE.qfqm)
+  rm(CH4, CO2, H2O)
   
   #I am not sure that the location of these files are the same across sites!
   #grab NEON level 4 friction velocity for a given site
@@ -363,7 +348,54 @@ met.cont.30m <- function(hd.file, sitecode, startdate, enddate){
     filter(duplicate_ct == 1) %>% 
     select(timeEnd, timeBgn, TowerPosition, mean, qfFinl, min, max, vari, numSamp)
   
-var = list(TAir = df_temp, Press = P.all, WS3D = Sonic.all, SWin = SWin.all, SWout = SWout.all, LWin = LWin.all, LWout = LWout.all, SoilHF = df_soil, MomRough = MomRough.all, Ufric = Ufric.all, CH4 = CH4.clean, CO2 = CO2.clean, H2O = H2O.clean, H2O.850 = H2O.850.clean, CO2.850 = CO2.850.clean)
+  #build fluxes df
+  #Add NEON level 4 CO2, sensible heat, latent heat fluxes to df
+  F_co2.nsae <- h5read(hd.file, paste("/", sitecode, "/dp04/data/fluxCo2/nsae", sep=""))
+  F_co2.nsae.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp04/qfqm/fluxCo2/nsae", sep=""))
+  F_co2.all <- cbind(F_co2.nsae, select(F_co2.nsae.qfqm, qfFinl)) %>% 
+    rename(nsae = flux, nsae.qfFinl = qfFinl)
+  F_co2.stor <- h5read(hd.file, paste("/", sitecode, "/dp04/data/fluxCo2/stor", sep="")) %>% select(flux)
+  F_co2.stor.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp04/qfqm/fluxCo2/stor", sep="")) %>% select(qfFinl)
+  F_co2.all <- cbind(F_co2.all, F_co2.stor, select(F_co2.stor.qfqm, qfFinl)) %>% 
+    rename(stor = flux, stor.qfFinl = qfFinl)
+  F_co2.turb <- h5read(hd.file, paste("/", sitecode, "/dp04/data/fluxCo2/turb", sep="")) %>% select(flux)
+  F_co2.turb.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp04/qfqm/fluxCo2/turb", sep="")) %>% select(qfFinl)
+  F_co2.all <- cbind(F_co2.all, F_co2.turb, select(F_co2.turb.qfqm, qfFinl)) %>% 
+    rename(turb = flux, turb.qfFinl = qfFinl)
+  
+  
+  F_H.nsae <- h5read(hd.file, paste("/", sitecode, "/dp04/data/fluxTemp/nsae", sep=""))
+  F_H.nsae.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp04/qfqm/fluxTemp/nsae", sep=""))
+  F_H.all <- cbind(F_H.nsae, select(F_H.nsae.qfqm, qfFinl)) %>% 
+    rename(nsae = flux, nsae.qfFinl = qfFinl)
+  F_H.stor <- h5read(hd.file, paste("/", sitecode, "/dp04/data/fluxTemp/stor", sep="")) %>% select(flux)
+  F_H.stor.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp04/qfqm/fluxTemp/stor", sep="")) %>% select(qfFinl)
+  F_H.all <- cbind(F_H.all, F_H.stor, select(F_H.stor.qfqm, qfFinl)) %>% 
+    rename(stor = flux, stor.qfFinl = qfFinl)
+  F_H.turb <- h5read(hd.file, paste("/", sitecode, "/dp04/data/fluxTemp/turb", sep="")) %>% select(flux)
+  F_H.turb.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp04/qfqm/fluxTemp/turb", sep="")) %>% select(qfFinl)
+  F_H.all <- cbind(F_H.all, F_H.turb, select(F_H.turb.qfqm, qfFinl)) %>% 
+    rename(turb = flux, turb.qfFinl = qfFinl)
+  
+  
+  F_LE.nsae <- h5read(hd.file, paste("/", sitecode, "/dp04/data/fluxH2o/nsae", sep=""))
+  F_LE.nsae.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp04/qfqm/fluxH2o/nsae", sep=""))
+  F_LE.all <- cbind(F_LE.nsae, select(F_LE.nsae.qfqm, qfFinl)) %>% 
+    rename(nsae = flux, nsae.qfFinl = qfFinl)
+  F_LE.stor <- h5read(hd.file, paste("/", sitecode, "/dp04/data/fluxH2o/stor", sep="")) %>% select(flux)
+  F_LE.stor.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp04/qfqm/fluxH2o/stor", sep="")) %>% select(qfFinl)
+  F_LE.all <- cbind(F_LE.all, F_LE.stor, select(F_LE.stor.qfqm, qfFinl)) %>% 
+    rename(stor = flux, stor.qfFinl = qfFinl)
+  F_LE.turb <- h5read(hd.file, paste("/", sitecode, "/dp04/data/fluxH2o/turb", sep="")) %>% select(flux)
+  F_LE.turb.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp04/qfqm/fluxH2o/turb", sep="")) %>% select(qfFinl)
+  F_LE.all <- cbind(F_LE.all, F_LE.turb, select(F_LE.turb.qfqm, qfFinl)) %>% 
+    rename(turb = flux, turb.qfFinl = qfFinl)
+  
+  
+ 
+  
+  
+var = list(TAir = df_temp, Press = P.all, WS3D = Sonic.all, SWin = SWin.all, SWout = SWout.all, LWin = LWin.all, LWout = LWout.all, SoilHF = df_soil, MomRough = MomRough.all, Ufric = Ufric.all, CH4 = CH4.clean, CO2 = CO2.clean, H2O = H2O.clean, H2O.850 = H2O.850.clean, CO2.850 = CO2.850.clean, F_co2 = F_co2.all, F_H = F_H.all, F_LE = F_LE.all)
   
   return(var)
 }
