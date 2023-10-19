@@ -42,26 +42,10 @@ enddate <- "2023-09"
 #                              package = "basic", check.size = T,
 #                              savepath = file.path(sitename))
 
-# Identify names of downloaded ZIP files
-zip.files <- dir(path = file.path(sitename, "filesToStack00200"), pattern = ".zip")
-
-# Unzip those files!
-for(j in 1:length(zip.files)){
-  unzip(file.path(sitename, "filesToStack00200", zip.files[j]),
-        exdir = file.path(sitename, "filesToStack00200"))
-}
-
-# Identify the .gz files created by unzipping
-gz.files <- dir(path = file.path(sitename, "filesToStack00200"), pattern = ".gz")
-
-# Process those as well!
-for(k in 1:length(gz.files)){
-  R.utils::gunzip(file.path(sitename, "filesToStack00200", gz.files[k]), 
-                  destname = file.path(sitename,
-                                       gsub(pattern = ".gz", replacement = "", 
-                                            x = gz.files[k])), 
-                  remove = F, overwrite = T)
-}
+# Un-ZIP those downloaded products
+unzip_neon(in_path = file.path(sitename, "filesToStack00200"),
+           out_path = file.path(sitename), 
+           quiet = FALSE)
 
 ## ------------------------------ ##
   # Extract HD5 Information ----

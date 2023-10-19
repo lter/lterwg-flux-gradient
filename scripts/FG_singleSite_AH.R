@@ -15,19 +15,20 @@ library(gtools)
 #load in FG specific functions
 source(file.path("R/SiteAttributes.R"))
 source(file.path("R/SiteDF.R"))
-source(file.path("R/hdf2df.R"))
 source(file.path("R/Flux_Gradient_MBR.R"))
 source(file.path("R/Flux_Gradient_AE.R"))
 source(file.path("R/time_format.R"))
-source(file.path("R/contHF.R"))
+source(file.path("R/cont9m.R"))
+source(file.path("R/metCont30m.R"))
+source(file.path("R/met1m.R"))
 #set up dir to store data
 Main.Directory <- c(file.path("data/Konza"))
 #set desired site name and NEON code
 sitename <- 'Konza Praire'
 sitecode <- 'KONZ'
 #set start and end date for obs
-startdate <- "2021-01"
-enddate <- "2023-09"
+startdate <- "2021-08"
+enddate <- "2021-09"
 #create site folders and setwd
 #site.dir <- paste(Main.Directory,"/",sitename, sep="")
 #if(!exists(site.dir)){dir.create(site.dir)}
@@ -44,12 +45,14 @@ attr.df <- SiteAttributes(hd.files, sitecode)
 #save df as csv
 # write.csv(attr.df, paste0(sitecode, "_", startdate, "_", enddate, "_attr.csv"))
 #grab co2, h20, ch4 level 1 data at all 30min resolution tower heights along with level 4 co2, sensible heat, latent heat fluxes, uStar, uBar, air temp, z0
-cont.df <- Site.DF(hd.files, sitecode, frequency = "high")
-cont.list <- cont.HF(hd.file = hd.files, sitecode = sitecode)
+#cont.df <- Site.DF(hd.files, sitecode, frequency = "high")
+m30.list <- met.cont.30m(hd.file = hd.files, sitecode = sitecode, startdate = startdate, enddate = enddate)
+m9.list <- cont.9m(hd.file = hd.files, sitecode = sitecode)
+m1.list <- met1m(hd.file = hd.files, sitecode = sitecode)
 #filter for good data
-h2o.qfqm.df <- cont.df %>% filter(h2o_qfqm.000_040_30m == "0") %>% filter(h2o_qfqm.000_060_30m == "0") %>% filter(F_co2_qfqm == "0")
-
-co2.qfqm.df <- cont.df %>% filter(co2_qfqm.000_040_30m == "0") %>% filter(co2_qfqm.000_060_30m == "0") %>% filter(F_LE_qfqm == "0")
+# h2o.qfqm.df <- cont.df %>% filter(h2o_qfqm.000_040_30m == "0") %>% filter(h2o_qfqm.000_060_30m == "0") %>% filter(F_co2_qfqm == "0")
+# 
+# co2.qfqm.df <- cont.df %>% filter(co2_qfqm.000_040_30m == "0") %>% filter(co2_qfqm.000_060_30m == "0") %>% filter(F_LE_qfqm == "0")
 #save df as csv
 # write.csv(cont.df, paste0(sitecode, "_", startdate, "_", enddate, "_cont.csv"))
 #calculate flux gradient
