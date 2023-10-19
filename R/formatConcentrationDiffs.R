@@ -31,6 +31,9 @@ for(focal_file in site_folder$name){
 fileIn <- fs::path(dirTmp,paste0(site,'_9m.Rdata'))
 load(fileIn)
 
+fileIn <- fs::path(dirTmp,paste0(site,'_30m.Rdata'))
+load(fileIn)
+
 # For each concentration, compute difference in concentation among tower levels
 # m9.list <- list(Cont=list(CH4=CH4))
 list.idx = seq_len(length(m9.list))
@@ -104,3 +107,5 @@ scalar_combine = dplyr::filter(scalar_combine, !is.na(dConc.x) & !is.na(dConc.y)
 
 scalar_combine = dplyr::full_join(CO2, CH4, by="match_time")
 scalar_combine = dplyr::filter(scalar_combine, !is.na(dConc.x) & !is.na(dConc.y))
+
+
