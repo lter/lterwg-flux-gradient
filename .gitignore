@@ -36,7 +36,11 @@ Konza
 # Data
 data/
 Data/
+### Ignore testing folder for scripts. Roisin added
+testing/
+
 
 # Ignore certain file types
 *.gz
 *.xml
+
