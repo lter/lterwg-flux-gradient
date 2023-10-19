@@ -80,8 +80,27 @@ m9Diff.list <- lapply(list.idx,FUN=function(idx){
   OUT$dConc <- OUT$mean_A-OUT$mean_B
   OUT$timeMid <- OUT$timeEnd_A+0.5*(OUT$timeBgn_B-OUT$timeEnd_A)
   
+  # Make match column for CH4 & CO2/H2O
+  if(scalar == "CH4"){
+    #####CHECK THIS WITH DIFFERENT TOWERS
+    OUT$match_time <- OUT$timeMid + 1.5*60 # CO2 & H2O starts 1.5 min past CH4
+  } else {
+    OUT$match_time <- OUT$timeMid 
+  }
   return(OUT)
 })
 
 # Reassign names from original list
 names(m9Diff.list) = names(m9.list)
+
+# Filter for values between 4-3
+CO2 = m9Diff.list[["CO2"]][m9Diff.list[["CO2"]]$dLevelsAminusB=="4_3",]
+H2O = m9Diff.list[["H2O"]][m9Diff.list[["H2O"]]$dLevelsAminusB=="4_3",]
+CH4 = m9Diff.list[["CH4"]][m9Diff.list[["CH4"]]$dLevelsAminusB=="4_3",]
+
+# Combine data frames for two scalars
+scalar_combine = dplyr::full_join(CO2, H2O, by="timeMid")
+scalar_combine = dplyr::filter(scalar_combine, !is.na(dConc.x) & !is.na(dConc.y))
+
+scalar_combine = dplyr::full_join(CO2, CH4, by="match_time")
+scalar_combine = dplyr::filter(scalar_combine, !is.na(dConc.x) & !is.na(dConc.y))
