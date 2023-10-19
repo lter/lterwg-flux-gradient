@@ -1,0 +1,82 @@
+# Pull data from google drive
+email <- 'csturtevant@battelleecology.org'
+site <- 'KONZ'
+
+# Authenticate with Google Drive and get site data
+googledrive::drive_auth(email = email)
+drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
+data_folder <- googledrive::drive_ls(path = drive_url)
+site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==site])
+dirTmp <- fs::path(tempdir(),site)
+dir.create(dirTmp)
+for(focal_file in site_folder$name){
+  
+  # Find the file identifier for that file
+  file_id <- subset(site_folder, name == focal_file)
+  
+  # Download that file
+  pathDnld <- fs::path(dirTmp,focal_file)
+  googledrive::drive_download(file = file_id$id, 
+                              path = pathDnld,
+                              overwrite = T)
+# Unzip
+  if(grepl(pattern='.zip',focal_file)){
+    utils::unzip(pathDnld,exdir=dirTmp)
+  }
+  
+}
+
+
+
+# Extract 9 minute data
+fileIn <- fs::path(dirTmp,paste0(site,'_9m.Rdata'))
+load(fileIn)
+
+# Fudge for not having the updated file. Remove this block
+# CH4list <- lapply(m9.list$Cont,FUN=function(idx){idx$CH4})
+# CH4 <- do.call(rbind,CH4list)
+
+# For each concentration, compute difference in concentation among tower levels
+# m9.list <- list(Cont=list(CH4=CH4))
+m9Diff.list <- lapply(m9.list,FUN=function(var){
+  var$timeBgn <- as.POSIXct(strptime(var$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+  var$timeEnd <- as.POSIXct(strptime(var$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+  var <- dplyr::arrange(var,timeBgn)
+  var$TowerPosition <- as.numeric(var$TowerPosition)
+  
+  # Without any filtering, this provides concentration diff for each adjacent tower level AND the top/bottom. 
+  # Do any filtering desired to restrict to particular tower levels (e.g. 1 & 3 to get that diff)
+  
+  # Create output data frame where conc diffs are in the same row
+  OUT <- var
+  var <- names(OUT)
+  ncol <- ncol(OUT)
+  nrow <- nrow(OUT)
+  OUT[1:(nrow-1),(ncol+1):(ncol*2)] <- OUT[2:(nrow),]
+  OUT <- OUT[1:(nrow-1),]
+  
+  names(OUT)[1:ncol] <- paste0(var,'_A')
+  names(OUT)[(ncol+1):(ncol*2)] <- paste0(var,'_B')
+  
+  # Apply quality control
+  timeChk <- OUT$timeBgn_B-OUT$timeEnd_A # looking for short positive lag (flush time is 1 min)
+  bad <- timeChk < 45 | timeChk > 100 | OUT$qfFinl_A == 1 | OUT$qfFinl_B == 1
+  OUT <- OUT[!bad,]
+  
+  # Compute tower level diff A-B
+  # Swap any in which the diff is negative bc we always want higher level minus lower level
+  diffTowerPosition<- OUT$TowerPosition_A-OUT$TowerPosition_B
+  idxNeg <- diffTowerPosition < 0
+  A <- OUT[idxNeg,1:ncol]
+  B <- OUT[idxNeg,(ncol+1):(ncol*2)]
+  OUT[idxNeg,1:ncol] <- B
+  OUT[idxNeg,(ncol+1):(ncol*2)] <- A
+  OUT$diffTowerPosition<- OUT$TowerPosition_A-OUT$TowerPosition_B
+  OUT$dLevelsAminusB <- paste0(OUT$TowerPosition_A,'_',OUT$TowerPosition_B)
+  
+  # Compute concentration diffs
+  OUT$dConc <- OUT$mean_A-OUT$mean_B
+  OUT$timeMid <- OUT$timeEnd_A+0.5*(OUT$timeBgn_B-OUT$timeEnd_A)
+  
+  return(OUT)
+})
