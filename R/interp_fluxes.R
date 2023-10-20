@@ -20,7 +20,7 @@ interp_fluxes <- function(timeBgn = NULL,
   fluxPred <- approx(x = timeMid, y = flux, xout = timePred, method="linear",
             rule = 1, f = 0.5, ties = mean, na.rm = FALSE)
   
-  return(fluxPred)
+  return(fluxPred$y)
   
 }
   
