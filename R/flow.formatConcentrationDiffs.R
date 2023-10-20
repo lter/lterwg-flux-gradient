@@ -1,5 +1,6 @@
 # Pull data from google drive
-email <- 'jaclyn_matthes@g.harvard.edu'
+email <- 'csturtevant@battelleecology.org'
+#email <- 'jaclyn_matthes@g.harvard.edu'
 site <- 'KONZ'
 
 # Authenticate with Google Drive and get site data
@@ -34,6 +35,10 @@ load(fileIn)
 fileIn <- fs::path(dirTmp,paste0(site,'_30m.Rdata'))
 load(fileIn)
 
+fileIn <- fs::path(dirTmp,paste0(site,'_1m.Rdata'))
+load(fileIn)
+
+# ------------------- Get concentration diffs for subsequent tower levels --------------
 # For each concentration, compute difference in concentation among tower levels
 # m9.list <- list(Cont=list(CH4=CH4))
 list.idx = seq_len(length(m9.list))
@@ -96,7 +101,7 @@ m9Diff.list <- lapply(list.idx,FUN=function(idx){
 # Reassign names from original list
 names(m9Diff.list) = names(m9.list)
 
-# Interpolate the flux data
+# ----- Interpolate the 30-min flux data to 9 min concentration midpoints ------
 source('./R/interp_fluxes.R')
 
 # FC
@@ -138,34 +143,28 @@ m9Diff.list <- lapply(m9Diff.list,FUN=function(var){
   return(var)
 })
 
+# ustar & roughness length
+timeBgn <- as.POSIXct(strptime(m30.list$Ufric$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+timeEnd <- as.POSIXct(strptime(m30.list$Ufric$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+ustar <- m30.list$Ufric$veloFric
+roughLength <- m30.list$MomRough$distZaxsRgh
+qf <- m30.list$Ufric$qfFinl # filter
+ustar[qf == 1] <- NA
+roughLength[qf == 1] <- NA
+m9Diff.list <- lapply(m9Diff.list,FUN=function(var){
+  timePred <- var$timeMid
+  ustarPred <- interp_fluxes(timeBgn,timeEnd,ustar,timePred)
+  roughLengthPred <- interp_fluxes(timeBgn,timeEnd,roughLength,timePred)
+  var$roughLength_interp <- roughLengthPred
+  return(var)
+})
+
+# Aggregate the 1-min RH & pressure on the tower top to the window of paired concentrations
+timeBgn <- as.POSIXct(strptime(m1.list$RH$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+timeEnd <- as.POSIXct(strptime(m1.list$RH$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+RH <- m1.list$RH$RHmean
+qf <- m1.list$RH$RHFinalQF # quality flag
+RH[qf == 1] <- NA # filter
 
 
-# Filter for values between 4-3
-CO2 = m9Diff.list[["CO2"]][m9Diff.list[["CO2"]]$dLevelsAminusB=="4_3",]
-H2O = m9Diff.list[["H2O"]][m9Diff.list[["H2O"]]$dLevelsAminusB=="4_3",]
-CH4 = m9Diff.list[["CH4"]][m9Diff.list[["CH4"]]$dLevelsAminusB=="4_3",]
-
-# Combine data frames for two scalars
-scalar_combine = dplyr::full_join(CO2, CH4, by="match_time")
-scalar_combine = dplyr::filter(scalar_combine, !is.na(dConc.x) & !is.na(dConc.y))
-
-scalar_combine$ch4flux = scalar_combine$FC_interp.x*(scalar_combine$dConc.y/scalar_combine$dConc.x)
-scalar_combine$FC_interp.x <- scalar_combine$FC_interp.x/1000 #DELETE ME
-plot <- plotly::plot_ly(data=scalar_combine, x=~match_time, y=~ch4flux,  type='scatter', mode='lines') %>%
-  plotly::layout(margin = list(b = 50, t = 50, r=50),
-                 title = 'CH4 Flux',
-                 xaxis = list(title = base::paste0(c(rep("\n&nbsp;", 3),
-                                                     rep("&nbsp;", 20),
-                                                     paste0("Date-time"),
-                                                     rep("&nbsp;", 20)),
-                                                   collapse = ""),
-                              nticks=6,
-                              #range = c(1,48),
-                              zeroline=TRUE
-                 ),
-                 yaxis = list(title = ''),
-                 showlegend=TRUE) %>% 
-  plotly::add_trace(data=scalar_combine,x=~match_time, y=~FC_interp.x,mode='lines',name='CO2 flux')
-
-
-print(plot)
+# Aggregate the 1-min ubar profile and tair profile at the window of paired concentations
