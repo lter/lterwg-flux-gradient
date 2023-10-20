@@ -31,11 +31,11 @@ enddate <- "2023-09"
 folders <- list.files(path = file.path("data","Konza", "NEON_eddy-flux"), pattern = "KONZ.DP4.00200.001", full.names = T)
 
 folders <- folders[8:33]
-# hd.files <-list.files(path = file.path(folders[1]), pattern="\\.h5$", full.names = T)
+hd.files <-list.files(path = file.path(folders[1]), pattern="\\.h5$", full.names = T)
 
 #select for 2021 july forward
 #grab attribute data
-#attr.df <- SiteAttributes(hd.files, sitecode)
+attr.df <- SiteAttributes(hd.files, sitecode)
 #save df as csv
 # write.csv(attr.df, paste0(sitecode, "_", startdate, "_", enddate, "_attr.csv"))
 #grab co2, h20, ch4 level 1 data at all 30min resolution tower heights along with level 4 co2, sensible heat, latent heat fluxes, uStar, uBar, air temp, z0
