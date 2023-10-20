@@ -63,6 +63,18 @@ met.1m <- function(hd.file, sitecode, startdate, enddate){
   #remove looping variable
   rm(temp, qfqm)
   
+  #grab top of tower air temp
+  heights.temp.top <- unique(test.df[which(test.df$group == paste( "/", sitecode,"/dp01/data/tempAirTop", sep="")),]$name)
+  #subsets heights list grabbing only those at 1m
+  heights.temp.top <-as.numeric(substr(stringr::str_subset(unique(stringr::str_subset(heights.temp.top, '000')),'1m'),6,6))
+  
+  temp.top <- h5read(hd.file, paste0("/", sitecode, '/dp01/data/tempAirTop/000_0', heights.temp.top,'0_1m/temp', sep=""))
+  temp.top.qfqm <- h5read(hd.file, paste0("/", sitecode, '/dp01/qfqm/tempAirTop/000_0', heights.temp.top,'0_1m/temp', sep=""))
+  temp.top.all <- left_join(temp.top, temp.top.qfqm, by = c("timeEnd", "timeBgn")) %>%
+    mutate(TowerPosition = paste0(heights.temp.top))
+  #combine all temp into one df
+  df_temp <- rbind(df_temp, temp.top.all)
+  
   #grab NEON level 1 air pressure at 2nd tower position 1min resolution for a given site
   P  <- h5read(hd.file, paste("/", sitecode, "/dp01/data/presBaro/000_0", heights.press,"_01m/presAtm", sep=""))
   #grab NEON level 1 qfqm for air pressure
