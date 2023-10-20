@@ -11,6 +11,29 @@
 
 - https://lternet.edu/working-groups/the-flux-gradient-project/
 
+## Current code workflow
+
+1. **flow.downloadNEON.R** Workflow script that download and unzip NEON HDF5 (eddy covariance files) files for all sites and time periods of interest. ALSO downloads all required MET data products that are not in the bundled HDF5 file.
+2. **flow.unzipNEON.R** Workflow. Unzips all downloaded NEON data files.
+3. **flow.siteDF.R** Extract and stack downloaded and unzipped data into R objects for each data averaging interval, saved in their own RData file. These are currently min9.list (9-min concentrations), min30.list (30-min met and flux data), and min1.list (1-min met data), WS2D (2D wind speed data). Also extracts and saves site attributes from the HDF5 files into an R object called attr.df. Zips and saves objects to Google Drive (`googledrive::drive_upload`).
+4. **flow.formatConcentrationDiffs** Grabs output from flow.siteDF.R from Google Drive. Align the 9-min concentration data among adjacent tower levels (and also the bottom-top levels). Interpolates 30-min eddy flux and MET data to the 9-min concentrations, including but not limited to u*, ubar (profile), roughness length. Also derives kinematic water flux (LE -> w'q'), heat flux (w'T'), aerodynamic canopy height, displacement height, that are needed for the various methods. Differences the concentrations for CH4, CO2, and H2O for adjacent tower levels (and bottom-top). Saves output as SITE_aligned_conc_flux_9min.RData, where SITE is the NEON site code. Zips and uploads to Google Drive.
+5. **flow.computeGradientFluxes** Grab aligned concentration & flux data from Google Drive and calculate the fluxes using all methods (MBR, Aero, wind profile). Save output as SITE_METHOD_USER_DATE.RData, where SITE is NEON site code, METHOD is the computation method (e.g. MBR=modified bowen ratio, AE = aerodynamic, WP=wind profile), USER is the username, date is the run date (YYYY-MM-DD).
+
+## Current (2023-10-20) assignments
+- Workflow steps 1-3: Alexis. Due 2023-10-27
+- Workflow step 4: Cove & Jackie. Due 2023-11-03
+    - Testing by Kyle and David
+- Workflow step 5:
+    - MBR: Roisin, Cove, Jackie. Due 2023-12-06 meeting
+    - Aero: Sam, Camilo, Alexis. Due 2023-12-06 meeting
+    - WP: Sam, Camilo, Alexis. Due 2023-12-06 meeting
+- Find available data with concurrent concentration profile and EC methane flux: Kyle. Due 2023-12-06 meeting
+- Manuscripts
+    - Methods paper(s): Which method works when and where? uncertainty.
+    - Big-picture science paper: CH4 fluxes and controls
+
+**NOTE**: Feel free to contact Nick and Angel during their office hours for coding/git help
+
 ## Guidelines for sharing scripts
 
 - All code should include sufficient annotation and documentation so that other users can understand and run the scripts 
@@ -38,14 +61,6 @@ library(tidyverse)
 
 ```
 
-
 ## Supplementary Resources
 
 NCEAS Scientific Computing Support Team page [link](https://nceas.github.io/scicomp.github.io)
-
-## Description of Current Functions
-Function Name: Description
-SiteAttributes: Grab site tower measurement heights
-Site.DF: Grab site gas concentrations, CO2 H LE fluxes, uStar, uBar, airtemp, airpress, z0, radiSwIn
-Flux_Gradient_MBR: Use gas concentrations,  CO2 LE fluxes and tower measurement heights to estimate fluxes using modified bowen ratio
-Flux_Gradient_AE: Use gas concentrations, CO2 H LE fluxes, uStar, uBar, airtemp, z0, radiSwIn, and tower measurement heights using aerodynamic model and wind profile

@@ -1,5 +1,5 @@
 # Pull data from google drive
-email <- 'csturtevant@battelleecology.org'
+email <- 'jaclyn_matthes@g.harvard.edu'
 site <- 'KONZ'
 
 # Authenticate with Google Drive and get site data
@@ -9,6 +9,7 @@ data_folder <- googledrive::drive_ls(path = drive_url)
 site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==site])
 dirTmp <- fs::path(tempdir(),site)
 dir.create(dirTmp)
+#focal_file = "KONZ_30m.zip"
 for(focal_file in site_folder$name){
   
   # Find the file identifier for that file
@@ -26,19 +27,19 @@ for(focal_file in site_folder$name){
   
 }
 
-
-
 # Extract 9 minute data
 fileIn <- fs::path(dirTmp,paste0(site,'_9m.Rdata'))
 load(fileIn)
 
-# Fudge for not having the updated file. Remove this block
-# CH4list <- lapply(m9.list$Cont,FUN=function(idx){idx$CH4})
-# CH4 <- do.call(rbind,CH4list)
+fileIn <- fs::path(dirTmp,paste0(site,'_30m.Rdata'))
+load(fileIn)
 
 # For each concentration, compute difference in concentation among tower levels
 # m9.list <- list(Cont=list(CH4=CH4))
-m9Diff.list <- lapply(m9.list,FUN=function(var){
+list.idx = seq_len(length(m9.list))
+m9Diff.list <- lapply(list.idx,FUN=function(idx){
+  var = m9.list[[idx]]
+  scalar = names(m9.list)[idx]
   var$timeBgn <- as.POSIXct(strptime(var$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
   var$timeEnd <- as.POSIXct(strptime(var$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
   var <- dplyr::arrange(var,timeBgn)
@@ -60,7 +61,11 @@ m9Diff.list <- lapply(m9.list,FUN=function(var){
   
   # Apply quality control
   timeChk <- OUT$timeBgn_B-OUT$timeEnd_A # looking for short positive lag (flush time is 1 min)
-  bad <- timeChk < 45 | timeChk > 100 | OUT$qfFinl_A == 1 | OUT$qfFinl_B == 1
+  if(scalar == "CH4"){
+    bad <- timeChk < 45 | timeChk > 100 | OUT$qfFinl_A == 1 | OUT$qfFinl_B == 1
+  } else {
+    bad <- timeChk < 200 | timeChk > 300 | OUT$qfFinl_A == 1 | OUT$qfFinl_B == 1
+  }
   OUT <- OUT[!bad,]
   
   # Compute tower level diff A-B
@@ -78,5 +83,89 @@ m9Diff.list <- lapply(m9.list,FUN=function(var){
   OUT$dConc <- OUT$mean_A-OUT$mean_B
   OUT$timeMid <- OUT$timeEnd_A+0.5*(OUT$timeBgn_B-OUT$timeEnd_A)
   
+  # Make match column for CH4 & CO2/H2O
+  if(scalar == "CH4"){
+    #####CHECK THIS WITH DIFFERENT TOWERS
+    OUT$match_time <- OUT$timeMid + 1.5*60 # CO2 & H2O starts 1.5 min past CH4
+  } else {
+    OUT$match_time <- OUT$timeMid 
+  }
   return(OUT)
 })
+
+# Reassign names from original list
+names(m9Diff.list) = names(m9.list)
+
+# Interpolate the flux data
+source('./R/interp_fluxes.R')
+
+# FC
+timeBgn <- as.POSIXct(strptime(m30.list$F_co2$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+timeEnd <- as.POSIXct(strptime(m30.list$F_co2$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+flux <- m30.list$F_co2$turb
+qf <- m30.list$F_co2$turb.qfFinl # filter
+flux[qf == 1] <- NA
+m9Diff.list <- lapply(m9Diff.list,FUN=function(var){
+  timePred <- var$timeMid
+  fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
+  var$FC_interp <- fluxPred
+  return(var)
+})
+
+# LE
+timeBgn <- as.POSIXct(strptime(m30.list$F_LE$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+timeEnd <- as.POSIXct(strptime(m30.list$F_LE$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+flux <- m30.list$F_LE$turb
+qf <- m30.list$F_LE$turb.qfFinl # filter
+flux[qf == 1] <- NA
+m9Diff.list <- lapply(m9Diff.list,FUN=function(var){
+  timePred <- var$timeMid
+  fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
+  var$LE_interp <- fluxPred
+  return(var)
+})
+
+# H
+timeBgn <- as.POSIXct(strptime(m30.list$F_H$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+timeEnd <- as.POSIXct(strptime(m30.list$F_H$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+flux <- m30.list$F_H$turb
+qf <- m30.list$F_H$turb.qfFinl # filter
+flux[qf == 1] <- NA
+m9Diff.list <- lapply(m9Diff.list,FUN=function(var){
+  timePred <- var$timeMid
+  fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
+  var$H_interp <- fluxPred
+  return(var)
+})
+
+
+
+# Filter for values between 4-3
+CO2 = m9Diff.list[["CO2"]][m9Diff.list[["CO2"]]$dLevelsAminusB=="4_3",]
+H2O = m9Diff.list[["H2O"]][m9Diff.list[["H2O"]]$dLevelsAminusB=="4_3",]
+CH4 = m9Diff.list[["CH4"]][m9Diff.list[["CH4"]]$dLevelsAminusB=="4_3",]
+
+# Combine data frames for two scalars
+scalar_combine = dplyr::full_join(CO2, CH4, by="match_time")
+scalar_combine = dplyr::filter(scalar_combine, !is.na(dConc.x) & !is.na(dConc.y))
+
+scalar_combine$ch4flux = scalar_combine$FC_interp.x*(scalar_combine$dConc.y/scalar_combine$dConc.x)
+scalar_combine$FC_interp.x <- scalar_combine$FC_interp.x/1000 #DELETE ME
+plot <- plotly::plot_ly(data=scalar_combine, x=~match_time, y=~ch4flux,  type='scatter', mode='lines') %>%
+  plotly::layout(margin = list(b = 50, t = 50, r=50),
+                 title = 'CH4 Flux',
+                 xaxis = list(title = base::paste0(c(rep("\n&nbsp;", 3),
+                                                     rep("&nbsp;", 20),
+                                                     paste0("Date-time"),
+                                                     rep("&nbsp;", 20)),
+                                                   collapse = ""),
+                              nticks=6,
+                              #range = c(1,48),
+                              zeroline=TRUE
+                 ),
+                 yaxis = list(title = ''),
+                 showlegend=TRUE) %>% 
+  plotly::add_trace(data=scalar_combine,x=~match_time, y=~FC_interp.x,mode='lines',name='CO2 flux')
+
+
+print(plot)
