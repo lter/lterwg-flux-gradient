@@ -1,4 +1,3 @@
-
 ###########################MONIN OBUKHOV LENGTH################################
 #' @param press atmospheric pressure in Kpa
 #' @param temp temperature in C
@@ -25,7 +24,7 @@ MOlength <- function(press,temp,H,LE,velofric){
   
   for(x in list(1:length(press))){
     rho = (press[x]*1000)/((temp[x]+273.15)*287)
-    print(rho)
+    #print(rho)
   }
   
   
@@ -34,15 +33,17 @@ MOlength <- function(press,temp,H,LE,velofric){
   for(x in list(1:length(H))){
     vpotflux <- (H[x]/(rho[x]*cp))+.61*(temp[x]+273.15)*(LE[x]/(rho[x]*l))
     vpotflux <- vpotflux
-    print(vpotflux)
+    #print(vpotflux)
   }
   
   #Monin-Obukhov Length#
   
   for(x in list(1:length(vpotflux))){
     L <- -((velofric[x]**3)*(temp[x]+273.15))/(k*g*(vpotflux[x]))
-    print(L)
+    #print(L)
   }
-  return(L)
+  
+  DATA <- list(rho = rho, vpotflux = vpotflux, L = L)
+  return(DATA)
   
 }
