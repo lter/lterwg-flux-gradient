@@ -1,4 +1,4 @@
-#' met.cont.30m
+#' met.cont.30min
 #'
 #' @param sitecode NEON site code
 #' @param hd.file file type h5 containg NEON site specific data
@@ -8,7 +8,7 @@
 #' @return df containing site co2, h2o, ch4 measurements at various tower heights
 #'
 #' @author Alexis Helgeson, Sam Jurado, David Reed, and Sparkle Malone
-met.cont.30m <- function(hd.file, sitecode, startdate, enddate){
+met.cont.30min <- function(hd.file, sitecode, startdate, enddate){
   
   #lists the contents of hdf5 file and returns a df with file contents
   test.df <- h5ls(hd.file,

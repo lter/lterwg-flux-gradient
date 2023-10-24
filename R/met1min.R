@@ -1,4 +1,4 @@
-#' met.1m
+#' met.1min
 #'
 #' @param hd.file file type h5 containg NEON site specific data
 #' @param sitecode NEON site code
@@ -7,7 +7,7 @@
 #'
 #' @return df containing high frequnecy site met
 #'
-met.1m <- function(hd.file, sitecode, startdate, enddate){
+met.1min <- function(hd.file, sitecode, startdate, enddate){
   #lists the contents of hdf5 file and returns a df with file contents
   test.df <- h5ls(hd.file,
                   recursive = TRUE,
@@ -68,8 +68,8 @@ met.1m <- function(hd.file, sitecode, startdate, enddate){
   #subsets heights list grabbing only those at 1m
   heights.temp.top <-as.numeric(substr(stringr::str_subset(unique(stringr::str_subset(heights.temp.top, '000')),'1m'),6,6))
   
-  temp.top <- h5read(hd.file, paste0("/", sitecode, '/dp01/data/tempAirTop/000_0', heights.temp.top,'0_1m/temp', sep=""))
-  temp.top.qfqm <- h5read(hd.file, paste0("/", sitecode, '/dp01/qfqm/tempAirTop/000_0', heights.temp.top,'0_1m/temp', sep=""))
+  temp.top <- h5read(hd.file, paste0("/", sitecode, '/dp01/data/tempAirTop/000_0', heights.temp.top,'0_01m/temp', sep=""))
+  temp.top.qfqm <- h5read(hd.file, paste0("/", sitecode, '/dp01/qfqm/tempAirTop/000_0', heights.temp.top,'0_01m/temp', sep=""))
   temp.top.all <- left_join(temp.top, temp.top.qfqm, by = c("timeEnd", "timeBgn")) %>%
     mutate(TowerPosition = paste0(heights.temp.top))
   #combine all temp into one df
@@ -99,17 +99,6 @@ met.1m <- function(hd.file, sitecode, startdate, enddate){
   LWout <- h5read(hd.file, paste("/", sitecode, "/dp01/data/radiNet/000_0", heights.solar, "0_01m/radiLwOut", sep=""))
   LWout.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp01/qfqm/radiNet/000_0", heights.solar, "0_01m/radiLwOut", sep=""))
   
-  
-  # Solar.all <- SWin %>%
-  #   left_join(SWin.qfqm, by = c("timeEnd", "timeBgn")) %>%
-  #   left_join(SWout, by = c("timeEnd", "timeBgn")) %>%
-  #   left_join(SWout.qfqm, by = c("timeEnd", "timeBgn")) %>%
-  #   left_join(LWout, by = c("timeEnd", "timeBgn")) %>%
-  #   left_join(LWin.qfqm, by = c("timeEnd", "timeBgn")) %>%
-  #   left_join(LWout, by = c("timeEnd", "timeBgn")) %>%
-  #   left_join(LWout.qfqm, by = c("timeEnd", "timeBgn")) %>%
-  #   mutate(TowerPosition = paste0(heights.solar))
-  
   SWin.all <- SWin %>%
     left_join(SWin.qfqm, by = c("timeEnd", "timeBgn")) %>%
     mutate(TowerPosition = paste0(heights.solar))
@@ -122,15 +111,6 @@ met.1m <- function(hd.file, sitecode, startdate, enddate){
   LWout.all <- LWout %>%
     left_join(LWin.qfqm, by = c("timeEnd", "timeBgn")) %>%
     mutate(TowerPosition = paste0(heights.solar))
-  
-  # #grab relative humidity
-  # RH <- loadByProduct("DP1.00098.001", site="KONZ", 
-  #                     timeIndex=1, package="basic", 
-  #                     startdate=startdate, enddate=enddate,
-  #                     check.size=F)
-  # RH <- RH$RH_1min %>% 
-  #   filter(horizontalPosition == "000") %>%
-  #   select(verticalPosition, startDateTime, endDateTime, RHMean, RHFinalQF)
   
   #soil heat flux
   plots.soil <- unique(test.df[which(test.df$group == paste( "/", sitecode,"/dp01/data/fluxHeatSoil", sep="")),]$name)

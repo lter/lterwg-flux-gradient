@@ -1,4 +1,4 @@
-#' cont.9m
+#' cont.9min
 #'
 #' @param sitecode NEON site code
 #' @param hd.file file type h5 containg NEON site specific data
@@ -6,7 +6,7 @@
 #' @return list with 4 data frames with site attributes and 9m tower concentrations for CH4, CO2, H2O 
 #'
 #' @author Alexis Helgeson, Sam Jurado, David Reed, Sparkle Malone, Jackie Matthes
-cont.9m <- function(hd.file, sitecode){
+cont.9min <- function(hd.file, sitecode){
   
   #lists the contents of hdf5 file and returns a df with file contents
   test.df <- rhdf5::h5ls(hd.file,
