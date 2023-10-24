@@ -1,11 +1,11 @@
 #' @title Un-ZIP NEON Data Products
 #' 
+#' 
+#' @param in_path location of download zip file
+#' @param out_path location to store h5 files
+#' @param quiet update function messages on/off
+#' 
 #' @description NEON data products are downloaded as ZIP files which unzip to .gz files. This function accepts the path to those 
-#'
-#' @param zip.dir filepath location of NEON zip folder
-#' @param sitecode NEON site code
-#' @param startdate startdate for download
-#' @param enddate enddate for download
 #'
 #' @return print message identifying where unzipped files can be found
 #'
