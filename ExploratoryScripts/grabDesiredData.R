@@ -19,18 +19,18 @@ source(file.path("R/cont9m.R"))
 source(file.path("R/metCont30m.R"))
 source(file.path("R/met1m.R"))
 #set up dir to store data
-Main.Directory <- c(file.path("data/Konza"))
+Main.Directory <- c(file.path("data/KONZ"))
 #set desired site name and NEON code
 sitename <- 'Konza Praire'
 sitecode <- 'KONZ'
 #set start and end date for obs
 startdate <- "2021-08"
-enddate <- "2023-09"
+enddate <- "2021-10"
 # Call Fcns to Calculate CH4 fluxes ---------------------------------------
 #grab h5 files to be passed to SiteAttributes and SiteDF
 folders <- list.files(path = file.path("data","Konza", "NEON_eddy-flux"), pattern = "KONZ.DP4.00200.001", full.names = T)
 
-folders <- folders[8:33]
+folders <- folders[8:10]
 hd.files <-list.files(path = file.path(folders[1]), pattern="\\.h5$", full.names = T)
 
 #select for 2021 july forward
@@ -39,7 +39,7 @@ attr.df <- SiteAttributes(hd.files, sitecode)
 #save df as csv
 # write.csv(attr.df, paste0(sitecode, "_", startdate, "_", enddate, "_attr.csv"))
 #grab co2, h20, ch4 level 1 data at all 30min resolution tower heights along with level 4 co2, sensible heat, latent heat fluxes, uStar, uBar, air temp, z0
-m1.list <- Site.DF(folder = folders, sitecode = sitecode, startdate = startdate, enddate = enddate)
+min9.list <- Site.DF(folder = folders, sitecode = sitecode, frequency = "9min")
 
 # WS2D <- m30.list$WS2D
 # WS2D <- WS2D %>%
