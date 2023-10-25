@@ -1,7 +1,8 @@
+#NOTE IMPORTANT INFORMATION: all of the .flow scripts are written assuming the end user has connect their R studio project to lterwg-flux-gradient GitHub AND that they have created a data folder AND that within that data folder there are site folders named with the NEON sitecode
 #load libraries
 library(neonUtilities)
 library(dplyr)
-#set start and end dates for data, remember CH4 is only available (august 2021 - present)
+#set start and end dates for data, REMEMBER CH4 is only available (august 2021 - present)
 startdate <- "2021-08"
 enddate <- "2021-09"
 #set NEON site code
