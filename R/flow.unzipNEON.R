@@ -1,3 +1,4 @@
+#NOTE IMPORTANT INFORMATION: all of the .flow scripts are written assuming the end user has connect their R studio project to lterwg-flux-gradient GitHub AND that they have created a data folder AND that within that data folder there are site folders named with the NEON sitecode
 #load libraries
 #source unzip_neon fcn
 source(file.path("R/unzip_neon.R"))
