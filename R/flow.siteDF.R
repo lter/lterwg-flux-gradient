@@ -16,14 +16,14 @@ library(gtools)
 source(file.path("R/SiteDF.R"))
 source(file.path("R/SiteAttributes.R"))
 source(file.path("R/cont9min.R"))
-source(file.path("R/metCont30inm.R"))
+source(file.path("R/metCont30min.R"))
 source(file.path("R/met1min.R"))
 source(file.path("R/Compile1min.R"))
 source(file.path("R/Compile30min.R"))
 source(file.path("R/Compile9min.R"))
 #set NEON sitecode
 #this sitecode is used to grab existing files and create new ones MAKE SURE IT MATCHES
-sitecode <- 'KONZ'
+sitecode <- 'GUAN'
 #Assuming you have connected to the lterwg-flux-gradient github to your R studio
 #grab h5 files to be passed to SiteAttributes and SiteDF
 folders <- list.files(path = file.path("data",sitecode, "NEON_eddy-flux"), pattern = "KONZ.DP4.00200.001", full.names = T)

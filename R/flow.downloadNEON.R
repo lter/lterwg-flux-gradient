@@ -5,7 +5,7 @@ library(dplyr)
 startdate <- "2021-08"
 enddate <- "2021-09"
 #set NEON site code
-sitecode <- 'KONZ'
+sitecode <- 'GUAN'
 #grab relative humidity at 1 min resolution
 RH1min <- loadByProduct("DP1.00098.001", site=sitecode,
                     timeIndex=1, package="basic",
@@ -42,6 +42,6 @@ WS2D2min <- WS2D2min$twoDWSD_2min %>%
   select(TowerPosition, startDateTime, endDateTime, windSpeedMean, windSpeedFinalQF)
 #save as .Rdata object to be called again in flow.siteDF
 DATA <- list(RH30min = RH30min, RH1min = RH1min, WS2D2min = WS2D2min, WS2D30min = WS2D30min)
-save(DATA, file = paste0("data/", sitecode,"_NonEddyMetVars.Rdata"))
+save(DATA, file = paste0("data/", sitecode, "/", sitecode,"_NonEddyMetVars.Rdata"))
 #grab bundled eddy-covariance data
 zipsByProduct(dpID="DP4.00200.001", sitecode,startdate, enddate,package="basic", check.size=F, savepath = file.path("data", sitecode))
