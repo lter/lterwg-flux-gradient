@@ -1,7 +1,8 @@
+#NOTE IMPORTANT INFORMATION: all of the .flow scripts are written assuming the end user has connect their R studio project to lterwg-flux-gradient GitHub AND that they have created a data folder AND that within that data folder there are site folders named with the NEON sitecode
 #load libraries
 library(neonUtilities)
 library(dplyr)
-#set start and end dates for data, remember CH4 is only available (august 2021 - present)
+#set start and end dates for data, REMEMBER CH4 is only available (august 2021 - present)
 startdate <- "2021-08"
 enddate <- "2021-09"
 #set NEON site code
@@ -42,6 +43,9 @@ WS2D2min <- WS2D2min$twoDWSD_2min %>%
   select(TowerPosition, startDateTime, endDateTime, windSpeedMean, windSpeedFinalQF)
 #save as .Rdata object to be called again in flow.siteDF
 DATA <- list(RH30min = RH30min, RH1min = RH1min, WS2D2min = WS2D2min, WS2D30min = WS2D30min)
+#create necessary sub-folder(s)
+dir.create(path = file.path("data"), showWarnings = F)
+dir.create(path = file.path("data", sitecode), showWarnings = F)
 save(DATA, file = paste0("data/", sitecode, "/", sitecode,"_NonEddyMetVars.Rdata"))
 #grab bundled eddy-covariance data
 zipsByProduct(dpID="DP4.00200.001", sitecode,startdate, enddate,package="basic", check.size=F, savepath = file.path("data", sitecode))
