@@ -235,7 +235,8 @@ m9Diff.list <- lapply(m9Diff.list,FUN=function(var){
   
   # Convert LE (W m-2) to w'q' (FH2O, mmol m-2 s-1)
   # lambda = latent heat of vaporiz. [J/kg] - Eqn in back of Stull pg. 641
-  var$lambda <- (2.501-(2.361*1e-3)*Tair_C_avg)*1e3 # lambda = J kg-1
+  #var$lambda <- (2.501-(2.361*1e-3)*Tair_C_avg)/1e6 # lambda = J kg-1
+  var$lambda <- (3149000-2370*(var$Tair_C+273.16))*1e-6 # J g-1
   var$FH2O_interp <- var$LE*(1/var$lambda) 
   
   return(var)
