@@ -193,11 +193,6 @@ m9Diff.list <- lapply(m9Diff.list,FUN=function(var){
   timeAvg_A41 <- var$timeBgn_B #averaging start time Level A when 4_1
   timeAvg_B41 <- var$timeEnd_A #averaging start time Level B when 4_1
   
-  # timeAvg_A <- m9Diff.list[["CO2"]]$timeBgn_A #averaging start time Level A
-  # timeAvg_B <- m9Diff.list[["CO2"]]$timeEnd_B #averaging end time Level B
-  # timeAvg_A41 <- m9Diff.list[["CO2"]]$timeBgn_B #averaging start time Level A when 4_1
-  # timeAvg_B41 <- m9Diff.list[["CO2"]]$timeEnd_A #averaging start time Level B when 4_1
-  # 
   RH_avg <- P_kPa_avg <- Tair_C_avg <- vector()
   for(i in 1:length(timeAvg_A)){
     print(i)
@@ -240,12 +235,12 @@ m9Diff.list <- lapply(m9Diff.list,FUN=function(var){
   
   # Convert LE (W m-2) to w'q' (FH2O, mmol m-2 s-1)
   # lambda = latent heat of vaporiz. [J/kg] - Eqn in back of Stull pg. 641
-  var$lambda <- (2.501-(2.361*1e-3)*Tair_C_avg)*1e6 # lambda = J kg-1
+  var$lambda <- (2.501-(2.361*1e-3)*Tair_C_avg)*1e3 # lambda = J kg-1
   var$FH2O_interp <- var$LE*(1/var$lambda) 
   
   return(var)
 })
 
-
+#save(m9Diff.list, "KONZ_9minfluxmet.Rdata")
 
 # Aggregate the 1-min ubar profile and tair profile at the window of paired concentations
