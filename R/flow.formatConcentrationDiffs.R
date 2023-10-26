@@ -1,6 +1,6 @@
 # Pull data from google drive
-email <- 'csturtevant@battelleecology.org'
-#email <- 'jaclyn_matthes@g.harvard.edu'
+#email <- 'csturtevant@battelleecology.org'
+email <- 'jaclyn_matthes@g.harvard.edu'
 site <- 'KONZ'
 
 # Authenticate with Google Drive and get site data
@@ -159,12 +159,89 @@ m9Diff.list <- lapply(m9Diff.list,FUN=function(var){
   return(var)
 })
 
-# Aggregate the 1-min RH & pressure on the tower top to the window of paired concentrations
-timeBgn <- as.POSIXct(strptime(m1.list$RH$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
-timeEnd <- as.POSIXct(strptime(m1.list$RH$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
-RH <- m1.list$RH$RHmean
+# # Aggregate the 1-min RH & pressure on the tower top to the window of paired concentrations
+# timeBgn <- as.POSIXct(strptime(m1.list$RH$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+# timeEnd <- as.POSIXct(strptime(m1.list$RH$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+# RH <- m1.list$RH$RHmean
+# qf <- m1.list$RH$RHFinalQF # quality flag
+# RH[qf == 1] <- NA # filter
+# 
+# # Aggregate the 1-min RH & pressure on the tower top to the window of paired concentrations
+# #timeBgn <- as.POSIXct(strptime(m1.list$RH$startDateTime,format='%Y-%m-%dT%H:%M:%OZS',tz='GMT'))
+# timeBgn <- m1.list$RH$startDateTime
+# timeEnd <- m1.list$RH$endDateTime
+
+RH <- m1.list$RH$RHMean
 qf <- m1.list$RH$RHFinalQF # quality flag
 RH[qf == 1] <- NA # filter
 
+P_kPa <- m1.list$Press$mean
+qf <- m1.list$Press$qfFinl # quality flag
+P_kPa[qf == 1] <- NA # filter
+
+Tair_C <- m1.list$Tair$mean
+qf <- m1.list$Tair$qfFinl # quality flag
+Tair_C[qf == 1] <- NA # filter
+
+# REVISIT WHETHER THERE'S A BETTER WAY TO DO THIS: takes a very long time to run
+# Average 1-minute met data into the 20-minute intervals that match 
+# the concentration differences at adjacent (or top_bottom) levels
+m9Diff.list <- lapply(m9Diff.list,FUN=function(var){
+  
+  timeAvg_A <- var$timeBgn_A #averaging start time Level A
+  timeAvg_B <- var$timeEnd_B #averaging end time Level B
+  timeAvg_A41 <- var$timeBgn_B #averaging start time Level A when 4_1
+  timeAvg_B41 <- var$timeEnd_A #averaging start time Level B when 4_1
+  
+  RH_avg <- P_kPa_avg <- Tair_C_avg <- vector()
+  for(i in 1:length(timeAvg_A)){
+    print(i)
+    if(var$dLevelsAminusB[i] != "4_1"){ # times seq for all non-4_1 level diff
+      RH_avg[i] <- mean(RH[timeBgn >= timeAvg_A[i] & timeEnd <= timeAvg_B[i]], na.rm=T)
+      P_kPa_avg[i] <- mean(P_kPa[timeBgn >= timeAvg_A[i] & timeEnd <= timeAvg_B[i]], na.rm=T)
+      Tair_C_avg[i] <- mean(Tair_C[timeBgn >= timeAvg_A[i] & timeEnd <= timeAvg_B[i]], na.rm=T)
+    } else { # times swapped (B then A) for the 4_1 level diff
+      RH_avg[i] <- mean(RH[timeBgn >= timeAvg_A41[i] & timeEnd <= timeAvg_B41[i]], na.rm=T)
+      P_kPa_avg[i] <- mean(P_kPa[timeBgn >= timeAvg_A41[i] & timeEnd <= timeAvg_B41[i]], na.rm=T)
+      Tair_C_avg[i] <- mean(Tair_C[timeBgn >= timeAvg_A41[i] & timeEnd <= timeAvg_B41[i]], na.rm=T)
+    }
+  }
+  # Store 1 min averaged RH, P (kPa), Tair (C) in 9 min table
+  #m9Diff.list[["CO2"]]$RH = RH_avg
+  var$RH <- RH_avg
+  var$P_kPa <- P_kPa_avg
+  var$Tair_C <- Tair_C_avg
+  
+  # Variables to calculate air physics vars & convert H and LE to flux
+  P_pa = P_kPa_avg*1000  #Atmospheric pressure [Pa]
+  ma = 28.964/1000    #molar mass of dry air [Kg/mol]
+  mv = 18/1000        #molar mass of water vapor [Kg/mol]
+  R = 8.314          #Universal gas constant dry air [J/(K mol)]
+  Cpa_dry = 1004.67  #J Kg-1 K-1 - specific heat of dry air
+  
+  # Save these variables for aerodynamic method later on
+  var$Tair_K = Tair_C_avg + 273.16
+  var$esat_Pa = 611.2*exp(17.67*(var$Tair_K-273.16)/(var$Tair_K-29.65)) #[Pa] saturated water vapor pressure
+  var$e_Pa = RH_avg*var$esat_Pa/100 #[Pa] vapor water pressure
+  var$VPD = (var$esat_Pa-var$e_Pa)/1000
+  var$rhoa_kgm3 = ma*(P_pa - var$e_Pa)/(R*var$Tair_K) # dry air density  [Kg/m3]
+  var$rhov_kgm3 = mv*var$e_Pa/(R*var$Tair_K) # water vapor density  [Kg/m3]
+  var$rho_kgm3 = var$rhoa_kgm3 + var$rhov_kgm3 # moist air density  [Kg/m3]
+  var$specificHumidity_pct = var$rhov_kgm3/var$rho_kgm3 # Specific humidity
+  var$Cp_moist = Cpa_dry*(1+0.84*var$specificHumidity_pct) # Specific heat of moist air [J kg-1 K-1] 
+  
+  # Convert H (W m-2) to w't' (Ftemp, K m-2 s-1) (Eqn. 40 in WPL, 1980)
+  var$Ftemp = var$H / (var$Cp_moist*var$rho_kgm3) 
+  
+  # Convert LE (W m-2) to w'q' (FH2O, mmol m-2 s-1)
+  # lambda = latent heat of vaporiz. [J/kg] - Eqn in back of Stull pg. 641
+  #var$lambda <- (2.501-(2.361*1e-3)*Tair_C_avg)/1e6 # lambda = J kg-1
+  var$lambda <- (3149000-2370*(var$Tair_C+273.16))*1e-6 # J g-1
+  var$FH2O_interp <- var$LE*(1/var$lambda) 
+  
+  return(var)
+})
+
+#save(m9Diff.list, "KONZ_9minfluxmet.Rdata")
 
 # Aggregate the 1-min ubar profile and tair profile at the window of paired concentations
