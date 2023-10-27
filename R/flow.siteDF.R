@@ -25,9 +25,9 @@ source(file.path("R/Compile30min.R"))
 source(file.path("R/Compile9min.R"))
 #set NEON sitecode
 #this sitecode is used to grab existing files and create new ones MAKE SURE IT MATCHES
-sitecode <- 'GUAN'
+sitecode <- 'TOOL'
 #copy this browser url from the site folder on the shared G drive (located at https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3) you wish to upload your zip files to
-drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Ygq7mtpnR8fhLHv7fvDo2lDRbRoIV3Nm")
+drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1mgqJps4HvjplsE7SXBvjAzm6n3BXC98I")
 #grab h5 files to be passed to SiteAttributes and SiteDF
 h5files <- list.files(path = file.path("data",sitecode), pattern = ".h5", full.names = T)
 #grab attribute data
@@ -60,6 +60,7 @@ zip(zipfile = paste0("data/", sitecode, "/", sitecode,"_attr.zip"), files = past
 zip(zipfile = paste0("data/", sitecode, "/", sitecode,"_WS2D2min.zip"), files = paste0("data/", sitecode, "/", sitecode, "_WS2D2min.Rdata"))
 #upload to Google Drive
 #IMPORTANT REMINDER if you have not gone through the process of valdiating your email with googledrive in R this code will not work please refer to https://nceas.github.io/scicomp.github.io/tutorials.html#using-the-googledrive-r-package
+#NOTE: you will be asked to re authenticate if your OAuth token is stale, select your already authenticated email from the list
 googledrive::drive_upload(media = paste0("data/", sitecode, "/", sitecode,"_1min.zip"), overwrite = T, path = drive_url)
 googledrive::drive_upload(media = paste0("data/", sitecode, "/", sitecode,"_9min.zip"), overwrite = T, path = drive_url)
 googledrive::drive_upload(media = paste0("data/", sitecode, "/", sitecode,"_30min.zip"), overwrite = T, path = drive_url)
