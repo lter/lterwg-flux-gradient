@@ -1,7 +1,7 @@
 # Pull data from google drive
 #email <- 'csturtevant@battelleecology.org'
 email <- 'jaclyn_matthes@g.harvard.edu'
-site <- 'KONZ'
+site <- 'BONA'
 
 # Authenticate with Google Drive and get site data
 googledrive::drive_auth(email = email)
@@ -29,22 +29,22 @@ for(focal_file in site_folder$name){
 }
 
 # Extract 9 minute data
-fileIn <- fs::path(dirTmp,paste0(site,'_9m.Rdata'))
+fileIn <- fs::path(dirTmp,"/data/",paste0(site,'/',site,'_9min.Rdata'))
 load(fileIn)
 
-fileIn <- fs::path(dirTmp,paste0(site,'_30m.Rdata'))
+fileIn <- fs::path(dirTmp,"/data/", paste0(site,'/',site,'_30min.Rdata'))
 load(fileIn)
 
-fileIn <- fs::path(dirTmp,paste0(site,'_1m.Rdata'))
+fileIn <- fs::path(dirTmp,"/data/",paste0(site,'/',site,'_1min.Rdata'))
 load(fileIn)
 
 # ------------------- Get concentration diffs for subsequent tower levels --------------
 # For each concentration, compute difference in concentation among tower levels
-# m9.list <- list(Cont=list(CH4=CH4))
-list.idx = seq_len(length(m9.list))
-m9Diff.list <- lapply(list.idx,FUN=function(idx){
-  var = m9.list[[idx]]
-  scalar = names(m9.list)[idx]
+# min9.list <- list(Cont=list(CH4=CH4))
+list.idx = seq_len(length(min9.list))
+min9Diff.list <- lapply(list.idx,FUN=function(idx){
+  var = min9.list[[idx]]
+  scalar = names(min9.list)[idx]
   var$timeBgn <- as.POSIXct(strptime(var$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
   var$timeEnd <- as.POSIXct(strptime(var$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
   var <- dplyr::arrange(var,timeBgn)
@@ -99,18 +99,18 @@ m9Diff.list <- lapply(list.idx,FUN=function(idx){
 })
 
 # Reassign names from original list
-names(m9Diff.list) = names(m9.list)
+names(min9Diff.list) = names(min9.list)
 
 # ----- Interpolate the 30-min flux data to 9 min concentration midpoints ------
 source('./R/interp_fluxes.R')
 
 # FC
-timeBgn <- as.POSIXct(strptime(m30.list$F_co2$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
-timeEnd <- as.POSIXct(strptime(m30.list$F_co2$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
-flux <- m30.list$F_co2$turb
-qf <- m30.list$F_co2$turb.qfFinl # filter
+timeBgn <- as.POSIXct(strptime(min30.list$F_co2$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+timeEnd <- as.POSIXct(strptime(min30.list$F_co2$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+flux <- min30.list$F_co2$turb
+qf <- min30.list$F_co2$turb.qfFinl # filter
 flux[qf == 1] <- NA
-m9Diff.list <- lapply(m9Diff.list,FUN=function(var){
+min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   timePred <- var$timeMid
   fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
   var$FC_interp <- fluxPred
@@ -118,12 +118,12 @@ m9Diff.list <- lapply(m9Diff.list,FUN=function(var){
 })
 
 # LE
-timeBgn <- as.POSIXct(strptime(m30.list$F_LE$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
-timeEnd <- as.POSIXct(strptime(m30.list$F_LE$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
-flux <- m30.list$F_LE$turb
-qf <- m30.list$F_LE$turb.qfFinl # filter
+timeBgn <- as.POSIXct(strptime(min30.list$F_LE$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+timeEnd <- as.POSIXct(strptime(min30.list$F_LE$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+flux <- min30.list$F_LE$turb
+qf <- min30.list$F_LE$turb.qfFinl # filter
 flux[qf == 1] <- NA
-m9Diff.list <- lapply(m9Diff.list,FUN=function(var){
+min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   timePred <- var$timeMid
   fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
   var$LE_interp <- fluxPred
@@ -131,12 +131,12 @@ m9Diff.list <- lapply(m9Diff.list,FUN=function(var){
 })
 
 # H
-timeBgn <- as.POSIXct(strptime(m30.list$F_H$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
-timeEnd <- as.POSIXct(strptime(m30.list$F_H$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
-flux <- m30.list$F_H$turb
-qf <- m30.list$F_H$turb.qfFinl # filter
+timeBgn <- as.POSIXct(strptime(min30.list$F_H$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+timeEnd <- as.POSIXct(strptime(min30.list$F_H$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+flux <- min30.list$F_H$turb
+qf <- min30.list$F_H$turb.qfFinl # filter
 flux[qf == 1] <- NA
-m9Diff.list <- lapply(m9Diff.list,FUN=function(var){
+min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   timePred <- var$timeMid
   fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
   var$H_interp <- fluxPred
@@ -144,59 +144,54 @@ m9Diff.list <- lapply(m9Diff.list,FUN=function(var){
 })
 
 # ustar & roughness length
-timeBgn <- as.POSIXct(strptime(m30.list$Ufric$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
-timeEnd <- as.POSIXct(strptime(m30.list$Ufric$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
-ustar <- m30.list$Ufric$veloFric
-roughLength <- m30.list$MomRough$distZaxsRgh
-qf <- m30.list$Ufric$qfFinl # filter
+timeBgn <- as.POSIXct(strptime(min30.list$Ufric$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+timeEnd <- as.POSIXct(strptime(min30.list$Ufric$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+ustar <- min30.list$Ufric$veloFric
+roughLength <- min30.list$MomRough$distZaxsRgh
+qf <- min30.list$Ufric$qfFinl # filter
 ustar[qf == 1] <- NA
 roughLength[qf == 1] <- NA
-m9Diff.list <- lapply(m9Diff.list,FUN=function(var){
+min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   timePred <- var$timeMid
   ustarPred <- interp_fluxes(timeBgn,timeEnd,ustar,timePred)
   roughLengthPred <- interp_fluxes(timeBgn,timeEnd,roughLength,timePred)
   var$roughLength_interp <- roughLengthPred
+  var$ustar_interp <- ustarPred
   return(var)
 })
 
-# # Aggregate the 1-min RH & pressure on the tower top to the window of paired concentrations
-# timeBgn <- as.POSIXct(strptime(m1.list$RH$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
-# timeEnd <- as.POSIXct(strptime(m1.list$RH$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
-# RH <- m1.list$RH$RHmean
-# qf <- m1.list$RH$RHFinalQF # quality flag
-# RH[qf == 1] <- NA # filter
-# 
-# # Aggregate the 1-min RH & pressure on the tower top to the window of paired concentrations
-# #timeBgn <- as.POSIXct(strptime(m1.list$RH$startDateTime,format='%Y-%m-%dT%H:%M:%OZS',tz='GMT'))
-# timeBgn <- m1.list$RH$startDateTime
-# timeEnd <- m1.list$RH$endDateTime
+# # Aggregate the 1-min met data on the tower top to 
+#the window of paired concentrations
+timeBgn <- min1.list$RH$startDateTime
+timeEnd <- min1.list$RH$endDateTime
 
-RH <- m1.list$RH$RHMean
-qf <- m1.list$RH$RHFinalQF # quality flag
+RH <- min1.list$RH$RHMean
+qf <- min1.list$RH$RHFinalQF # quality flag
 RH[qf == 1] <- NA # filter
 
-P_kPa <- m1.list$Press$mean
-qf <- m1.list$Press$qfFinl # quality flag
+P_kPa <- min1.list$Press$mean
+qf <- min1.list$Press$qfFinl # quality flag
 P_kPa[qf == 1] <- NA # filter
 
-Tair_C <- m1.list$Tair$mean
-qf <- m1.list$Tair$qfFinl # quality flag
+Tair_C <- min1.list$Tair$mean
+qf <- min1.list$Tair$qfFinl # quality flag
 Tair_C[qf == 1] <- NA # filter
 
 # REVISIT WHETHER THERE'S A BETTER WAY TO DO THIS: takes a very long time to run
 # Average 1-minute met data into the 20-minute intervals that match 
 # the concentration differences at adjacent (or top_bottom) levels
-m9Diff.list <- lapply(m9Diff.list,FUN=function(var){
-  
+min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
+
   timeAvg_A <- var$timeBgn_A #averaging start time Level A
   timeAvg_B <- var$timeEnd_B #averaging end time Level B
   timeAvg_A41 <- var$timeBgn_B #averaging start time Level A when 4_1
   timeAvg_B41 <- var$timeEnd_A #averaging start time Level B when 4_1
-  
+
   RH_avg <- P_kPa_avg <- Tair_C_avg <- vector()
   for(i in 1:length(timeAvg_A)){
     print(i)
     if(var$dLevelsAminusB[i] != "4_1"){ # times seq for all non-4_1 level diff
+    #if(min9Diff.list[["CO2"]]$dLevelsAminusB[i] != "4_1"){ # times seq for all non-4_1 level diff
       RH_avg[i] <- mean(RH[timeBgn >= timeAvg_A[i] & timeEnd <= timeAvg_B[i]], na.rm=T)
       P_kPa_avg[i] <- mean(P_kPa[timeBgn >= timeAvg_A[i] & timeEnd <= timeAvg_B[i]], na.rm=T)
       Tair_C_avg[i] <- mean(Tair_C[timeBgn >= timeAvg_A[i] & timeEnd <= timeAvg_B[i]], na.rm=T)
@@ -242,6 +237,6 @@ m9Diff.list <- lapply(m9Diff.list,FUN=function(var){
   return(var)
 })
 
-#save(m9Diff.list, "KONZ_9minfluxmet.Rdata")
+save(min9Diff.list, file ="BONA_9minfluxmet.Rdata")
 
 # Aggregate the 1-min ubar profile and tair profile at the window of paired concentations
