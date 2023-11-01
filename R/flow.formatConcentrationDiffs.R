@@ -1,7 +1,7 @@
 # Pull data from google drive
 email <- 'csturtevant@battelleecology.org'
 #email <- 'jaclyn_matthes@g.harvard.edu'
-site <- 'KONZ'
+site <- 'HARV'
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: fs, googledrive
@@ -16,7 +16,7 @@ source('./R/aggregate_averages.R')
 # -------------------------------------------------------
 
 # Authenticate with Google Drive and get site data
-googledrive::drive_auth(email = email)
+googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
 data_folder <- googledrive::drive_ls(path = drive_url)
 site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==site])
@@ -367,14 +367,13 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   
   # Convert LE (W m-2) to w'q' (FH2O, mmol m-2 s-1)
   # lambda = latent heat of vaporiz. [J/kg] - Eqn in back of Stull pg. 641
-  #var$lambda <- (2.501-(2.361*1e-3)*Tair_C_avg)/1e6 # lambda = J kg-1
-  var$lambda <- (3149000-2370*(Tair_C+273.16))*1e-6 # J g-1
-  var$FH2O_interp <- var$LE_interp*(1/var$lambda) 
+  #var$lambda <- (3149000-2370*(Tair_C+273.16))*1e-6 # J g-1
+  #var$FH2O_interp <- var$LE_interp*(1/var$lambda) 
+  var$lambda <- (2.501-0.00237*Tair_C)*1E6 # lambda = J kg-1 Eqn in back of Stull pg. 641
+  var$FH2O_interp <- var$LE_interp/var$lambda/mv*1000 # mmol m-2 s-1
   
   return(var)
 })
-
-
 
 
 
@@ -388,4 +387,4 @@ wdPrev <- getwd()
 setwd(dirTmp)
 utils::zip(zipfile=fileZip,files=paste0(site,'_aligned_conc_flux_9min.RData'))
 setwd(wdPrev)
-#googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folder$id[data_folder$name==site]) # path might need work
+googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folder$id[data_folder$name==site]) # path might need work
