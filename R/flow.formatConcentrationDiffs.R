@@ -210,7 +210,7 @@ P_kPa_1min <- data.frame(timeBgn=timeBgn,
 
 # Merge the 1-min MET data frames and clear space
 MET_1min <- base::merge(RH_1min,P_kPa_1min,all=TRUE)
-rm('RH_1min','RH','qf','P_kPa_1min','P_kPa','qf')
+rm('RH_1min','RH','qf','P_kPa_1min','P_kPa')
 
 # 3D wind (round times to minute mark)
 lvlTow <- attr.df$LvlMeasTow[1] # how many measurement levels
