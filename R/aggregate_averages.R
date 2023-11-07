@@ -64,7 +64,7 @@ aggregate_averages <- function(timeBgn,
     compAgrAll[setAgr] <- TRUE # Record which aggregation windows we have covered
     
     # Compute the aggregated averages for each window
-    for(idxAgr in 1:length(setAgr)){
+    for(idxAgr in seq_len(length(setAgr))){
       idxSetAgr <- setAgr[idxAgr]
       if(idxSetAgr %in% setRpt){
         message(paste0(Sys.time(), ': Processed ',idxSetAgr,' out of ',numOut))
