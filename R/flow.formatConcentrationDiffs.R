@@ -2,6 +2,8 @@
 email <- 'alexisrose0525@gmail.com'
 #email <- 'jaclyn_matthes@g.harvard.edu'
 site <- 'KONZ'
+# email <- 'csturtevant@battelleecology.org'
+#email <- 'jaclyn_matthes@g.harvard.edu'
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: fs, googledrive
