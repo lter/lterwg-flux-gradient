@@ -1,7 +1,7 @@
 # Pull data from google drive
-email <- 'csturtevant@battelleecology.org'
+email <- 'alexisrose0525@gmail.com'
 #email <- 'jaclyn_matthes@g.harvard.edu'
-site <- 'HARV'
+site <- 'KONZ'
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: fs, googledrive
