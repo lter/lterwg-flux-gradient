@@ -381,11 +381,11 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
 
 
 # -------- Save and zip the file to the temp directory. Upload to google drive. -------
-fileSave <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min_kbd_test.RData'))
-fileZip <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min_kbd_test.zip'))
+fileSave <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min.RData'))
+fileZip <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min.zip'))
 save(min9Diff.list,file=fileSave)
 wdPrev <- getwd()
 setwd(dirTmp)
-utils::zip(zipfile=fileZip,files=paste0(site,'_aligned_conc_flux_9min_kbd_test.RData'))
+utils::zip(zipfile=fileZip,files=paste0(site,'_aligned_conc_flux_9min.RData'))
 setwd(wdPrev)
 googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folder$id[data_folder$name==site]) # path might need work
