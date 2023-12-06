@@ -1,42 +1,14 @@
+library(dplyr)
 source(file.path("R/MO_Length.R"))
-#load in site 30min data
+source(file.path("R/eddydiffAE.R"))
+#function arguments
+#desired concentration
+cont.desired <- "CH4"
+#add code later that pulls zip files off of g drive
 sitecode <- 'KONZ'
-load(paste0("data/", sitecode,"_30m.Rdata"))
-#filter for good data
-Press <- m30.list$Press %>% 
-  filter(qfFinl == "0") %>%
-  select(timeBgn, mean) %>%
-  rename(press = mean)
-  
-Tair <- m30.list$Tair %>% 
-  filter(qfFinl == "0") %>%
-  filter(TowerPosition == "4") %>%
-  select(timeBgn, mean) %>%
-  rename(tair = mean)
-
-F_LE <- m30.list$F_LE %>% 
-  filter(turb.qfFinl == "0") %>%
-  select(timeBgn, turb) %>%
-  rename(F_LE = turb)
-F_H <- m30.list$F_H %>% 
-  filter(turb.qfFinl == "0") %>%
-  select(timeBgn, turb) %>%
-  rename(F_H = turb)
-uStar <- m30.list$Ufric %>%
-  filter(qfFinl == "0") %>%
-  select(timeBgn, veloFric) %>%
-  rename(ustar = veloFric)
-#combine data by time
-data.all <- uStar %>%
-  left_join(Press, by = c("timeBgn")) %>%
-  left_join(Tair, by = c("timeBgn")) %>%
-  left_join(F_LE, by = c("timeBgn")) %>%
-  left_join(F_H, by = c("timeBgn"))
-  
-#remove timesteps with NAs
-data.na <- na.omit(data.all)
-#calculate obukov length
-MO.vars <- MOlength(press = data.na$press, temp = data.na$tair, H = data.na$F_H, LE = data.na$F_LE, velofric = data.na$ustar)
-#grab canopy height
-MO.param <- (as.numeric(attr.df$DistZaxsTow) - as.numeric(attr.df$DistZaxsDisp))/as.numeric(MO.vars$L)
-
+#load in interpolated 9 min data
+load(file.path("data", sitecode, "KONZ_min9Diff.Rdata"))
+load(file.path("data", sitecode, "KONZ_attr.Rdata"))
+#call function to calculate eddy diffusivity using AE method
+min9EddyDiff.list <- eddydiffAE(cont.desired = cont.desired, sitecode = sitecode, min9 = min9Diff.list, attr = attr.df)
+ae.check <- min9EddyDiff.list$CH4

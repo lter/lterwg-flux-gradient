@@ -1,21 +1,21 @@
 #' Compile30min
 #'
-#' @param folder list containing monthly h5 files
 #' @param sitecode NEON site code 
+#' @param h5files list of h5 filepaths
 #'
 #' @return list of dataframes containing Tair, Press, WS3D, SWin, Swout, LWin, LWout, SoilHF, CH4, CO2, H2O gas concentrations and fluxes, MomRough, and Ufric at 30 min resolution 
 #'
 #' @author Alexis Helgeson
 #' 
-Compile30min <- function(folder, sitecode){
+Compile30min <- function(h5files, sitecode){
   #create empty list to store monthly data
   ALL.data = list()
   
   #looping over all h5 files and extracting data over timeseries (startdate:enddate)
-  for(i in 1:length(folder)){
-    hd.file <-list.files(path = file.path(folder[i]), pattern="\\.h5$", full.names = T)
+  for(i in 1:length(h5files)){
+    hd.file <- h5files[i]
     print(i)
-    month.data <- met.cont.30m(hd.file = hd.file, sitecode = sitecode, startdate = startdate, enddate = enddate)
+    month.data <- met.cont.30min(hd.file = hd.file, sitecode = sitecode, startdate = startdate, enddate = enddate)
     
     ALL.data[[i]] <- month.data
     

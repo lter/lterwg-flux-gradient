@@ -43,4 +43,5 @@ testing/
 # Ignore certain file types
 *.gz
 *.xml
+*.Rdata
 

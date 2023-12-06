@@ -10,12 +10,14 @@ SiteAttributes <- function(hd.files, sitecode){
   #all attributes grabbed are: "DistZaxsCnpy""DistZaxsDisp""DistZaxsGrndOfst""DistZaxsLvlMeasTow""DistZaxsTow""ElevRefeTow""LatTow""LonTow""LvlMeasTow""Pf.AngEnuXaxs""Pf.AngEnuYaxs""Pf.Ofst""TimeDiffUtcLt""TimeTube""TypeEco""ZoneTime""ZoneUtm"
   #we are only using "DistZaxsLvlMeasTow" (i.e. the measurement heights) in the MBR calculation
   #this fcn only uses 1st file in the list which corresponds to specific month, we are assuming all of these attributes are consistent across all months
-  attr <- data.frame(rhdf5::h5readAttributes(hd.files[1], name = paste0("/", sitecode)))
-  attr <- subset(attr, select = -c(TypeEco))
-  attr$TowerPosition <- seq(1,dim(attr)[1], 1)
+  attr.list <- rhdf5::h5readAttributes(hd.files[1], name = paste0("/", sitecode))
+  #removing TypeEco from the list becasue this returns an error from data.frame when run at GUAN this site 
+  attr.list <- attr.list[-which(names(attr.list) == "TypeEco")]
+  attr.df <- data.frame(attr.list)
+  attr.df$TowerPosition <- seq(1,dim(attr.df)[1], 1)
   #add NEON sitecide as column
-  attr$Site <- sitecode 
+  attr.df$Site <- sitecode 
   
-  return(attr)
+  return(attr.df)
   
 }
