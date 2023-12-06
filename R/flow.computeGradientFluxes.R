@@ -1,10 +1,10 @@
 # Pull data from google drive
 email <- 'alexisrose0525@gmail.com'
 #copy this browser url from the site folder on the shared G drive (located at https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3) you wish to upload your zip files to
-drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1hzWPskSodKkHiempx7HUjLesXAxku2AB")
+drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1mgqJps4HvjplsE7SXBvjAzm6n3BXC98I")
 #add userinfo for saving and uploading the file to G drive
 user <- "AH"
-sitecode <- 'KONZ'
+sitecode <- 'TOOL'
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: googledrive
@@ -17,7 +17,7 @@ source(file.path("R/eddydiffWP.R"))
 source(file.path("R/FG_AE.WP.R"))
 source(file.path("R/computeFG.AE.WP.R"))
 
-# Final note: This script takes approx 45 min to run per site. 
+# Final note: This script takes approx 10 min to run per site. 
 # -------------------------------------------------------
 # Authenticate with Google Drive and get site data
 googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.

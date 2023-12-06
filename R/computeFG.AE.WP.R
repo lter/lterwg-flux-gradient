@@ -4,6 +4,8 @@
 #'
 #' @return list of data frame containing fluxes calculate using AE and WP methods
 #' 
+#' @author Alexis Helgeson
+#' 
 computeFG.AE.WP <- function(min9.K){
   #calculate H2O fluxes
   H2O <- min9.K[[which(names(min9.K) == "H2O")]]

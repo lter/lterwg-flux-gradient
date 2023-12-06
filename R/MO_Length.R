@@ -7,7 +7,7 @@
 #'
 #' @return Vector of monin obuhkov length
 #'
-#' @author Samuel Jurado
+#' @author Samuel Jurado and Alexis Helgeson
 #' 
 
 

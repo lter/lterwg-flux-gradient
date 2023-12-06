@@ -3,6 +3,8 @@
 #' @param min9 gas concentration data frame
 #' @param gas which gas are you computing
 #' 
+#' @author Samuel Jurado and Alexis Helgeson
+#' 
 FG_AE.WP <- function(min9, gas){
   diff.conc <- as.numeric(min9$dConc)/0.0289 #umol CO2 mol-1 #divide by molar mass so units cancel
   diff.heights <- as.numeric(min9$dHeight) # m
@@ -12,6 +14,5 @@ FG_AE.WP <- function(min9, gas){
   
   min9$FG <- rho*(-k)*(diff.conc)/(diff.heights)
   
-  min9.FG.list <- list(gas = min9)
-  return(min9.FG.list)
+  return(min9)
 }

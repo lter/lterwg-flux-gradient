@@ -3,6 +3,8 @@
 #' @param sitecode NEON site code
 #' @param min9 9min interpolated data file for given site
 #' @param attr site attribute file
+#' 
+#' @author Alexis Helgeson, Samuel Jurado, Roisin Commane, and Camilo Rey-Sanchez
 #'
 #' @return list of gas concentration dataframes containing variables associated with aerodynamic eddy diffusivity calculation
 #' 
