@@ -1,8 +1,8 @@
 # Pull data from google drive
-email <- 'csturtevant@battelleecology.org'
+email <- 'jaclyn_matthes@g.harvard.edu'
 #email <- 'jaclyn_matthes@g.harvard.edu'
 #email <- 'kyle.delwiche@gmail.com'
-site <- 'CPER'
+site <- 'BONA'
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Requires packages: fs, googledrive
@@ -34,34 +34,78 @@ for(focal_file in fileDnld){
   googledrive::drive_download(file = file_id$id, 
                               path = pathDnld,
                               overwrite = T)
-# Unzip
+  # Unzip
   if(grepl(pattern='.zip',focal_file)){
     utils::unzip(pathDnld,exdir=dirTmp)
   }
-
+  
 }
 
-# Load the data (uncomment those you want to load - must align with download choices made above)
+# Load the data 
 fileIn <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min.RData'))
 load(fileIn)
-# 
-# fileIn <- fs::path(dirTmp,'data',site,paste0(site,'_9min.Rdata'))
-# load(fileIn)
-# 
-# fileIn <- fs::path(dirTmp,'data',site,paste0(site,'_30min.Rdata'))
-# load(fileIn)
-# 
-# fileIn <- fs::path(dirTmp,'data',site,paste0(site,'_1min.Rdata'))
-# load(fileIn)
-# 
-# fileIn <- fs::path(dirTmp,'data',site,paste0(site,'_WS2D2min.Rdata'))
-# load(fileIn)
-# 
-# fileIn <- fs::path(dirTmp,'data',site,paste0(site,'_attr.Rdata'))
-# load(fileIn)
 
+# Calculate modified Bowen ratio (MBR) gradient fluxes:
+# Filter for top-most tower level - use top two
+topht_1 = max(min9Diff.list[["CO2"]]$TowerPosition_A)
+topht = paste0(topht_1,"_",topht_1-1)
+CO2 = dplyr::filter(min9Diff.list[["CO2"]], dLevelsAminusB == topht)
+CH4 = dplyr::filter(min9Diff.list[["CH4"]], dLevelsAminusB == topht)
+H2O = dplyr::filter(min9Diff.list[["H2O"]], dLevelsAminusB == topht)
 
-# ------------------- Jackie makes the magic happen --------------
+# Add gas suffix to all column names to track into combined table
+colnames(CO2) <- paste0(colnames(CO2), '_CO2')
+colnames(H2O) <- paste0(colnames(H2O), '_H2O')
+colnames(CH4) <- paste0(colnames(CH4), '_CH4')
 
+# Keep match_time column for linking among gases 
+CO2 = dplyr::rename(CO2, match_time = match_time_CO2)
+H2O = dplyr::rename(H2O, match_time = match_time_H2O)
+CH4 = dplyr::rename(CH4, match_time = match_time_CH4)
 
+# Align CO2, H2O, CH4 conc diffs and fluxes by match_time
+MBRflux_align = dplyr::full_join(CO2, H2O, by = "match_time") 
+MBRflux_align = dplyr::full_join(MBRflux_align, CH4, by = "match_time") 
+MBRflux_align = dplyr::mutate(MBRflux_align, 
+                              month = lubridate::month(match_time), 
+                              date = lubridate::date(match_time),
+                              hour = lubridate::hour(match_time),
+                              year = lubridate::year(match_time))
 
+# Calculate MBR fluxes for all tracer combos
+MBRflux_align$FCO2_MBR_H2Otrace = MBRflux_align$FH2O_interp_H2O * (MBRflux_align$dConc_CO2 / MBRflux_align$dConc_H2O)
+MBRflux_align$FH2O_MBR_CO2trace = MBRflux_align$FC_interp_CO2 * (MBRflux_align$dConc_H2O / MBRflux_align$dConc_CO2)
+MBRflux_align$FCH4_MBR_CO2trace = MBRflux_align$FC_interp_CO2 * (MBRflux_align$dConc_CH4 / MBRflux_align$dConc_CO2)
+MBRflux_align$FCH4_MBR_H2Otrace = MBRflux_align$FH2O_interp_H2O * (MBRflux_align$dConc_CH4 / MBRflux_align$dConc_H2O)
+
+# -------- Save and zip the file to the temp directory. Upload to google drive. -------
+fileSave <- fs::path(dirTmp,paste0(site,'_MBRflux.RData'))
+fileZip <- fs::path(dirTmp,paste0(site,'_MBRflux.zip'))
+save(MBRflux_align,file=fileSave)
+wdPrev <- getwd()
+setwd(dirTmp)
+utils::zip(zipfile=fileZip,files=paste0(site,'_MBRflux.RData'))
+setwd(wdPrev)
+googledrive::drive_upload(media = fileZip, overwrite = T, 
+                          path = data_folder$id[data_folder$name==site]) # path might need work
+
+# # 1:1 plots with EC flux & gradient flux
+# plot_FCO2 = ggplot(filter(MBRflux_align, hour>10, hour<15)) +
+#   geom_point(aes(FC_interp.x, gradFCO2)) +
+#   geom_abline(aes(intercept=0, slope=1), color="red", lty=2) +
+#   labs(x = "EC CO2 Flux", y = "Gradient CO2 Flux", title = site) +
+#   ylim(c(-10,10)) +
+#   xlim(c(-10,10)) +
+#   theme_minimal()
+# 
+# plot_FH2O = ggplot(MBRflux_align) +
+#   geom_point(aes(FH2O_interp.x, gradFH2O)) +
+#   geom_abline(aes(intercept=0, slope=1), color="red", lty=2) +
+#   labs(x = "EC H2O Flux", y = "Gradient H2O Flux", title=site) +
+#   ylim(c(-5,20)) +
+#   xlim(c(-5,20)) +
+#   theme_minimal()
+# 
+# # pdf(paste0("../",site,".pdf"),height=4, width=8)
+# # cowplot::plot_grid(CO2, H2O)
+# # dev.off()
