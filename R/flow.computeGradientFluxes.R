@@ -1,10 +1,10 @@
 # Pull data from google drive
 email <- 'alexisrose0525@gmail.com'
 #copy this browser url from the site folder on the shared G drive (located at https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3) you wish to upload your zip files to
-drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1mgqJps4HvjplsE7SXBvjAzm6n3BXC98I")
+drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/179tnYqzdSl4IpT9o4G9eaWYv6I3KQ0Qd")
 #add userinfo for saving and uploading the file to G drive
 user <- "AH"
-sitecode <- 'TOOL'
+sitecode <- 'NIWO'
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: googledrive
@@ -44,7 +44,8 @@ for(focal_file in site_folder$name){
 }
 # Load 9 min interpolated data and attribute info
 #problem loading in .Rdata objects currently being saved to 2 different directories?
-fileIn <- fs::path(dirTmp,paste0(sitecode,'_aligned_conc_flux_9min.Rdata'))
+#for KONZ files are unzipped in the same location
+fileIn <- fs::path(dirTmp, paste0(sitecode,'_aligned_conc_flux_9min.Rdata'))
 load(fileIn)
 fileIn <- fs::path(dirTmp,'data',sitecode,paste0(sitecode,'_attr.Rdata'))
 load(fileIn)
@@ -72,3 +73,4 @@ zip(zipfile = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys
 #NOTE: you will be asked to re authenticate if your OAuth token is stale, select your already authenticated email from the list
 googledrive::drive_upload(media = file.path("data", sitecode, paste0(sitecode,"_AE_", user, "_", Sys.Date(),".zip")), overwrite = T, path = drive_url)
 googledrive::drive_upload(media = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".zip")), overwrite = T, path = drive_url)
+                          
