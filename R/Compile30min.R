@@ -15,7 +15,7 @@ Compile30min <- function(h5files, sitecode){
   for(i in 1:length(h5files)){
     hd.file <- h5files[i]
     print(i)
-    month.data <- met.cont.30min(hd.file = hd.file, sitecode = sitecode, startdate = startdate, enddate = enddate)
+    month.data <- met.cont.30min(hd.file = hd.file, sitecode = sitecode)
     
     ALL.data[[i]] <- month.data
     
@@ -35,7 +35,7 @@ Compile30min <- function(h5files, sitecode){
   CH4.all <- data.frame()
   CO2.all <- data.frame()
   H2O.all <- data.frame()
-  MomRough.all <- data.frame()
+  FluxFoot.all <- data.frame()
   Ufric.all <- data.frame()
   H2O.850.all <- data.frame()
   CO2.850.all <- data.frame()
@@ -79,8 +79,8 @@ Compile30min <- function(h5files, sitecode){
     grabH2O <- grabMonth[[which(names(grabMonth) == "H2O")]]
     H2O.all <- bind_rows(H2O.all, grabH2O)
     #grab roughness length for all months and combine into one df
-    grabMomRough <- grabMonth[[which(names(grabMonth) == "MomRough")]]
-    MomRough.all <- bind_rows(MomRough.all, grabMomRough)
+    grabFluxFoot <- grabMonth[[which(names(grabMonth) == "FluxFoot")]]
+    FluxFoot.all <- bind_rows(FluxFoot.all, grabFluxFoot)
     #grab friction velocity for all months and combine into one df
     grabUfric <- grabMonth[[which(names(grabMonth) == "Ufric")]]
     Ufric.all <- bind_rows(Ufric.all, grabUfric)
@@ -105,7 +105,7 @@ Compile30min <- function(h5files, sitecode){
   
   
   #FOR 30M MET AND GAS
-  DATA <- list(SWin = SWin.all, SWout = SWout.all, LWin = LWin.all, LWout = LWout.all, Tair = Tair.all, Press = Press.all, WS3D = WS3D.all, SoilHF = SoilHF.all, CH4 = CH4.all, CO2 = CO2.all, H2O = H2O.all, MomRough = MomRough.all, Ufric = Ufric.all, H2O.850 = H2O.850.all, CO2.850 = CO2.850.all, F_co2 = F_co2.all, F_H = F_H.all, F_LE = F_LE.all)
+  DATA <- list(SWin = SWin.all, SWout = SWout.all, LWin = LWin.all, LWout = LWout.all, Tair = Tair.all, Press = Press.all, WS3D = WS3D.all, SoilHF = SoilHF.all, CH4 = CH4.all, CO2 = CO2.all, H2O = H2O.all, FluxFoot = FluxFoot.all, Ufric = Ufric.all, H2O.850 = H2O.850.all, CO2.850 = CO2.850.all, F_co2 = F_co2.all, F_H = F_H.all, F_LE = F_LE.all)
   
   return(DATA)
   

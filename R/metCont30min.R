@@ -236,11 +236,11 @@ met.cont.30min <- function(hd.file, sitecode, startdate, enddate){
   SoniWind.qfqm  <- h5read(hd.file, paste("/", sitecode, "/dp01/qfqm/soni/000_0",heights[ length(heights)], "0_30m/veloXaxsYaxsErth", sep=""))
   Sonic.all <- left_join(SoniWind, SoniWind.qfqm, by = c("timeEnd", "timeBgn")) %>%
     mutate(TowerPosition = paste0(heights[length(heights)]))
-  #grab NEON momentum roughness from footprint stats table
+  #grab all flux footprint variables
   #which of these is momentum roughness? Assuming veloZaxsHorSd for now based on range and mean 
-  MomRough <- h5read(hd.file, paste("/", sitecode, "/dp04/data/foot/stat", sep=""))
-  MomRough.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp04/qfqm/foot/turb", sep=""))
-  MomRough.all <- left_join(MomRough, MomRough.qfqm, by = c("timeEnd", "timeBgn"))
+  fluxFoot <- h5read(hd.file, paste("/", sitecode, "/dp04/data/foot/stat", sep=""))
+  fluxFoot.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp04/qfqm/foot/turb", sep=""))
+  fluxFoot.all <- left_join(fluxFoot, fluxFoot.qfqm, by = c("timeEnd", "timeBgn"))
   #NEON only provides general qfqm for footprint not variable specific
   #grab NEON top of tower incoming solar radiation to be used in uStar filtering
   heights.solar <- unique(test.df[which(test.df$group == paste( "/", sitecode,"/dp01/data/radiNet", sep="")),]$name)
@@ -395,7 +395,7 @@ met.cont.30min <- function(hd.file, sitecode, startdate, enddate){
  
   
   
-var = list(TAir = df_temp, Press = P.all, WS3D = Sonic.all, SWin = SWin.all, SWout = SWout.all, LWin = LWin.all, LWout = LWout.all, SoilHF = df_soil, MomRough = MomRough.all, Ufric = Ufric.all, CH4 = CH4.clean, CO2 = CO2.clean, H2O = H2O.clean, H2O.850 = H2O.850.clean, CO2.850 = CO2.850.clean, F_co2 = F_co2.all, F_H = F_H.all, F_LE = F_LE.all)
+var = list(TAir = df_temp, Press = P.all, WS3D = Sonic.all, SWin = SWin.all, SWout = SWout.all, LWin = LWin.all, LWout = LWout.all, SoilHF = df_soil, FluxFoot = fluxFoot.all, Ufric = Ufric.all, CH4 = CH4.clean, CO2 = CO2.clean, H2O = H2O.clean, H2O.850 = H2O.850.clean, CO2.850 = CO2.850.clean, F_co2 = F_co2.all, F_H = F_H.all, F_LE = F_LE.all)
   
   return(var)
 }
