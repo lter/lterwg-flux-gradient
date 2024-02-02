@@ -15,21 +15,21 @@ library(R.utils)
 library(gtools)
 library(googledrive)
 #load in data compiling functions
-source(file.path("R/SiteDF.R"))
-source(file.path("R/SiteAttributes.R"))
-source(file.path("R/cont9min.R"))
-source(file.path("R/metCont30min.R"))
-source(file.path("R/met1min.R"))
-source(file.path("R/Compile1min.R"))
-source(file.path("R/Compile30min.R"))
-source(file.path("R/Compile9min.R"))
+source(file.path("SiteDF.R"))
+source(file.path("SiteAttributes.R"))
+source(file.path("cont9min.R"))
+source(file.path("metCont30min.R"))
+source(file.path("met1min.R"))
+source(file.path("Compile1min.R"))
+source(file.path("Compile30min.R"))
+#source(file.path("Compile9min.R"))
 #set NEON sitecode
 #this sitecode is used to grab existing files and create new ones MAKE SURE IT MATCHES
 sitecode <- 'TOOL'
 #copy this browser url from the site folder on the shared G drive (located at https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3) you wish to upload your zip files to
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1mgqJps4HvjplsE7SXBvjAzm6n3BXC98I")
 #grab h5 files to be passed to SiteAttributes and SiteDF
-h5files <- list.files(path = file.path("data",sitecode), pattern = ".h5", full.names = T)
+h5files <- list.files(path = paste0("data/", sitecode), pattern = ".h5", full.names = T)
 #grab attribute data
 attr.df <- SiteAttributes(hd.files = h5files, sitecode = sitecode)
 #grab gas concentration and met data at desired frequency (1min, 9min, 30min)
@@ -42,10 +42,14 @@ RH1min <- DATA$RH1min
 WS2D2min <- DATA$WS2D2min
 RH30min <- DATA$RH30min
 WS2D30min <- DATA$WS2D30min
+PAR1min <- DATA$PAR1min
+PAR30min <- DATA$PAR30min
 #match previously dowlonaded met to correct list
 min1.list$RH <- RH1min
+min1.list$PAR <- PAR1min
 min30.list$RH <- RH30min
 min30.list$WS2D <- WS2D30min
+min30.list$PAR <- PAR30min
 #save as R.data objects
 save(min1.list, file = paste0("data/", sitecode, "/", sitecode,"_1min.Rdata"))
 save(min9.list, file = paste0("data/", sitecode, "/", sitecode,"_9min.Rdata"))

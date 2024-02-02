@@ -42,9 +42,29 @@ WS2D2min <- loadByProduct("DP1.00001.001", site=sitecode,
 WS2D2min <- WS2D2min$twoDWSD_2min %>%
   mutate(TowerPosition = as.numeric(verticalPosition)/10) %>%
   select(TowerPosition, startDateTime, endDateTime, windSpeedMean, windSpeedFinalQF)
+#grab PAR at 1 min resolution
+PAR1min <- loadByProduct("DP1.00024.001", site=sitecode,
+                        timeIndex=1, package="basic",
+                        startdate=startdate, enddate=enddate,
+                        check.size=F, include.provisional = T)
+PAR1min <- PAR1min$PARPAR_1min %>%
+  mutate(TowerPosition = as.numeric(verticalPosition)/10) %>%
+  select(TowerPosition, startDateTime, endDateTime, PARMean, PARFinalQF)
+#grab PAR at 30 min resolution
+PAR30min <- loadByProduct("DP1.00024.001", site=sitecode,
+                         timeIndex=30, package="basic",
+                         startdate=startdate, enddate=enddate,
+                         check.size=F, include.provisional = T)
+PAR30min <- PAR30min$PARPAR_30min %>%
+  mutate(TowerPosition = as.numeric(verticalPosition)/10) %>%
+  select(TowerPosition, startDateTime, endDateTime, PARMean, PARFinalQF)
+
+# load(paste0("data/", sitecode, "/", sitecode,"_NonEddyMetVars.Rdata"))
+# DATA$PAR1min = PAR1min
+# DATA$PAR30min = PAR30min
 #save as .Rdata object to be called again in flow.siteDF
-DATA <- list(RH30min = RH30min, RH1min = RH1min, WS2D2min = WS2D2min, WS2D30min = WS2D30min)
-#create necessary sub-folder(s)
+DATA <- list(RH30min = RH30min, RH1min = RH1min, WS2D2min = WS2D2min, WS2D30min = WS2D30min, PAR1min = PAR1min, PAR30min = PAR30min)
+# #create necessary sub-folder(s)
 dir.create(path = file.path("data"), showWarnings = F)
 dir.create(path = file.path("data", sitecode), showWarnings = F)
 save(DATA, file = paste0("data/", sitecode, "/", sitecode,"_NonEddyMetVars.Rdata"))
