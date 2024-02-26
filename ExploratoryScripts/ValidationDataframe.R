@@ -32,29 +32,28 @@ for(focal_file in site_folder$name){
 #problem loading in .Rdata objects currently being saved to 2 different directories?
 fileIn <- fs::path(dirTmp, paste0(sitecode,'_MBRflux.Rdata'))
 load(fileIn)
-fileIn <- fs::path(dirTmp,'data',sitecode,paste0(sitecode,'_AE_AH_2023-12-05.Rdata'))
+fileIn <- fs::path(dirTmp,'data',sitecode,paste0(sitecode,'_AE_AH_2024-02-23.Rdata'))
 load(fileIn)
-fileIn <- fs::path(dirTmp,'data',sitecode,paste0(sitecode,'_WP_AH_2023-12-05.Rdata'))
+fileIn <- fs::path(dirTmp,'data',sitecode,paste0(sitecode,'_WP_AH_2024-02-23.Rdata'))
 load(fileIn)
-#add gas identifier column to AE and WP data frames
+#add gas identifier column and site identifier column to AE and WP data frames
 min9.FG.AE.list$H2O$gas <- "H2O"
+min9.FG.AE.list$H2O$site <- paste0(sitecode)
 min9.FG.AE.list$CO2$gas <- "CO2"
+min9.FG.AE.list$CO2$site <- paste0(sitecode)
 min9.FG.AE.list$CH4$gas <- "CH4"
+min9.FG.AE.list$CH4$site <- paste0(sitecode)
 
 min9.FG.WP.list$H2O$gas <- "H2O"
+min9.FG.WP.list$H2O$site <- paste0(sitecode)
 min9.FG.WP.list$CO2$gas <- "CO2"
+min9.FG.WP.list$CO2$site <- paste0(sitecode)
 min9.FG.WP.list$CH4$gas <- "CH4"
+min9.FG.WP.list$CH4$site <- paste0(sitecode)
 #bind list into df
 AE.df <- bind_rows(min9.FG.AE.list)
 WP.df <- bind_rows(min9.FG.WP.list)
 #rename dataframes to be site specific so can combine into one list object that will then become large validation dataframe
-KONZ_MBR <- MBRflux_align
-rm(MBRflux_align)
-KONZ_AE <- AE.df
-rm(min9.FG.AE.list, AE.df)
-KONZ_WP <- WP.df
-rm(min9.FG.WP.list, WP.df)
-
 BONA_MBR <- MBRflux_align
 rm(MBRflux_align)
 BONA_AE <- AE.df
@@ -88,6 +87,13 @@ rm(MBRflux_align)
 JORN_AE <- AE.df
 rm(min9.FG.AE.list, AE.df)
 JORN_WP <- WP.df
+rm(min9.FG.WP.list, WP.df)
+
+KONZ_MBR <- MBRflux_align
+rm(MBRflux_align)
+KONZ_AE <- AE.df
+rm(min9.FG.AE.list, AE.df)
+KONZ_WP <- WP.df
 rm(min9.FG.WP.list, WP.df)
 
 NIWO_MBR <- MBRflux_align
