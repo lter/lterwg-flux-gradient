@@ -14,7 +14,7 @@ eddydiffAE <- function(sitecode, min9, attr){
   #remove timesteps with NAs
   H2O.na <- na.omit(min9[[which(names(min9) == "H2O")]])
   #calculate obukov length
-  MO.vars <- MOlength(press = H2O.na$P_kPa, temp = H2O.na$Tair1, H = H2O.na$H_interp, LE = H2O.na$LE_interp, velofric = H2O.na$ustar_interp)
+  MO.vars <- MOlength(press = H2O.na$P_kPa, temp = H2O.na$Tair1, H = H2O.na$H_turb_interp, LE = H2O.na$LE_turb_interp, velofric = H2O.na$ustar_interp)
   #add OB params to data frame for eddy diffusivty calculation
   H2O <- cbind(H2O.na, MO.vars$rho, MO.vars$vpotflux, MO.vars$L)
   #rename columns
@@ -22,17 +22,18 @@ eddydiffAE <- function(sitecode, min9, attr){
   names(H2O)[old.names[1]] <- "rho"
   names(H2O)[old.names[2]] <- "vpotflux"
   names(H2O)[old.names[3]] <- "L"
-  #grab only tower heights and positions for matching
-  tower.heights <- attr %>% select(DistZaxsLvlMeasTow, TowerPosition)
-  #adding place holder identifier to create tower height columns
-  H2O$TowerHeight_A <- "hold"
-  H2O$TowerHeight_B <- "hold"
-  for(i in 1:dim(attr)[1]){
-    #loop over position A
-    H2O[which(H2O$TowerPosition_A == i),"TowerHeight_A"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
-    #loop over position B
-    H2O[which(H2O$TowerPosition_B == i),"TowerHeight_B"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
-  }
+  #DEPRECIATED CODE: TOWER HEIGHT NOW ADDED IN flow.formatConcentrationDiffs.R
+  # #grab only tower heights and positions for matching
+  # tower.heights <- attr %>% select(DistZaxsLvlMeasTow, TowerPosition)
+  # #adding place holder identifier to create tower height columns
+  # H2O$TowerHeight_A <- "hold"
+  # H2O$TowerHeight_B <- "hold"
+  # for(i in 1:dim(attr)[1]){
+  #   #loop over position A
+  #   H2O[which(H2O$TowerPosition_A == i),"TowerHeight_A"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
+  #   #loop over position B
+  #   H2O[which(H2O$TowerPosition_B == i),"TowerHeight_B"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
+  # }
   #grab canopy height
   #want to calculate stability param with respect to tower positions A & B
   #want to use heights where z > d
@@ -116,7 +117,7 @@ eddydiffAE <- function(sitecode, min9, attr){
   #remove timesteps with NAs
   CO2.na <- na.omit(min9[[which(names(min9) == "CO2")]])
   #calculate obukov length
-  MO.vars <- MOlength(press = CO2.na$P_kPa, temp = CO2.na$Tair1, H = CO2.na$H_interp, LE = CO2.na$LE_interp, velofric = CO2.na$ustar_interp)
+  MO.vars <- MOlength(press = CO2.na$P_kPa, temp = CO2.na$Tair1, H = CO2.na$H_turb_interp, LE = CO2.na$LE_turb_interp, velofric = CO2.na$ustar_interp)
   #add OB params to data frame for eddy diffusivty calculation
   CO2 <- cbind(CO2.na, MO.vars$rho, MO.vars$vpotflux, MO.vars$L)
   #rename columns
@@ -124,15 +125,16 @@ eddydiffAE <- function(sitecode, min9, attr){
   names(CO2)[old.names[1]] <- "rho"
   names(CO2)[old.names[2]] <- "vpotflux"
   names(CO2)[old.names[3]] <- "L"
-  #adding place holder identifier to create tower height columns
-  CO2$TowerHeight_A <- "hold"
-  CO2$TowerHeight_B <- "hold"
-  for(i in 1:dim(attr)[1]){
-    #loop over position A
-    CO2[which(CO2$TowerPosition_A == i),"TowerHeight_A"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
-    #loop over position B
-    CO2[which(CO2$TowerPosition_B == i),"TowerHeight_B"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
-  }
+  #DEPRECIATED CODE: TOWER HEIGHT NOW ADDED IN flow.formatConcentrationDiffs.R
+  # #adding place holder identifier to create tower height columns
+  # CO2$TowerHeight_A <- "hold"
+  # CO2$TowerHeight_B <- "hold"
+  # for(i in 1:dim(attr)[1]){
+  #   #loop over position A
+  #   CO2[which(CO2$TowerPosition_A == i),"TowerHeight_A"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
+  #   #loop over position B
+  #   CO2[which(CO2$TowerPosition_B == i),"TowerHeight_B"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
+  # }
   #want to calculate stability param with respect to tower positions A & B
   #want to use heights where z > d
   #want to add flag when z < d
@@ -181,7 +183,7 @@ eddydiffAE <- function(sitecode, min9, attr){
   #remove timesteps with NAs
   CH4.na <- na.omit(min9[[which(names(min9) == "CH4")]])
   #calculate obukov length
-  MO.vars <- MOlength(press = CH4.na$P_kPa, temp = CH4.na$Tair1, H = CH4.na$H_interp, LE = CH4.na$LE_interp, velofric = CH4.na$ustar_interp)
+  MO.vars <- MOlength(press = CH4.na$P_kPa, temp = CH4.na$Tair1, H = CH4.na$H_turb_interp, LE = CH4.na$LE_turb_interp, velofric = CH4.na$ustar_interp)
   #add OB params to data frame for eddy diffusivty calculation
   CH4 <- cbind(CH4.na, MO.vars$rho, MO.vars$vpotflux, MO.vars$L)
   #rename columns
@@ -189,15 +191,16 @@ eddydiffAE <- function(sitecode, min9, attr){
   names(CH4)[old.names[1]] <- "rho"
   names(CH4)[old.names[2]] <- "vpotflux"
   names(CH4)[old.names[3]] <- "L"
-  #adding place holder identifier to create tower height columns
-  CH4$TowerHeight_A <- "hold"
-  CH4$TowerHeight_B <- "hold"
-  for(i in 1:dim(attr)[1]){
-    #loop over position A
-    CH4[which(CH4$TowerPosition_A == i),"TowerHeight_A"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
-    #loop over position B
-    CH4[which(CH4$TowerPosition_B == i),"TowerHeight_B"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
-  }
+  #DEPRECIATED CODE: TOWER HEIGHT NOW ADDED IN flow.formatConcentrationDiffs.R
+  # #adding place holder identifier to create tower height columns
+  # CH4$TowerHeight_A <- "hold"
+  # CH4$TowerHeight_B <- "hold"
+  # for(i in 1:dim(attr)[1]){
+  #   #loop over position A
+  #   CH4[which(CH4$TowerPosition_A == i),"TowerHeight_A"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
+  #   #loop over position B
+  #   CH4[which(CH4$TowerPosition_B == i),"TowerHeight_B"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
+  # }
   #want to calculate stability param with respect to tower positions A & B
   #want to use heights where z > d
   #want to add flag when z < d
