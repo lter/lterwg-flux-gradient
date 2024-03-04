@@ -4,7 +4,7 @@ email <- 'alexisrose0525@gmail.com'
 #this url should point to the NEONSITES_Validation folder
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/14Ga9sLRMlQVvorZdHBiYxCbUybiGwPNp")
 #the R.data/zipfiles are labeled based on the method used to calculate the fluxes (i.e. AE, WP, MBR)
-method <- 'WP'
+method <- 'AE'
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: googledrive
@@ -53,7 +53,7 @@ for(focal_file in validation_folder$name){
 fileIn <- fs::path(dirTmp, paste0("data/Validation/SITES_", method, "_val.Rdata"))
 load(fileIn)
 #if data is already downloaded and saved
-load(file.path("data", "Validation", paste0("SITES_", method, "_val.Rdata")))
+#load(file.path("data", "Validation", paste0("SITES_", method, "_val.Rdata")))
 
 #bind all site dataframes together
 if(method == "AE"){
