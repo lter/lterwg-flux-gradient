@@ -1,16 +1,16 @@
-#' plot.histogram
+#' plot.all.sites.bar
 #'
 #' @param all.sites dataframe of all sites
-#' @param desired.var which variable to feature in the histogram
+#' @param desired.var which variable to feature in the bar plot
 #' @param x.lab x axis label
 #'
-#' @return histogram plot of variable across all sites
+#' @return bar plot of variable across all sites
 #' 
 #'
 #' @author Alexis Helgeson
-plot.histogram <- function(all.sites, desired.var, x.lab){
-  #plot histogram of desired variable
-  ggplot(all.sites, aes(x = all.sites[,paste0(desired.var)])) +
+plot.all.sites.bar <- function(all.sites, desired.var, x.lab){
+  #bar plot of desired variable
+  ggplot(all.sites, aes(x = !! sym(desired.var))) +
     geom_bar() +
     facet_wrap(~ site, scales = "free")+
     xlab(paste0(x.lab))+

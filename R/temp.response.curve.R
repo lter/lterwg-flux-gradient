@@ -4,18 +4,19 @@
 #' @param TA.name name of Ait Temperature column
 #' @param rho initial value of amplitude parameter
 #' @param psi initial value of growth/decay parameter
+#' @param flux.name name of flux column to use as CO2 flux
 #'
 #' @return model object with estimated temperature response curve parameters from nighttime CO2 flux and Air Temperature
 #' 
 #'
 #' @author Alexis Helgeson
-temp.response.curve <- function(site, TA.name, rho, psi){
+temp.response.curve <- function(site, TA.name, rho, psi, flux.name){
   #define model
   frmu   <- R ~ rho*exp(psi*TA)
   #set initial parameter values
   stprm  <- c(rho = rho, psi = psi)
   #select for only model predictor and response data
-  df_accurate <- data.frame(TA=site[,paste0(TA.name)], R = site$FG)
+  df_accurate <- data.frame(TA=site[,paste0(TA.name)], R = site[,paste0(flux.name)])
   #fit model
   light.response.model <- gsl_nls(fn=frmu, data=df_accurate, start=stprm)
   #print(light.response.model)
