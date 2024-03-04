@@ -56,20 +56,20 @@ load(fileIn)
 
 #call function to calculate eddy diffusivity using AE method
 #add in calculation for all gas concentrations
-min9.K.AE.list <- eddydiffAE(sitecode = sitecode, min9 = min9Diff.list, attr = attr.df)
+min9.K.AE.list <- eddydiffAE(sitecode = sitecode, min9 = min9Diff.list)
 #call function to calculate eddy diffusivity using WP method
-min9.K.WP.list <- eddydiffWP(sitecode = sitecode, min9 = min9Diff.list, attr = attr.df)
+#min9.K.WP.list <- eddydiffWP(sitecode = sitecode, min9 = min9Diff.list)
 #call function to compute fluxes
-min9.FG.AE.list <- computeFG.AE.WP(min9.K = min9.K.AE.list)
-min9.FG.WP.list <- computeFG.AE.WP(min9.K = min9.K.WP.list)
+min9.FG.AE.list <- computeFG.AE.WP(min9.K = min9.K.AE.list, eddy.diff.name = "EddyDiff_phim")
+#min9.FG.WP.list <- computeFG.AE.WP(min9.K = min9.K.WP.list)
 #save as R.data objects
-save(min9.FG.AE.list, file = file.path("data", sitecode, paste0(sitecode,"_AE_", user, "_", Sys.Date(),".Rdata")))
-save(min9.FG.WP.list, file = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".Rdata")))
+save(min9.FG.AE.list, file = file.path("data", sitecode, paste0(sitecode,"_AE_phim_", user, "_", Sys.Date(),".Rdata")))
+#save(min9.FG.WP.list, file = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".Rdata")))
 #zip R.data objects
-zip(zipfile = file.path("data", sitecode, paste0(sitecode,"_AE_", user, "_", Sys.Date(),".zip")), files = file.path("data", sitecode, paste0(sitecode,"_AE_", user, "_", Sys.Date(),".Rdata")))
-zip(zipfile = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".zip")), files = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".Rdata")))
+zip(zipfile = file.path("data", sitecode, paste0(sitecode,"_AE_phim_", user, "_", Sys.Date(),".zip")), files = file.path("data", sitecode, paste0(sitecode,"_AE_phim_", user, "_", Sys.Date(),".Rdata")))
+#zip(zipfile = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".zip")), files = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".Rdata")))
 #upload to Google Drive
 #IMPORTANT REMINDER if you have not gone through the process of valdiating your email with googledrive in R this code will not work please refer to https://nceas.github.io/scicomp.github.io/tutorials.html#using-the-googledrive-r-package
 #NOTE: you will be asked to re authenticate if your OAuth token is stale, select your already authenticated email from the list
-googledrive::drive_upload(media = file.path("data", sitecode, paste0(sitecode,"_AE_", user, "_", Sys.Date(),".zip")), overwrite = T, path = drive_url)
-googledrive::drive_upload(media = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".zip")), overwrite = T, path = drive_url)
+googledrive::drive_upload(media = file.path("data", sitecode, paste0(sitecode,"_AE_phim_", user, "_", Sys.Date(),".zip")), overwrite = T, path = drive_url)
+#googledrive::drive_upload(media = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".zip")), overwrite = T, path = drive_url)
