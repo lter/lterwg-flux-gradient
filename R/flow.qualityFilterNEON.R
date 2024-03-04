@@ -6,7 +6,7 @@ drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/14Ga9sLR
 #add userinfo for saving and uploading the file to G drive
 user <- "AH"
 #the R.data/zipfiles are labeled based on the method used to calculate the fluxes (i.e. AE, WP, MBR)
-method <- 'AE'
+method <- 'WP'
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: googledrive
@@ -22,6 +22,7 @@ source(file.path("R/CalculateRMSE.R"))
 source(file.path("R/spike.detection.R"))
 #source(file.path("R/ustar.threshold.R"))
 source(file.path("R/run.quality.R"))
+source(file.path("R/add.hour.column.R"))
 
 #Pull data from gdrive
 # Authenticate with Google Drive and get site data
@@ -52,7 +53,7 @@ for(focal_file in validation_folder$name){
 fileIn <- fs::path(dirTmp, paste0("data/Validation/SITES_", method, ".Rdata"))
 load(fileIn)
 #if data is already downloaded and saved
-#load(file.path("data", "Validation", paste0("SITES_", method, ".Rdata")))
+load(file.path("data", "Validation", paste0("SITES_", method, ".Rdata")))
 
 #run quality flag functions and calculate residuals, note we cannot calculate residuals for CH4 yet
 #save list of df as .Rdata object, zip, and upload to google drive
@@ -76,3 +77,5 @@ if(method == "MBR"){
   zip(zipfile = paste0("data/Validation/SITES_MBR.zip"), files = paste0("data/Validation/SITES_MBR.Rdata"))
   googledrive::drive_upload(media = paste0("data/Validation/SITES_MBR.zip"), overwrite = T, path = drive_url)
 }
+#TO DO ADD PROPER TZ CORRECTION FOR GUAN TO add.hour.colum.R
+

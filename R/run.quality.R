@@ -42,8 +42,11 @@ run.quality <- function(list.sites, method){
     }
     #Add in month column for grouping/visualizations
     site.residuals$month <- month(site.residuals$timeBgn_A)
+    #Add in hour column for grouping/visualizations: the timezone will be local for that site and corrected for daylight savings
+    #TO DO: ADD PROPER TZ CORRECTION CODE FOR GUAN
+    site.hour <- add.hour.column(site = site.residuals, site.name = unique(site$site))
     
-    list.sites.quality[[s]] <- site.residuals
+    list.sites.quality[[s]] <- site.hour
   }
   #only includes top two tower levels
   names(list.sites.quality) <- names(list.sites)
