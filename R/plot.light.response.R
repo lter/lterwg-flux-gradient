@@ -9,6 +9,8 @@
 #'
 #' @author Alexis Helgeson
 plot.light.response <- function(model, site, flux.name){
+  #remove NAs from dataframe for plotting
+  site <- site[complete.cases(site[,c("PAR", paste0(flux.name))]),]
   #grab model coefficients
   model.coeff <- coefficients(model)
   alpha <- model.coeff[["alpha"]]

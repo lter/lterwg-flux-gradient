@@ -10,6 +10,8 @@
 #'
 #' @author Alexis Helgeson
 plot.temp.response <- function(model, site, TA.name, flux.name){
+  #remove NAs from dataframe for plotting
+  site <- site[complete.cases(site[,c(paste0(TA.name), paste0(flux.name))]),]
   #grab model coefficients
   model.coeff <- coefficients(model)
   rho <- model.coeff[["rho"]]

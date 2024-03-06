@@ -10,6 +10,8 @@
 #'
 #' @author Alexis Helgeson
 plot.all.sites.1to1 <- function(all.sites, desired.var, x.lab, y.lab){
+  #add na filter for desired.var
+  all.sites <- all.sites[complete.cases(all.sites[,desired.var]),]
   #set scale for each facet so x and y are even: NOTE THESE LIST ENTRIES NEED TO BE IN THE SAME ORDER AS THE FACETTED PLOTS
   x.limits <- list(scale_x_continuous(limits = range(all.sites[which(all.sites$site=="BONA"), "FG"])), scale_x_continuous(limits = range(all.sites[which(all.sites$site=="CPER"), "FG"])), scale_x_continuous(limits = range(all.sites[which(all.sites$site=="GUAN"), "FG"])), scale_x_continuous(limits = range(all.sites[which(all.sites$site=="HARV"), "FG"])), scale_x_continuous(limits = range(all.sites[which(all.sites$site=="JORN"), "FG"])), scale_x_continuous(limits = range(all.sites[which(all.sites$site=="KONZ"), "FG"])), scale_x_continuous(limits = range(all.sites[which(all.sites$site=="NIWO"), "FG"])), scale_x_continuous(limits = range(all.sites[which(all.sites$site=="TOOL"), "FG"])))
   y.limits <- list(scale_y_continuous(limits = range(all.sites[which(all.sites$site=="BONA"), "FG"])), scale_y_continuous(limits = range(all.sites[which(all.sites$site=="CPER"), "FG"])), scale_y_continuous(limits = range(all.sites[which(all.sites$site=="GUAN"), "FG"])), scale_y_continuous(limits = range(all.sites[which(all.sites$site=="HARV"), "FG"])), scale_y_continuous(limits = range(all.sites[which(all.sites$site=="JORN"), "FG"])), scale_y_continuous(limits = range(all.sites[which(all.sites$site=="KONZ"), "FG"])), scale_y_continuous(limits = range(all.sites[which(all.sites$site=="NIWO"), "FG"])), scale_y_continuous(limits = range(all.sites[which(all.sites$site=="TOOL"), "FG"])))
