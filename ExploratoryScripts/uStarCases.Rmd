@@ -1,0 +1,195 @@
+---
+output: 
+  rmarkdown::html_vignette:
+    keep_md: true
+vignette: >
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteIndexEntry{different treatments of uStar threshold}
+  %\usepackage[UTF-8]{inputenc}
+
+---
+
+```{r, include = FALSE}
+# do not execute on CRAN: 
+# https://stackoverflow.com/questions/28961431/computationally-heavy-r-vignettes
+is_check <- ("CheckExEnv" %in% search()) || any(c("_R_CHECK_TIMINGS_",
+             "_R_CHECK_LICENSE_") %in% names(Sys.getenv()))
+knitr::opts_chunk$set(eval = !is_check)
+```
+
+```{r setup, include = FALSE}
+library(knitr)
+#rmarkdown::render("vignettes/uStarCases.Rmd","md_document")
+opts_knit$set(root.dir = '..')
+opts_chunk$set(
+    #, fig.align = "center"
+    #, fig.width = 3.27, fig.height = 2.5, dev.args = list(pointsize = 10)
+    #,cache = TRUE
+    #, fig.width = 4.3, fig.height = 3.2, dev.args = list(pointsize = 10)
+    #, fig.width = 6.3, fig.height = 6.2, dev.args = list(pointsize = 10)
+    # works with html but causes problems with latex
+    #,out.extra = 'style = "display:block; margin: auto"' 
+    )
+knit_hooks$set(spar = function(before, options, envir) {
+    if (before) {
+        par(las = 1 )                   #also y axis labels horizontal
+        par(mar = c(2.0,3.3,0,0) + 0.3 )  #margins
+        par(tck = 0.02 )                          #axe-tick length inside plots             
+        par(mgp = c(1.1,0.2,0) )  #positioning of axis title, axis labels, axis
+     }
+})
+```
+
+
+```{r, include = FALSE}
+#themeTw <- theme_bw(base_size = 10) + theme(axis.title = element_text(size = 9))
+```
+
+# Different treatments of uStar threshold
+
+The recommended way of dealing with the uncertain uStar threshold for filtering
+the half-hourly data, is to repeat all the processing steps with several 
+bootstrapped estimates of the threshold as in `vignette('useCase')`.
+
+First, some setup.
+
+```{r init, message = FALSE, output = 'hide'}
+#+++ load libraries used in this vignette
+library(REddyProc)
+library(dplyr)
+#+++ define directory for outputs
+outDir <- tempdir()  # CRAN policy dictates to write only to this dir in examples
+#outDir <- "out"     # to write to subdirectory of current users dir
+#+++ Add time stamp in POSIX time format to example data 
+# and filter long runs of equal NEE values
+EddyDataWithPosix <- fConvertTimeToPosix(
+  filterLongRuns(Example_DETha98, "NEE")
+  , 'YDH', Year = 'Year', Day = 'DoY', Hour = 'Hour')
+```
+
+## Not applying uStar filtering
+
+Subsequent processing steps can be performed without further uStar filtering
+using `sEddyProc_sMDSGapFill`. Corresponding result columns then have
+no uStar specific suffix. 
+
+```{r noUStar, message = FALSE}
+EProc <- sEddyProc$new(
+  'DE-Tha', EddyDataWithPosix, c('NEE','Rg','Tair','VPD', 'Ustar'))
+EProc$sMDSGapFill('NEE')
+grep("NEE.*_f$",names(EProc$sExportResults()), value = TRUE)
+```
+
+## User-specified uStar threshold
+
+The user can provide value for uStar-filtering before gapfilling, using
+`sEddyProc_sMDSGapFillAfterUstar`. Output columns for this uStar scenario use
+the suffix as specified by argument `uStarSuffix` which defaults to "uStar". 
+
+The friction velocity, uStar, needs to be in column named "Ustar" of the input 
+dataset.
+
+```{r userUStar, message = FALSE}
+EProc <- sEddyProc$new(
+  'DE-Tha', EddyDataWithPosix, c('NEE','Rg','Tair','VPD', 'Ustar'))
+uStar <- 0.46
+EProc$sMDSGapFillAfterUstar('NEE', uStarTh = uStar)
+grep("NEE.*_f$",names(EProc$sExportResults()), value = TRUE)
+```
+
+## Single uStar threshold estimate
+
+The uStar threshold can be estimated from the uStar-NEE relationship 
+from the data without estimating its uncertainty by a bootstrap.
+
+```{r singleUStar, message = FALSE}
+EProc <- sEddyProc$new(
+  'DE-Tha', EddyDataWithPosix, c('NEE','Rg','Tair','VPD', 'Ustar'))
+# estimating the thresholds based on the data (without bootstrap)
+(uStarTh <- EProc$sEstUstarThold())
+# may plot saturation of NEE with UStar for a specified season to pdf
+EProc$sPlotNEEVersusUStarForSeason(levels(uStarTh$season)[3], dir = outDir )
+```
+
+Next, the annual estimate is used as the default in gap-filling.
+Output columns use the suffix as specified by argument `uSstarSuffix` 
+which defaults to "uStar".
+
+```{r singleUStarGapfill, message = FALSE}
+#EProc$useAnnualUStarThresholds()
+EProc$sMDSGapFillAfterUstar('NEE')
+grep("NEE.*_f$",names(EProc$sExportResults()), value = TRUE)
+```
+
+## Scenarios across distribution of u* threshold estimate
+
+Choosing a different u* threshold effects filtering and the subsequent processing
+steps of gap-filling, and flux-partitioning. In order to quantify the uncertainty
+due to not exactly knowing the u* threshold, these processing steps should be
+repeated for different threshold scenarios, and the spread across the results should
+be investigated.
+
+First, the quantiles of the threshold distribution are estimated by bootstrap.
+
+```{r uStarScen, results='hold'}
+EProc <- sEddyProc$new(
+  'DE-Tha', EddyDataWithPosix, c('NEE','Rg','Tair','VPD', 'Ustar'))
+EProc$sEstimateUstarScenarios(
+    nSample = 100L, probs = c(0.05, 0.5, 0.95))
+# inspect the thresholds to be used by default
+EProc$sGetUstarScenarios()
+```
+
+By default the annually aggregated threshold estimates are used for each season
+within one year as in the original method publication.
+To see the estimates for different aggregation levels,
+use method `sEddyProc_sGetEstimatedUstarThresholdDistribution`:
+```{r}
+(uStarThAgg <- EProc$sGetEstimatedUstarThresholdDistribution())
+```
+
+In conjunction with method `usGetSeasonalSeasonUStarMap` and 
+`sEddyProc_sSetUstarScenarios` this can be used
+to set seasonally different u* threshold. 
+However, this common case supported by method 
+`sEddyProc_useSeaonsalUStarThresholds`. 
+
+```{r uStarScenSetSeasonal}
+#EProc$sSetUstarScenarios(
+#  usGetSeasonalSeasonUStarMap(uStarThAgg)[,-2])
+EProc$useSeaonsalUStarThresholds()
+# inspect the changed thresholds to be used
+EProc$sGetUstarScenarios()
+```
+
+Several function whose name ends with 'UstarScens'
+perform the subsequent processing steps for all uStar scenarios.
+They operate and create columns that differ between threshold scenarios by
+a suffix.
+
+```{r uStarScenGapfill, message=FALSE}
+EProc$sMDSGapFillUStarScens("NEE")
+grep("NEE_.*_f$",names(EProc$sExportResults()), value = TRUE)
+```
+
+```{r uStarScenMRPart, message=FALSE}
+EProc$sSetLocationInfo(LatDeg = 51.0, LongDeg = 13.6, TimeZoneHour = 1)
+EProc$sMDSGapFill('Tair', FillAll = FALSE, minNWarnRunLength = NA)
+EProc$sMDSGapFill('Rg', FillAll = FALSE, minNWarnRunLength = NA)
+EProc$sMDSGapFill('VPD', FillAll = FALSE, minNWarnRunLength = NA)
+EProc$sMRFluxPartitionUStarScens()
+grep("GPP_.*_f$",names(EProc$sExportResults()), value = TRUE)
+if (FALSE) {
+  # run only interactively, because it takes long
+  EProc$sGLFluxPartitionUStarScens(uStarScenKeep = "U50")
+  grep("GPP_DT_.*_f$",names(EProc$sExportResults()), value = TRUE)
+}
+```
+
+The argument `uStarScenKeep = "U50"` specifies that the outputs that
+are not distinguished by the suffix, e.g. `FP_GPP2000`, should be reported for the
+median u* threshold scenario with suffix `U50`, instead of the default first scenario.
+
+## See also
+A more advanced case of user-specified seasons for
+uStar threshold estimate is given in [`vignette('DEGebExample')`](DEGebExample.html).

@@ -1,7 +1,7 @@
 # Pull data from google drive
 email <- 'alexisrose0525@gmail.com'
 #email <- 'jaclyn_matthes@g.harvard.edu'
-site <- 'KONZ'
+site <- 'TOOL'
 # email <- 'csturtevant@battelleecology.org'
 #email <- 'jaclyn_matthes@g.harvard.edu'
 
@@ -80,13 +80,14 @@ min9Diff.list <- lapply(list.idx,FUN=function(idx){
   ncol <- ncol(OUT)
   nrow <- nrow(OUT)
   OUT[1:(nrow-1),(ncol+1):(ncol*2)] <- OUT[2:(nrow),]
-  OUT <- OUT[1:(nrow-1),]
+  OUT <- OUT[1:(nrow-1),] #last row removed because becomes NA
   
   names(OUT)[1:ncol] <- paste0(var,'_A')
   names(OUT)[(ncol+1):(ncol*2)] <- paste0(var,'_B')
   
+  #YOU MUST RUN THIS BEFORE CHANGING THE TOWER POSITIONS OTHERWISE YOU WILL END UP REMOVING COMBINATION OF TOWERPOSITION_A = 4 AND TOWERPOSITION_B = 1
   # Apply quality control
-  timeChk <- OUT$timeBgn_B-OUT$timeEnd_A # looking for short positive lag (flush time is 1 min)
+  timeChk <- difftime(OUT$timeBgn_B, OUT$timeEnd_A, units = "secs") # looking for short positive lag (flush time is 1 min for CH4 but 3 min for CO2 and H2O)
   if(scalar == "CH4"){
     bad <- timeChk < 45 | timeChk > 100 | OUT$qfFinl_A == 1 | OUT$qfFinl_B == 1
   } else {
@@ -96,6 +97,7 @@ min9Diff.list <- lapply(list.idx,FUN=function(idx){
   
   # Compute tower level diff A-B
   # Swap any in which the diff is negative bc we always want higher level minus lower level
+  #Using A as "top" and B as "bottom"
   diffTowerPosition<- OUT$TowerPosition_A-OUT$TowerPosition_B
   idxNeg <- diffTowerPosition < 0
   A <- OUT[idxNeg,1:ncol]
@@ -107,25 +109,39 @@ min9Diff.list <- lapply(list.idx,FUN=function(idx){
   
   # Compute concentration diffs
   OUT$dConc <- OUT$mean_A-OUT$mean_B
-  OUT$timeMid <- OUT$timeEnd_A+0.5*(OUT$timeBgn_B-OUT$timeEnd_A)
+  
+  OUT$timeMid <- OUT$timeEnd_A+(0.5*difftime(OUT$timeBgn_B, OUT$timeEnd_A, units = "secs"))
   
   # Make match column for CH4 & CO2/H2O
   if(scalar == "CH4"){
     #####CHECK THIS WITH DIFFERENT TOWERS
-    OUT$match_time <- OUT$timeMid + 1.5*60 # CO2 & H2O starts 1.5 min past CH4
+    OUT$match_time <- OUT$timeMid + (1.5*60) # CO2 & H2O starts 3 min past CH4 so need to add 1.5 min so that timeMid aligns across gas concentrations, multiply by 60 to convert min to sec
   } else {
     OUT$match_time <- OUT$timeMid 
   }
+  
+  #Add in tower heights from attribute data frame to gas concentrations data frames
+  #grab only tower heights and positions for matching
+  tower.heights <- as.data.frame(cbind(attr.df[,4], attr.df[,17]))
+  names(tower.heights) <- c("TowerHeight", "TowerPosition")
+  #add tower height to data frame
+  for(height in 1:dim(tower.heights)[1]){
+    #loop over position A
+    OUT[which(OUT$TowerPosition_A == height),"TowerHeight_A"] <- tower.heights[which(tower.heights$TowerPosition == height),1]
+    #loop over position B
+    OUT[which(OUT$TowerPosition_B == height),"TowerHeight_B"] <- tower.heights[which(tower.heights$TowerPosition == height),1]
+    }
+  
   return(OUT)
 })
 
 # Reassign names from original list
 names(min9Diff.list) = names(min9.list)
 
-# ----- Interpolate the 30-min flux data to 9 min concentration midpoints ------
+# ----- Interpolate the 30-min flux data to 9 min or 6 min concentration midpoints ------
 message(paste0(Sys.time(),': Interpolating fluxes to midpoint of each paired profile window...'))
 
-# FC
+# FC_turb
 timeBgn <- as.POSIXct(strptime(min30.list$F_co2$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
 timeEnd <- as.POSIXct(strptime(min30.list$F_co2$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
 flux <- min30.list$F_co2$turb
@@ -134,11 +150,37 @@ flux[qf == 1] <- NA
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   timePred <- var$timeMid
   fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
-  var$FC_interp <- fluxPred
+  var$FC_turb_interp <- fluxPred
   return(var)
 })
 
-# LE
+# FC_stor
+timeBgn <- as.POSIXct(strptime(min30.list$F_co2$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+timeEnd <- as.POSIXct(strptime(min30.list$F_co2$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+flux <- min30.list$F_co2$stor
+qf <- min30.list$F_co2$stor.qfFinl # filter
+flux[qf == 1] <- NA
+min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
+  timePred <- var$timeMid
+  fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
+  var$FC_stor_interp <- fluxPred
+  return(var)
+})
+
+# FC_nee
+timeBgn <- as.POSIXct(strptime(min30.list$F_co2$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+timeEnd <- as.POSIXct(strptime(min30.list$F_co2$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+flux <- min30.list$F_co2$nsae
+qf <- min30.list$F_co2$stor.qfFinl # filter
+flux[qf == 1] <- NA
+min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
+  timePred <- var$timeMid
+  fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
+  var$FC_nee_interp <- fluxPred
+  return(var)
+})
+
+# LE_turb
 timeBgn <- as.POSIXct(strptime(min30.list$F_LE$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
 timeEnd <- as.POSIXct(strptime(min30.list$F_LE$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
 flux <- min30.list$F_LE$turb
@@ -147,11 +189,37 @@ flux[qf == 1] <- NA
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   timePred <- var$timeMid
   fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
-  var$LE_interp <- fluxPred
+  var$LE_turb_interp <- fluxPred
   return(var)
 })
 
-# H
+# LE_stor
+timeBgn <- as.POSIXct(strptime(min30.list$F_LE$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+timeEnd <- as.POSIXct(strptime(min30.list$F_LE$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+flux <- min30.list$F_LE$stor
+qf <- min30.list$F_LE$stor.qfFinl # filter
+flux[qf == 1] <- NA
+min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
+  timePred <- var$timeMid
+  fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
+  var$LE_stor_interp <- fluxPred
+  return(var)
+})
+
+# LE_nsae
+timeBgn <- as.POSIXct(strptime(min30.list$F_LE$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+timeEnd <- as.POSIXct(strptime(min30.list$F_LE$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+flux <- min30.list$F_LE$nsae
+qf <- min30.list$F_LE$nsae.qfFinl # filter
+flux[qf == 1] <- NA
+min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
+  timePred <- var$timeMid
+  fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
+  var$LE_nsae_interp <- fluxPred
+  return(var)
+})
+
+# H_turb
 timeBgn <- as.POSIXct(strptime(min30.list$F_H$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
 timeEnd <- as.POSIXct(strptime(min30.list$F_H$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
 flux <- min30.list$F_H$turb
@@ -160,7 +228,33 @@ flux[qf == 1] <- NA
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   timePred <- var$timeMid
   fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
-  var$H_interp <- fluxPred
+  var$H_turb_interp <- fluxPred
+  return(var)
+})
+
+# H_stor
+timeBgn <- as.POSIXct(strptime(min30.list$F_H$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+timeEnd <- as.POSIXct(strptime(min30.list$F_H$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+flux <- min30.list$F_H$stor
+qf <- min30.list$F_H$stor.qfFinl # filter
+flux[qf == 1] <- NA
+min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
+  timePred <- var$timeMid
+  fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
+  var$H_stor_interp <- fluxPred
+  return(var)
+})
+
+# H_nsae
+timeBgn <- as.POSIXct(strptime(min30.list$F_H$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+timeEnd <- as.POSIXct(strptime(min30.list$F_H$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
+flux <- min30.list$F_H$nsae
+qf <- min30.list$F_H$nsae.qfFinl # filter
+flux[qf == 1] <- NA
+min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
+  timePred <- var$timeMid
+  fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
+  var$H_nsae_interp <- fluxPred
   return(var)
 })
 
@@ -168,7 +262,7 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
 timeBgn <- as.POSIXct(strptime(min30.list$Ufric$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
 timeEnd <- as.POSIXct(strptime(min30.list$Ufric$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
 ustar <- min30.list$Ufric$veloFric
-roughLength <- min30.list$MomRough$distZaxsRgh
+roughLength <- min30.list$FluxFoot$distZaxsRgh
 qf <- min30.list$Ufric$qfFinl # filter
 ustar[qf == 1] <- NA
 roughLength[qf == 1] <- NA
@@ -210,9 +304,20 @@ P_kPa_1min <- data.frame(timeBgn=timeBgn,
                          timeEnd=timeEnd,
                          P_kPa=P_kPa)
 
+# PAR (round times to minute mark)
+timeBgn <- round(as.POSIXct(min1.list$PAR$startDateTime),units='mins')
+timeEnd <- round(as.POSIXct(min1.list$PAR$endDateTime),units='mins')
+PAR <- min1.list$PAR$PARMean
+qf <- min1.list$PAR$PARFinalQF # quality flag
+PAR[qf == 1] <- NA # filter
+PAR_1min <- data.frame(timeBgn=timeBgn,
+                         timeEnd=timeEnd,
+                         PAR=PAR)
+
 # Merge the 1-min MET data frames and clear space
 MET_1min <- base::merge(RH_1min,P_kPa_1min,all=TRUE)
-rm('RH_1min','RH','qf','P_kPa_1min','P_kPa')
+MET_1min <- base::merge(MET_1min,PAR_1min,all=TRUE)
+rm('RH_1min','RH','qf','P_kPa_1min','P_kPa','PAR_1min','PAR')
 
 # 3D wind (round times to minute mark)
 lvlTow <- attr.df$LvlMeasTow[1] # how many measurement levels
@@ -279,14 +384,17 @@ for(idxLvl in 1:(lvlTow-1)){
 # Aggregate!
 message(paste0(Sys.time(),': Aggregating 1-min MET data to each paired profile window. This should take 5-10 min...'))
 
+#for debugging PAR NAs; currently showing up in MET_agr for all 3 gas concentrations
+#idxDf = "CH4"
+
 MET_agr_list <- foreach::foreach(idxDf = names(min9Diff.list)) %dopar% {
   message(paste0(Sys.time(),': Aggregating 1-min MET data to paired profile windows for ',idxDf,' data frame. This will take a while...'))
 
   # Find which level is measured first to get the overall start and end window of the profile pair
   AbeforeB <- min9Diff.list[[idxDf]]$timeBgn_A < min9Diff.list[[idxDf]]$timeBgn_B
-  timeAgrBgn <- min9Diff.list[[idxDf]]$timeBgn_B 
+  timeAgrBgn <- min9Diff.list[[idxDf]]$timeBgn_B
   timeAgrBgn[AbeforeB] <- min9Diff.list[[idxDf]]$timeBgn_A[AbeforeB]
-  timeAgrEnd <- min9Diff.list[[idxDf]]$timeEnd_A 
+  timeAgrEnd <- min9Diff.list[[idxDf]]$timeEnd_A
   timeAgrEnd[AbeforeB] <- min9Diff.list[[idxDf]]$timeEnd_B[AbeforeB]
   
   # Aggregate the 1-min data to the combined window of the profile pair
@@ -365,14 +473,14 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   var$Cp_moist = Cpa_dry*(1+0.84*var$specificHumidity_pct) # Specific heat of moist air [J kg-1 K-1] 
   
   # Convert H (W m-2) to w't' (Ftemp, K m-2 s-1) (Eqn. 40 in WPL, 1980)
-  var$Ftemp = var$H_interp / (var$Cp_moist*var$rho_kgm3) 
+  var$Ftemp = var$H_turb_interp / (var$Cp_moist*var$rho_kgm3) 
   
   # Convert LE (W m-2) to w'q' (FH2O, mmol m-2 s-1)
   # lambda = latent heat of vaporiz. [J/kg] - Eqn in back of Stull pg. 641
   #var$lambda <- (3149000-2370*(Tair_C+273.16))*1e-6 # J g-1
   #var$FH2O_interp <- var$LE_interp*(1/var$lambda) 
   var$lambda <- (2.501-0.00237*Tair_C)*1E6 # lambda = J kg-1 Eqn in back of Stull pg. 641
-  var$FH2O_interp <- var$LE_interp/var$lambda/mv*1000 # mmol m-2 s-1
+  var$FH2O_interp <- var$LE_turb_interp/var$lambda/mv*1000 # mmol m-2 s-1
   
   return(var)
 })

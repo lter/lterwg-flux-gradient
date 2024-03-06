@@ -73,6 +73,7 @@ MBRflux_align = dplyr::mutate(MBRflux_align,
                               year = lubridate::year(match_time))
 
 # Calculate MBR fluxes for all tracer combos
+#TO DO: UPDATE TO INCLUDE CALCULATIONS WITH BOTH TURBULENT AND TOTAL FLUXES, ADD CALCULATION OF STORAGE FLUX
 MBRflux_align$FCO2_MBR_H2Otrace = MBRflux_align$FH2O_interp_H2O * (MBRflux_align$dConc_CO2 / MBRflux_align$dConc_H2O)
 MBRflux_align$FH2O_MBR_CO2trace = MBRflux_align$FC_interp_CO2 * (MBRflux_align$dConc_H2O / MBRflux_align$dConc_CO2)
 MBRflux_align$FCH4_MBR_CO2trace = MBRflux_align$FC_interp_CO2 * (MBRflux_align$dConc_CH4 / MBRflux_align$dConc_CO2)

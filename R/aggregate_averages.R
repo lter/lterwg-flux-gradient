@@ -13,9 +13,8 @@
 #' windows of timeBgn to timeEnd that fit entirely within timeAgrBgn to timeAgrEnd are 
 #' averaged. 
 #' 
-#' @export
+#' @author Jackie Matthes and Cove Sturtevant
 #'
-#' @examples
 #' 
 #' 
 # Change-log and author contributions / copyrights
@@ -49,6 +48,10 @@ aggregate_averages <- function(timeBgn,
   numBrk <- ceiling(numMeas/maxLen)
   compAgrAll <- rep(FALSE,numOut) # Make sure we cover all aggregation windows
   setRpt <- seq(from=1,to=numOut,by=5000) # Cadence to report progress
+  
+  #For debugging PAR NAs
+  # idxBrk = 1
+  
   for (idxBrk in 1:numBrk){
     # Data
     idxBgn <- (idxBrk-1)*maxLen+1
@@ -81,6 +84,7 @@ aggregate_averages <- function(timeBgn,
   lenSetAgr <- length(setAgr)
   for(idxAgr in setAgr){
     compAgrAll[idxAgr] <- TRUE
+    #this message returns odd statements such as "Processing missed window 4241 out of 57 total missed windows" where the 4241 refers to the indexing of compAgrAll not to lenSetAgr
     message(paste0('Processing missed window ',idxAgr,' out of ',lenSetAgr, ' total missed windows'))
 
     dataIdx <- meas[timeBgn >= timeAgrBgn[idxAgr] & timeEnd <= timeAgrEnd[idxAgr],,drop=FALSE]

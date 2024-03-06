@@ -2,27 +2,32 @@
 #'
 #' @param sitecode  NEON site code
 #' @param min9 9min interpolated data file for given site
-#' @param attr site attribute file
-#' 
+#'
 #' @author Alexis Helgeson, Samuel Jurado, Roisin Commane, and Camilo Rey-Sanchez
 #'
 #' @return list of gas concentration dataframes containing variables associated with wind profile eddy diffusivity calculation
 #' 
-eddydiffWP <- function(sitecode, min9, attr){
+eddydiffWP <- function(sitecode, min9){
   #currently hard coded to calculate for all gas concentrations
   #grab H2O
   H2O <- min9[[which(names(min9) == "H2O")]]
-  #grab only tower heights and positions for matching
-  tower.heights <- attr.df %>% select(DistZaxsLvlMeasTow, TowerPosition)
-  #adding place holder identifier to create tower height columns
-  H2O$TowerHeight_A <- "hold"
-  H2O$TowerHeight_B <- "hold"
-  for(i in 1:dim(attr.df)[1]){
-    #loop over position A
-    H2O[which(H2O$TowerPosition_A == i),"TowerHeight_A"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
-    #loop over position B
-    H2O[which(H2O$TowerPosition_B == i),"TowerHeight_B"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
-  }
+  #remove NAs from data columns used in calculation for WP this includes: ubar1:n and roughLength_interp
+  #select for data columns -> remember there are as many ubar cols as there are TowerPositions for a given site
+  data.cols <- c("roughLength_interp", grep("ubar", names(H2O), value = TRUE))
+  #remove NAs
+  H2O <- H2O[complete.cases(H2O[,data.cols]),]
+  #DEPRECIATED CODE: TOWER HEIGHT NOW ADDED IN flow.formatConcentrationDiffs.R
+  # #grab only tower heights and positions for matching
+  # tower.heights <- attr.df %>% select(DistZaxsLvlMeasTow, TowerPosition)
+  # #adding place holder identifier to create tower height columns
+  # H2O$TowerHeight_A <- "hold"
+  # H2O$TowerHeight_B <- "hold"
+  # for(i in 1:dim(attr.df)[1]){
+  #   #loop over position A
+  #   H2O[which(H2O$TowerPosition_A == i),"TowerHeight_A"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
+  #   #loop over position B
+  #   H2O[which(H2O$TowerPosition_B == i),"TowerHeight_B"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
+  # }
   #calculate eddy diffusivty using WP
   #assuming von karman constant is 0.4
   k = 0.4
@@ -31,6 +36,7 @@ eddydiffWP <- function(sitecode, min9, attr){
   
   #create column for store wind profile eddy diffusivity
   H2O$EddyDiff <- "hold"
+  #TO DO: REFORMAT ubar COLUMNS SO THAT WE CAN SELECT FOR CORRECT ubar USING TowerPosition
   for(j in 1:dim(H2O)[1]){
     c.name <- paste0("ubar", as.character(H2O[j,"TowerPosition_A"]))
     ubar = as.numeric(H2O[j,grep(c.name, names(H2O))])
@@ -38,18 +44,22 @@ eddydiffWP <- function(sitecode, min9, attr){
     
     H2O[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(H2O[j,"GeometricMean_AB"])/log(z/as.numeric(H2O[j,"roughLength_interp"])))
   }
-  
+  #set EddyDiff as numeric
+  H2O$EddyDiff <- as.numeric(H2O$EddyDiff)
   #grab CO2
   CO2 <- min9[[which(names(min9) == "CO2")]]
-  #adding place holder identifier to create tower height columns
-  CO2$TowerHeight_A <- "hold"
-  CO2$TowerHeight_B <- "hold"
-  for(i in 1:dim(attr.df)[1]){
-    #loop over position A
-    CO2[which(CO2$TowerPosition_A == i),"TowerHeight_A"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
-    #loop over position B
-    CO2[which(CO2$TowerPosition_B == i),"TowerHeight_B"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
-  }
+  #remove NAs
+  CO2 <- CO2[complete.cases(CO2[,data.cols]),]
+  #DEPRECIATED CODE: TOWER HEIGHT NOW ADDED IN flow.formatConcentrationDiffs.R
+  # #adding place holder identifier to create tower height columns
+  # CO2$TowerHeight_A <- "hold"
+  # CO2$TowerHeight_B <- "hold"
+  # for(i in 1:dim(attr.df)[1]){
+  #   #loop over position A
+  #   CO2[which(CO2$TowerPosition_A == i),"TowerHeight_A"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
+  #   #loop over position B
+  #   CO2[which(CO2$TowerPosition_B == i),"TowerHeight_B"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
+  # }
   #calculate eddy diffusivty using WP
   #assuming von karman constant is 0.4
   k = 0.4
@@ -65,18 +75,22 @@ eddydiffWP <- function(sitecode, min9, attr){
     
     CO2[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(CO2[j,"GeometricMean_AB"])/log(z/as.numeric(CO2[j,"roughLength_interp"])))
   }
-  
+  #set EddyDiff as numeric
+  CO2$EddyDiff <- as.numeric(CO2$EddyDiff)
   #grab CH4
   CH4 <- min9[[which(names(min9) == "CH4")]]
-  #adding place holder identifier to create tower height columns
-  CH4$TowerHeight_A <- "hold"
-  CH4$TowerHeight_B <- "hold"
-  for(i in 1:dim(attr.df)[1]){
-    #loop over position A
-    CH4[which(CH4$TowerPosition_A == i),"TowerHeight_A"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
-    #loop over position B
-    CH4[which(CH4$TowerPosition_B == i),"TowerHeight_B"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
-  }
+  #remove NAs
+  CH4 <- CH4[complete.cases(CH4[,data.cols]),]
+  #DEPRECIATED CODE: TOWER HEIGHT NOW ADDED IN flow.formatConcentrationDiffs.R
+  # #adding place holder identifier to create tower height columns
+  # CH4$TowerHeight_A <- "hold"
+  # CH4$TowerHeight_B <- "hold"
+  # for(i in 1:dim(attr.df)[1]){
+  #   #loop over position A
+  #   CH4[which(CH4$TowerPosition_A == i),"TowerHeight_A"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
+  #   #loop over position B
+  #   CH4[which(CH4$TowerPosition_B == i),"TowerHeight_B"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
+  # }
   #calculate eddy diffusivty using WP
   #assuming von karman constant is 0.4
   k = 0.4
@@ -92,7 +106,8 @@ eddydiffWP <- function(sitecode, min9, attr){
     
     CH4[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(CH4[j,"GeometricMean_AB"])/log(z/as.numeric(CH4[j,"roughLength_interp"])))
   }
-  
+  #set EddyDiff as numeric
+  CH4$EddyDiff <- as.numeric(CH4$EddyDiff)
   #add to list
   min9.K.WP.list <- list(H2O = H2O, CO2 = CO2, CH4 = CH4)
   return(min9.K.WP.list)

@@ -1,10 +1,10 @@
 # Pull data from google drive
 email <- 'sparklelmalone@gmail.com'
 #copy this browser url from the site folder on the shared G drive (located at https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3) you wish to upload your zip files to
-drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1mgqJps4HvjplsE7SXBvjAzm6n3BXC98I")
+drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1IbdBGHMteLhFThQzCAA3AeoKh4-xHgWg")
 #add userinfo for saving and uploading the file to G drive
 user <- "AH"
-sitecode <- 'TOOL'
+sitecode <- 'BONA'
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: googledrive
@@ -44,21 +44,22 @@ for(focal_file in site_folder$name){
 }
 # Load 9 min interpolated data and attribute info
 #problem loading in .Rdata objects currently being saved to 2 different directories?
-fileIn <- fs::path(dirTmp,paste0(sitecode,'_aligned_conc_flux_9min.Rdata'))
+#for KONZ files are unzipped in the same location
+fileIn <- fs::path(dirTmp, paste0(sitecode,'_aligned_conc_flux_9min.Rdata'))
 load(fileIn)
-fileIn <- fs::path(dirTmp,'data',sitecode,paste0(sitecode,'_attr.Rdata'))
-load(fileIn)
+# fileIn <- fs::path(dirTmp,'data',sitecode,paste0(sitecode,'_attr.Rdata'))
+# load(fileIn)
 #if already downloaded data off of G drive or used flow.formatConcentrationDiffs.R
 #load in interpolated 9 min data
-#load(file.path("data", sitecode, "KONZ_min9Diff.Rdata"))
+#load(file.path("data", sitecode, paste0(sitecode,"_min9Diff.Rdata")))
 # load(file.path("data", sitecode, "KONZ_attr.Rdata"))
 
 #call function to calculate eddy diffusivity using AE method
 #add in calculation for all gas concentrations
-min9.K.AE.list <- eddydiffAE(sitecode = sitecode, min9 = min9Diff.list, attr = attr.df)
+min9.K.AE.list <- eddydiffAE(sitecode = sitecode, min9 = min9Diff.list)
 #call function to calculate eddy diffusivity using WP method
-min9.K.WP.list <- eddydiffWP(sitecode = sitecode, min9 = min9Diff.list, attr = attr.df)
-#call function to compute fluxes
+min9.K.WP.list <- eddydiffWP(sitecode = sitecode, min9 = min9Diff.list)
+#call function to compute fluxes, function contains option to manual set name of eddy diffusivity column default is "EddyDiff"
 min9.FG.AE.list <- computeFG.AE.WP(min9.K = min9.K.AE.list)
 min9.FG.WP.list <- computeFG.AE.WP(min9.K = min9.K.WP.list)
 #save as R.data objects
