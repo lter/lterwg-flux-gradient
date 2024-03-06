@@ -62,8 +62,23 @@ if(method == "AE"){
 if(method == "WP"){
   all.sites <- bind_rows(SITES_WP_validation)
 }
-
-#FG quality flags are columns IQR.flag (flagged outliers), spike.flag (flagged spikes) for WP method and IQR.flag, spike.flag, Stability_500 (stable, unstable, neutral conditions set using L threshold 500), and Stability_100 (stable, unstable, neutral conditions set using L threshold 100)for AE method
+#TO DO ADD MBR, NOT YET AVAILABLE
+if(method == "MBR"){
+  all.sites <- bind_rows(SITES_MBR_validation)
+}
+#FG quality flags columns across methods (AE, WP): 
+#IQR.flag (flagged outliers)
+#spike.flag (flagged spikes)
+#"month"_ustar_threshold (flagged flxues > u star threshold for that month)
+#FG quality flag columns only for AE method:
+#Stability_500 (stable, unstable, neutral conditions set using L threshold 500)
+#Stability_100 (stable, unstable, neutral conditions set using L threshold 100)
+#Other noteworthy columns across methods (AE, WP):
+#month (numeric month)
+#hour (hour from local time to site corrected for daylight savings)
+#day_night (character either "day" or "night" set using PAR threshold 92)
+#residual (numeric EC - FG)
+#RMSE (numeric sqrt(mean((residual)^2)))
 
 #plot Linear 1:1 for calculated FG CO2 and H2O against EC CO2 and H2O
 #axis ranges set using range of FG calculated flux
@@ -81,12 +96,10 @@ plot.all.sites.1to1(all.sites = all.sites %>% filter(gas == "H2O" & IQR.flag == 
 plot.all.sites.1to1(all.sites = all.sites %>% filter(gas == "H2O" & spike.flag == "0"), desired.var = "FH2O_interp", x.lab = expression(paste("Estimated H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), y.lab = expression(paste("FG H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")))
 #look at bar plot of atmospheric conditions for each site
 #THIS STABILITY COLUMN ONLY APPLIES TO AE METHOD BECASUE ONLY THAT METHOD USES THE OBUKHOV LENGTH (L)
-if(method == "AE"){
-  #L threshold of 100
-  plot.all.sites.bar(all.sites = all.sites, desired.var = "Stability_100", x.lab = "Atmospheric Condition")
-  #L threshold of 500
-  plot.all.sites.bar(all.sites = all.sites, desired.var = "Stability_500", x.lab = "Atmospheric Condition")
-}
+#L threshold of 100
+plot.all.sites.bar(all.sites = all.sites, desired.var = "Stability_100", x.lab = "Atmospheric Condition")
+#L threshold of 500
+plot.all.sites.bar(all.sites = all.sites, desired.var = "Stability_500", x.lab = "Atmospheric Condition")
 #look at bar plot of outliers/spikes for each site
 #CO2
 plot.all.sites.bar(all.sites = all.sites %>% filter(gas=="CO2"), desired.var = "IQR.flag", x.lab = "IQR Flag")
@@ -96,6 +109,7 @@ plot.all.sites.bar(all.sites = all.sites %>% filter(gas=="H2O"), desired.var = "
 plot.all.sites.bar(all.sites = all.sites %>% filter(gas=="H2O"), desired.var = "spike.flag", x.lab = "Spike Flag")
 #plot light response curves daytime CO2 vs daytime PAR for FG and EC calculated fluxes
 #calculate light response curves, filter to only daytime flux and PAR data at single site
+#using rectangular hyperbolic model
 model.LRC.FG <- light.response.curve(site = all.sites %>% filter(gas == "CO2" & day_night == "day" & site == "BONA"), alpha = 0.001, beta = 6, gama = 0.3, flux.name = "FG")
 model.LRC.EC <- light.response.curve(site = all.sites %>% filter(gas == "CO2" & day_night == "day" & site == "BONA"), alpha = 0.001, beta = 6, gama = 0.3, flux.name = "FC_nee_interp")
 #plot light response curve using estimated parameters
@@ -104,6 +118,7 @@ plot.light.response(model = model.LRC.EC, site = all.sites %>% filter(gas == "CO
 #plot temperature response curves for nighttime CO2 vs nighttime air temperature for FG and EC calculated fluxes
 #calculate temperature response curves, filter to only nighttime flux and air temperature data
 #use top of tower air temperature: column name will vary by site depending on number of levels on the tower
+#using exponential model
 model.TRC.FG <- temp.response.curve(site = all.sites %>% filter(gas == "CO2" & day_night == "night" & site == "BONA"), TA.name = "Tair5", rho = 1, psi = 0.1, flux.name = "FG")
 model.TRC.EC <- temp.response.curve(site = all.sites %>% filter(gas == "CO2" & day_night == "night" & site == "BONA"), TA.name = "Tair5", rho = 1, psi = 0.1, flux.name = "FC_nee_interp")
 plot.temp.response(model = model.TRC.FG, site = all.sites %>% filter(gas == "CO2" & day_night == "night" & site == "BONA"), TA.name = "Tair5", flux.name = "FG")
@@ -115,3 +130,4 @@ plot.temp.response(model = model.TRC.EC, site = all.sites %>% filter(gas == "CO2
 all.sites.diurnal <- calculate.all.sites.diurnal.avg(all.sites = all.sites)
 #plot dirnual cycle for all sites
 plot.all.sites.diurnal(all.sites = all.sites.diurnal, flux.name = "mean_FG_flux", flux.ymin.name = "FG_ymin", flux.ymax.name = "FG_ymax")
+plot.all.sites.diurnal(all.sites = all.sites.diurnal, flux.name = "mean_EC_flux", flux.ymin.name = "EC_ymin", flux.ymax.name = "EC_ymax")
