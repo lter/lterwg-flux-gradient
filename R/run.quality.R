@@ -28,13 +28,10 @@ run.quality <- function(list.sites, method){
     site.outlier <- IQR.outlier.filter(site = site)
     #flag spikes in fluxes, create new columns spike.bin which is the bin assigned for comparison of differences, spike.flag that flags spikes, date, and day_night
     site.spike <- spike.detection(site = site.outlier)
-    #flag ustar
-    #still needs work -> REddy Proc function only works with dataframe where rows are exactly 30 min apart
-    #site.ustar <- ustar.threshold(site = site.stability)
     #flag atmospheric stability conditions, create new columns Stability_100 and Stability_500 that indicates neutral, stable, unstable conditions
     #only for AE which uses L
     if(method == "AE"){
-      site.stability <- stability.filter(site = site.spike)
+      site.stability <- stability.condition(site = site.spike)
       site.residuals <- calculate.rmse(site = site.stability)
     }else{
       #Next calculate RMSE and residuals
@@ -42,9 +39,14 @@ run.quality <- function(list.sites, method){
     }
     #Add in month column for grouping/visualizations
     site.residuals$month <- month(site.residuals$timeBgn_A)
+    #flag ustar -> this function must be called after the month column is added, we need the month column for ustar threshold calculation
+    #still needs work -> REddy Proc function only works with dataframe where rows are exactly 30 min apart
+    #Decided to use "plotting" method for determining ustar threshold: selecting for ustar values when -1 >= nighttime NEE <= 1 and take median, grouping data by month, growing/nongrowing, all data
+    #the ustar_threshold column is a dataframe
+    site.ustar <- ustar.threshold.interp(site = site.residuals)
     #Add in hour column for grouping/visualizations: the timezone will be local for that site and corrected for daylight savings
     #TO DO: ADD PROPER TZ CORRECTION CODE FOR GUAN
-    site.hour <- add.hour.column(site = site.residuals, site.name = unique(site$site))
+    site.hour <- add.hour.column(site = site.ustar, site.name = unique(site$site))
     
     list.sites.quality[[s]] <- site.hour
   }

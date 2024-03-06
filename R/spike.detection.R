@@ -36,55 +36,11 @@ spike.detection <- function(site){
   #separate out fluxes into daytime and nighttime
   site.CO2.day <- site.CO2 %>% filter(day_night=="day")
   site.CO2.night <- site.CO2 %>% filter(day_night=="night")
-  #calculate median of differences (Md)/MAD for day/night fluxes for each spike.bin
-  num.groups <- unique(site.groups)
-  #daytime
-  for(d in 1:length(num.groups)){
-    day.bin <- site.CO2.day %>% filter(spike.bin==num.groups[d])
-    #add 1 obs from next bin to calculate differences
-    day.bin.plus1 <- rbind(day.bin, site.CO2.day[which(site.CO2.day$spike.bin==(d+1))[1],])
-    #calculate difference of FG
-    day.bin$day.d <- diff(day.bin.plus1$FG)
-    #calculate median of differences
-    day.Md <- median(day.bin$day.d, na.rm = T)
-    #calculate MAD
-    day.MAD <- mad(day.bin$FG, na.rm = T)
-    #set upper/lower threshold for difference using z=5.5
-    lower.threshold <- day.Md - ((5.5*day.MAD)/0.6745)
-    upper.threshold <- day.Md + ((5.5*day.MAD)/0.6745)
-    #flag which day.d fall outside of range, use NEON convention 1 = bad data, 0 = good data
-    day.bin[which(day.bin$day.d < lower.threshold),"spike.flag"] <- "1"
-    day.bin[which(day.bin$day.d > upper.threshold), "spike.flag"] <- "1"
-    day.bin[which(day.bin$day.d >= lower.threshold & day.bin$day.d <= upper.threshold),"spike.flag"] <- "0"
-    #add flag to larger df to save
-    site.CO2.day[which(site.CO2.day$spike.bin==num.groups[d]),"spike.flag"] <- day.bin$spike.flag
-  }
-  #check.spike <- site.CO2.day %>% filter(spike.flag=="1")
-  
-  #nighttime
-  for(n in 1:length(num.groups)){
-    night.bin <- site.CO2.night %>% filter(spike.bin==num.groups[n])
-    #add 1 obs from next bin to calculate differences
-    night.bin.plus1 <- rbind(night.bin, site.CO2.night[which(site.CO2.night$spike.bin==(n+1))[1],])
-    #calculate difference of FG
-    night.bin$day.d <- diff(night.bin.plus1$FG)
-    #calculate median of differences
-    night.Md <- median(night.bin$day.d, na.rm = T)
-    #calculate MAD
-    night.MAD <- mad(night.bin$FG, na.rm = T)
-    #set upper/lower threshold for difference using z=5.5
-    lower.threshold <- night.Md - ((5.5*night.MAD)/0.6745)
-    upper.threshold <- night.Md + ((5.5*night.MAD)/0.6745)
-    #flag which day.d fall outside of range, use NEON convention 1 = bad data, 0 = good data
-    night.bin[which(night.bin$day.d < lower.threshold),"spike.flag"] <- "1"
-    night.bin[which(night.bin$day.d > upper.threshold), "spike.flag"] <- "1"
-    night.bin[which(night.bin$day.d >= lower.threshold & night.bin$day.d <= upper.threshold),"spike.flag"] <- "0"
-    #add flag to larger df to save
-    site.CO2.night[which(site.CO2.night$spike.bin==num.groups[n]),"spike.flag"] <- night.bin$spike.flag
-  }
-  #check.spike <- site.CO2.night %>% filter(spike.flag =="1")
-  #combine day/night
-  site.CO2.spike <- rbind(site.CO2.day, site.CO2.night)
+  #calculate flux difference threshold and add spike.flag column where 1 = spike and 0 = no spike
+  site.CO2.day <- calculate.flux.diff.add.flag(day.night.df = site.CO2.day)
+  site.CO2.night <- calculate.flux.diff.add.flag(day.night.df = site.CO2.night)
+  #combine day/night along with rows with PAR NA where we could not calculate day/night so were not included in spike detection: We want this dataframe to have the same number of rows as the original WE ARE NOT REMOVING ANY DATA 
+  site.CO2.spike <- bind_rows(site.CO2.day, site.CO2.night, site.CO2[which(is.na(site.CO2$PAR)),])
   #calculate how much data would be remain after de-spiking, print message
   percent.good.data <- round(length(site.CO2.spike[which(site.CO2.spike$spike.flag=="0"),"FG"])/length(site.CO2.spike[,"FG"]),3)*100 #good data/total data
   print(paste0("After de-spiking fluxes there is ~", percent.good.data, "% good data remaining for CO2"))
@@ -103,54 +59,11 @@ spike.detection <- function(site){
   #separate out fluxes into daytime and nighttime
   site.H2O.day <- site.H2O %>% filter(day_night=="day")
   site.H2O.night <- site.H2O %>% filter(day_night=="night")
-  #calculate median of differences (Md)/MAD for day/night fluxes for each spike.bin
-  num.groups <- unique(site.groups)
-  #daytime
-  for(d in 1:length(num.groups)){
-    day.bin <- site.H2O.day %>% filter(spike.bin==num.groups[d])
-    #add 1 obs from next bin to calculate differences
-    day.bin.plus1 <- rbind(day.bin, site.H2O.day[which(site.H2O.day$spike.bin==(d+1))[1],])
-    #calculate difference of FG
-    day.bin$day.d <- diff(day.bin.plus1$FG)
-    #calculate median of differences
-    day.Md <- median(day.bin$day.d, na.rm = T)
-    #calculate MAD
-    day.MAD <- mad(day.bin$FG, na.rm = T)
-    #set upper/lower threshold for difference using z=5.5
-    lower.threshold <- day.Md - ((5.5*day.MAD)/0.6745)
-    upper.threshold <- day.Md + ((5.5*day.MAD)/0.6745)
-    #flag which day.d fall outside of range, use NEON convention 1 = bad data, 0 = good data
-    day.bin[which(day.bin$day.d < lower.threshold),"spike.flag"] <- "1"
-    day.bin[which(day.bin$day.d > upper.threshold), "spike.flag"] <- "1"
-    day.bin[which(day.bin$day.d >= lower.threshold & day.bin$day.d <= upper.threshold),"spike.flag"] <- "0"
-    #add flag to larger df to save
-    site.H2O.day[which(site.H2O.day$spike.bin==num.groups[d]),"spike.flag"] <- day.bin$spike.flag
-  }
-  #check.spike <- site.H2O.day %>% filter(spike.flag=="1")
-  #nighttime
-  for(n in 1:length(num.groups)){
-    night.bin <- site.H2O.night %>% filter(spike.bin==num.groups[n])
-    #add 1 obs from next bin to calculate differences
-    night.bin.plus1 <- rbind(night.bin, site.H2O.night[which(site.H2O.night$spike.bin==(n+1))[1],])
-    #calculate difference of FG
-    night.bin$day.d <- diff(night.bin.plus1$FG)
-    #calculate median of differences
-    night.Md <- median(night.bin$day.d, na.rm = T)
-    #calculate MAD
-    night.MAD <- mad(night.bin$FG, na.rm = T)
-    #set upper/lower threshold for difference using z=5.5
-    lower.threshold <- night.Md - ((5.5*night.MAD)/0.6745)
-    upper.threshold <- night.Md + ((5.5*night.MAD)/0.6745)
-    #flag which day.d fall outside of range, use NEON convention 1 = bad data, 0 = good data
-    night.bin[which(night.bin$day.d < lower.threshold),"spike.flag"] <- "1"
-    night.bin[which(night.bin$day.d > upper.threshold), "spike.flag"] <- "1"
-    night.bin[which(night.bin$day.d >= lower.threshold & night.bin$day.d <= upper.threshold),"spike.flag"] <- "0"
-    #add flag to larger df to save
-    site.H2O.night[which(site.H2O.night$spike.bin==num.groups[n]),"spike.flag"] <- night.bin$spike.flag
-  }
-  #check.spike <- site.H2O.night %>% filter(spike.flag =="1")
-  #combine day/night
-  site.H2O.spike <- rbind(site.H2O.day, site.H2O.night)
+  #calculate flux difference threshold and add spike.flag column where 1 = spike and 0 = no spike
+  site.H2O.day <- calculate.flux.diff.add.flag(day.night.df = site.H2O.day)
+  site.H2O.night <- calculate.flux.diff.add.flag(day.night.df = site.H2O.night)
+  #combine day/night along with rows with PAR NA where we could not calculate day/night so were not included in spike detection: We want this dataframe to have the same number of rows as the original WE ARE NOT REMOVING ANY DATA 
+  site.H2O.spike <- bind_rows(site.H2O.day, site.H2O.night, site.H2O[which(is.na(site.H2O$PAR)),])
   #calculate how much data would be remain after de-spiking, print message
   percent.good.data <- round(length(site.H2O.spike[which(site.H2O.spike$spike.flag=="0"),"FG"])/length(site.H2O.spike[,"FG"]),3)*100 #good data/total data
   print(paste0("After de-spiking fluxes there is ~", percent.good.data, "% good data remaining for H2O"))
@@ -169,60 +82,17 @@ spike.detection <- function(site){
   #separate out fluxes into daytime and nighttime
   site.CH4.day <- site.CH4 %>% filter(day_night=="day")
   site.CH4.night <- site.CH4 %>% filter(day_night=="night")
-  #calculate median of differences (Md)/MAD for day/night fluxes for each spike.bin
-  num.groups <- unique(site.groups)
-  #daytime
-  for(d in 1:length(num.groups)){
-    day.bin <- site.CH4.day %>% filter(spike.bin==num.groups[d])
-    #add 1 obs from next bin to calculate differences
-    day.bin.plus1 <- rbind(day.bin, site.CH4.day[which(site.CH4.day$spike.bin==(d+1))[1],])
-    #calculate difference of FG
-    day.bin$day.d <- diff(day.bin.plus1$FG)
-    #calculate median of differences
-    day.Md <- median(day.bin$day.d, na.rm = T)
-    #calculate MAD
-    day.MAD <- mad(day.bin$FG, na.rm = T)
-    #set upper/lower threshold for difference using z=5.5
-    lower.threshold <- day.Md - ((5.5*day.MAD)/0.6745)
-    upper.threshold <- day.Md + ((5.5*day.MAD)/0.6745)
-    #flag which day.d fall outside of range, use NEON convention 1 = bad data, 0 = good data
-    day.bin[which(day.bin$day.d < lower.threshold),"spike.flag"] <- "1"
-    day.bin[which(day.bin$day.d > upper.threshold), "spike.flag"] <- "1"
-    day.bin[which(day.bin$day.d >= lower.threshold & day.bin$day.d <= upper.threshold),"spike.flag"] <- "0"
-    #add flag to larger df to save
-    site.CH4.day[which(site.CH4.day$spike.bin==num.groups[d]),"spike.flag"] <- day.bin$spike.flag
-  }
-  #check.spike <- site.CH4.day %>% filter(spike.flag=="1")
-  #nighttime
-  for(n in 1:length(num.groups)){
-    night.bin <- site.CH4.night %>% filter(spike.bin==num.groups[n])
-    #add 1 obs from next bin to calculate differences
-    night.bin.plus1 <- rbind(night.bin, site.CH4.night[which(site.CH4.night$spike.bin==(n+1))[1],])
-    #calculate difference of FG
-    night.bin$day.d <- diff(night.bin.plus1$FG)
-    #calculate median of differences
-    night.Md <- median(night.bin$day.d, na.rm = T)
-    #calculate MAD
-    night.MAD <- mad(night.bin$FG, na.rm = T)
-    #set upper/lower threshold for difference using z=5.5
-    lower.threshold <- night.Md - ((5.5*night.MAD)/0.6745)
-    upper.threshold <- night.Md + ((5.5*night.MAD)/0.6745)
-    #flag which day.d fall outside of range, use NEON convention 1 = bad data, 0 = good data
-    night.bin[which(night.bin$day.d < lower.threshold),"spike.flag"] <- "1"
-    night.bin[which(night.bin$day.d > upper.threshold), "spike.flag"] <- "1"
-    night.bin[which(night.bin$day.d >= lower.threshold & night.bin$day.d <= upper.threshold),"spike.flag"] <- "0"
-    #add flag to larger df to save
-    site.CH4.night[which(site.CH4.night$spike.bin==num.groups[n]),"spike.flag"] <- night.bin$spike.flag
-  }
-  #check.spike <- site.CH4.night %>% filter(spike.flag =="1")
-  #combine day/night
-  site.CH4.spike <- rbind(site.CH4.day, site.CH4.night)
+  #calculate flux difference threshold and add spike.flag column where 1 = spike and 0 = no spike
+  site.CH4.day <- calculate.flux.diff.add.flag(day.night.df = site.CH4.day)
+  site.CH4.night <- calculate.flux.diff.add.flag(day.night.df = site.CH4.night)
+  #combine day/night along with rows with PAR NA where we could not calculate day/night so were not included in spike detection: We want this dataframe to have the same number of rows as the original WE ARE NOT REMOVING ANY DATA 
+  site.CH4.spike <- bind_rows(site.CH4.day, site.CH4.night, site.CH4[which(is.na(site.CH4$PAR)),])
   #calculate how much data would be remain after de-spiking, print message
   percent.good.data <- round(length(site.CH4.spike[which(site.CH4.spike$spike.flag=="0"),"FG"])/length(site.CH4.spike[,"FG"]),3)*100 #good data/total data
   print(paste0("After de-spiking fluxes there is ~", percent.good.data, "% good data remaining for CH4"))
   
   #return df with spike.flag
-  site.spike <- rbind(site.CO2.spike, site.H2O.spike, site.CH4.spike)
+  site.spike <- bind_rows(site.CO2.spike, site.H2O.spike, site.CH4.spike)
   
   return(site.spike)
 }
