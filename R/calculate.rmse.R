@@ -1,4 +1,4 @@
-#' CalculateRMSE
+#' calculate.rmse
 #'
 #' @param site df of calculated flux from specific site taken from Validation df
 #'
@@ -22,7 +22,8 @@ calculate.rmse <- function(site){
   site.CH4 <- site %>% filter(gas == "CH4")
   site.CH4$residual <- NA #set NA for now
   site.CH4$RMSE <- NA
-  # site.CH4$residual <- site.CH4$FC_nsae_interp - site.CH4$FG
+  print("NO VALIDATION DATA AVAILABLE FOR CH4, SETTING RESIDUAL AND RMSE COLUMNS TO NA")
+  # site.CH4$residual <- site.CH4$ - site.CH4$FG
   # site.CH4$RMSE <- sqrt(mean((site.CH4$residual)^2))
   
   site.residual <- rbind(site.CO2, site.H2O, site.CH4)
