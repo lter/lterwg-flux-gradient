@@ -10,6 +10,7 @@
 run.quality <- function(list.sites, method){
   #loop over sites
   list.sites.quality <- list()
+  list.sites.ustar <- list()
   for(s in 1:length(list.sites)){
     #select one site, all quality metrics are site specific
     site <- list.sites[[s]]
@@ -44,14 +45,16 @@ run.quality <- function(list.sites, method){
     #Decided to use "plotting" method for determining ustar threshold: selecting for ustar values when -1 >= nighttime NEE <= 1 and take median, grouping data by month, growing/nongrowing, all data
     #the ustar_threshold column is a dataframe
     site.ustar <- ustar.threshold.interp(site = site.residuals)
+    list.sites.ustar[[s]] <- site.ustar
     #Add in hour column for grouping/visualizations: the timezone will be local for that site and corrected for daylight savings
     #TO DO: ADD PROPER TZ CORRECTION CODE FOR GUAN
-    site.hour <- add.hour.column(site = site.ustar, site.name = unique(site$site))
+    site.hour <- add.hour.column(site = site.residuals, site.name = unique(site$site))
     
     list.sites.quality[[s]] <- site.hour
   }
   #only includes top two tower levels
   names(list.sites.quality) <- names(list.sites)
+  names(list.sites.ustar) <- names(list.sites)
   
-  return(list.sites.quality)
+  return(list(list.sites.quality, list.sites.ustar))
 }

@@ -47,36 +47,43 @@ ustar.threshold.interp <- function(site){
   Nov.threshold <- threshold(NEE=Nov)
   Dec.threshold <- threshold(NEE=Dec)
   All.threshold <- threshold(NEE=site.CO2)
+  #save ustar threshold values in dataframe
+  ustar.threshold.df <- data.frame(site = unique(site.CO2$site),Jan = Jan.threshold, Feb = Feb.threshold, Mar = Mar.threshold, Apr = Apr.threshold, May = May.threshold, Jun = Jun.threshold, Jul = Jul.threshold, Aug = Aug.threshold, Sep = Sep.threshold, Oct = Oct.threshold, Nov = Nov.threshold, Dec = Dec.threshold, All = All.threshold)
+  #DEPRECIATED CODE
   #WE ARE CALCULATING USTAR THRESHOLD USING NEE AND APPYING TO ALL OTHER FLUXES
   #add u star flag columns to site data frame: use NEON convention "0" good data "1" bad data
-  site[which(site$ustar_interp > Jan.threshold),"Jan_ustar_threshold"] <- "0"
-  site[which(site$ustar_interp <= Jan.threshold),"Jan_ustar_threshold"] <- "1"
-  site[which(site$ustar_interp > Feb.threshold),"Feb_ustar_threshold"] <- "0"
-  site[which(site$ustar_interp <= Feb.threshold),"Feb_ustar_threshold"] <- "1"
-  site[which(site$ustar_interp > Mar.threshold),"Mar_ustar_threshold"] <- "0"
-  site[which(site$ustar_interp <= Mar.threshold),"Mar_ustar_threshold"] <- "1"
-  site[which(site$ustar_interp > Apr.threshold),"Apr_ustar_threshold"] <- "0"
-  site[which(site$ustar_interp <= Apr.threshold),"Apr_ustar_threshold"] <- "1"
-  site[which(site$ustar_interp > May.threshold),"May_ustar_threshold"] <- "0"
-  site[which(site$ustar_interp <= May.threshold),"May_ustar_threshold"] <- "1"
-  site[which(site$ustar_interp > Jun.threshold),"Jun_ustar_threshold"] <- "0"
-  site[which(site$ustar_interp <= Jun.threshold),"Jun_ustar_threshold"] <- "1"
-  site[which(site$ustar_interp > Jul.threshold),"Jul_ustar_threshold"] <- "0"
-  site[which(site$ustar_interp <= Jul.threshold),"Jul_ustar_threshold"] <- "1"
-  site[which(site$ustar_interp > Aug.threshold),"Aug_ustar_threshold"] <- "0"
-  site[which(site$ustar_interp <= Aug.threshold),"Aug_ustar_threshold"] <- "1"
-  site[which(site$ustar_interp > Sep.threshold),"Sep_ustar_threshold"] <- "0"
-  site[which(site$ustar_interp <= Sep.threshold),"Sep_ustar_threshold"] <- "1"
-  site[which(site$ustar_interp > Oct.threshold),"Oct_ustar_threshold"] <- "0"
-  site[which(site$ustar_interp <= Oct.threshold),"Oct_ustar_threshold"] <- "1"
-  site[which(site$ustar_interp > Nov.threshold),"Nov_ustar_threshold"] <- "0"
-  site[which(site$ustar_interp <= Nov.threshold),"Nov_ustar_threshold"] <- "1"
-  site[which(site$ustar_interp > Dec.threshold),"Dec_ustar_threshold"] <- "0"
-  site[which(site$ustar_interp <= Dec.threshold),"Dec_ustar_threshold"] <- "1"
-  site[which(site$ustar_interp > All.threshold),"All_ustar_threshold"] <- "0"
-  site[which(site$ustar_interp <= All.threshold),"All_ustar_threshold"] <- "1"
+  # site[which(site$ustar_interp > Jan.threshold),"Jan_ustar_threshold"] <- "0"
+  # site[which(site$ustar_interp <= Jan.threshold),"Jan_ustar_threshold"] <- "1"
+  # site[which(site$ustar_interp > Feb.threshold),"Feb_ustar_threshold"] <- "0"
+  # site[which(site$ustar_interp <= Feb.threshold),"Feb_ustar_threshold"] <- "1"
+  # site[which(site$ustar_interp > Mar.threshold),"Mar_ustar_threshold"] <- "0"
+  # site[which(site$ustar_interp <= Mar.threshold),"Mar_ustar_threshold"] <- "1"
+  # site[which(site$ustar_interp > Apr.threshold),"Apr_ustar_threshold"] <- "0"
+  # site[which(site$ustar_interp <= Apr.threshold),"Apr_ustar_threshold"] <- "1"
+  # site[which(site$ustar_interp > May.threshold),"May_ustar_threshold"] <- "0"
+  # site[which(site$ustar_interp <= May.threshold),"May_ustar_threshold"] <- "1"
+  # site[which(site$ustar_interp > Jun.threshold),"Jun_ustar_threshold"] <- "0"
+  # site[which(site$ustar_interp <= Jun.threshold),"Jun_ustar_threshold"] <- "1"
+  # site[which(site$ustar_interp > Jul.threshold),"Jul_ustar_threshold"] <- "0"
+  # site[which(site$ustar_interp <= Jul.threshold),"Jul_ustar_threshold"] <- "1"
+  # site[which(site$ustar_interp > Aug.threshold),"Aug_ustar_threshold"] <- "0"
+  # site[which(site$ustar_interp <= Aug.threshold),"Aug_ustar_threshold"] <- "1"
+  # site[which(site$ustar_interp > Sep.threshold),"Sep_ustar_threshold"] <- "0"
+  # site[which(site$ustar_interp <= Sep.threshold),"Sep_ustar_threshold"] <- "1"
+  # site[which(site$ustar_interp > Oct.threshold),"Oct_ustar_threshold"] <- "0"
+  # site[which(site$ustar_interp <= Oct.threshold),"Oct_ustar_threshold"] <- "1"
+  # site[which(site$ustar_interp > Nov.threshold),"Nov_ustar_threshold"] <- "0"
+  # site[which(site$ustar_interp <= Nov.threshold),"Nov_ustar_threshold"] <- "1"
+  # site[which(site$ustar_interp > Dec.threshold),"Dec_ustar_threshold"] <- "0"
+  # site[which(site$ustar_interp <= Dec.threshold),"Dec_ustar_threshold"] <- "1"
+  # site[which(site$ustar_interp > All.threshold),"All_ustar_threshold"] <- "0"
+  # site[which(site$ustar_interp <= All.threshold),"All_ustar_threshold"] <- "1"
   
-  return(site)
+  # site[which(site$ustar_interp > All.threshold),"ustar.flag"] <- "0"
+  # site[which(site$ustar_interp <= All.threshold),"ustar.flag"] <- "1"
+  
+  return(ustar.threshold.df)
+  #DEPRECIATED CODE
   #find which ustar values corresponds with ~ 0 NEE; take median of ustar values
   #try to find threshold by using fit -> problem returns u star value < 0
   # Function to find x-intercept where y > 0

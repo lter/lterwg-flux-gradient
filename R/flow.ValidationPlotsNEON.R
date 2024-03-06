@@ -69,7 +69,6 @@ if(method == "MBR"){
 #FG quality flags columns across methods (AE, WP): 
 #IQR.flag (flagged outliers)
 #spike.flag (flagged spikes)
-#"month"_ustar_threshold (flagged flxues > u star threshold for that month)
 #FG quality flag columns only for AE method:
 #Stability_500 (stable, unstable, neutral conditions set using L threshold 500)
 #Stability_100 (stable, unstable, neutral conditions set using L threshold 100)
