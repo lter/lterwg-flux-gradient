@@ -11,17 +11,17 @@
 #'
 #' @author Alexis Helgeson
 light.response.curve <- function(site, alpha, beta, gama, flux.name){
-  #define model
-  frmu   <- P ~ ((alpha*beta*Q)/((alpha*Q) + beta)) - gama
+  #using rectangular hyperbolic model
+  light.model   <- P ~ ((alpha*beta*Q)/((alpha*Q) + beta)) - gama
   #set initial parameter values
-  stprm  <- c(alpha = alpha, beta = beta, gama = gama)
+  inital.param  <- c(alpha = alpha, beta = beta, gama = gama)
   #select for only model predictor and response data
-  df_accurate <- data.frame(Q=site$PAR, P = site[,paste0(flux.name)])
+  light.flux.vars <- data.frame(Q=site$PAR, P = site[,paste0(flux.name)])
   #fit model
-  light.response.model <- gsl_nls(fn=frmu, data=df_accurate, start=stprm)
+  light.response.model <- gsl_nls(fn=light.model, data=light.flux.vars, start=inital.param)
   #print(light.response.model)
   #make predictions
-  #df_pred <- predict(light.response.model, newdata=df_accurate)
+  #df_pred <- predict(light.response.model, newdata=light.flux.vars)
   
   return(light.response.model)
 }

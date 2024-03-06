@@ -11,17 +11,17 @@
 #'
 #' @author Alexis Helgeson
 temp.response.curve <- function(site, TA.name, rho, psi, flux.name){
-  #define model
-  frmu   <- R ~ rho*exp(psi*TA)
+  #using exponential model
+  temp.model   <- R ~ rho*exp(psi*TA)
   #set initial parameter values
-  stprm  <- c(rho = rho, psi = psi)
+  initial.param  <- c(rho = rho, psi = psi)
   #select for only model predictor and response data
-  df_accurate <- data.frame(TA=site[,paste0(TA.name)], R = site[,paste0(flux.name)])
+  temp.flux.vars <- data.frame(TA=site[,paste0(TA.name)], R = site[,paste0(flux.name)])
   #fit model
-  light.response.model <- gsl_nls(fn=frmu, data=df_accurate, start=stprm)
+  temp.response.model <- gsl_nls(fn=temp.model, data=temp.flux.vars, start=initial.param)
   #print(light.response.model)
   #make predictions
-  #df_pred <- predict(light.response.model, newdata=df_accurate)
+  #df_pred <- predict(temp.response.model, newdata=temp.flux.vars)
   
-  return(light.response.model)
+  return(temp.response.model)
 }
