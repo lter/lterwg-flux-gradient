@@ -11,6 +11,11 @@ eddydiffWP <- function(sitecode, min9){
   #currently hard coded to calculate for all gas concentrations
   #grab H2O
   H2O <- min9[[which(names(min9) == "H2O")]]
+  #remove NAs from data columns used in calculation for WP this includes: ubar1:n and roughLength_interp
+  #select for data columns -> remember there are as many ubar cols as there are TowerPositions for a given site
+  data.cols <- c("roughLength_interp", grep("ubar", names(H2O), value = TRUE))
+  #remove NAs
+  H2O <- H2O[complete.cases(H2O[,data.cols]),]
   #DEPRECIATED CODE: TOWER HEIGHT NOW ADDED IN flow.formatConcentrationDiffs.R
   # #grab only tower heights and positions for matching
   # tower.heights <- attr.df %>% select(DistZaxsLvlMeasTow, TowerPosition)
@@ -31,6 +36,7 @@ eddydiffWP <- function(sitecode, min9){
   
   #create column for store wind profile eddy diffusivity
   H2O$EddyDiff <- "hold"
+  #TO DO: REFORMAT ubar COLUMNS SO THAT WE CAN SELECT FOR CORRECT ubar USING TowerPosition
   for(j in 1:dim(H2O)[1]){
     c.name <- paste0("ubar", as.character(H2O[j,"TowerPosition_A"]))
     ubar = as.numeric(H2O[j,grep(c.name, names(H2O))])
@@ -38,9 +44,12 @@ eddydiffWP <- function(sitecode, min9){
     
     H2O[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(H2O[j,"GeometricMean_AB"])/log(z/as.numeric(H2O[j,"roughLength_interp"])))
   }
-  
+  #set EddyDiff as numeric
+  H2O$EddyDiff <- as.numeric(H2O$EddyDiff)
   #grab CO2
   CO2 <- min9[[which(names(min9) == "CO2")]]
+  #remove NAs
+  CO2 <- CO2[complete.cases(CO2[,data.cols]),]
   #DEPRECIATED CODE: TOWER HEIGHT NOW ADDED IN flow.formatConcentrationDiffs.R
   # #adding place holder identifier to create tower height columns
   # CO2$TowerHeight_A <- "hold"
@@ -66,9 +75,12 @@ eddydiffWP <- function(sitecode, min9){
     
     CO2[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(CO2[j,"GeometricMean_AB"])/log(z/as.numeric(CO2[j,"roughLength_interp"])))
   }
-  
+  #set EddyDiff as numeric
+  CO2$EddyDiff <- as.numeric(CO2$EddyDiff)
   #grab CH4
   CH4 <- min9[[which(names(min9) == "CH4")]]
+  #remove NAs
+  CH4 <- CH4[complete.cases(CH4[,data.cols]),]
   #DEPRECIATED CODE: TOWER HEIGHT NOW ADDED IN flow.formatConcentrationDiffs.R
   # #adding place holder identifier to create tower height columns
   # CH4$TowerHeight_A <- "hold"
@@ -94,7 +106,8 @@ eddydiffWP <- function(sitecode, min9){
     
     CH4[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(CH4[j,"GeometricMean_AB"])/log(z/as.numeric(CH4[j,"roughLength_interp"])))
   }
-  
+  #set EddyDiff as numeric
+  CH4$EddyDiff <- as.numeric(CH4$EddyDiff)
   #add to list
   min9.K.WP.list <- list(H2O = H2O, CO2 = CO2, CH4 = CH4)
   return(min9.K.WP.list)

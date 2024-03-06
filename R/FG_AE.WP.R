@@ -6,6 +6,9 @@
 #' @author Samuel Jurado and Alexis Helgeson
 #' 
 FG_AE.WP <- function(min9, eddy.diff.name){
+  #remove NAs
+  data.cols <- c("dConc", "rhoa_kgm3", "dHeight")
+  min9 <- min9[complete.cases(min9[,data.cols]),]
   diff.conc <- as.numeric(min9$dConc)/0.0289 #umol CO2 mol-1 #divide by molar mass so units cancel
   diff.heights <- as.numeric(min9$dHeight) # m
   #does this eddy diffisivity need a direction correction?

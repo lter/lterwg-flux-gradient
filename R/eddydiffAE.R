@@ -10,12 +10,16 @@
 eddydiffAE <- function(sitecode, min9){
   #currently hard coded to calculate for all gas concentrations
   #grab H2O gas concentration
-  #remove timesteps with NAs
-  H2O.na <- na.omit(min9[[which(names(min9) == "H2O")]])
+  H2O <- min9[[which(names(min9) == "H2O")]]
+  #remove NAs from data columns used in calculation for AE this includes: P_kPa, Tair1, H_turb_interp, LE_turb_interp, ustar_interp, z_displ_calc
+  #select for data columns -> remember there are as many ubar cols as there are TowerPositions for a given site
+  data.cols <- c("P_kPa", "Tair1", "H_turb_interp", "LE_turb_interp", "ustar_interp", "z_displ_calc")
+  #remove NAs
+  H2O <- H2O[complete.cases(H2O[,data.cols]),]
   #calculate obukov length
-  MO.vars <- MOlength(press = H2O.na$P_kPa, temp = H2O.na$Tair1, H = H2O.na$H_turb_interp, LE = H2O.na$LE_turb_interp, velofric = H2O.na$ustar_interp)
+  MO.vars <- MOlength(press = H2O$P_kPa, temp = H2O$Tair1, H = H2O$H_turb_interp, LE = H2O$LE_turb_interp, velofric = H2O$ustar_interp)
   #add OB params to data frame for eddy diffusivty calculation
-  H2O <- cbind(H2O.na, MO.vars$rho, MO.vars$vpotflux, MO.vars$L)
+  H2O <- cbind(H2O, MO.vars$rho, MO.vars$vpotflux, MO.vars$L)
   #rename columns
   old.names <- grep("MO", names(H2O))
   names(H2O)[old.names[1]] <- "rho"
@@ -110,17 +114,19 @@ eddydiffAE <- function(sitecode, min9){
   #why are we using geometric mean instead of regular mean?
   H2O$GeometricMean_AB <- sqrt(as.numeric(H2O$TowerHeight_A)*as.numeric(H2O$TowerHeight_B))
   #we want to calculate eddy diffusivity for each height
-  H2O$EddyDiff_phih = (k*as.numeric(H2O$ustar_interp)*as.numeric(H2O$GeometricMean_AB))/as.numeric(H2O$phih)
+  H2O$EddyDiff = (k*as.numeric(H2O$ustar_interp)*as.numeric(H2O$GeometricMean_AB))/as.numeric(H2O$phih)
+  # H2O$EddyDiff_phih = (k*as.numeric(H2O$ustar_interp)*as.numeric(H2O$GeometricMean_AB))/as.numeric(H2O$phih)
   #try calculating eddy diffusivity with wind shear parameter (phim) instead of heat parameter (phih)
-  H2O$EddyDiff_phim = (k*as.numeric(H2O$ustar_interp)*as.numeric(H2O$GeometricMean_AB))/as.numeric(H2O$phim)
+  # H2O$EddyDiff_phim = (k*as.numeric(H2O$ustar_interp)*as.numeric(H2O$GeometricMean_AB))/as.numeric(H2O$phim)
   
   #grab CO2 gas concentration
-  #remove timesteps with NAs
-  CO2.na <- na.omit(min9[[which(names(min9) == "CO2")]])
+  CO2 <- min9[[which(names(min9) == "CO2")]]
+  #remove NAs
+  CO2 <- CO2[complete.cases(CO2[,data.cols]),]
   #calculate obukov length
-  MO.vars <- MOlength(press = CO2.na$P_kPa, temp = CO2.na$Tair1, H = CO2.na$H_turb_interp, LE = CO2.na$LE_turb_interp, velofric = CO2.na$ustar_interp)
+  MO.vars <- MOlength(press = CO2$P_kPa, temp = CO2$Tair1, H = CO2$H_turb_interp, LE = CO2$LE_turb_interp, velofric = CO2$ustar_interp)
   #add OB params to data frame for eddy diffusivty calculation
-  CO2 <- cbind(CO2.na, MO.vars$rho, MO.vars$vpotflux, MO.vars$L)
+  CO2 <- cbind(CO2, MO.vars$rho, MO.vars$vpotflux, MO.vars$L)
   #rename columns
   old.names <- grep("MO", names(CO2))
   names(CO2)[old.names[1]] <- "rho"
@@ -178,17 +184,19 @@ eddydiffAE <- function(sitecode, min9){
   #why are we using geometric mean instead of regular mean?
   CO2$GeometricMean_AB <- sqrt(as.numeric(CO2$TowerHeight_A)*as.numeric(CO2$TowerHeight_B))
   #we want to calculate eddy diffusivity for each height
-  CO2$EddyDiff_phih = (k*as.numeric(CO2$ustar_interp)*as.numeric(CO2$GeometricMean_AB))/as.numeric(CO2$phih)
-  #try calculating eddy diffusivity with wind shear parameter (phim) instead of heat parameter (phih)
-  CO2$EddyDiff_phim = (k*as.numeric(CO2$ustar_interp)*as.numeric(CO2$GeometricMean_AB))/as.numeric(CO2$phim)
+  CO2$EddyDiff = (k*as.numeric(CO2$ustar_interp)*as.numeric(CO2$GeometricMean_AB))/as.numeric(CO2$phih)
+  # CO2$EddyDiff_phih = (k*as.numeric(CO2$ustar_interp)*as.numeric(CO2$GeometricMean_AB))/as.numeric(CO2$phih)
+  # #try calculating eddy diffusivity with wind shear parameter (phim) instead of heat parameter (phih)
+  # CO2$EddyDiff_phim = (k*as.numeric(CO2$ustar_interp)*as.numeric(CO2$GeometricMean_AB))/as.numeric(CO2$phim)
   
   #grab CO2 gas concentration
-  #remove timesteps with NAs
-  CH4.na <- na.omit(min9[[which(names(min9) == "CH4")]])
+  CH4 <- min9[[which(names(min9) == "CH4")]]
+  #remove NAs
+  CH4 <- CH4[complete.cases(CH4[,data.cols]),]
   #calculate obukov length
-  MO.vars <- MOlength(press = CH4.na$P_kPa, temp = CH4.na$Tair1, H = CH4.na$H_turb_interp, LE = CH4.na$LE_turb_interp, velofric = CH4.na$ustar_interp)
+  MO.vars <- MOlength(press = CH4$P_kPa, temp = CH4$Tair1, H = CH4$H_turb_interp, LE = CH4$LE_turb_interp, velofric = CH4$ustar_interp)
   #add OB params to data frame for eddy diffusivty calculation
-  CH4 <- cbind(CH4.na, MO.vars$rho, MO.vars$vpotflux, MO.vars$L)
+  CH4 <- cbind(CH4, MO.vars$rho, MO.vars$vpotflux, MO.vars$L)
   #rename columns
   old.names <- grep("MO", names(CH4))
   names(CH4)[old.names[1]] <- "rho"
@@ -246,9 +254,10 @@ eddydiffAE <- function(sitecode, min9){
   #why are we using geometric mean instead of regular mean?
   CH4$GeometricMean_AB <- sqrt(as.numeric(CH4$TowerHeight_A)*as.numeric(CH4$TowerHeight_B))
   #we want to calculate eddy diffusivity for each height
-  CH4$EddyDiff_phih = (k*as.numeric(CH4$ustar_interp)*as.numeric(CH4$GeometricMean_AB))/as.numeric(CH4$phih)
-  #try calculating eddy diffusivity with wind shear parameter (phim) instead of heat parameter (phih)
-  CH4$EddyDiff_phim = (k*as.numeric(CH4$ustar_interp)*as.numeric(CH4$GeometricMean_AB))/as.numeric(CH4$phim)
+  CH4$EddyDiff = (k*as.numeric(CH4$ustar_interp)*as.numeric(CH4$GeometricMean_AB))/as.numeric(CH4$phih)
+  # CH4$EddyDiff_phih = (k*as.numeric(CH4$ustar_interp)*as.numeric(CH4$GeometricMean_AB))/as.numeric(CH4$phih)
+  # #try calculating eddy diffusivity with wind shear parameter (phim) instead of heat parameter (phih)
+  # CH4$EddyDiff_phim = (k*as.numeric(CH4$ustar_interp)*as.numeric(CH4$GeometricMean_AB))/as.numeric(CH4$phim)
   
   
   #add to list
