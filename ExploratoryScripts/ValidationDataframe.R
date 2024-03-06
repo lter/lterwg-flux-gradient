@@ -3,8 +3,8 @@ library(dplyr)
 email <- 'alexisrose0525@gmail.com'
 user <- "AH"
 #copy this browser url from the site folder on the shared G drive (located at https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3) you wish to upload your zip files to
-drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1mgqJps4HvjplsE7SXBvjAzm6n3BXC98I")
-sitecode <- 'TOOL'
+drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1uTshIqUXRarnqNqxiVVXL19GUCgwF7bk")
+sitecode <- 'HARV'
 # Authenticate with Google Drive and get site data
 googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
 site_folder <- googledrive::drive_ls(path = drive_url)
@@ -32,9 +32,9 @@ for(focal_file in site_folder$name){
 #problem loading in .Rdata objects currently being saved to 2 different directories?
 fileIn <- fs::path(dirTmp, paste0(sitecode,'_MBRflux.Rdata'))
 load(fileIn)
-fileIn <- fs::path(dirTmp,'data',sitecode,paste0(sitecode,'_AE_AH_2024-02-23.Rdata'))
+fileIn <- fs::path(dirTmp,'data',sitecode,paste0(sitecode,'_AE_AH_2024-03-05.Rdata'))
 load(fileIn)
-fileIn <- fs::path(dirTmp,'data',sitecode,paste0(sitecode,'_WP_AH_2024-02-23.Rdata'))
+fileIn <- fs::path(dirTmp,'data',sitecode,paste0(sitecode,'_WP_AH_2024-03-05.Rdata'))
 load(fileIn)
 #add gas identifier column and site identifier column to AE and WP data frames
 min9.FG.AE.list$H2O$gas <- "H2O"
