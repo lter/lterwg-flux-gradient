@@ -4,7 +4,7 @@ email <- 'alexisrose0525@gmail.com'
 #this url should point to the NEONSITES_Validation folder
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/14Ga9sLRMlQVvorZdHBiYxCbUybiGwPNp")
 #the R.data/zipfiles are labeled based on the method used to calculate the fluxes (i.e. AE, WP, MBR)
-method <- 'AE'
+method <- 'WP'
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: googledrive
@@ -120,6 +120,7 @@ plot.light.response(model = model.LRC.EC, site = all.sites %>% filter(gas == "CO
 #using exponential model
 model.TRC.FG <- temp.response.curve(site = all.sites %>% filter(gas == "CO2" & day_night == "night" & site == "BONA"), TA.name = "Tair5", rho = 1, psi = 0.1, flux.name = "FG")
 model.TRC.EC <- temp.response.curve(site = all.sites %>% filter(gas == "CO2" & day_night == "night" & site == "BONA"), TA.name = "Tair5", rho = 1, psi = 0.1, flux.name = "FC_nee_interp")
+#plot temperature response curve using estimated parameters
 plot.temp.response(model = model.TRC.FG, site = all.sites %>% filter(gas == "CO2" & day_night == "night" & site == "BONA"), TA.name = "Tair5", flux.name = "FG")
 plot.temp.response(model = model.TRC.EC, site = all.sites %>% filter(gas == "CO2" & day_night == "night" & site == "BONA"), TA.name = "Tair5", flux.name = "FC_nee_interp")
 #plot diurnal averages for all sites
