@@ -6,7 +6,7 @@ drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/14Ga9sLR
 #add userinfo for saving and uploading the file to G drive
 user <- "AH"
 #the R.data/zipfiles are labeled based on the method used to calculate the fluxes (i.e. AE, WP, MBR)
-method <- 'WP'
+method <- 'AE'
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: googledrive
@@ -61,26 +61,16 @@ load(file.path("data", "Validation", paste0("SITES_", method, ".Rdata")))
 #zip
 #upload to g drive
 if(method=="WP"){
-  SITES_WP_all_metrics <- run.quality(list.sites = SITES_WP, method = method)
-  SITES_WP_validation <- SITES_WP_all_metrics[[1]]
-  SITES_WP_USTAR <- SITES_WP_all_metrics[[2]]
+  SITES_WP_validation <- run.quality(list.sites = SITES_WP, method = method)
   save(SITES_WP_validation, file = file.path("data", "Validation", "SITES_WP_val.Rdata"))
-  save(SITES_WP_USTAR, file = file.path("data", "Validation", "SITES_WP_ustar.Rdata"))
-  zip(zipfile = paste0("data/Validation/SITES_WP_val.zip"), files = paste0("data/Validation/SITES_WP_val.Rdata"))
   zip(zipfile = paste0("data/Validation/SITES_WP_ustar.zip"), files = paste0("data/Validation/SITES_WP_ustar.Rdata"))
   googledrive::drive_upload(media = paste0("data/Validation/SITES_WP_val.zip"), overwrite = T, path = drive_url)
-  googledrive::drive_upload(media = paste0("data/Validation/SITES_WP_ustar.zip"), overwrite = T, path = drive_url)
 }
 if(method == "AE"){
-  SITES_AE_all_metrics <- run.quality(list.sites = SITES_AE, method = method)
-  SITES_AE_validation <- SITES_AE_all_metrics[[1]]
-  SITES_AE_USTAR <- SITES_AE_all_metrics[[2]]
+  SITES_AE_validation <- run.quality(list.sites = SITES_AE, method = method)
   save(SITES_AE_validation, file = file.path("data", "Validation", "SITES_AE_val.Rdata"))
-  save(SITES_AE_USTAR, file = file.path("data", "Validation", "SITES_AE_ustar.Rdata"))
-  zip(zipfile = paste0("data/Validation/SITES_AE_val.zip"), files = paste0("data/Validation/SITES_AE_val.Rdata"))
   zip(zipfile = paste0("data/Validation/SITES_AE_ustar.zip"), files = paste0("data/Validation/SITES_AE_ustar.Rdata"))
   googledrive::drive_upload(media = paste0("data/Validation/SITES_AE_val.zip"), overwrite = T, path = drive_url)
-  googledrive::drive_upload(media = paste0("data/Validation/SITES_AE_ustar.zip"), overwrite = T, path = drive_url)
 }
 if(method == "MBR"){
   SITES_MBR_validation <- run.quality(list.sites = SITES_MBR, method = method)
@@ -88,5 +78,5 @@ if(method == "MBR"){
   zip(zipfile = paste0("data/Validation/SITES_MBR.zip"), files = paste0("data/Validation/SITES_MBR.Rdata"))
   googledrive::drive_upload(media = paste0("data/Validation/SITES_MBR.zip"), overwrite = T, path = drive_url)
 }
-#TO DO ADD PROPER TZ CORRECTION FOR GUAN TO add.hour.colum.R
+#TO DO ADD PROPER TZ CORRECTION FOR GUAN TO add.hour.column.R
 
