@@ -10,7 +10,7 @@
 calculate.rmse <- function(site){
   #calculate RMSE for CO2
   site.CO2 <- site %>% filter(gas == "CO2")
-  site.CO2$residual <- site.CO2$FC_nee_interp - site.CO2$FG
+  site.CO2$residual <- site.CO2$FC_turb_interp - site.CO2$FG
   site.CO2$RMSE <- sqrt(mean((site.CO2$residual)^2, na.rm = T))
   
   #calculate RMSE for H2O
