@@ -75,8 +75,39 @@ if(remake_key == TRUE){
 # Harmonization ----
 ## ----------------------------- ##
 
+# Clear environment (again)
+rm(list = ls())
 
+# Identify key
+(key_id <- googledrive::drive_ls(path = googledrive::as_id("https://drive.google.com/drive/u/0/folders/1jrOJIu5WfdzmlbL9vMkUNfzBpRC-W0Wd")) %>% 
+  dplyr::filter(name == "Methane-Key") )
 
+# Download key
+googledrive::drive_download(file = key_id$id, overwrite = T,
+                              path = file.path("methane", "methane-key.csv"))
 
+# Read the key back in
+ch4_key <- read.csv(file = file.path("methane", "methane-key.csv"))
+
+# Check structure
+dplyr::glimpse(ch4_key)
+
+# Harmonize the raw data with that key
+ch4_tidy <- ltertools::harmonize(key = ch4_key, 
+                                 raw_folder = file.path("methane", "raw_methane"),
+                                 data_format = c("csv", "xlsx", "xls"),
+                                 quiet = FALSE)
+
+# Check structure
+dplyr::glimpse(ch4_tidy)
+
+# Export locally
+write.csv(x = ch4_tidy, na = "", row.names = F,
+          file = file.path("methane", "methane_non-neon_harmonized.csv"))
+
+# Upload to Drive
+googledrive::drive_upload(media = file.path("methane", "methane_non-neon_harmonized.csv"), 
+                          overwrite = T,
+                          path = googledrive::as_id("https://drive.google.com/drive/u/0/folders/1bxPr64QS-lH-V9zTFkEPhXIUK51LEoBs"))
 
 # End ----
