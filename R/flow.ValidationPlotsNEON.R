@@ -57,8 +57,8 @@ load(fileIn)
 fileIn <- fs::path(dirTmp, paste0("data/Validation/SITES_WP_val.Rdata"))
 load(fileIn)
 #if data is already downloaded and saved
-load(file.path("data", "Validation", paste0("SITES_AE_val.Rdata")))
-load(file.path("data", "Validation", paste0("SITES_WP_val.Rdata")))
+#load(file.path("data", "Validation", paste0("SITES_AE_val.Rdata")))
+#load(file.path("data", "Validation", paste0("SITES_WP_val.Rdata")))
 
 #bind all site dataframes together
 all.sites.ae <- bind_rows(SITES_AE_validation)
@@ -69,6 +69,7 @@ all.sites.wp <- bind_rows(SITES_WP_validation)
 #FG quality flags columns across methods (AE, WP): 
 #IQR.flag (flagged outliers)
 #spike.flag (flagged spikes)
+#ustar flag (flagged ustar values below threshold)
 #FG quality flag columns only for AE method:
 #Stability_500 (stable, unstable, neutral conditions set using L threshold 500)
 #Stability_100 (stable, unstable, neutral conditions set using L threshold 100)
@@ -101,9 +102,9 @@ plot.all.sites.1to1(all.sites = all.sites.ae %>% filter(gas == "H2O" & IQR.flag 
 plot.all.sites.1to1(all.sites = all.sites.ae %>% filter(gas == "H2O" & spike.flag == "0"), x.flux = "FH2O_interp", y.flux = "FG", x.lab = expression(paste("Estimated H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), y.lab = expression(paste("FG H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), plot.title = "Aerodynamic Method")
 #SINGLE SITE
 #CO2
-plot.single.site.1to1(site = all.sites.ae %>% filter(gas == "CO2" & site == "KONZ"), x.flux = "FC_nee_interp", y.flux = "FG", x.lab = expression(paste("EC CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), y.lab = expression(paste("FG CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), plot.title = "Aerodynamic Method")
+plot.single.site.1to1(site = all.sites.ae %>% filter(gas == "CO2" & site == "KONZ"), x.flux = "FC_nee_interp", y.flux = "FG", x.lab = expression(paste("EC CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), y.lab = expression(paste("FG CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), plot.title = "Aerodynamic Method at KONZ")
 #H2O
-plot.single.site.1to1(site = all.sites.ae %>% filter(gas == "H2O" & site == "KONZ"), x.flux = "FH2O_interp", y.flux = "FG", x.lab = expression(paste("Estimated H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), y.lab = expression(paste("FG H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), plot.title = "Aerodynamic Method")
+plot.single.site.1to1(site = all.sites.ae %>% filter(gas == "H2O" & site == "KONZ"), x.flux = "FH2O_interp", y.flux = "FG", x.lab = expression(paste("Estimated H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), y.lab = expression(paste("FG H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), plot.title = "Aerodynamic Method at KONZ")
 #METHOD WP
 #ALL SITES
 #CO2 all data
@@ -120,9 +121,9 @@ plot.all.sites.1to1(all.sites = all.sites.wp %>% filter(gas == "H2O" & IQR.flag 
 plot.all.sites.1to1(all.sites = all.sites.wp %>% filter(gas == "H2O" & spike.flag == "0"), x.flux = "FH2O_interp", y.flux = "FG", x.lab = expression(paste("Estimated H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), y.lab = expression(paste("FG H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), plot.title = "Wind Profile Method")
 #SINGLE SITE
 #CO2
-plot.single.site.1to1(site = all.sites.wp %>% filter(gas == "CO2" & site == "KONZ"), x.flux = "FC_nee_interp", y.flux = "FG", x.lab = expression(paste("EC CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), y.lab = expression(paste("FG CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), plot.title = "Wind Profile Method")
+plot.single.site.1to1(site = all.sites.wp %>% filter(gas == "CO2" & site == "KONZ"), x.flux = "FC_nee_interp", y.flux = "FG", x.lab = expression(paste("EC CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), y.lab = expression(paste("FG CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), plot.title = "Wind Profile Method at KONZ")
 #H2O
-plot.single.site.1to1(site = all.sites.wp %>% filter(gas == "H2O" & site == "KONZ"), x.flux = "FH2O_interp", y.flux = "FG", x.lab = expression(paste("Estimated H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), y.lab = expression(paste("FG H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), plot.title = "Wind Profile Method")
+plot.single.site.1to1(site = all.sites.wp %>% filter(gas == "H2O" & site == "KONZ"), x.flux = "FH2O_interp", y.flux = "FG", x.lab = expression(paste("Estimated H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), y.lab = expression(paste("FG H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), plot.title = "Wind Profile Method at KONZ")
 
 # PLOT BAR PLOTS ----------------------------------------------------------
 #NOTE THE FUNCTION plot.all.sites.bar WORKS WITH A DATAFRAME THAT HAS MULTIPLE SITES AND A DATAFRAME THAT HAS ONE SITE
@@ -204,11 +205,11 @@ model.LRC.FG.WP <- light.response.curve(site = all.sites.wp %>% filter(gas == "C
 model.LRC.EC.WP <- light.response.curve(site = all.sites.wp %>% filter(gas == "CO2" & day_night == "day" & site == "BONA"), alpha = 0.001, beta = 6, gama = 0.3, flux.name = "FC_nee_interp")
 #plot light response curve using estimated parameters
 #METHOD AE
-plot.light.response(model = model.LRC.FG.AE, site = all.sites.ae %>% filter(gas == "CO2" & day_night == "day" & site == "BONA"), flux.name = "FG", plot.title = "FG AE")
-plot.light.response(model = model.LRC.EC.AE, site = all.sites.ae %>% filter(gas == "CO2" & day_night == "day" & site == "BONA"), flux.name = "FC_nee_interp", plot.title = "EC AE")
+plot.light.response(model = model.LRC.FG.AE, site = all.sites.ae %>% filter(gas == "CO2" & day_night == "day" & site == "BONA"), flux.name = "FG", plot.title = "FG AE at BONA")
+plot.light.response(model = model.LRC.EC.AE, site = all.sites.ae %>% filter(gas == "CO2" & day_night == "day" & site == "BONA"), flux.name = "FC_nee_interp", plot.title = "EC AE at BONA")
 #METHOD WP
-plot.light.response(model = model.LRC.FG.WP, site = all.sites.wp %>% filter(gas == "CO2" & day_night == "day" & site == "BONA"), flux.name = "FG", plot.title = "FG WP")
-plot.light.response(model = model.LRC.EC.WP, site = all.sites.wp %>% filter(gas == "CO2" & day_night == "day" & site == "BONA"), flux.name = "FC_nee_interp", plot.title = "EC WP")
+plot.light.response(model = model.LRC.FG.WP, site = all.sites.wp %>% filter(gas == "CO2" & day_night == "day" & site == "BONA"), flux.name = "FG", plot.title = "FG WP at BONA")
+plot.light.response(model = model.LRC.EC.WP, site = all.sites.wp %>% filter(gas == "CO2" & day_night == "day" & site == "BONA"), flux.name = "FC_nee_interp", plot.title = "EC WP at BONA")
 
 # TEMPERATURE RESPONSE CURVE ----------------------------------------------
 #plot temperature response curves for nighttime CO2 vs nighttime air temperature for FG and EC calculated fluxes
@@ -248,11 +249,11 @@ model.TRC.FG.WP <- temp.response.curve(site = all.sites.wp %>% filter(gas == "CO
 model.TRC.EC.WP <- temp.response.curve(site = all.sites.wp %>% filter(gas == "CO2" & day_night == "night" & site == "BONA"), TA.name = "Tair5", rho = 1, psi = 0.1, flux.name = "FC_nee_interp")
 #plot temperature response curve using estimated parameters
 #METHOD AE
-plot.temp.response(model = model.TRC.FG.AE, site = all.sites.ae %>% filter(gas == "CO2" & day_night == "night" & site == "BONA"), TA.name = "Tair5", flux.name = "FG", plot.title = "FG AE")
-plot.temp.response(model = model.TRC.EC.AE, site = all.sites.ae %>% filter(gas == "CO2" & day_night == "night" & site == "BONA"), TA.name = "Tair5", flux.name = "FC_nee_interp", plot.title = "EC AE")
+plot.temp.response(model = model.TRC.FG.AE, site = all.sites.ae %>% filter(gas == "CO2" & day_night == "night" & site == "BONA"), TA.name = "Tair5", flux.name = "FG", plot.title = "FG AE at BONA")
+plot.temp.response(model = model.TRC.EC.AE, site = all.sites.ae %>% filter(gas == "CO2" & day_night == "night" & site == "BONA"), TA.name = "Tair5", flux.name = "FC_nee_interp", plot.title = "EC AE at BONA")
 #METHOD WP
-plot.temp.response(model = model.TRC.FG.WP, site = all.sites.ae %>% filter(gas == "CO2" & day_night == "night" & site == "BONA"), TA.name = "Tair5", flux.name = "FG", plot.title = "FG WP")
-plot.temp.response(model = model.TRC.EC.WP, site = all.sites.ae %>% filter(gas == "CO2" & day_night == "night" & site == "BONA"), TA.name = "Tair5", flux.name = "FC_nee_interp", plot.title = "EC WP")
+plot.temp.response(model = model.TRC.FG.WP, site = all.sites.ae %>% filter(gas == "CO2" & day_night == "night" & site == "BONA"), TA.name = "Tair5", flux.name = "FG", plot.title = "FG WP at BONA")
+plot.temp.response(model = model.TRC.EC.WP, site = all.sites.ae %>% filter(gas == "CO2" & day_night == "night" & site == "BONA"), TA.name = "Tair5", flux.name = "FC_nee_interp", plot.title = "EC WP at BONA")
 
 # PLOT DIURNAL CYCLE ------------------------------------------------------
 #plot diurnal averages for all sites
