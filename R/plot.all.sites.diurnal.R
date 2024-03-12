@@ -9,15 +9,17 @@
 #' 
 #'
 #' @author Alexis Helgeson and Sam Jurado 
-plot.all.sites.diurnal <- function(all.sites, flux.name, flux.ymin.name, flux.ymax.name){
+plot.all.sites.diurnal <- function(all.sites, plot.title){
   #plot diurnal cycle of all sites
-  ggplot(all.sites, aes(x = hour, y = !! sym(flux.name))) +
+  ggplot(all.sites, aes(x = hour, y = mean_flux, colour = flux.name)) +
     geom_point() +
-    geom_errorbar(aes(ymin = !! sym(flux.ymin.name), ymax = !! sym(flux.ymax.name)), width = 0.2) +  
+    geom_errorbar(aes(ymin = all.sites$ymin, ymax = all.sites$ymax, width = 0.2)) +  
     facet_wrap(~ site, scales = "free")+
     scale_x_discrete(breaks = c("00", "06", "12", "18", "23"))+
     xlab("Hour of Day")+
     ylab(expression(paste("CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")))+
+    guides(colour=guide_legend(title=""))+
     theme_minimal()+
-    theme(text = element_text(size = 20), axis.title=element_text(size=24))
+    ggtitle(paste0(plot.title))+
+    theme(text = element_text(size = 20), axis.title=element_text(size=24), legend.position = "top", plot.title = element_text(hjust = 0.5))
 }
