@@ -43,9 +43,7 @@ ch4_files
 
 # Download desired files
 purrr::walk2(.x = ch4_files$id, .y = ch4_files$name,
-             .f = ~ googledrive::drive_download(file = .x, overwrite = T,
-                                                path = file.path("methane", 
-                                                                 "raw_methane", .y)))
+             .f = ~ googledrive::drive_download(file = .x, overwrite = T, path = file.path("methane", "raw_methane", .y)))
 
 ## ----------------------------- ##
           # Key Prep ----
@@ -53,14 +51,25 @@ purrr::walk2(.x = ch4_files$id, .y = ch4_files$name,
 # NOTE: This code is only run once to make the 'column key' skeleton
 ## Which will be subsequently updated by hand
 
-# Generate key object
-ch4_key_v0 <- ltertools::begin_key(raw_folder = file.path("methane", "raw_methane"),
-                                   data_format = c("csv", "xlsx", "xls"),
-                                   guess_tidy = FALSE)
+# Want to remake the skeleton?
+remake_key <- FALSE
 
-
-
-
+# Only make a new key if that is set to TRUE
+if(remake_key == TRUE){
+  
+  # Generate key object
+  ch4_key_v0 <- ltertools::begin_key(raw_folder = file.path("methane", "raw_methane"),
+                                     data_format = c("csv", "xlsx", "xls"),
+                                     guess_tidy = FALSE)
+  
+  # Check structure of _that_
+  dplyr::glimpse(ch4_key_v0)
+  
+  # Export
+  write.csv(x = ch4_key_v0, na = "", row.names = F,
+            file = file.path("methane", "methane_key_skeleton.csv"))
+  
+}
 
 ## ----------------------------- ##
 # Harmonization ----
