@@ -1,7 +1,7 @@
 # Pull data from google drive
 email <- 'jaclyn_matthes@g.harvard.edu'
 #email <- 'kyle.delwiche@gmail.com'
-site <- 'KONZ'
+site <- 'HARV'
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Requires packages: fs, googledrive
@@ -77,10 +77,12 @@ FCH4_MBR_H2Otrace_mean = FCH4_MBR_H2Otrace_lo = FCH4_MBR_H2Otrace_hi = FCH4_MBR_
 FCO2_MBR_H2Otrace_mean = FCO2_MBR_H2Otrace_lo = FCO2_MBR_H2Otrace_hi = FCO2_MBR_H2Otrace_sd = vector()
 FCH4_MBR_CO2trace_mean = FCH4_MBR_CO2trace_lo = FCH4_MBR_CO2trace_hi = FCH4_MBR_CO2trace_sd = vector()
 FH2O_MBR_CO2trace_mean = FH2O_MBR_CO2trace_lo = FH2O_MBR_CO2trace_hi = FH2O_MBR_CO2trace_sd = vector()
+dConc_CO2_mean = dConc_CO2_sd = dConc_H2O_mean = dConc_H2O_sd = dConc_CH4_mean = dConc_CH4_sd = vector()
 
 nsamp = 1000
 
 for(i in 1:nrow(MBRflux_align)){ # loop over time to sample conc 
+  
   # Draw nsamp from normal with mean & sd of concentration
   cConc_CO2_A = rnorm(n = nsamp, mean = MBRflux_align$mean_A_CO2[i],
                       sd = sqrt(MBRflux_align$vari_A_CO2[i]))
@@ -100,18 +102,26 @@ for(i in 1:nrow(MBRflux_align)){ # loop over time to sample conc
                       sd = sqrt(MBRflux_align$vari_B_CH4[i]))
   dConc_CH4 = cConc_CH4_A-cConc_CH4_B
   
+  # Save dConc mean & var
+  dConc_CO2_mean[i] = mean(dConc_CO2)
+  dConc_CO2_sd[i] = sd(dConc_CO2)
+  dConc_CH4_mean[i] = mean(dConc_CH4)
+  dConc_CH4_sd[i] = sd(dConc_CH4)
+  dConc_H2O_mean[i] = mean(dConc_H2O)
+  dConc_H2O_sd[i] = sd(dConc_H2O)
+  
   for(j in 1:nsamp){ # loop over sampled conc to calculate flux
     # Calculate MBR fluxes for all tracer combos
     FCO2_MBR_H2Otrace[j] = ifelse(!is.na(MBRflux_align$FH2O_interp_H2O[i] * 
       (dConc_CO2[j] / dConc_H2O[j])),MBRflux_align$FH2O_interp_H2O[i] * 
         (dConc_CO2[j] / dConc_H2O[j]),NA)
     
-    FH2O_MBR_CO2trace[j] = ifelse(!is.na(MBRflux_align$FC_interp_CO2[i] *
-      (dConc_H2O[j] / dConc_CO2[j])),MBRflux_align$FC_interp_CO2[i] *
+    FH2O_MBR_CO2trace[j] = ifelse(!is.na(MBRflux_align$FC_turb_interp_CO2[i] *
+      (dConc_H2O[j] / dConc_CO2[j])),MBRflux_align$FC_turb_interp_CO2[i] *
         (dConc_H2O[j] / dConc_CO2[j]), NA)
     
-    FCH4_MBR_CO2trace[j] = ifelse(!is.na(MBRflux_align$FC_interp_CO2[i] *
-      (dConc_CH4[j] /dConc_CO2[j])), MBRflux_align$FC_interp_CO2[i] *
+    FCH4_MBR_CO2trace[j] = ifelse(!is.na(MBRflux_align$FC_turb_interp_CO2[i] *
+      (dConc_CH4[j] /dConc_CO2[j])), MBRflux_align$FC_turb_interp_CO2[i] *
         (dConc_CH4[j] /dConc_CO2[j]), NA)
     
     FCH4_MBR_H2Otrace[j] = ifelse(!is.na(MBRflux_align$FH2O_interp_H2O[i] * 
@@ -170,16 +180,117 @@ MBRflux_align$FH2O_MBR_CO2trace_lo = FH2O_MBR_CO2trace_lo
 MBRflux_align$FH2O_MBR_CO2trace_hi = FH2O_MBR_CO2trace_hi
 MBRflux_align$FH2O_MBR_CO2trace_sd = FH2O_MBR_CO2trace_sd
 
+MBRflux_align$dConc_CO2_mean = dConc_CO2_mean
+MBRflux_align$dConc_CO2_sd = dConc_CO2_sd
+MBRflux_align$dConc_H2O_mean = dConc_H2O_mean
+MBRflux_align$dConc_H2O_sd = dConc_H2O_sd
+MBRflux_align$dConc_CH4_mean = dConc_CH4_mean
+MBRflux_align$dConc_CH4_sd = dConc_CH4_sd
+
 MBRflux_align$year = lubridate::year(MBRflux_align$match_time)
-ggplot(dplyr::filter(MBRflux_align, year==2023)) +
-  geom_point(aes(match_time, FCO2_MBR_H2Otrace_mn)) +
-  geom_errorbar(aes(match_time, ymin=FCO2_MBR_H2Otrace_lo,
-                    ymax = FCO2_MBR_H2Otrace_hi),color="darkblue") +
-  #geom_line(aes(match_time, FCO2_MBR_H2Otrace_lo),color="darkblue") +
-  ylim(c(-50,50))
+MBRflux_align$dConc_CO2_bin = ifelse((MBRflux_align$dConc_CO2_mean-MBRflux_align$dConc_CO2_sd*2)<0 &
+                                       (MBRflux_align$dConc_CO2_mean+MBRflux_align$dConc_CO2_sd*2)>0,1,0)
+
+MBRflux_align$dConc_H2O_bin = ifelse((MBRflux_align$dConc_H2O_mean-MBRflux_align$dConc_H2O_sd*2)<0 &
+                                       (MBRflux_align$dConc_H2O_mean+MBRflux_align$dConc_H2O_sd*2)>0,1,0)
+
+ggplot(MBRflux_align) +
+  # geom_errorbar(aes(match_time, ymin = dConc_CO2_mean-dConc_CO2_sd,
+  #                   ymax = dConc_CO2_mean+dConc_CO2_sd)) +
+  geom_point(aes(match_time, dConc_CO2_mean,color=factor(dConc_CO2_bin))) +
+  ylim(c(-10,10))
+
+ggplot(dplyr::filter(MBRflux_align,dConc_H2O_bin==0))+
+  geom_point(aes(x = FC_turb_interp_CO2, 
+                 y = FCO2_MBR_H2Otrace_mean,
+                 color = FCO2_MBR_H2Otrace_sd)) +
+  geom_abline(aes(intercept=0,slope=1),lty=2) +
+  #scale_color_gradient(limits=c(0,10)) +
+  #scale_color_gradient(limits=c(0,1)) +
+  ylim(c(-5,5)) +
+  xlim(c(-5,5))
+
+tmp = dplyr::filter(MBRflux_align,dConc_H2O_bin==0)
+cor.test(tmp$FC_turb_interp_CO2,tmp$FCO2_MBR_H2Otrace_mean)
+
+test = lm(FCO2_MBR_H2Otrace_mean ~ FC_turb_interp_CO2, 
+          data = dplyr::filter(MBRflux_align,dConc_H2O_bin==0))
+summary(test)
+
+
+ggplot(MBRflux_align)+
+  geom_point(aes(x = FCO2_MBR_H2Otrace_sd, 
+                 y = abs(FCO2_MBR_H2Otrace_mean - FC_turb_interp_CO2))) +
+  ylim(0,300) +
+  xlim(0,10000)
 
 ggplot(dplyr::filter(MBRflux_align, year==2023))+
-  geom_point(aes(MBRflux_align$ FC_interp_CO2
+  geom_point(aes(x = FCO2_MBR_H2Otrace_sd, 
+                 y = abs(FCO2_MBR_H2Otrace_mean - FC_turb_interp_CO2))) +
+   ylim(0,50) +
+   xlim(0,1200)
+
+ggplot(dplyr::filter(MBRflux_align, year==2023))+
+  geom_point(aes(x = FH2O_MBR_CO2trace_sd, 
+                 y = abs(FH2O_MBR_CO2trace_mean - FH2O_interp_CO2))) +
+  ylim(0,50) +
+  xlim(0,1200)
+
+ggplot(dplyr::filter(MBRflux_align, year==2023, month==8)) +
+  geom_errorbar(aes(match_time, ymin = dConc_CO2_mean-dConc_CO2_sd,
+                    ymax = dConc_CO2_mean+dConc_CO2_sd)) +
+  geom_point(aes(match_time, dConc_CO2_mean)) +
+  ylim(c(-10,10))
+
+
+
+ggplot(dplyr::filter(MBRflux_align, year==2023, month==8)) +
+  geom_point(aes(FC_turb_interp_CO2,FCO2_MBR_H2Otrace_mean,
+                 color=factor(dConc_CO2_bin))) +
+  ylim(c(-10,10))
+
+ggplot(dplyr::filter(MBRflux_align, year==2023))+
+  geom_point(aes(x = sqrt(vari_B_CO2), 
+                 y = abs(FCO2_MBR_H2Otrace_mean - FC_turb_interp_CO2))) +
+  ylim(0,1500) + 
+  xlim(0,5)
+
+ggplot(dplyr::filter(MBRflux_align, year==2023))+
+  geom_point(aes(x = sqrt(vari_B_H2O), 
+                 y = abs(FCO2_MBR_H2Otrace_mean - FC_turb_interp_CO2))) +
+  xlim(0,1) + ylim(0,1500)
+
+ggplot(dplyr::filter(MBRflux_align, year==2023))+
+  geom_point(aes(x = match_time, 
+                 y = abs(FCO2_MBR_H2Otrace_mean - FC_turb_interp_CO2))) +
+  ylim(0,500)
+
+
+ggplot(dplyr::filter(MBRflux_align, year==2023, abs(dConc_H2O) > 0.1))+
+  geom_point(aes(x = dConc_H2O, 
+                 y = FCO2_MBR_H2Otrace_mean - FC_turb_interp_CO2)) +
+  ylim(-25,25) +
+  xlim(-5,5)
+
+tmp = dplyr::filter(MBRflux_align, year==2023, abs(dConc_H2O) > 0.1)
+tmp2 = dplyr::filter(MBRflux_align, year==2023)
+nrow(tmp)/nrow(tmp2)
+
+ggplot(dplyr::filter(MBRflux_align, year==2023))+
+  geom_point(aes(x = dConc_H2O, 
+                 y = FCO2_MBR_H2Otrace_mean - FC_turb_interp_CO2)) +
+  ylim(-25,25) +
+  xlim(-5,5)
+
+ggplot(dplyr::filter(MBRflux_align, year==2023))+
+  geom_point(aes(x = dConc_CO2_mean, y = FH2O_MBR_CO2trace_mean - FC_interp_H2O)) 
+
+ggplot(dplyr::filter(MBRflux_align, year==2023))+
+  geom_point(aes(x = dConc_CO2_var, y = FH2O_MBR_CO2trace_mean - FC_interp_H2O)) 
+
+ggplot(dplyr::filter(MBRflux_align, year==2023))+
+  geom_point(aes(x = FH2O_MBR_CO2trace_sd, y = FH2O_MBR_CO2trace_mean - FC_interp_H2O)) 
+
 
 # -------- Save and zip the file to the temp directory. Upload to google drive. -------
 fileSave <- fs::path(dirTmp,paste0(site,'_MBRflux_bootstrap.RData'))
