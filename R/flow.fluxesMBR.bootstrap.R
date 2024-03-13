@@ -73,8 +73,11 @@ MBRflux_align = dplyr::mutate(MBRflux_align,
 
 # Sample over concentration mean & variance 
 FCO2_MBR_H2Otrace = FH2O_MBR_CO2trace = FCH4_MBR_CO2trace = FCH4_MBR_H2Otrace = vector()
-FCH4_MBR_H2Otrace_mn = FCH4_MBR_H2Otrace_lo = FCH4_MBR_H2Otrace_hi = vector()
-FCO2_MBR_H2Otrace_mn = FCO2_MBR_H2Otrace_lo = FCO2_MBR_H2Otrace_hi = vector()
+FCH4_MBR_H2Otrace_mean = FCH4_MBR_H2Otrace_lo = FCH4_MBR_H2Otrace_hi = FCH4_MBR_H2Otrace_sd = vector()
+FCO2_MBR_H2Otrace_mean = FCO2_MBR_H2Otrace_lo = FCO2_MBR_H2Otrace_hi = FCO2_MBR_H2Otrace_sd = vector()
+FCH4_MBR_CO2trace_mean = FCH4_MBR_CO2trace_lo = FCH4_MBR_CO2trace_hi = FCH4_MBR_CO2trace_sd = vector()
+FH2O_MBR_CO2trace_mean = FH2O_MBR_CO2trace_lo = FH2O_MBR_CO2trace_hi = FH2O_MBR_CO2trace_sd = vector()
+
 nsamp = 1000
 
 for(i in 1:nrow(MBRflux_align)){ # loop over time to sample conc 
@@ -147,13 +150,25 @@ for(i in 1:nrow(MBRflux_align)){ # loop over time to sample conc
   
 }
 
-MBRflux_align$FCH4_MBR_H2Otrace_mn = FCH4_MBR_H2Otrace_mn
+MBRflux_align$FCH4_MBR_H2Otrace_mean = FCH4_MBR_H2Otrace_mean
 MBRflux_align$FCH4_MBR_H2Otrace_lo = FCH4_MBR_H2Otrace_lo
 MBRflux_align$FCH4_MBR_H2Otrace_hi = FCH4_MBR_H2Otrace_hi
+MBRflux_align$FCH4_MBR_H2Otrace_sd = FCH4_MBR_H2Otrace_sd
 
-MBRflux_align$FCO2_MBR_H2Otrace_mn = FCO2_MBR_H2Otrace_mn
+MBRflux_align$FCH4_MBR_CO2trace_mean = FCH4_MBR_CO2trace_mean
+MBRflux_align$FCH4_MBR_CO2trace_lo = FCH4_MBR_CO2trace_lo
+MBRflux_align$FCH4_MBR_CO2trace_hi = FCH4_MBR_CO2trace_hi
+MBRflux_align$FCH4_MBR_CO2trace_sd = FCH4_MBR_CO2trace_sd
+
+MBRflux_align$FCO2_MBR_H2Otrace_mean = FCO2_MBR_H2Otrace_mean
 MBRflux_align$FCO2_MBR_H2Otrace_lo = FCO2_MBR_H2Otrace_lo
 MBRflux_align$FCO2_MBR_H2Otrace_hi = FCO2_MBR_H2Otrace_hi
+MBRflux_align$FCO2_MBR_H2Otrace_sd = FCO2_MBR_H2Otrace_sd
+
+MBRflux_align$FH2O_MBR_CO2trace_mean = FH2O_MBR_CO2trace_mean
+MBRflux_align$FH2O_MBR_CO2trace_lo = FH2O_MBR_CO2trace_lo
+MBRflux_align$FH2O_MBR_CO2trace_hi = FH2O_MBR_CO2trace_hi
+MBRflux_align$FH2O_MBR_CO2trace_sd = FH2O_MBR_CO2trace_sd
 
 MBRflux_align$year = lubridate::year(MBRflux_align$match_time)
 ggplot(dplyr::filter(MBRflux_align, year==2023)) +
@@ -163,13 +178,16 @@ ggplot(dplyr::filter(MBRflux_align, year==2023)) +
   #geom_line(aes(match_time, FCO2_MBR_H2Otrace_lo),color="darkblue") +
   ylim(c(-50,50))
 
+ggplot(dplyr::filter(MBRflux_align, year==2023))+
+  geom_point(aes(MBRflux_align$ FC_interp_CO2
+
 # -------- Save and zip the file to the temp directory. Upload to google drive. -------
-fileSave <- fs::path(dirTmp,paste0(site,'_MBRflux.RData'))
-fileZip <- fs::path(dirTmp,paste0(site,'_MBRflux.zip'))
+fileSave <- fs::path(dirTmp,paste0(site,'_MBRflux_bootstrap.RData'))
+fileZip <- fs::path(dirTmp,paste0(site,'_MBRflux_bootstrap.zip'))
 save(MBRflux_align,file=fileSave)
 wdPrev <- getwd()
 setwd(dirTmp)
-utils::zip(zipfile=fileZip,files=paste0(site,'_MBRflux.RData'))
+utils::zip(zipfile=fileZip,files=paste0(site,'_MBRflux_bootstrap.RData'))
 setwd(wdPrev)
 googledrive::drive_upload(media = fileZip, overwrite = T, 
                           path = data_folder$id[data_folder$name==site]) # path might need work
