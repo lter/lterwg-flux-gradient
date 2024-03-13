@@ -80,21 +80,21 @@ nsamp = 1000
 for(i in 1:nrow(MBRflux_align)){ # loop over time to sample conc 
   # Draw nsamp from normal with mean & sd of concentration
   cConc_CO2_A = rnorm(n = nsamp, mean = MBRflux_align$mean_A_CO2[i],
-                      sd = MBRflux_align$vari_A_CO2[i]^2)
+                      sd = sqrt(MBRflux_align$vari_A_CO2[i]))
   cConc_CO2_B = rnorm(n = nsamp, mean = MBRflux_align$mean_B_CO2[i],
-                      sd = MBRflux_align$vari_B_CO2[i]^2)
+                      sd = sqrt(MBRflux_align$vari_B_CO2[i]))
   dConc_CO2 = cConc_CO2_A-cConc_CO2_B
   
   cConc_H2O_A = rnorm(n = nsamp, mean = MBRflux_align$mean_A_H2O[i],
-                      sd = MBRflux_align$vari_A_H2O[i]^2)
+                      sd = sqrt(MBRflux_align$vari_A_H2O[i]))
   cConc_H2O_B = rnorm(n = nsamp, mean = MBRflux_align$mean_B_H2O[i],
-                      sd = MBRflux_align$vari_B_H2O[i]^2)
+                      sd = sqrt(MBRflux_align$vari_B_H2O[i]))
   dConc_H2O = cConc_H2O_A-cConc_H2O_B
   
   cConc_CH4_A = rnorm(n = nsamp, mean = MBRflux_align$mean_A_CH4[i],
-                      sd = MBRflux_align$vari_A_CH4[i]^2)
+                      sd = sqrt(MBRflux_align$vari_A_CH4[i]))
   cConc_CH4_B = rnorm(n = nsamp, mean = MBRflux_align$mean_B_CH4[i],
-                      sd = MBRflux_align$vari_B_CH4[i]^2)
+                      sd = sqrt(MBRflux_align$vari_B_CH4[i]))
   dConc_CH4 = cConc_CH4_A-cConc_CH4_B
   
   for(j in 1:nsamp){ # loop over sampled conc to calculate flux
