@@ -117,17 +117,34 @@ for(i in 1:nrow(MBRflux_align)){ # loop over time to sample conc
   }
   
   #calculate lower and upper bounds of confidence interval
-  FCH4_MBR_H2Otrace_mn[i] = mean(FCH4_MBR_H2Otrace)
+  FCH4_MBR_H2Otrace_mean[i] = mean(FCH4_MBR_H2Otrace)
   FCH4_MBR_H2Otrace_lo[i] = mean(FCH4_MBR_H2Otrace) -
     qt(0.95,df=nsamp-1)*sd(FCH4_MBR_H2Otrace)/sqrt(nsamp)
   FCH4_MBR_H2Otrace_hi[i] = mean(FCH4_MBR_H2Otrace) +
     qt(0.95,df=nsamp-1)*sd(FCH4_MBR_H2Otrace)/sqrt(nsamp)
+  FCH4_MBR_H2Otrace_sd[i] = sd(FCH4_MBR_H2Otrace)
   
-  FCO2_MBR_H2Otrace_mn[i] = mean(FCO2_MBR_H2Otrace)
+  FCH4_MBR_CO2trace_mean[i] = mean(FCH4_MBR_CO2trace)
+  FCH4_MBR_CO2trace_lo[i] = mean(FCH4_MBR_CO2trace) -
+    qt(0.95,df=nsamp-1)*sd(FCH4_MBR_CO2trace)/sqrt(nsamp)
+  FCH4_MBR_CO2trace_hi[i] = mean(FCH4_MBR_CO2trace) +
+    qt(0.95,df=nsamp-1)*sd(FCH4_MBR_CO2trace)/sqrt(nsamp)
+  FCH4_MBR_CO2trace_sd[i] = sd(FCH4_MBR_CO2trace)
+  
+  FCO2_MBR_H2Otrace_mean[i] = mean(FCO2_MBR_H2Otrace)
   FCO2_MBR_H2Otrace_lo[i] = mean(FCO2_MBR_H2Otrace) -
     qt(0.95,df=nsamp-1)*sd(FCO2_MBR_H2Otrace)/sqrt(nsamp)
   FCO2_MBR_H2Otrace_hi[i] = mean(FCO2_MBR_H2Otrace) +
     qt(0.95,df=nsamp-1)*sd(FCO2_MBR_H2Otrace)/sqrt(nsamp)
+  FCO2_MBR_H2Otrace_sd[i] = sd(FCO2_MBR_H2Otrace)
+  
+  FH2O_MBR_CO2trace_mean[i] = mean(FH2O_MBR_CO2trace)
+  FH2O_MBR_CO2trace_lo[i] = mean(FH2O_MBR_CO2trace) -
+    qt(0.95,df=nsamp-1)*sd(FH2O_MBR_CO2trace)/sqrt(nsamp)
+  FH2O_MBR_CO2trace_hi[i] = mean(FH2O_MBR_CO2trace) +
+    qt(0.95,df=nsamp-1)*sd(FH2O_MBR_CO2trace)/sqrt(nsamp)
+  FH2O_MBR_CO2trace_sd[i] = sd(FH2O_MBR_CO2trace)
+  
 }
 
 MBRflux_align$FCH4_MBR_H2Otrace_mn = FCH4_MBR_H2Otrace_mn
