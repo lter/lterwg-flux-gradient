@@ -9,7 +9,7 @@
 calculate.all.sites.diurnal.avg <- function(all.sites){
   #calculate diurnal averages by site for each flux type
   all.sites.diurnal.FG <- all.sites %>% filter(gas == "CO2") %>% group_by(hour, site) %>% summarise(mean_flux = mean(FG, na.rm=TRUE), sd_flux = sd(FG, na.rm=TRUE), n =n())
-  all.sites.diurnal.EC <- all.sites %>% filter(gas == "CO2") %>% group_by(hour, site) %>% summarise( mean_flux = mean(FC_nee_interp, na.rm =TRUE), sd_flux = sd(FC_nee_interp, na.rm =TRUE), n =n())
+  all.sites.diurnal.EC <- all.sites %>% filter(gas == "CO2") %>% group_by(hour, site) %>% summarise(mean_flux = mean(FC_turb_interp, na.rm =TRUE), sd_flux = sd(FC_turb_interp, na.rm =TRUE), n =n())
   #add standard error column
   all.sites.diurnal.FG$std_err <- all.sites.diurnal.FG$sd_flux/sqrt(all.sites.diurnal.FG$n)
   all.sites.diurnal.EC$std_err <- all.sites.diurnal.EC$sd_flux/sqrt(all.sites.diurnal.EC$n)
