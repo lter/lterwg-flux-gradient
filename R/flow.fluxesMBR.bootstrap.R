@@ -1,6 +1,5 @@
 # Pull data from google drive
 email <- 'jaclyn_matthes@g.harvard.edu'
-#email <- 'jaclyn_matthes@g.harvard.edu'
 #email <- 'kyle.delwiche@gmail.com'
 site <- 'KONZ'
 
