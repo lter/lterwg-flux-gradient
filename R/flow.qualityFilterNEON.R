@@ -12,6 +12,7 @@ method <- 'AE'
 # Also requires packages: googledrive
 library(dplyr)
 library(lubridate)
+library(changepoint)
 #library(REddyProc)
 
 # Load functions in this repo
@@ -54,7 +55,7 @@ for(focal_file in validation_folder$name){
 fileIn <- fs::path(dirTmp, paste0("data/Validation/SITES_", method, ".Rdata"))
 load(fileIn)
 #if data is already downloaded and saved
-load(file.path("data", "Validation", paste0("SITES_", method, ".Rdata")))
+#load(file.path("data", "Validation", paste0("SITES_", method, ".Rdata")))
 
 #run quality flag functions and calculate residuals, note we cannot calculate residuals for CH4 yet
 #save list of df as .Rdata object, zip, and upload to google drive
@@ -63,20 +64,20 @@ load(file.path("data", "Validation", paste0("SITES_", method, ".Rdata")))
 if(method=="WP"){
   SITES_WP_validation <- run.quality(list.sites = SITES_WP, method = method)
   save(SITES_WP_validation, file = file.path("data", "Validation", "SITES_WP_val.Rdata"))
-  zip(zipfile = paste0("data/Validation/SITES_WP_ustar.zip"), files = paste0("data/Validation/SITES_WP_ustar.Rdata"))
-  googledrive::drive_upload(media = paste0("data/Validation/SITES_WP_val.zip"), overwrite = T, path = drive_url)
+  zip(zipfile = paste0("data/Validation/SITES_WP_val.zip"), files = paste0("data/Validation/SITES_WP_val.Rdata"))
+  googledrive::drive_upload(media = paste0("data/Validation/SITES_WP_val.Rdata"), overwrite = T, path = drive_url)
 }
 if(method == "AE"){
   SITES_AE_validation <- run.quality(list.sites = SITES_AE, method = method)
   save(SITES_AE_validation, file = file.path("data", "Validation", "SITES_AE_val.Rdata"))
-  zip(zipfile = paste0("data/Validation/SITES_AE_ustar.zip"), files = paste0("data/Validation/SITES_AE_ustar.Rdata"))
-  googledrive::drive_upload(media = paste0("data/Validation/SITES_AE_val.zip"), overwrite = T, path = drive_url)
+  zip(zipfile = paste0("data/Validation/SITES_AE_val.zip"), files = paste0("data/Validation/SITES_AE_val.Rdata"))
+  googledrive::drive_upload(media = paste0("data/Validation/SITES_AE_val.Rdata"), overwrite = T, path = drive_url)
 }
 if(method == "MBR"){
   SITES_MBR_validation <- run.quality(list.sites = SITES_MBR, method = method)
-  save(SITES_MBR, file = file.path("data", "Validation", "SITES_MBR.Rdata"))
-  zip(zipfile = paste0("data/Validation/SITES_MBR.zip"), files = paste0("data/Validation/SITES_MBR.Rdata"))
-  googledrive::drive_upload(media = paste0("data/Validation/SITES_MBR.zip"), overwrite = T, path = drive_url)
+  save(SITES_MBR, file = file.path("data", "Validation", "SITES_MBR_val.Rdata"))
+  zip(zipfile = paste0("data/Validation/SITES_MBR_val.zip"), files = paste0("data/Validation/SITES_MBR_val.Rdata"))
+  googledrive::drive_upload(media = paste0("data/Validation/SITES_MBR_val.zip"), overwrite = T, path = drive_url)
 }
 #TO DO ADD PROPER TZ CORRECTION FOR GUAN TO add.hour.column.R
 

@@ -50,7 +50,7 @@ run.quality <- function(list.sites, method){
     #TO DO: ADD PROPER TZ CORRECTION CODE FOR GUAN
     site.hour <- add.hour.column(site = site.ustar, site.name = unique(site$site))
     
-    #list.sites.quality[[s]] <- site.hour
+    list.sites.quality[[s]] <- site.hour
   }
   #only includes top two tower levels
   names(list.sites.quality) <- names(list.sites)
