@@ -6,7 +6,7 @@ drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/14Ga9sLR
 #add userinfo for saving and uploading the file to G drive
 user <- "AH"
 #the R.data/zipfiles are labeled based on the method used to calculate the fluxes (i.e. AE, WP, MBR)
-method <- 'AE'
+method <- 'WP'
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: googledrive
@@ -55,7 +55,7 @@ for(focal_file in validation_folder$name){
 fileIn <- fs::path(dirTmp, paste0("data/Validation/SITES_", method, ".Rdata"))
 load(fileIn)
 #if data is already downloaded and saved
-#load(file.path("data", "Validation", paste0("SITES_", method, ".Rdata")))
+load(file.path("data", "Validation", paste0("SITES_", method, ".Rdata")))
 
 #run quality flag functions and calculate residuals, note we cannot calculate residuals for CH4 yet
 #save list of df as .Rdata object, zip, and upload to google drive
@@ -64,7 +64,7 @@ load(fileIn)
 if(method=="WP"){
   SITES_WP_validation <- run.quality(list.sites = SITES_WP, method = method)
   save(SITES_WP_validation, file = file.path("data", "Validation", "SITES_WP_val.Rdata"))
-  zip(zipfile = paste0("data/Validation/SITES_WP_val.zip"), files = paste0("data/Validation/SITES_WP_val.Rdata"))
+  #zip(zipfile = paste0("data/Validation/SITES_WP_val.zip"), files = paste0("data/Validation/SITES_WP_val.Rdata"))
   googledrive::drive_upload(media = paste0("data/Validation/SITES_WP_val.Rdata"), overwrite = T, path = drive_url)
 }
 if(method == "AE"){
