@@ -1,3 +1,7 @@
+load(file.path("data", "Validation", paste0("SITES_WP_val.Rdata")))
+all.sites.wp <- bind_rows(SITES_WP_validation)
+load(file.path("data", "Validation", paste0("SITES_AE_val.Rdata")))
+all.sites.ae <- bind_rows(SITES_AE_validation)
 #ADD STABILITY COLUMNS TO WP AND MBR
 #select just site, gas, timeMid, and stability columns
 stability.df <- all.sites.ae %>% select(site, gas, timeMid, Stability_100, Stability_500)
