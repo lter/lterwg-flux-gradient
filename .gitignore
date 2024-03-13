@@ -43,3 +43,6 @@ testing/
 *.xml
 *.Rdata
 .RDataTmp
+
+# Ignore certain folders
+methane/

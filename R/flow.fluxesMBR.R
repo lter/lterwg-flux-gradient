@@ -1,8 +1,8 @@
 # Pull data from google drive
-email <- 'jaclyn_matthes@g.harvard.edu'
+email <- 'csturtevant@battelleecology.org'
 #email <- 'jaclyn_matthes@g.harvard.edu'
 #email <- 'kyle.delwiche@gmail.com'
-site <- 'BONA'
+site <- 'TOOL' #'KONZ' BONA CPER GUAN HARV JORN NIWO TOOL
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Requires packages: fs, googledrive
@@ -72,12 +72,13 @@ MBRflux_align = dplyr::mutate(MBRflux_align,
                               hour = lubridate::hour(match_time),
                               year = lubridate::year(match_time))
 
+
 # Calculate MBR fluxes for all tracer combos
 #TO DO: UPDATE TO INCLUDE CALCULATIONS WITH BOTH TURBULENT AND TOTAL FLUXES, ADD CALCULATION OF STORAGE FLUX
-MBRflux_align$FCO2_MBR_H2Otrace = MBRflux_align$FH2O_interp_H2O * (MBRflux_align$dConc_CO2 / MBRflux_align$dConc_H2O)
-MBRflux_align$FH2O_MBR_CO2trace = MBRflux_align$FC_interp_CO2 * (MBRflux_align$dConc_H2O / MBRflux_align$dConc_CO2)
-MBRflux_align$FCH4_MBR_CO2trace = MBRflux_align$FC_interp_CO2 * (MBRflux_align$dConc_CH4 / MBRflux_align$dConc_CO2)
-MBRflux_align$FCH4_MBR_H2Otrace = MBRflux_align$FH2O_interp_H2O * (MBRflux_align$dConc_CH4 / MBRflux_align$dConc_H2O)
+MBRflux_align$FCO2_MBR_H2Otrace = MBRflux_align$FH2O_interp_H2O*1000 * (MBRflux_align$dConc_CO2 / (MBRflux_align$dConc_H2O*1000))
+MBRflux_align$FH2O_MBR_CO2trace = MBRflux_align$FC_turb_interp_CO2/1000 * (MBRflux_align$dConc_H2O / (MBRflux_align$dConc_CO2/1000))
+MBRflux_align$FCH4_MBR_CO2trace = MBRflux_align$FC_turb_interp_CO2/1000 * (MBRflux_align$dConc_CH4 / (MBRflux_align$dConc_CO2/1000))
+MBRflux_align$FCH4_MBR_H2Otrace = MBRflux_align$FH2O_interp_H2O*1000 * (MBRflux_align$dConc_CH4 / (MBRflux_align$dConc_H2O*1000))
 
 # -------- Save and zip the file to the temp directory. Upload to google drive. -------
 fileSave <- fs::path(dirTmp,paste0(site,'_MBRflux.RData'))

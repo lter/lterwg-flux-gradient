@@ -1,5 +1,5 @@
 # Pull data from google drive
-email <- 'alexisrose0525@gmail.com'
+email <- 'sparklelmalone@gmail.com'
 #copy this browser url from the site folder on the shared G drive (located at https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3) you wish to upload your zip files to
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1IbdBGHMteLhFThQzCAA3AeoKh4-xHgWg")
 #add userinfo for saving and uploading the file to G drive
