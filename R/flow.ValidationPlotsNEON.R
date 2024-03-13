@@ -54,9 +54,9 @@ for(focal_file in validation_folder$name){
 #TO DO: better understand how to control where files are unzipped to when downloaded off of gdrive
 fileIn <- fs::path(dirTmp, paste0("SITES_AE_val.Rdata"))
 load(fileIn)
-fileIn <- fs::path(dirTmp, paste0("SITES_WP_val.Rdata"))
+fileIn <- fs::path(dirTmp, paste0("SITES_WP_Stability.Rdata"))
 load(fileIn)
-fileIn <- fs::path(dirTmp, paste0("SITES_MBR.Rdata"))
+fileIn <- fs::path(dirTmp, paste0("SITES_MBR_Stability.Rdata"))
 load(fileIn)
 #if data is already downloaded and saved
 #load(file.path("data", "Validation", paste0("SITES_AE_val.Rdata")))
@@ -65,14 +65,10 @@ load(fileIn)
 
 #bind all site dataframes together
 all.sites.ae <- bind_rows(SITES_AE_validation)
-all.sites.wp <- bind_rows(SITES_WP_validation)
-all.sites.mbr <- bind_rows(SITES_MBR)
+# all.sites.wp <- bind_rows(SITES_WP_validation)
+# all.sites.mbr <- bind_rows(SITES_MBR)
 #TO DO ADD MBR, NOT YET AVAILABLE
 # all.sites.mbr <- bind_rows(SITES_MBR_validation)
-
-#add stability column to wp and mbr
-# check.wp <- all.sites.wp[which(all.sites.wp$match_time == all.sites.ae$match_time),]
-# check.mbr <- all.sites.mbr[which(all.sites.mbr$match_time == all.sites.ae$match_time),]
 
 #FG quality flags columns across methods (AE, WP): 
 #IQR.flag (flagged outliers)
@@ -101,9 +97,9 @@ plot.all.sites.1to1(all.sites = all.sites.ae %>% filter(gas == "CO2"), x.flux = 
 #CO2 filter -50 to 50 
 plot.all.sites.1to1(all.sites = all.sites.ae %>% filter(gas == "CO2") %>% filter(FG >= -50 & FG <= 50), x.flux = "FC_turb_interp", y.flux = "FG", x.lab = expression(paste("EC CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), y.lab = expression(paste("FG CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), plot.title = "Aerodynamic Method")
 #CO2 removed outliers
-plot.all.sites.1to1(all.sites = all.sites.ae %>% filter(gas == "CO2" & IQR.flag == "0"), x.flux = "FC_nee_interp", y.flux = "FG", x.lab = expression(paste("EC CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), y.lab = expression(paste("FG CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), plot.title = "Aerodynamic Method")
+plot.all.sites.1to1(all.sites = all.sites.ae %>% filter(gas == "CO2" & IQR.flag == "0"), x.flux = "FC_turb_interp", y.flux = "FG", x.lab = expression(paste("EC CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), y.lab = expression(paste("FG CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), plot.title = "Aerodynamic Method")
 #CO2 removed spikes
-plot.all.sites.1to1(all.sites = all.sites.ae %>% filter(gas == "CO2" & spike.flag == "0"), x.flux = "FC_nee_interp", y.flux = "FG", x.lab = expression(paste("EC CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), y.lab = expression(paste("FG CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), plot.title = "Aerodynamic Method")
+plot.all.sites.1to1(all.sites = all.sites.ae %>% filter(gas == "CO2" & spike.flag == "0"), x.flux = "FC_turb_interp", y.flux = "FG", x.lab = expression(paste("EC CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), y.lab = expression(paste("FG CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), plot.title = "Aerodynamic Method")
 #H2O all data
 plot.all.sites.1to1(all.sites = all.sites.ae %>% filter(gas == "H2O"), x.flux = "FH2O_interp", y.flux = "FG", x.lab = expression(paste("Estimated H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), y.lab = expression(paste("FG H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), plot.title = "Aerodynamic Method")
 #H2O removed outliers
@@ -112,19 +108,21 @@ plot.all.sites.1to1(all.sites = all.sites.ae %>% filter(gas == "H2O" & IQR.flag 
 plot.all.sites.1to1(all.sites = all.sites.ae %>% filter(gas == "H2O" & spike.flag == "0"), x.flux = "FH2O_interp", y.flux = "FG", x.lab = expression(paste("Estimated H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), y.lab = expression(paste("FG H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), plot.title = "Aerodynamic Method")
 #SINGLE SITE
 #CO2
-plot.single.site.1to1(site = all.sites.ae %>% filter(gas == "CO2" & site == "KONZ"), x.flux = "FC_nee_interp", y.flux = "FG", x.lab = expression(paste("EC CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), y.lab = expression(paste("FG CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), plot.title = "Aerodynamic Method at KONZ")
+plot.single.site.1to1(site = all.sites.ae %>% filter(gas == "CO2" & site == "KONZ"), x.flux = "FC_turb_interp", y.flux = "FG", x.lab = expression(paste("EC CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), y.lab = expression(paste("FG CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), plot.title = "Aerodynamic Method at KONZ")
 #H2O
 plot.single.site.1to1(site = all.sites.ae %>% filter(gas == "H2O" & site == "KONZ"), x.flux = "FH2O_interp", y.flux = "FG", x.lab = expression(paste("Estimated H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), y.lab = expression(paste("FG H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), plot.title = "Aerodynamic Method at KONZ")
 #METHOD WP
 #ALL SITES
 #CO2 all data
-plot.all.sites.1to1(all.sites = all.sites.wp %>% filter(gas == "CO2"), x.flux = "FC_nee_interp", y.flux = "FG", x.lab = expression(paste("EC CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), y.lab = expression(paste("FG CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), plot.title = "Wind Profile Method")
+plot.all.sites.1to1(all.sites = all.sites.wp %>% filter(gas == "CO2"), x.flux = "FC_turb_interp", y.flux = "FG", x.lab = expression(paste("EC CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), y.lab = expression(paste("FG CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), plot.title = "Wind Profile Method")
+#CO2 neutral conditions using Stability_100
+plot.all.sites.1to1(all.sites = all.sites.wp %>% filter(gas == "CO2" & Stability_100 == "neutral"), x.flux = "FC_turb_interp", y.flux = "FG", x.lab = expression(paste("EC CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), y.lab = expression(paste("FG CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), plot.title = "Wind Profile Method under Neutral Conditions")
 #CO2 filter -50 to 50 
 plot.all.sites.1to1(all.sites = all.sites.wp %>% filter(gas == "CO2") %>% filter(FG >= -50 & FG <= 50), x.flux = "FC_turb_interp", y.flux = "FG", x.lab = expression(paste("EC CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), y.lab = expression(paste("FG CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), plot.title = "Wind Profile Method")
 #CO2 removed outliers
-plot.all.sites.1to1(all.sites = all.sites.wp %>% filter(gas == "CO2" & IQR.flag == "0"), x.flux = "FC_nee_interp", y.flux = "FG", x.lab = expression(paste("EC CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), y.lab = expression(paste("FG CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), plot.title = "Wind Profile Method")
+plot.all.sites.1to1(all.sites = all.sites.wp %>% filter(gas == "CO2" & IQR.flag == "0"), x.flux = "FC_turb_interp", y.flux = "FG", x.lab = expression(paste("EC CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), y.lab = expression(paste("FG CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), plot.title = "Wind Profile Method")
 #CO2 removed spikes
-plot.all.sites.1to1(all.sites = all.sites.wp %>% filter(gas == "CO2" & spike.flag == "0"), x.flux = "FC_nee_interp", y.flux = "FG", x.lab = expression(paste("EC CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), y.lab = expression(paste("FG CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), plot.title = "Wind Profile Method")
+plot.all.sites.1to1(all.sites = all.sites.wp %>% filter(gas == "CO2" & spike.flag == "0"), x.flux = "FC_turb_interp", y.flux = "FG", x.lab = expression(paste("EC CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), y.lab = expression(paste("FG CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), plot.title = "Wind Profile Method")
 #H2O all data
 plot.all.sites.1to1(all.sites = all.sites.wp %>% filter(gas == "H2O"), x.flux = "FH2O_interp", y.flux = "FG", x.lab = expression(paste("Estimated H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), y.lab = expression(paste("FG H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), plot.title = "Wind Profile Method")
 #H2O removed outliers
@@ -133,7 +131,7 @@ plot.all.sites.1to1(all.sites = all.sites.wp %>% filter(gas == "H2O" & IQR.flag 
 plot.all.sites.1to1(all.sites = all.sites.wp %>% filter(gas == "H2O" & spike.flag == "0"), x.flux = "FH2O_interp", y.flux = "FG", x.lab = expression(paste("Estimated H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), y.lab = expression(paste("FG H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), plot.title = "Wind Profile Method")
 #SINGLE SITE
 #CO2
-plot.single.site.1to1(site = all.sites.wp %>% filter(gas == "CO2" & site == "KONZ"), x.flux = "FC_nee_interp", y.flux = "FG", x.lab = expression(paste("EC CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), y.lab = expression(paste("FG CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), plot.title = "Wind Profile Method at KONZ")
+plot.single.site.1to1(site = all.sites.wp %>% filter(gas == "CO2" & site == "KONZ"), x.flux = "FC_turb_interp", y.flux = "FG", x.lab = expression(paste("EC CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), y.lab = expression(paste("FG CO"[2], " Flux (umol CO"[2], " m"^-2," s"^-1,")")), plot.title = "Wind Profile Method at KONZ")
 #H2O
 plot.single.site.1to1(site = all.sites.wp %>% filter(gas == "H2O" & site == "KONZ"), x.flux = "FH2O_interp", y.flux = "FG", x.lab = expression(paste("Estimated H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), y.lab = expression(paste("FG H"[2], "O Flux (mmol H"[2], "O m"^-2," s"^-1,")")), plot.title = "Wind Profile Method at KONZ")
 #METHOD MBR
@@ -149,9 +147,9 @@ plot.all.sites.1to1(all.sites = all.sites.mbr %>% filter(FCO2_MBR_H2Otrace >= -5
 #THIS STABILITY COLUMN ONLY APPLIES TO AE METHOD BECASUE ONLY THAT METHOD USES THE OBUKHOV LENGTH (L)
 #ALL SITES
 #L threshold of 100
-plot.all.sites.bar(all.sites = all.sites.ae, desired.var = "Stability_100", x.lab = "Atmospheric Condition", plot.title = "Aerodynamic Method")
+plot.all.sites.bar(all.sites = all.sites.ae, desired.var = "Stability_100", x.lab = "Atmospheric Condition", plot.title = "100m threshold")
 #L threshold of 500
-plot.all.sites.bar(all.sites = all.sites.ae, desired.var = "Stability_500", x.lab = "Atmospheric Condition", plot.title = "Aerodynamic Method")
+plot.all.sites.bar(all.sites = all.sites.ae, desired.var = "Stability_500", x.lab = "Atmospheric Condition", plot.title = "500m threshold")
 #SINGLE SITE
 #L threshold of 100
 plot.all.sites.bar(all.sites = all.sites.ae %>% filter(site == "KONZ"), desired.var = "Stability_100", x.lab = "Atmospheric Condition", plot.title = "Aerodynamic Method")
@@ -276,7 +274,7 @@ plot.temp.response(model = model.TRC.EC.WP, site = all.sites.ae %>% filter(gas =
 
 # PLOT DIURNAL CYCLE ------------------------------------------------------
 #plot diurnal averages for all sites
-#calculate diurnal averages across sites
+#calculate diurnal averages across sites for EC using turbulent flux
 #NOTE TOOL DOES NOT HAVE ENOUGH DATA FOR 24 HR DIURNAL CYCLE, MISSING HOURS 05 AND 00
 #OPTION TO FILTER DATA BEFORE TAKING HOURLY AVERAGE BY FILTERING COLUMN IQR.flag == "0" or spike.flag == "0"
 #ALL SITES
