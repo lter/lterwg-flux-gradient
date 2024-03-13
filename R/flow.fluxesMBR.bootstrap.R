@@ -72,48 +72,14 @@ MBRflux_align = dplyr::mutate(MBRflux_align,
                               hour = lubridate::hour(match_time),
                               year = lubridate::year(match_time))
 
-ggplot(MBRflux_align) +
-  geom_point(aes(match_time, dConc_CO2)) + 
-  labs(title = site) +
-  theme_minimal()
-
-ggplot(MBRflux_align) +
-  geom_point(aes(match_time, vari_A_CO2)) + 
-  ylim(c(0,100)) + 
-  labs(title = site) +
-  theme_minimal()
-
-ggplot(MBRflux_align) +
-  geom_point(aes(dConc_CO2, vari_A_CO2)) +
-  ylim(c(0,100)) + 
-  labs(title = site) +
-  theme_minimal()
-
-ggplot(MBRflux_align) +
-  geom_point(aes(match_time, dConc_H2O)) + 
-  labs(title = site) +
-  theme_minimal()
-
-ggplot(MBRflux_align) +
-  geom_point(aes(match_time, vari_A_H2O)) + 
-  ylim(c(0,100)) + 
-  labs(title = site) +
-  theme_minimal()
-
-ggplot(MBRflux_align) +
-  geom_point(aes(dConc_H2O, vari_A_H2O)) +
-  ylim(c(0,100)) + 
-  labs(title = site) +
-  theme_minimal()
-
+# Sample over concentration mean & variance 
 FCO2_MBR_H2Otrace = FH2O_MBR_CO2trace = FCH4_MBR_CO2trace = FCH4_MBR_H2Otrace = vector()
-
 FCH4_MBR_H2Otrace_mn = FCH4_MBR_H2Otrace_lo = FCH4_MBR_H2Otrace_hi = vector()
 FCO2_MBR_H2Otrace_mn = FCO2_MBR_H2Otrace_lo = FCO2_MBR_H2Otrace_hi = vector()
+nsamp = 1000
 
-for(i in 1:nrow(MBRflux_align)){
-  nsamp = 1000
-  
+for(i in 1:nrow(MBRflux_align)){ # loop over time to sample conc 
+  # Draw nsamp from normal with mean & sd of concentration
   cConc_CO2_A = rnorm(n = nsamp, mean = MBRflux_align$mean_A_CO2[i],
                       sd = MBRflux_align$vari_A_CO2[i]^2)
   cConc_CO2_B = rnorm(n = nsamp, mean = MBRflux_align$mean_B_CO2[i],
@@ -132,17 +98,23 @@ for(i in 1:nrow(MBRflux_align)){
                       sd = MBRflux_align$vari_B_CH4[i]^2)
   dConc_CH4 = cConc_CH4_A-cConc_CH4_B
   
-  for(j in 1:nsamp){
+  for(j in 1:nsamp){ # loop over sampled conc to calculate flux
     # Calculate MBR fluxes for all tracer combos
-    #TO DO: UPDATE TO INCLUDE CALCULATIONS WITH BOTH TURBULENT AND TOTAL FLUXES, ADD CALCULATION OF STORAGE FLUX
-    FCO2_MBR_H2Otrace[j] = MBRflux_align$FH2O_interp_H2O[i] * 
-      (dConc_CO2[j] / dConc_H2O[j])
-    # FH2O_MBR_CO2trace[j] = MBRflux_align$FC_interp_CO2[i] * 
-    #   (dConc_H2O[j] / dConc_CO2[j])
-    # FCH4_MBR_CO2trace[j] = MBRflux_align$FC_interp_CO2[i] * 
-    #   (dConc_CH4[j] /dConc_CO2[j])
-    FCH4_MBR_H2Otrace[j] = MBRflux_align$FH2O_interp_H2O[i] * 
-      (dConc_CH4[j] / dConc_H2O[j])
+    FCO2_MBR_H2Otrace[j] = ifelse(!is.na(MBRflux_align$FH2O_interp_H2O[i] * 
+      (dConc_CO2[j] / dConc_H2O[j])),MBRflux_align$FH2O_interp_H2O[i] * 
+        (dConc_CO2[j] / dConc_H2O[j]),NA)
+    
+    FH2O_MBR_CO2trace[j] = ifelse(!is.na(MBRflux_align$FC_interp_CO2[i] *
+      (dConc_H2O[j] / dConc_CO2[j])),MBRflux_align$FC_interp_CO2[i] *
+        (dConc_H2O[j] / dConc_CO2[j]), NA)
+    
+    FCH4_MBR_CO2trace[j] = ifelse(!is.na(MBRflux_align$FC_interp_CO2[i] *
+      (dConc_CH4[j] /dConc_CO2[j])), MBRflux_align$FC_interp_CO2[i] *
+        (dConc_CH4[j] /dConc_CO2[j]), NA)
+    
+    FCH4_MBR_H2Otrace[j] = ifelse(!is.na(MBRflux_align$FH2O_interp_H2O[i] * 
+      (dConc_CH4[j] / dConc_H2O[j])), MBRflux_align$FH2O_interp_H2O[i] * 
+        (dConc_CH4[j] / dConc_H2O[j]), NA)
   }
   
   #calculate lower and upper bounds of confidence interval
@@ -158,6 +130,22 @@ for(i in 1:nrow(MBRflux_align)){
   FCO2_MBR_H2Otrace_hi[i] = mean(FCO2_MBR_H2Otrace) +
     qt(0.95,df=nsamp-1)*sd(FCO2_MBR_H2Otrace)/sqrt(nsamp)
 }
+
+MBRflux_align$FCH4_MBR_H2Otrace_mn = FCH4_MBR_H2Otrace_mn
+MBRflux_align$FCH4_MBR_H2Otrace_lo = FCH4_MBR_H2Otrace_lo
+MBRflux_align$FCH4_MBR_H2Otrace_hi = FCH4_MBR_H2Otrace_hi
+
+MBRflux_align$FCO2_MBR_H2Otrace_mn = FCO2_MBR_H2Otrace_mn
+MBRflux_align$FCO2_MBR_H2Otrace_lo = FCO2_MBR_H2Otrace_lo
+MBRflux_align$FCO2_MBR_H2Otrace_hi = FCO2_MBR_H2Otrace_hi
+
+MBRflux_align$year = lubridate::year(MBRflux_align$match_time)
+ggplot(dplyr::filter(MBRflux_align, year==2023)) +
+  geom_point(aes(match_time, FCO2_MBR_H2Otrace_mn)) +
+  geom_errorbar(aes(match_time, ymin=FCO2_MBR_H2Otrace_lo,
+                    ymax = FCO2_MBR_H2Otrace_hi),color="darkblue") +
+  #geom_line(aes(match_time, FCO2_MBR_H2Otrace_lo),color="darkblue") +
+  ylim(c(-50,50))
 
 # -------- Save and zip the file to the temp directory. Upload to google drive. -------
 fileSave <- fs::path(dirTmp,paste0(site,'_MBRflux.RData'))
