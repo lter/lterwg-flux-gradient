@@ -13,17 +13,17 @@ library(ggh4x)
 library(googledrive)
 
 # Load functions in this repo
-source(file.path("R/plot.all.sites.1to1.R"))
-source(file.path("R/plot.single.site.1to1.R"))
-source(file.path("R/plot.all.sites.bar.R"))
-source(file.path("R/light.response.curve.R"))
-source(file.path("R/plot.light.response.R"))
-source(file.path("R/temp.response.curve.R"))
-source(file.path("R/plot.temp.response.R"))
-source(file.path("R/plot.all.sites.diurnal.R"))
-source(file.path("R/calculate.all.sites.diurnal.avg.R"))
-source(file.path("R/all.sites.light.response.curve.R"))
-source(file.path("R/all.sites.temp.response.curve.R"))
+source(file.path("functions/plot.all.sites.1to1.R"))
+source(file.path("functions/plot.single.site.1to1.R"))
+source(file.path("functions/plot.all.sites.bar.R"))
+source(file.path("functions/light.response.curve.R"))
+source(file.path("functions/plot.light.response.R"))
+source(file.path("functions/temp.response.curve.R"))
+source(file.path("functions/plot.temp.response.R"))
+source(file.path("functions/plot.all.sites.diurnal.R"))
+source(file.path("functions/calculate.all.sites.diurnal.avg.R"))
+source(file.path("functions/all.sites.light.response.curve.R"))
+source(file.path("functions/all.sites.temp.response.curve.R"))
 
 #Pull data from gdrive
 # Authenticate with Google Drive and get site data

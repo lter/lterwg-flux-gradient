@@ -15,14 +15,14 @@ library(R.utils)
 library(gtools)
 library(googledrive)
 #load in data compiling functions
-source(file.path("SiteDF.R"))
-source(file.path("SiteAttributes.R"))
-source(file.path("cont9min.R"))
-source(file.path("metCont30min.R"))
-source(file.path("met1min.R"))
-source(file.path("Compile1min.R"))
-source(file.path("Compile30min.R"))
-#source(file.path("Compile9min.R"))
+source(file.path("functions/SiteDF.R"))
+source(file.path("functions/SiteAttributes.R"))
+source(file.path("functions/cont9min.R"))
+source(file.path("functions/metCont30min.R"))
+source(file.path("functions/met1min.R"))
+source(file.path("functions/Compile1min.R"))
+source(file.path("functions/Compile30min.R"))
+source(file.path("functions/Compile9min.R"))
 #set NEON sitecode
 #this sitecode is used to grab existing files and create new ones MAKE SURE IT MATCHES
 sitecode <- 'TOOL'

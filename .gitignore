@@ -33,16 +33,18 @@ vignettes/*.pdf
 test_download.R
 Harvard_Forest
 Konza
-# Data
-data/
-Data/
-### Ignore testing folder for scripts. Roisin added
-testing/
+
 # Ignore certain file types
 *.gz
 *.xml
 *.Rdata
 .RDataTmp
+*.jpeg
+*.jpg
+*.png
 
 # Ignore certain folders
 methane/
+data/
+Data/
+testing/

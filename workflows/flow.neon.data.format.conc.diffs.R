@@ -11,8 +11,8 @@ library(foreach)
 library(doParallel)
 
 # Load functions in this repo
-source('./R/interp_fluxes.R')
-source('./R/aggregate_averages.R')
+source(file.path("functions/interp_fluxes.R"))
+source(file.path("functions/aggregate_averages.R"))
 
 # Final note: This script takes approx 45 min to run per site. 
 # -------------------------------------------------------

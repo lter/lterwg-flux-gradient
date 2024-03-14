@@ -16,18 +16,8 @@ eddydiffWP <- function(sitecode, min9){
   data.cols <- c("roughLength_interp", grep("ubar", names(H2O), value = TRUE))
   #remove NAs
   H2O <- H2O[complete.cases(H2O[,data.cols]),]
-  #DEPRECIATED CODE: TOWER HEIGHT NOW ADDED IN flow.formatConcentrationDiffs.R
-  # #grab only tower heights and positions for matching
-  # tower.heights <- attr.df %>% select(DistZaxsLvlMeasTow, TowerPosition)
-  # #adding place holder identifier to create tower height columns
-  # H2O$TowerHeight_A <- "hold"
-  # H2O$TowerHeight_B <- "hold"
-  # for(i in 1:dim(attr.df)[1]){
-  #   #loop over position A
-  #   H2O[which(H2O$TowerPosition_A == i),"TowerHeight_A"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
-  #   #loop over position B
-  #   H2O[which(H2O$TowerPosition_B == i),"TowerHeight_B"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
-  # }
+  #calculate obukhov length and stability parameters
+  H2O <- calculate.stability.correction(gas = H2O)
   #calculate eddy diffusivty using WP
   #assuming von karman constant is 0.4
   k = 0.4
@@ -42,7 +32,7 @@ eddydiffWP <- function(sitecode, min9){
     ubar = as.numeric(H2O[j,grep(c.name, names(H2O))])
     z = as.numeric(H2O[j,"TowerHeight_A"])
     
-    H2O[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(H2O[j,"GeometricMean_AB"])/log(z/as.numeric(H2O[j,"roughLength_interp"])))
+    H2O[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(H2O[j,"GeometricMean_AB"])/(log(z/as.numeric(H2O[j,"roughLength_interp"]))*H2O[j,"phih"]))
   }
   #set EddyDiff as numeric
   H2O$EddyDiff <- as.numeric(H2O$EddyDiff)
@@ -50,16 +40,8 @@ eddydiffWP <- function(sitecode, min9){
   CO2 <- min9[[which(names(min9) == "CO2")]]
   #remove NAs
   CO2 <- CO2[complete.cases(CO2[,data.cols]),]
-  #DEPRECIATED CODE: TOWER HEIGHT NOW ADDED IN flow.formatConcentrationDiffs.R
-  # #adding place holder identifier to create tower height columns
-  # CO2$TowerHeight_A <- "hold"
-  # CO2$TowerHeight_B <- "hold"
-  # for(i in 1:dim(attr.df)[1]){
-  #   #loop over position A
-  #   CO2[which(CO2$TowerPosition_A == i),"TowerHeight_A"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
-  #   #loop over position B
-  #   CO2[which(CO2$TowerPosition_B == i),"TowerHeight_B"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
-  # }
+  #calculate obukhov length and stability columns
+  CO2 <- calculate.stability.correction(gas = CO2)
   #calculate eddy diffusivty using WP
   #assuming von karman constant is 0.4
   k = 0.4
@@ -73,7 +55,7 @@ eddydiffWP <- function(sitecode, min9){
     ubar = as.numeric(CO2[j,grep(c.name, names(CO2))])
     z = as.numeric(CO2[j,"TowerHeight_A"])
     
-    CO2[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(CO2[j,"GeometricMean_AB"])/log(z/as.numeric(CO2[j,"roughLength_interp"])))
+    CO2[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(CO2[j,"GeometricMean_AB"])/(log(z/as.numeric(CO2[j,"roughLength_interp"]))*CO2[j,"phih"]))
   }
   #set EddyDiff as numeric
   CO2$EddyDiff <- as.numeric(CO2$EddyDiff)
@@ -81,16 +63,8 @@ eddydiffWP <- function(sitecode, min9){
   CH4 <- min9[[which(names(min9) == "CH4")]]
   #remove NAs
   CH4 <- CH4[complete.cases(CH4[,data.cols]),]
-  #DEPRECIATED CODE: TOWER HEIGHT NOW ADDED IN flow.formatConcentrationDiffs.R
-  # #adding place holder identifier to create tower height columns
-  # CH4$TowerHeight_A <- "hold"
-  # CH4$TowerHeight_B <- "hold"
-  # for(i in 1:dim(attr.df)[1]){
-  #   #loop over position A
-  #   CH4[which(CH4$TowerPosition_A == i),"TowerHeight_A"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
-  #   #loop over position B
-  #   CH4[which(CH4$TowerPosition_B == i),"TowerHeight_B"] <- tower.heights[which(tower.heights$TowerPosition == i),1]
-  # }
+  #calculate obukhov length and stability parameter
+  CH4 <- calculate.stability.correction(gas = CH4)
   #calculate eddy diffusivty using WP
   #assuming von karman constant is 0.4
   k = 0.4
@@ -104,7 +78,7 @@ eddydiffWP <- function(sitecode, min9){
     ubar = as.numeric(CH4[j,grep(c.name, names(CH4))])
     z = as.numeric(CH4[j,"TowerHeight_A"])
     
-    CH4[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(CH4[j,"GeometricMean_AB"])/log(z/as.numeric(CH4[j,"roughLength_interp"])))
+    CH4[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(CH4[j,"GeometricMean_AB"])/(log(z/as.numeric(CH4[j,"roughLength_interp"]))*CH4[j,"phih"]))
   }
   #set EddyDiff as numeric
   CH4$EddyDiff <- as.numeric(CH4$EddyDiff)
