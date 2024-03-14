@@ -1,5 +1,5 @@
 # Pull data from google drive
-email <- 'sparklelmalone@gmail.com'
+email <- 'alexisrose0525@gmail.com'
 #copy this browser url from the site folder on the shared G drive (located at https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3) you wish to upload your zip files to
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1mgqJps4HvjplsE7SXBvjAzm6n3BXC98I")
 #add userinfo for saving and uploading the file to G drive
@@ -16,6 +16,7 @@ source(file.path("R/eddydiffAE.R"))
 source(file.path("R/eddydiffWP.R"))
 source(file.path("R/FG_AE.WP.R"))
 source(file.path("R/computeFG.AE.WP.R"))
+source(file.path("R/calculate.stability.correction.R"))
 
 # Final note: This script takes approx 10 min to run per site. 
 # -------------------------------------------------------
@@ -56,20 +57,20 @@ load(fileIn)
 
 #call function to calculate eddy diffusivity using AE method
 #add in calculation for all gas concentrations
-min9.K.AE.list <- eddydiffAE(sitecode = sitecode, min9 = min9Diff.list)
+#min9.K.AE.list <- eddydiffAE(sitecode = sitecode, min9 = min9Diff.list)
 #call function to calculate eddy diffusivity using WP method
 min9.K.WP.list <- eddydiffWP(sitecode = sitecode, min9 = min9Diff.list)
 #call function to compute fluxes, function contains option to manual set name of eddy diffusivity column default is "EddyDiff"
-min9.FG.AE.list <- computeFG.AE.WP(min9.K = min9.K.AE.list)
+#min9.FG.AE.list <- computeFG.AE.WP(min9.K = min9.K.AE.list)
 min9.FG.WP.list <- computeFG.AE.WP(min9.K = min9.K.WP.list)
 #save as R.data objects
-save(min9.FG.AE.list, file = file.path("data", sitecode, paste0(sitecode,"_AE_", user, "_", Sys.Date(),".Rdata")))
+#save(min9.FG.AE.list, file = file.path("data", sitecode, paste0(sitecode,"_AE_", user, "_", Sys.Date(),".Rdata")))
 save(min9.FG.WP.list, file = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".Rdata")))
 #zip R.data objects
-zip(zipfile = file.path("data", sitecode, paste0(sitecode,"_AE_", user, "_", Sys.Date(),".zip")), files = file.path("data", sitecode, paste0(sitecode,"_AE_", user, "_", Sys.Date(),".Rdata")))
-zip(zipfile = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".zip")), files = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".Rdata")))
+# zip(zipfile = file.path("data", sitecode, paste0(sitecode,"_AE_", user, "_", Sys.Date(),".zip")), files = file.path("data", sitecode, paste0(sitecode,"_AE_", user, "_", Sys.Date(),".Rdata")))
+# zip(zipfile = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".zip")), files = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".Rdata")))
 #upload to Google Drive
 #IMPORTANT REMINDER if you have not gone through the process of valdiating your email with googledrive in R this code will not work please refer to https://nceas.github.io/scicomp.github.io/tutorials.html#using-the-googledrive-r-package
 #NOTE: you will be asked to re authenticate if your OAuth token is stale, select your already authenticated email from the list
-googledrive::drive_upload(media = file.path("data", sitecode, paste0(sitecode,"_AE_", user, "_", Sys.Date(),".zip")), overwrite = T, path = drive_url)
-googledrive::drive_upload(media = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".zip")), overwrite = T, path = drive_url)
+#googledrive::drive_upload(media = file.path("data", sitecode, paste0(sitecode,"_AE_", user, "_", Sys.Date(),".Rdata")), overwrite = T, path = drive_url)
+googledrive::drive_upload(media = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".Rdata")), overwrite = T, path = drive_url)

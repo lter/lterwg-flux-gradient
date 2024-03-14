@@ -4,7 +4,7 @@
 # Script Authors: Sparkle Malone, Nick Lyon
 
 # PURPOSE:
-## Harmonize (i.e., synonmize column names) of PI-provided CH4 data
+## Harmonize (i.e., synonymize column names) of PI-provided CH4 data
 ## Desired format matches NEON data format
 
 ## ----------------------------- ##
@@ -13,7 +13,7 @@
 
 # Load needed libraries
 # install.packages("librarian")
-librarian::shelf(tidyverse, googledrive, ltertools)
+librarian::shelf(tidyverse, googledrive, lter/ltertools)
 
 # Clear environment
 rm(list = ls())
@@ -28,7 +28,7 @@ dir.create(path = file.path("methane", "raw_methane"), showWarnings = F)
 
 # Identify desired files
 ch4_files <- dplyr::bind_rows(
-  googledrive::drive_ls(path = googledrive::as_id("https://drive.google.com/drive/u/0/folders/1MzyDvXudL-A3ZGlzukbhil19fsx3s7Mk")),
+  # googledrive::drive_ls(path = googledrive::as_id("https://drive.google.com/drive/u/0/folders/1MzyDvXudL-A3ZGlzukbhil19fsx3s7Mk")),
   googledrive::drive_ls(path = googledrive::as_id("https://drive.google.com/drive/u/0/folders/1qPrBaZxX7XBBKq77eEmVXALSoDmUB2_I")),
   googledrive::drive_ls(path = googledrive::as_id("https://drive.google.com/drive/u/0/folders/1AOct-UbwpzkuLMT9EnEspRX_QnX07T4G")) ) %>% 
   # Keep only CSVs / Excel files
