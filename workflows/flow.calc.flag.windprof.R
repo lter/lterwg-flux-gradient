@@ -17,7 +17,6 @@ source(file.path("functions/FG_AE.WP.R"))
 source(file.path("functions/computeFG.AE.WP.R"))
 source(file.path("functions/calculate.stability.correction.R"))
 
-
 # Authenticate with Google Drive
 site="HARV"
 googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
@@ -60,7 +59,9 @@ min9.K.WP.list <- eddydiffWP(sitecode = sitecode, min9 = min9Diff.list)
 ### JACKIE PUT BOOTSTRAP SAMPLING HERE
 
 #call function to compute fluxes, function contains option to manual set name of eddy diffusivity column default is "EddyDiff"
-min9.FG.WP.list <- computeFG.AE.WP(min9.K = min9.K.WP.list)
+ 
+min9.FG.WP.list <- computeFG.AE.WP(min9.K = min9.K.WP.list, boot_onezero = 1)
+
 #save as R.data objects
 save(min9.FG.WP.list, file = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".Rdata")))
 #zip R.data objects
