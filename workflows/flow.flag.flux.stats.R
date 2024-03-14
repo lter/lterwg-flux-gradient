@@ -16,15 +16,15 @@ library(changepoint)
 #library(REddyProc)
 
 # Load functions in this repo
-source(file.path("R/IQR.outlier.flag.R"))
-source(file.path("R/stability.condition.R"))
-source(file.path("R/calculate.rmse.R"))
-source(file.path("R/spike.detection.R"))
-source(file.path("R/ustar.threshold.interp.R"))
-source(file.path("R/run.quality.R"))
-source(file.path("R/add.hour.column.R"))
-source(file.path("R/calculate.flux.diff.add.flag.R"))
-source(file.path("R/calculate.IQR.add.flag.R"))
+source(file.path("functions/IQR.outlier.flag.R"))
+source(file.path("functions/stability.condition.R"))
+source(file.path("functions/calculate.rmse.R"))
+source(file.path("functions/spike.detection.R"))
+source(file.path("functions/ustar.threshold.interp.R"))
+source(file.path("functions/run.quality.R"))
+source(file.path("functions/add.hour.column.R"))
+source(file.path("functions/calculate.flux.diff.add.flag.R"))
+source(file.path("functions/calculate.IQR.add.flag.R"))
 
 #Pull data from gdrive
 # Authenticate with Google Drive and get site data
