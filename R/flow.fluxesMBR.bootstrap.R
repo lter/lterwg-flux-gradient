@@ -1,7 +1,7 @@
 # Pull data from google drive
 email <- 'jaclyn_matthes@g.harvard.edu'
 #email <- 'kyle.delwiche@gmail.com'
-site <- 'KONZ'
+site <- 'TOOL'
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Requires packages: fs, googledrive
@@ -187,16 +187,30 @@ MBRflux_align$dConc_H2O_sd = dConc_H2O_sd
 MBRflux_align$dConc_CH4_mean = dConc_CH4_mean
 MBRflux_align$dConc_CH4_sd = dConc_CH4_sd
 
-# MBRflux_align$year = lubridate::year(MBRflux_align$match_time)
-# MBRflux_align$dConc_CO2_bin = ifelse((MBRflux_align$dConc_CO2_mean-MBRflux_align$dConc_CO2_sd*2)<0 &
-#                                        (MBRflux_align$dConc_CO2_mean+MBRflux_align$dConc_CO2_sd*2)>0,1,0)
-# 
-# MBRflux_align$dConc_H2O_bin = ifelse((MBRflux_align$dConc_H2O_mean-MBRflux_align$dConc_H2O_sd*2)<0 &
-#                                        (MBRflux_align$dConc_H2O_mean+MBRflux_align$dConc_H2O_sd*2)>0,1,0)
-# 
-# MBRflux_align$dConc_CH4_bin = ifelse((MBRflux_align$dConc_CH4_mean-MBRflux_align$dConc_CH4_sd*2)<0 &
-#                                        (MBRflux_align$dConc_CH4_mean+MBRflux_align$dConc_CH4_sd*2)>0,1,0)
+MBRflux_align$dConc_CO2_bin = ifelse((MBRflux_align$dConc_CO2_mean-MBRflux_align$dConc_CO2_sd*2)<0 &
+                                       (MBRflux_align$dConc_CO2_mean+MBRflux_align$dConc_CO2_sd*2)>0,1,0)
 
+MBRflux_align$dConc_H2O_bin = ifelse((MBRflux_align$dConc_H2O_mean-MBRflux_align$dConc_H2O_sd*2)<0 &
+                                       (MBRflux_align$dConc_H2O_mean+MBRflux_align$dConc_H2O_sd*2)>0,1,0)
+
+MBRflux_align$dConc_CH4_bin = ifelse((MBRflux_align$dConc_CH4_mean-MBRflux_align$dConc_CH4_sd*2)<0 &
+                                       (MBRflux_align$dConc_CH4_mean+MBRflux_align$dConc_CH4_sd*2)>0,1,0)
+
+ggplot(data=dplyr::filter(MBRflux_align, dConc_H2O_bin==0)) +
+  geom_point(aes(x=FC_turb_interp_CO2, y=FCO2_MBR_H2Otrace_mean)) +
+  geom_abline(aes(intercept=0,slope=1),lty=2) +
+  ylim(c(-10,10)) +
+  xlim(c(-10,10)) +
+  labs(title=site) +
+  theme_minimal()
+
+ggplot(data=dplyr::filter(MBRflux_align, dConc_CO2_bin==0)) +
+  geom_point(aes(x=FH2O_interp_H2O, y=FH2O_MBR_CO2trace_mean)) +
+  geom_abline(aes(intercept=0,slope=1),lty=2) +
+  ylim(c(-1,5)) +
+  xlim(c(-1,5)) +
+  labs(title = site) +
+  theme_minimal()
 
 # -------- Save and zip the file to the temp directory. Upload to google drive. -------
 fileSave <- fs::path(dirTmp,paste0(site,'_MBRflux_bootstrap.RData'))
