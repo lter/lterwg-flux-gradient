@@ -43,6 +43,9 @@ testing/
 *.xml
 *.Rdata
 .RDataTmp
+*.jpeg
+*.jpg
+*.png
 
 # Ignore certain folders
 methane/
