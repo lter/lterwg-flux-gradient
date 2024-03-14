@@ -13,7 +13,7 @@
 
 ## Data Frame Organization
 - Column name should use snake case include units, last "_" proceeds units (i.e. var_molperm3)
--     no "- or /" in column names
+- no "- or /" in column names
 
 ## Workflow Folder
 
@@ -34,7 +34,7 @@
 ## Exploratory Folder
 - Wild West, this is where preliminary functions and workflows are stored
 
-## Depreciated Folder
+## Deprecated Folder
 - This is where unused workflows and functions are stored
 
 **NOTE**: Feel free to contact Nick and Angel during their office hours for coding/git help
