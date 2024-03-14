@@ -1,4 +1,4 @@
-#' Site.DF
+#' compile.neon.data
 #'
 #' @param sitecode NEON site code
 #' @param h5files list of h5 filepaths
@@ -8,22 +8,22 @@
 #' 
 #'
 #' @author Alexis Helgeson, Sam Jurado, David Reed, and Sparkle Malone
-Site.DF <- function(h5files, sitecode, frequency = "30min"){
+compile.neon.data <- function(h5files, sitecode, frequency = "30min"){
   
   #pulls 30m concentration, flux, and met data
   if(frequency == "30min"){
-    DATA <- Compile30min(h5files = h5files, sitecode = sitecode)
+    DATA <- compile.neon.data.30min(h5files = h5files, sitecode = sitecode)
   }
     
   
   #pulls 9m CH4, CO2, H2O gas concentrations
   if(frequency == "9min"){
-    DATA <- Compile9min(h5files = h5files, sitecode = sitecode)
+    DATA <- compile.neon.data.9min.6min(h5files = h5files, sitecode = sitecode)
   }
   
   #pulls 9m CH4, CO2, H2O gas concentrations
   if(frequency == "1min"){
-    DATA <- Compile1min(h5files = h5files, sitecode = sitecode)
+    DATA <- compile.neon.data.1min(h5files = h5files, sitecode = sitecode)
   }
   
   return(DATA)
