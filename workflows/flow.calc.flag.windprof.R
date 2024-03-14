@@ -1,10 +1,10 @@
 # Pull data from google drive
-email <- 'alexisrose0525@gmail.com'
-#copy this browser url from the site folder on the shared G drive (located at https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3) you wish to upload your zip files to
-drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1mgqJps4HvjplsE7SXBvjAzm6n3BXC98I")
-#add userinfo for saving and uploading the file to G drive
-user <- "AH"
-sitecode <- 'TOOL'
+email <- 'jaclyn_matthes@g.harvard.edu'
+# #copy this browser url from the site folder on the shared G drive (located at https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3) you wish to upload your zip files to
+# #add userinfo for saving and uploading the file to G drive
+# user <- "AH"
+# sitecode <- 'KONZ'
+# drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1mgqJps4HvjplsE7SXBvjAzm6n3BXC98I")
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: googledrive
@@ -17,16 +17,24 @@ source(file.path("functions/FG_AE.WP.R"))
 source(file.path("functions/computeFG.AE.WP.R"))
 source(file.path("functions/calculate.stability.correction.R"))
 
-# Final note: This script takes approx 10 min to run per site. 
-# -------------------------------------------------------
-# Authenticate with Google Drive and get site data
+
+# Authenticate with Google Drive
+site="HARV"
 googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
-site_folder <- googledrive::drive_ls(path = drive_url)
-#site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==sitecode])
-dirTmp <- fs::path(tempdir(),sitecode)
+drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
+data_folder <- googledrive::drive_ls(path = drive_url)
+site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==site])
+
+# Download data
+dirTmp <- fs::path(tempdir(),site)
 dir.create(dirTmp)
-#focal_file = "KONZ_30m.zip"
-for(focal_file in site_folder$name){
+
+# Uncomment the next line and comment the following line if you want all the files
+#fileDnld <- site_folder$name 
+fileDnld <- paste0(site,'_aligned_conc_flux_9min.zip')
+
+message(paste0('Downloading aligned concentration & flux data for ',site))
+for(focal_file in fileDnld){
   
   # Find the file identifier for that file
   file_id <- subset(site_folder, name == focal_file)
@@ -40,19 +48,11 @@ for(focal_file in site_folder$name){
   if(grepl(pattern='.zip',focal_file)){
     utils::unzip(pathDnld,exdir=dirTmp)
   }
-  
 }
-# Load 9 min interpolated data and attribute info
-#problem loading in .Rdata objects currently being saved to 2 different directories?
-#for KONZ files are unzipped in the same location
-fileIn <- fs::path(dirTmp, paste0(sitecode,'_aligned_conc_flux_9min.Rdata'))
+
+# Load the data 
+fileIn <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min.RData'))
 load(fileIn)
-# fileIn <- fs::path(dirTmp,'data',sitecode,paste0(sitecode,'_attr.Rdata'))
-# load(fileIn)
-#if already downloaded data off of G drive or used flow.formatConcentrationDiffs.R
-#load in interpolated 9 min data
-#load(file.path("data", sitecode, paste0(sitecode,"_min9Diff.Rdata")))
-# load(file.path("data", sitecode, "KONZ_attr.Rdata"))
 
 #call function to calculate eddy diffusivity using WP method
 min9.K.WP.list <- eddydiffWP(sitecode = sitecode, min9 = min9Diff.list)
