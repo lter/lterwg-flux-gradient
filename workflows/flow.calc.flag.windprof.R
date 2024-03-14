@@ -1,10 +1,5 @@
 # Pull data from google drive
 email <- 'jaclyn_matthes@g.harvard.edu'
-# #copy this browser url from the site folder on the shared G drive (located at https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3) you wish to upload your zip files to
-# #add userinfo for saving and uploading the file to G drive
-# user <- "AH"
-# sitecode <- 'KONZ'
-# drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1mgqJps4HvjplsE7SXBvjAzm6n3BXC98I")
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: googledrive
@@ -18,7 +13,7 @@ source(file.path("functions/computeFG.AE.WP.R"))
 source(file.path("functions/calculate.stability.correction.R"))
 
 # Authenticate with Google Drive
-site="HARV"
+sitecode <- "HARV"
 googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
 data_folder <- googledrive::drive_ls(path = drive_url)

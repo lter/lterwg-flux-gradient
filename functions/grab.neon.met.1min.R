@@ -1,4 +1,4 @@
-#' met.1min
+#' grab.neon.met.1min
 #'
 #' @param hd.file file type h5 containg NEON site specific data
 #' @param sitecode NEON site code
@@ -7,7 +7,7 @@
 #'
 #' @return df containing high frequnecy site met
 #'
-met.1min <- function(hd.file, sitecode, startdate, enddate){
+grab.neon.met.1min <- function(hd.file, sitecode, startdate, enddate){
   #lists the contents of hdf5 file and returns a df with file contents
   test.df <- h5ls(hd.file,
                   recursive = TRUE,

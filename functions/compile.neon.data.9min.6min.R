@@ -1,4 +1,4 @@
-#' Compile9min 
+#' compile.neon.data.9min.6min 
 #'
 #' @param h5files list containing monthly h5 files
 #' @param sitecode NEON site code 
@@ -6,7 +6,7 @@
 #' @return list of dataframes containing CH4, CO2, H2O gas concentration at 9 min resolution
 #'
 #' @author Alexis Helgeson
-Compile9min <- function(h5files, sitecode){
+compile.neon.data.9min.6min <- function(h5files, sitecode){
   #create empty list to store monthly data
   ALL.data = list()
   
@@ -14,7 +14,7 @@ Compile9min <- function(h5files, sitecode){
   for(i in 1:length(h5files)){
     hd.file <- h5files[i]
     print(i)
-    month.data <- cont.9min(hd.file = hd.file, sitecode = sitecode)
+    month.data <- grab.neon.gas.9min.6min(hd.file = hd.file, sitecode = sitecode)
     
     ALL.data[[i]] <- month.data
     
