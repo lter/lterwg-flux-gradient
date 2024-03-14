@@ -60,6 +60,9 @@ load(fileIn)
 #min9.K.AE.list <- eddydiffAE(sitecode = sitecode, min9 = min9Diff.list)
 #call function to calculate eddy diffusivity using WP method
 min9.K.WP.list <- eddydiffWP(sitecode = sitecode, min9 = min9Diff.list)
+
+### JACKIE PUT BOOTSTRAP SAMPLING HERE
+
 #call function to compute fluxes, function contains option to manual set name of eddy diffusivity column default is "EddyDiff"
 #min9.FG.AE.list <- computeFG.AE.WP(min9.K = min9.K.AE.list)
 min9.FG.WP.list <- computeFG.AE.WP(min9.K = min9.K.WP.list)
