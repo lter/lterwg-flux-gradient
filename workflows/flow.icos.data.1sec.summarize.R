@@ -17,15 +17,17 @@ librarian::shelf(tidyverse, googledrive)
 # Force authentication with Google Drive
 googledrive::drive_auth()
 
+# Ensure data folder exists
+dir.create(path = file.path("data"), showWarnings = F)
+
 # Clear environment
 rm(list = ls())
-
 
 ## ----------------------------------- ##
 # ICOS 1 Second CH4 Summary ----
 ## ----------------------------------- ##
 
-
+# Read in from local 
 
 
 
