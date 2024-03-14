@@ -1,4 +1,4 @@
-#' calculate.rmse
+#' calc.rmse
 #'
 #' @param site df of calculated flux from specific site taken from Validation df
 #'
@@ -7,7 +7,7 @@
 #'
 #' @author Alexis Helgeson
 #' 
-calculate.rmse <- function(site){
+calc.rmse <- function(site){
   #calculate RMSE for CO2
   site.CO2 <- site %>% filter(gas == "CO2")
   site.CO2$residual <- site.CO2$FC_turb_interp - site.CO2$FG

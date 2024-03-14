@@ -1,4 +1,4 @@
-#' ustar.threshold.interp
+#' calc.flag.ustar.thres
 #'
 #' @param site df containing site NEE and PAR data
 #'
@@ -6,7 +6,7 @@
 #'
 #'
 #' @author Alexis Helgeson
-ustar.threshold.interp <- function(site){
+calc.flag.ustar.thres <- function(site){
   #ustar for CO2; calculate ustar based on eddy-covariance NEE flux and apply to other fluxes
   #filter to nighttime NEE flux
   site.CO2 <- site %>% filter(gas == "CO2" & day_night == "night")
