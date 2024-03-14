@@ -58,17 +58,10 @@ icos_v2 <- icos_df[-1, ] %>%
                                                format = "%Y-%m-%d %H:%M:%S")) %>%
   # Fix class of numeric columns
   dplyr::mutate(dplyr::across(.cols = -TIMESTAMP_ymd_hms,
-                              .fns = as.numeric)) %>% 
+                              .fns = as.numeric))
   # Calculate difference in time
-  ## Make row number column
-  dplyr::mutate(row_num = 1:nrow(.)) %>% 
-  ## Calculate start/end time within that
-  dplyr::group_by(row_num) %>%
-  dplyr::summarize(start = min(TIMESTAMP_ymd_hms), 
-            end = max(TIMESTAMP_ymd_hms)) %>%
-  dplyr::ungroup() %>%
-  # Calculate difference in time
-  dplyr::mutate(gap = difftime(time1 = end, time2 = dplyr::lag(start, default = NA), units = "secs"))
+  
+  
 
 # Re-check structure
 dplyr::glimpse(icos_v2)
