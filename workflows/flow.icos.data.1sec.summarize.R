@@ -39,9 +39,7 @@ icos_df <- icos_v0[1:1000, ]
 # Check structure
 dplyr::glimpse(icos_df)
 
-icos_df[1:2,]
-
-# Fix weird double header line
+# Handle general formatting issues
 icos_v2 <- icos_df[-1, ] %>% 
   # Make sure units are explicit
   dplyr::rename(TIMESTAMP_ymd_hms = TIMESTAMP,
@@ -59,14 +57,49 @@ icos_v2 <- icos_df[-1, ] %>%
   # Fix class of numeric columns
   dplyr::mutate(dplyr::across(.cols = -TIMESTAMP_ymd_hms,
                               .fns = as.numeric))
-  # Calculate difference in time
-  
-  
 
 # Re-check structure
 dplyr::glimpse(icos_v2)
 
+# Define the percentage of each minute of data to retain
+perc_keep <- 50
+
+# Drop desired percentage of each minute of sensor information
+icos_v3 <- icos_v2 %>% 
+  # Calculate difference in time (within tower levels)
+  dplyr::group_by(LEVEL) %>% 
+  dplyr::mutate(gap = as.numeric(difftime(time1 = TIMESTAMP_ymd_hms,
+                                          time2 = min(TIMESTAMP_ymd_hms, na.rm = T),
+                                          units = "secs")),
+                minute_group = ifelse(test = (gap == 0),
+                                      yes = 1, 
+                                      no = ceiling(gap / 60))) %>%
+  dplyr::ungroup() %>% 
+  # Identify % of "minute group"
+  dplyr::group_by(LEVEL, minute_group) %>% 
+  dplyr::mutate(relative_gap = seq_along(gap),
+                perc_val = (relative_gap / 60) * 100,
+                perc_flag = ifelse(test = ((relative_gap / 60) * 100) >= perc_keep,
+                                   yes = "keep", no = "drop")) %>% 
+  dplyr::ungroup() %>% 
+  # Filter out percentages beneath the desired percent threshold
+  dplyr::filter(perc_flag != "drop")
+
+# Check structure
+dplyr::glimpse(icos_v3)
+
+
+# Generate 30-minute groups
 
 
 
-s# End ----
+
+
+
+## tibble::view(icos_v2)
+
+psych::multi.hist(x = icos_v2$relative_gap)
+
+
+
+# End ----
