@@ -1,6 +1,7 @@
 # Spatial Homogeneity:
 
 library(googlesheets4)
+library(googledrive)
 library( sf)
 library(terra)
 library(AOI)
@@ -8,6 +9,8 @@ library(ggplot2)
 
 email <- 'sparklelmalone@gmail.com'
 googledrive::drive_auth(email = email) 
+
+ # https://nceas.github.io/scicomp.github.io/tutorials.html#problems-with-authorization
 
 Sites <- googlesheets4::read_sheet('https://docs.google.com/spreadsheets/d/1VkqT-PSdV8Ak_Ji4cdTDs7SZTNBOId4bZDJGMcXqrAI/edit?usp=drive_link')
 
