@@ -11,11 +11,11 @@ sitecode <- 'TOOL'
 library(dplyr)
 
 # Load functions in this repo
-source(file.path("R/MO_Length.R"))
-source(file.path("R/eddydiffWP.R"))
-source(file.path("R/FG_AE.WP.R"))
-source(file.path("R/computeFG.AE.WP.R"))
-source(file.path("R/calculate.stability.correction.R"))
+source(file.path("functions/MO_Length.R"))
+source(file.path("functions/eddydiffWP.R"))
+source(file.path("functions/FG_AE.WP.R"))
+source(file.path("functions/computeFG.AE.WP.R"))
+source(file.path("functions/calculate.stability.correction.R"))
 
 # Final note: This script takes approx 10 min to run per site. 
 # -------------------------------------------------------
