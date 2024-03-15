@@ -58,7 +58,7 @@ min9.K.WP.list <- calc.eddydiff.windprof(sitecode = sitecode, min9 = min9Diff.li
 min9.FG.WP.list <- calc.gas.aero.windprof.flux(min9.K = min9.K.WP.list, 
                                                bootstrap = 1, nsamp=1000)
 
-# Save calculated aerdynamic flux gradient fluxes as R.data objects
+# Save calculated wind profile flux gradient fluxes as R.data objects
 save(min9.FG.WP.list, file = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".Rdata")))
 #zip R.data objects
 zip(zipfile = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".zip")), files = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".Rdata")))
