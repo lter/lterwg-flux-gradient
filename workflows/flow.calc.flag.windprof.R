@@ -49,13 +49,13 @@ fileIn <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min.RData'))
 load(fileIn)
 
 #call function to calculate eddy diffusivity using WP method
-min9.K.WP.list <- eddydiffWP(sitecode = sitecode, min9 = min9Diff.list)
+min9.K.WP.list <- calc.eddydiff.windprof(sitecode = sitecode, min9 = min9Diff.list)
 
-### JACKIE PUT BOOTSTRAP SAMPLING HERE
-
-#call function to compute fluxes, function contains option to manual set name of eddy diffusivity column default is "EddyDiff"
- 
-min9.FG.WP.list <- computeFG.AE.WP(min9.K = min9.K.WP.list, boot_onezero = 1)
+# call function to compute fluxes
+# function contains option to manual set name of eddy diffusivity column default is "EddyDiff"
+# 
+min9.FG.WP.list <- calc.gas.aero.windprof.flux(min9.K = min9.K.WP.list, 
+                                               bootstrap = 1, nsamp=1000)
 
 #save as R.data objects
 save(min9.FG.WP.list, file = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".Rdata")))

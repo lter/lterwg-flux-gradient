@@ -7,9 +7,9 @@ library(dplyr)
 
 # Load functions in this repo
 source(file.path("functions/MO_Length.R"))
-source(file.path("functions/eddydiffAE.R"))
-source(file.path("functions/FG_AE.WP.R"))
-source(file.path("functions/computeFG.AE.WP.R"))
+source(file.path("functions/calc.eddydiff.aero.R"))
+source(file.path("functions/calc.gas.aero.windprof.flux.R"))
+source(file.path("functions/calc.eqn.aero.windprof.flux.R"))
 source(file.path("functions/calculate.stability.correction.R"))
 
 # Authenticate with Google Drive
@@ -44,19 +44,20 @@ for(focal_file in fileDnld){
   }
 }
 
-# Load the data 
+# Load the data after download from Google Drive
 fileIn <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min.RData'))
 load(fileIn)
 
-#call function to calculate eddy diffusivity using AE method
-#add in calculation for all gas concentrations
-min9.K.AE.list <- eddydiffAE(sitecode = sitecode, min9 = min9Diff.list)
+# Calculate eddy diffusivity with the aerodynamic method
+min9.K.AE.list <- calc.eddydiff.aero(sitecode = sitecode, min9 = min9Diff.list)
 
-### JACKIE PUT BOOTSTRAP SAMPLING HERE
+# Compute aerdynamic flux gradient fluxes for all gases
+# Optional bootstrap (1) or skip bootstrap (0) for gas conc uncertainty
+# function contains option to manual set name of eddy diffusivity column default is "EddyDiff"
+min9.FG.AE.list <- calc.gas.aero.windprof.flux(min9.K = min9.K.AE.list,
+                                               bootstrap = 1, nsamp = 1000)
 
-#call function to compute fluxes, function contains option to manual set name of eddy diffusivity column default is "EddyDiff"
-min9.FG.AE.list <- computeFG.AE.WP(min9.K = min9.K.AE.list)
-#save as R.data objects
+# Save calculated aerdynamic flux gradient fluxes as R.data objects
 save(min9.FG.AE.list, file = file.path("data", sitecode, paste0(sitecode,"_AE_", user, "_", Sys.Date(),".Rdata")))
 #zip R.data objects
 zip(zipfile = file.path("data", sitecode, paste0(sitecode,"_AE_", user, "_", Sys.Date(),".zip")), files = file.path("data", sitecode, paste0(sitecode,"_AE_", user, "_", Sys.Date(),".Rdata")))

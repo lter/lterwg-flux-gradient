@@ -25,9 +25,9 @@ calc.eqn.aero.windprof.flux <- function(min9, eddy.diff.name, bootstrap, nsamp){
     
     # Remove missing data
     min9 <- min9[complete.cases(min9[,data.cols]),]
-    nsamp = nsamp
+    nsamp = nsamp # number of bootstrap samples
     
-    # Sample over concentration mean & variance 
+    # Storage for flux & concentration diff mean & variance 
     FG_mean = FG_sd = vector()
     dConc_mean = dConc_sd = vector()
     
