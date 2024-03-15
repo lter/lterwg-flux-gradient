@@ -5,9 +5,9 @@ email <- 'jaclyn_matthes@g.harvard.edu'
 # Also requires packages: googledrive
 library(dplyr)
 
-# Load functions in this repo
+# Load functions for the wind profile flux gradient calculation
 source(file.path("functions/MO_Length.R"))
-source(file.path("functions/eddydiffWP.R"))
+source(file.path("functions/calc.eddydiff.windprof.R"))
 source(file.path("functions/FG_AE.WP.R"))
 source(file.path("functions/computeFG.AE.WP.R"))
 source(file.path("functions/calculate.stability.correction.R"))
