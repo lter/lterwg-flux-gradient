@@ -33,15 +33,15 @@ calc.eqn.aero.windprof.flux <- function(min9, eddy.diff.name, bootstrap, nsamp){
     
     for(i in 1:nrow(min9)){ # loop over each row (timestep) in df
      
-       # Draw nsamp for concentrations at levels A & B from normal 
-      # using the mean & sd of concentration
+      # Draw nsamp for concentrations at tower levels A & B 
+      # from normal using the mean & sd of concentration
       cConc_A = rnorm(n = nsamp, mean = min9$mean_A[i],
                       sd = sqrt(min9$vari_A[i]))
       cConc_B = rnorm(n = nsamp, mean = min9$mean_B[i],
                       sd = sqrt(min9$vari_B[i]))
       
-      # Save mean and sd of concentration difference between
-      # sampled conc at levels A & B
+      # Store mean and sd of concentration difference between
+      # re-sampled concentrations at tower levels A & B
       dConc = cConc_A-cConc_B
       dConc_mean[i] = mean(dConc)
       dConc_sd[i] = sd(dConc)
@@ -71,10 +71,9 @@ calc.eqn.aero.windprof.flux <- function(min9, eddy.diff.name, bootstrap, nsamp){
     # to the orig data frame
     min9$FG_mean = FG_mean
     min9$FG_sd = FG_sd
-    min9$dConc_mean = dConc_mean
     min9$dConc_sd = dConc_sd
   } 
-  else{ # do not bootstrap
+  else{ # do not bootstrap, just use the dConc mean
     diff.conc <- as.numeric(min9$dConc) # CO2 umol mol-1, CH4 nmol mol-1, H2O mmol mol-1
     diff.heights <- as.numeric(min9$dHeight) # m
     
@@ -83,9 +82,9 @@ calc.eqn.aero.windprof.flux <- function(min9, eddy.diff.name, bootstrap, nsamp){
     rho <- as.numeric(min9$rhoa_kgm3) #kg m-3
     rho_mol <- rho*.0289 # mol m-3
     min9$FG_mean <- rho_mol*(-k)*(diff.conc)/(diff.heights) # CO2 umol m-2 s-1, CH4 nmol m-2 s-1, H2O mmol m-2 s-1
-    min9$FG_sd <- NA
-    
-    }
+    min9$FG_sd <- NA # does not exist for non-bootstrap
+    min9$dConc_sd <- NA # does not exist for non-bootstrap
+  }
   
   # Return the original table with flux attached
   return(min9)
