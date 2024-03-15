@@ -1,11 +1,15 @@
-#' compute.gasflux.FG.aerowindprof
+#' calc.gas.aero.windprof.flux.R
+#'
+#' 
 #'
 #' @param min9.K list of data frames output of eddydiffAE or eddydiffWP
 #' @param eddy.diff.name name of which eddy diffusivity to use
+#' @param bootstrap: 1 to run bootstrap iterations for conc mean & sd or 0 to use mean
 #'
-#' @return list of data frame containing fluxes calculate using AE and WP methods
-#' 
-#' @author Alexis Helgeson
+#' @return list of data frames (one df per gas) containing fluxes calculate using AE and WP methods
+#' @return 
+#'
+#' @author Alexis Helgeson, Jackie Matthes
 #' 
 calc.gas.aero.windprof.flux <- function(min9.K, eddy.diff.name = "EddyDiff", 
                             bootstrap){
