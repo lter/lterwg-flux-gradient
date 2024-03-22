@@ -1,8 +1,18 @@
-# Merges together NEON flux, met, and profile concentration data. Computes differences in 
-# concentrations for paired tower levels. Aligns non-concentration data with the mid-point of 
-# the paired-level concentration differences. Methods for alignment differ according to 
-# the data. 30-min flux data are interpolated. Data at smaller (e.g. 1-min) averaging 
-# intervals are aggregated over the combined window of each paired concentration difference.
+# Uses output from flow.neon.data.extract.R from Google Drive. 
+#
+# Merges together NEON flux, met, and profile concentration data. Aligns the profile 
+# concentration data (CH4, CO2, and H2O) among adjacent tower levels (and also the bottom-top 
+# levels) and computes the difference in mean concentration. Aligns non-concentration data 
+# with the mid-point of the paired-level concentration differences. 
+# Methods for alignment differ according to the data. 30-min flux data are interpolated. 
+# Data at smaller (e.g. 1-min) averaging intervals are aggregated to the combined window of 
+# each paired concentration difference. 
+#
+# Also derives kinematic water flux (LE -> w'q'), heat flux (w'T'), aerodynamic 
+# canopy height, displacement height, that are needed for the various methods. 
+#
+# Saves output as SITE_aligned_conc_flux_9min.RData, where SITE is the NEON site code. 
+# Zips and uploads to Google Drive.
 
 # Pull data from google drive
 email <- 'alexisrose0525@gmail.com'
