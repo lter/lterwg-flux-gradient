@@ -1,3 +1,9 @@
+# Merges together NEON flux, met, and profile concentration data. Computes differences in 
+# concentrations for paired tower levels. Aligns non-concentration data with the mid-point of 
+# the paired-level concentration differences. Methods for alignment differ according to 
+# the data. 30-min flux data are interpolated. Data at smaller (e.g. 1-min) averaging 
+# intervals are aggregated over the combined window of each paired concentration difference.
+
 # Pull data from google drive
 email <- 'alexisrose0525@gmail.com'
 #email <- 'jaclyn_matthes@g.harvard.edu'
@@ -11,7 +17,7 @@ library(foreach)
 library(doParallel)
 
 # Load functions in this repo
-source(file.path("functions/interp_fluxes.R"))
+source(file.path("functions/interp.flux.R"))
 source(file.path("functions/aggregate_averages.R"))
 
 # Final note: This script takes approx 45 min to run per site. 
@@ -149,7 +155,7 @@ qf <- min30.list$F_co2$turb.qfFinl # filter
 flux[qf == 1] <- NA
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   timePred <- var$timeMid
-  fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
+  fluxPred <- interp.flux(timeBgn,timeEnd,flux,timePred)
   var$FC_turb_interp <- fluxPred
   return(var)
 })
@@ -162,7 +168,7 @@ qf <- min30.list$F_co2$stor.qfFinl # filter
 flux[qf == 1] <- NA
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   timePred <- var$timeMid
-  fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
+  fluxPred <- interp.flux(timeBgn,timeEnd,flux,timePred)
   var$FC_stor_interp <- fluxPred
   return(var)
 })
@@ -175,7 +181,7 @@ qf <- min30.list$F_co2$stor.qfFinl # filter
 flux[qf == 1] <- NA
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   timePred <- var$timeMid
-  fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
+  fluxPred <- interp.flux(timeBgn,timeEnd,flux,timePred)
   var$FC_nee_interp <- fluxPred
   return(var)
 })
@@ -188,7 +194,7 @@ qf <- min30.list$F_LE$turb.qfFinl # filter
 flux[qf == 1] <- NA
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   timePred <- var$timeMid
-  fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
+  fluxPred <- interp.flux(timeBgn,timeEnd,flux,timePred)
   var$LE_turb_interp <- fluxPred
   return(var)
 })
@@ -201,7 +207,7 @@ qf <- min30.list$F_LE$stor.qfFinl # filter
 flux[qf == 1] <- NA
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   timePred <- var$timeMid
-  fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
+  fluxPred <- interp.flux(timeBgn,timeEnd,flux,timePred)
   var$LE_stor_interp <- fluxPred
   return(var)
 })
@@ -214,7 +220,7 @@ qf <- min30.list$F_LE$nsae.qfFinl # filter
 flux[qf == 1] <- NA
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   timePred <- var$timeMid
-  fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
+  fluxPred <- interp.flux(timeBgn,timeEnd,flux,timePred)
   var$LE_nsae_interp <- fluxPred
   return(var)
 })
@@ -227,7 +233,7 @@ qf <- min30.list$F_H$turb.qfFinl # filter
 flux[qf == 1] <- NA
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   timePred <- var$timeMid
-  fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
+  fluxPred <- interp.flux(timeBgn,timeEnd,flux,timePred)
   var$H_turb_interp <- fluxPred
   return(var)
 })
@@ -240,7 +246,7 @@ qf <- min30.list$F_H$stor.qfFinl # filter
 flux[qf == 1] <- NA
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   timePred <- var$timeMid
-  fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
+  fluxPred <- interp.flux(timeBgn,timeEnd,flux,timePred)
   var$H_stor_interp <- fluxPred
   return(var)
 })
@@ -253,7 +259,7 @@ qf <- min30.list$F_H$nsae.qfFinl # filter
 flux[qf == 1] <- NA
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   timePred <- var$timeMid
-  fluxPred <- interp_fluxes(timeBgn,timeEnd,flux,timePred)
+  fluxPred <- interp.flux(timeBgn,timeEnd,flux,timePred)
   var$H_nsae_interp <- fluxPred
   return(var)
 })
@@ -268,9 +274,9 @@ ustar[qf == 1] <- NA
 roughLength[qf == 1] <- NA
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   timePred <- var$timeMid
-  ustarPred <- interp_fluxes(timeBgn,timeEnd,ustar,timePred)
+  ustarPred <- interp.flux(timeBgn,timeEnd,ustar,timePred)
   var$ustar_interp <- ustarPred
-  roughLengthPred <- interp_fluxes(timeBgn,timeEnd,roughLength,timePred)
+  roughLengthPred <- interp.flux(timeBgn,timeEnd,roughLength,timePred)
   var$roughLength_interp <- roughLengthPred
   return(var)
 })
