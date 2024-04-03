@@ -1,4 +1,4 @@
-#' spike.detection
+#' flag.flux.spikes
 #'
 #' @param site df of calculated flux from specific site taken from Validation df
 #'
@@ -6,7 +6,7 @@
 #' 
 #'
 #' @author Alexis Helgeson
-spike.detection <- function(site){
+flag.flux.spikes <- function(site){
   #add column for daytime/nighttime based on converted global radiation threshold of 20 W/m2 converted to PAR units umol/m2/s by using a conversion factor of 0.217, so 20/0.217 = ~92 umol/m2/s
   for(p in 1:dim(site)[1]){
     if(is.na(site[p, "PAR"])){
@@ -37,8 +37,8 @@ spike.detection <- function(site){
   site.CO2.day <- site.CO2 %>% filter(day_night=="day")
   site.CO2.night <- site.CO2 %>% filter(day_night=="night")
   #calculate flux difference threshold and add spike.flag column where 1 = spike and 0 = no spike
-  site.CO2.day <- calculate.flux.diff.add.flag(day.night.df = site.CO2.day)
-  site.CO2.night <- calculate.flux.diff.add.flag(day.night.df = site.CO2.night)
+  site.CO2.day <- flag.calc.flux.diff(day.night.df = site.CO2.day)
+  site.CO2.night <- flag.calc.flux.diff(day.night.df = site.CO2.night)
   #combine day/night along with rows with PAR NA where we could not calculate day/night so were not included in spike detection: We want this dataframe to have the same number of rows as the original WE ARE NOT REMOVING ANY DATA 
   site.CO2.spike <- bind_rows(site.CO2.day, site.CO2.night, site.CO2[which(is.na(site.CO2$PAR)),])
   #calculate how much data would be remain after de-spiking, print message
@@ -60,8 +60,8 @@ spike.detection <- function(site){
   site.H2O.day <- site.H2O %>% filter(day_night=="day")
   site.H2O.night <- site.H2O %>% filter(day_night=="night")
   #calculate flux difference threshold and add spike.flag column where 1 = spike and 0 = no spike
-  site.H2O.day <- calculate.flux.diff.add.flag(day.night.df = site.H2O.day)
-  site.H2O.night <- calculate.flux.diff.add.flag(day.night.df = site.H2O.night)
+  site.H2O.day <- flag.calc.flux.diff(day.night.df = site.H2O.day)
+  site.H2O.night <- flag.calc.flux.diff(day.night.df = site.H2O.night)
   #combine day/night along with rows with PAR NA where we could not calculate day/night so were not included in spike detection: We want this dataframe to have the same number of rows as the original WE ARE NOT REMOVING ANY DATA 
   site.H2O.spike <- bind_rows(site.H2O.day, site.H2O.night, site.H2O[which(is.na(site.H2O$PAR)),])
   #calculate how much data would be remain after de-spiking, print message
@@ -83,8 +83,8 @@ spike.detection <- function(site){
   site.CH4.day <- site.CH4 %>% filter(day_night=="day")
   site.CH4.night <- site.CH4 %>% filter(day_night=="night")
   #calculate flux difference threshold and add spike.flag column where 1 = spike and 0 = no spike
-  site.CH4.day <- calculate.flux.diff.add.flag(day.night.df = site.CH4.day)
-  site.CH4.night <- calculate.flux.diff.add.flag(day.night.df = site.CH4.night)
+  site.CH4.day <- flag.calc.flux.diff(day.night.df = site.CH4.day)
+  site.CH4.night <- flag.calc.flux.diff(day.night.df = site.CH4.night)
   #combine day/night along with rows with PAR NA where we could not calculate day/night so were not included in spike detection: We want this dataframe to have the same number of rows as the original WE ARE NOT REMOVING ANY DATA 
   site.CH4.spike <- bind_rows(site.CH4.day, site.CH4.night, site.CH4[which(is.na(site.CH4$PAR)),])
   #calculate how much data would be remain after de-spiking, print message

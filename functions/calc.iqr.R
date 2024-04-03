@@ -1,4 +1,4 @@
-#' calculate.IQR.add.flag
+#' calc.iqr
 #'
 #' @param gas.df data frame of specific gas CO2, CH4, H2O with FG column
 #'
@@ -6,7 +6,7 @@
 #' 
 #'
 #' @author Alexis Helgeson
-calculate.IQR.add.flag <- function(gas.df){
+calc.iqr <- function(gas.df){
   #calculate IQR range based on specified upper and lower bounds
   #remember the FG column is the calculated flux
   Q3 <- quantile(gas.df$FG, c(0.75))[[1]]

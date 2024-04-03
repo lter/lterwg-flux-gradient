@@ -1,4 +1,4 @@
-#' Compile1min
+#' compile.neon.data.1min
 #'
 #' @param sitecode NEON site code 
 #' @param h5files list of h5 files
@@ -6,7 +6,7 @@
 #' @return list of data frames containing Tair, Press, WS3D, SWin, Swout, LWin, LWout, SoilHF at 1 min resolution
 #'
 #' @author Alexis Helgeson
-Compile1min <- function(h5files, sitecode){
+compile.neon.data.1min <- function(h5files, sitecode){
   #create empty list to store monthly data
   ALL.data = list()
   
@@ -14,7 +14,7 @@ Compile1min <- function(h5files, sitecode){
   for(i in 1:length(h5files)){
     hd.file <- h5files[i]
     print(i)
-    month.data <- met.1min(hd.file = hd.file, sitecode = sitecode, startdate = startdate, enddate = enddate)
+    month.data <- grab.neon.met.1min(hd.file = hd.file, sitecode = sitecode, startdate = startdate, enddate = enddate)
     
     ALL.data[[i]] <- month.data
     

@@ -1,4 +1,4 @@
-#' Compile30min
+#' compile.neon.data.30min
 #'
 #' @param sitecode NEON site code 
 #' @param h5files list of h5 filepaths
@@ -7,7 +7,7 @@
 #'
 #' @author Alexis Helgeson
 #' 
-Compile30min <- function(h5files, sitecode){
+compile.neon.data.30min <- function(h5files, sitecode){
   #create empty list to store monthly data
   ALL.data = list()
   
@@ -15,7 +15,7 @@ Compile30min <- function(h5files, sitecode){
   for(i in 1:length(h5files)){
     hd.file <- h5files[i]
     print(i)
-    month.data <- met.cont.30min(hd.file = hd.file, sitecode = sitecode)
+    month.data <- grab.neon.met.flux.30min(hd.file = hd.file, sitecode = sitecode)
     
     ALL.data[[i]] <- month.data
     

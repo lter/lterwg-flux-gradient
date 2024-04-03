@@ -1,4 +1,4 @@
-#' eddydiffWP
+#' calc.eddydiff.windprof.R
 #'
 #' @param sitecode  NEON site code
 #' @param min9 9min interpolated data file for given site
@@ -7,7 +7,8 @@
 #'
 #' @return list of gas concentration dataframes containing variables associated with wind profile eddy diffusivity calculation
 #' 
-eddydiffWP <- function(sitecode, min9){
+calc.eddydiff.windprof <- function(sitecode, min9){
+  
   #currently hard coded to calculate for all gas concentrations
   #grab H2O
   H2O <- min9[[which(names(min9) == "H2O")]]

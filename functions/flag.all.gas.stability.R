@@ -1,4 +1,4 @@
-#' stability.condition
+#' flag.all.gas.stability
 #'
 #' @param site df of calculated flux from specific site taken from Validation df
 #'
@@ -7,7 +7,7 @@
 #'
 #' @author Alexis Helgeson
 #' 
-stability.condition <- function(site){
+flag.all.gas.stability <- function(site){
   #use obukov length to filter for stable, neutral, unstable atmospheric conditions
   #use 100m and 500m as threshold for comparison
   site[which(abs(site$L) > 100),"Stability_100"] <- "neutral"

@@ -1,4 +1,4 @@
-#' add.hour.column
+#' add.hour.col
 #'
 #' @param site individual site data frame
 #' @param site.name NEON site code
@@ -7,7 +7,7 @@
 #' 
 #'
 #' @author Alexis Helgeson and Sam Jurado
-add.hour.column <- function(site, site.name){
+add.hour.col <- function(site, site.name){
   #fix timezone and adjust for daylight savings
   #these sites are all in MT
   if(site.name == "NIWO" | site.name == "BONA" | site.name == "CPER" | site.name == "JORN"){

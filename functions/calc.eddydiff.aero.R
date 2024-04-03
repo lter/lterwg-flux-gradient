@@ -1,4 +1,4 @@
-#' eddydiffAE
+#' calc.eddydiff.aero.R
 #'
 #' @param sitecode NEON site code
 #' @param min9 9min interpolated data file for given site
@@ -7,7 +7,7 @@
 #'
 #' @return list of gas concentration dataframes containing variables associated with aerodynamic eddy diffusivity calculation
 #' 
-eddydiffAE <- function(sitecode, min9){
+calc.eddydiff.aero <- function(sitecode, min9){
   #currently hard coded to calculate for all gas concentrations
   #grab H2O gas concentration
   H2O <- min9[[which(names(min9) == "H2O")]]

@@ -1,4 +1,4 @@
-#' calculate.flux.diff.add.flag
+#' flag.calc.flux.diff
 #'
 #' @param day.night.df gas concentration data frame filtered to either day or night
 #'
@@ -6,7 +6,7 @@
 #' 
 #'
 #' @author Alexis Helgeson
-calculate.flux.diff.add.flag <- function(day.night.df){
+flag.calc.flux.diff <- function(day.night.df){
   #add a looping column where the numbers are all consecutive: cut() does not return consecutive numbers if there is missing data, which there is because our fluxes are not gapfilled
   num.groups <- unique(day.night.df$spike.bin)
   loop.num <- seq(1, length(num.groups),1)

@@ -16,15 +16,15 @@ library(changepoint)
 #library(REddyProc)
 
 # Load functions in this repo
-source(file.path("R/IQR.outlier.flag.R"))
-source(file.path("R/stability.condition.R"))
-source(file.path("R/calculate.rmse.R"))
-source(file.path("R/spike.detection.R"))
-source(file.path("R/ustar.threshold.interp.R"))
-source(file.path("R/run.quality.R"))
-source(file.path("R/add.hour.column.R"))
-source(file.path("R/calculate.flux.diff.add.flag.R"))
-source(file.path("R/calculate.IQR.add.flag.R"))
+source(file.path("functions/calc.iqr.R"))
+source(file.path("functions/flag.all.gas.stability.R"))
+source(file.path("functions/calc.rmse.R"))
+source(file.path("functions/flag.flux.spikes.R"))
+source(file.path("functions/calc.flag.ustar.thres.R"))
+source(file.path("functions/compile.quality.flags.add.cols.fluxes.R"))
+source(file.path("functions/add.hour.col.R"))
+source(file.path("functions/flag.calc.flux.diff.R"))
+source(file.path("functions/flag.iqr.R"))
 
 #Pull data from gdrive
 # Authenticate with Google Drive and get site data
@@ -62,19 +62,19 @@ load(file.path("data", "Validation", paste0("SITES_", method, ".Rdata")))
 #zip
 #upload to g drive
 if(method=="WP"){
-  SITES_WP_validation <- run.quality(list.sites = SITES_WP, method = method)
+  SITES_WP_validation <- compile.quality.flags.add.cols.fluxes(list.sites = SITES_WP, method = method)
   save(SITES_WP_validation, file = file.path("data", "Validation", "SITES_WP_val.Rdata"))
   #zip(zipfile = paste0("data/Validation/SITES_WP_val.zip"), files = paste0("data/Validation/SITES_WP_val.Rdata"))
   googledrive::drive_upload(media = paste0("data/Validation/SITES_WP_val.Rdata"), overwrite = T, path = drive_url)
 }
 if(method == "AE"){
-  SITES_AE_validation <- run.quality(list.sites = SITES_AE, method = method)
+  SITES_AE_validation <- compile.quality.flags.add.cols.fluxes(list.sites = SITES_AE, method = method)
   save(SITES_AE_validation, file = file.path("data", "Validation", "SITES_AE_val.Rdata"))
   zip(zipfile = paste0("data/Validation/SITES_AE_val.zip"), files = paste0("data/Validation/SITES_AE_val.Rdata"))
   googledrive::drive_upload(media = paste0("data/Validation/SITES_AE_val.Rdata"), overwrite = T, path = drive_url)
 }
 if(method == "MBR"){
-  SITES_MBR_validation <- run.quality(list.sites = SITES_MBR, method = method)
+  SITES_MBR_validation <- compile.quality.flags.add.cols.fluxes(list.sites = SITES_MBR, method = method)
   save(SITES_MBR, file = file.path("data", "Validation", "SITES_MBR_val.Rdata"))
   zip(zipfile = paste0("data/Validation/SITES_MBR_val.zip"), files = paste0("data/Validation/SITES_MBR_val.Rdata"))
   googledrive::drive_upload(media = paste0("data/Validation/SITES_MBR_val.zip"), overwrite = T, path = drive_url)

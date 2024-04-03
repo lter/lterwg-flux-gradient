@@ -1,4 +1,4 @@
-#' run.quality
+#' compile.quality.flags.add.cols.fluxes
 #'
 #' @param list.sites list of sites with computed FG fluxes
 #' @param method FG method either MBR, AE, WP
@@ -7,7 +7,7 @@
 #' 
 #'
 #' @author Alexis Helgeson
-run.quality <- function(list.sites, method){
+compile.quality.flags.add.cols.fluxes <- function(list.sites, method){
   #loop over sites
   list.sites.quality <- list()
   #list.sites.ustar <- list()
@@ -26,17 +26,17 @@ run.quality <- function(list.sites, method){
       site <- site %>% filter(TowerHeight_A == site.upper.height & TowerHeight_B == site.lower.height)
     }
     #flag outliers, create new column IQR_flag that flags outliers
-    site.outlier <- IQR.outlier.filter(site = site)
+    site.outlier <- flag.iqr(site = site)
     #flag spikes in fluxes, create new columns spike.bin which is the bin assigned for comparison of differences, spike.flag that flags spikes, date, and day_night
-    site.spike <- spike.detection(site = site.outlier)
+    site.spike <- flag.flux.spikes(site = site.outlier)
     #flag atmospheric stability conditions, create new columns Stability_100 and Stability_500 that indicates neutral, stable, unstable conditions
     #only for AE which uses L
     if(method == "AE"){
-      site.stability <- stability.condition(site = site.spike)
-      site.residuals <- calculate.rmse(site = site.stability)
+      site.stability <- flag.all.gas.stability(site = site.spike)
+      site.residuals <- calc.rmse(site = site.stability)
     }else{
       #Next calculate RMSE and residuals
-      site.residuals <- calculate.rmse(site = site.spike)
+      site.residuals <- calc.rmse(site = site.spike)
     }
     #Add in month column for grouping/visualizations
     site.residuals$month <- month(site.residuals$timeBgn_A)
@@ -44,11 +44,11 @@ run.quality <- function(list.sites, method){
     #still needs work -> REddy Proc function only works with dataframe where rows are exactly 30 min apart
     #Decided to use "plotting" method for determining ustar threshold: selecting for ustar values when -1 >= nighttime NEE <= 1 and take median, grouping data by month, growing/nongrowing, all data
     #the ustar_threshold column is a dataframe
-    site.ustar <- ustar.threshold.interp(site = site.residuals)
+    site.ustar <- calc.flag.ustar.thres(site = site.residuals)
     #list.sites.ustar[[s]] <- site.ustar
     #Add in hour column for grouping/visualizations: the timezone will be local for that site and corrected for daylight savings
     #TO DO: ADD PROPER TZ CORRECTION CODE FOR GUAN
-    site.hour <- add.hour.column(site = site.ustar, site.name = unique(site$site))
+    site.hour <- add.hour.col(site = site.ustar, site.name = unique(site$site))
     
     list.sites.quality[[s]] <- site.hour
   }
