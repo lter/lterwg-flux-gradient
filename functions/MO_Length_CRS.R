@@ -18,7 +18,7 @@ MOlength <- function(press,temp,H,LE,velofric){
   lambda = 2.26*10**3 # Latent Heat of Vaporization (J g-1)
   k = .41        # Von Karmaan Constant (unitless)
   g = 9.81       # Gravity (m s-2)
-  cp = 1005      # Specific Heat of Air J K-1 g-1
+  cp = 1.005      # Specific Heat of Air J K-1 g-1
   R= 8.314462    # Universal gas constant m3 Pa K-1 mol-1
   Md= 29         # Molecular mass of dry air g mol-1
   
