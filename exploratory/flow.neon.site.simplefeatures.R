@@ -2,7 +2,7 @@
 # Load libraries:
 library( sf)
 library(ggplot2)
-
+library(dplyr)
 # Import the csv of sites and their locations. 
 Sites <- read.csv('/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/FG_Site_Locations - Sheet1.csv')
 
@@ -53,7 +53,42 @@ assign.wedge <- function(shp, r, n_wedges) {
   return(wedges )
 }
 
+length(Sites.shp$Name)
 
-test <- assign.wedge(shp=Sites.shp, r=4, n_wedges=8)
+sites.wedges <-c()
 
-plot(test$x)
+for( i in 1:length(Sites.shp$Name)){
+  print(i)
+  sf <- assign.wedge(shp=Sites.shp[i,], r=4, n_wedges=8) %>% st_as_sf
+  sf$Site.Id.NEON <- Sites.shp$Site.Id.NEON[i]
+  sites.wedges <-rbind( sites.wedges, sf)
+}
+
+# Load shapefile created in Site.Spatial.Homo:
+load('/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/data/NEONLTERsiteBuffers.Rdata')
+st_crs(sites.wedges)
+"epsg:4326"
+sites.wedges <- sites.wedges %>% st_transform( st_crs(BONA.shp))
+
+# Take the intersection of the site files and the wedges:
+BONA.wedges <- sites.wedges %>% st_intersection(BONA.shp )
+GUAN.wedges <- sites.wedges %>% st_intersection(GUAN.shp )
+HARV.wedges <- sites.wedges %>% st_intersection(HARV.shp )
+JORN.wedges <- sites.wedges %>% st_intersection(JORN.shp )
+KONZ.wedges <- sites.wedges %>% st_intersection(KONZ.shp )
+NIWO.wedges <- sites.wedges %>% st_intersection(NIWO.shp )
+TOOL.wedges <- sites.wedges %>% st_intersection(TOOL.shp )
+CPER.wedges <- sites.wedges %>% st_intersection(CPER.shp )
+
+plot(CPER.wedges$x)
+
+save(sites.wedges,
+     BONA.wedges,
+     GUAN.wedges,
+     HARV.wedges,
+     JORN.wedges, 
+     KONZ.wedges,
+     NIWO.wedges, 
+     TOOL.wedges,
+     CPER.wedges,
+     file='/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/FG_Site_Wdges.RDATA')
