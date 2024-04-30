@@ -50,6 +50,11 @@ KONZ.shp <- Site.Buffers %>% filter(Site.Buffers$Site.Id.NEON == "KONZ" )
 NIWO.shp <- Site.Buffers %>% filter(Site.Buffers$Site.Id.NEON == "NIWO" )
 TOOL.shp <- Site.Buffers %>% filter(Site.Buffers$Site.Id.NEON == "TOOL" )
 
+plot(BONA.shp$geometry)
+methods(class = "sf")
+
+
+
 #crop and mask
 BONA.evi.proj.cm <-BONA.evi %>% crop(BONA.shp, mask=TRUE)
 CPER.evi.proj.cm <-CPER.evi %>% crop(CPER.shp, mask=TRUE)
@@ -146,7 +151,6 @@ save(BONA.shp.var, CPER.shp.var, GUAN.shp.var,
 
 
 # Homo exploration: ####
-
 
 load('/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/data/NEONLTERsite_varBuffers.Rdata')
 
