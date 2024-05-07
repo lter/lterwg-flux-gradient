@@ -24,12 +24,67 @@ dir.create(path = file.path("data"), showWarnings = F)
 # Clear environment
 rm(list = ls())
 
-# Make a vector of all column names found in an attribute table
-attr_colnames <- c("DistZaxsCnpy", "DistZaxsDisp", "DistZaxsGrndOfst", 
-                   "DistZaxsLvlMeasTow", "DistZaxsTow", "ElevRefeTow", 
-                   "LatTow", "LonTow", "LvlMeasTow", "Pf.AngEnuXaxs", 
-                   "Pf.AngEnuYaxs", "Pf.Ofst", "TimeDiffUtcLt", "TimeTube", 
-                   "ZoneTime", "ZoneUtm", "TowerPosition", "Site")
+## ---------------------------- ##
+# Wrangling ----
+## ---------------------------- ##
+
+## Done elsewhere (talk to Kyle)
+
+
+## ---------------------------- ##
+# CSV to RData ----
+## ---------------------------- ##
+
+# Identify Drive folder
+drive_url <- googledrive::as_id("https://drive.google.com/drive/u/0/folders/1MzyDvXudL-A3ZGlzukbhil19fsx3s7Mk")
+
+# Identify attributes table CSV
+attr_csv <- googledrive::drive_ls(path = drive_url) %>% 
+  dplyr::filter(stringr::str_detect(string = name, pattern = "_attr.csv"))
+
+# Download from Google Drive into 'data/' folder
+purrr::walk2(.x = attr_csv$id, .y = attr_csv$name,
+             .f = ~ googledrive::drive_download(file = .x, overwrite = T,
+                                                path = file.path("data", .y)))
+
+# Read in that CSV
+attr.df <- read.csv(file = file.path("data", attr_csv$name))
+
+# Pare down the CSV file name a bit
+file_slug <- gsub(pattern = "_attr.csv", replacement = "", x = attr_csv$name)
+
+# Save the table as an RData object
+save(attr.df, file = file.path("data", paste0(file_slug, "_attr.RData")))
+
+# Zip it too
+zip(zipfile = file.path("data", paste0(file_slug, "_attr.zip")),
+    files = file.path("data", paste0(file_slug, "_attr.RData")))
+
+# Upload both back to the same Drive folder the CSV came from
+## RData
+googledrive::drive_upload(media = file.path("data", paste0(file_slug, "_attr.RData")),
+                          path = drive_url, overwrite = T)
+## Zip
+googledrive::drive_upload(media = file.path("data", paste0(file_slug, "_attr.zip")),
+                          path = drive_url, overwrite = T)
+
+
+
+csv_to_rdata <- function(csv = NULL, rdata = NULL){
+  
+  if(is.null(csv) == TRUE | is.null(rdata) == TRUE)
+    stop("Both arguments must be provided")
+  
+  if(tolower(tools::file_ext(csv)) != "csv")
+    stop("'csv' must be a comma separated value (.csv) file")
+  
+  
+  data <- read.csv(file = csv)
+  
+  
+  
+}
+
 
 ## ---------------------------- ##
     # SE-Deg Attributes ----
