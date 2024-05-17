@@ -14,7 +14,7 @@ calc.eddydiff.aero <- function(sitecode, min9){
   #remove NAs from data columns used in calculation for AE this includes: z_displ_calc
   #select for data columns -> remember there are as many ubar cols as there are TowerPositions for a given site
   data.cols <- c("z_displ_calc")
-  H2O <- H2O[complete.cases(H2O[,..data.cols]),]
+  H2O <- H2O[complete.cases(H2O[,data.cols]),]
   #calculate Obukhov length and stability parameters
   H2O <- calculate.stability.correction(gas = H2O)
   #calculate eddy diffusivity
