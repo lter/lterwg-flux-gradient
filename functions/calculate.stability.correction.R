@@ -13,14 +13,17 @@ calculate.stability.correction <- function(gas){
   #remove NAs
   gas <- gas[complete.cases(gas[,data.cols]),]
   #calculate obukov length
+  #MO.vars <- MOlength(press = gas$P_kPa, temp = gas$Tair1, H = gas$H_turb_interp, LE = gas$LE_turb_interp, velofric = gas$ustar_interp)
   MO.vars <- MOlength(press = gas$P_kPa, temp = gas$Tair1, H = gas$H_turb_interp, LE = gas$LE_turb_interp, velofric = gas$ustar_interp)
   #add OB params to data frame for eddy diffusivty calculation
-  gas <- cbind(gas, MO.vars$rho, MO.vars$vpotflux, MO.vars$L)
-  #rename columns
-  old.names <- grep("MO", names(gas))
-  names(gas)[old.names[1]] <- "rho"
-  names(gas)[old.names[2]] <- "vpotflux"
-  names(gas)[old.names[3]] <- "L"
+  #gas <- cbind(gas, MO.vars$rho, MO.vars$vpotflux, MO.vars$L)
+  gas <- data.frame(gas, rho = MO.vars$rho, vpotflux = MO.vars$vpotflux, L = MO.vars$L)
+  # #rename columns
+  # old.names <- grep("MO", names(gas))
+  # names(gas)[old.names[1]] <- "rho"
+  # names(gas)[old.names[2]] <- "vpotflux"
+  # names(gas)[old.names[3]] <- "L"
+  
   #grab canopy height
   #want to calculate stability param with respect to tower heights A & B
   #want to use heights where min(TowerHeight_A, TowerHeight_B) > d
@@ -29,7 +32,7 @@ calculate.stability.correction <- function(gas){
   gas$phih <- "hold"
   gas$phim <- "hold"
   gas$canopy.flag <- "hold"
-  for(k in 1:dim(gas)[1]){
+  for(k in 1:nrow(gas)){
     #pull out row for looping
     row.loop <- gas[k,]
     #set z as mean of tower positions A & B

@@ -256,7 +256,6 @@ min30Diff.list <- lapply(min30Diff.list,FUN=function(var){
   return(var)
 })
 
-
 # ------ Aggregate the 1-min MET and 2-min ubar data to each window of paired concentrations -----
 numCoreAvail <- parallel::detectCores()
 numCoreUse <- numCoreAvail # Adjust as desired
@@ -369,15 +368,12 @@ message(paste0(Sys.time(),': Aggregating 1-min MET data to each paired profile w
 #for debugging PAR NAs; currently showing up in MET_agr for all 3 gas concentrations
 #idxDf = "CH4"
 
-MET_agr_list <- foreach::foreach(idxDf = names(min9Diff.list)) %dopar% {
-  message(paste0(Sys.time(),': Aggregating 1-min MET data to paired profile windows for ',idxDf,' data frame. This will take a while...'))
+MET_agr_list <- foreach::foreach(idxDf = names(min30Diff.list)) %dopar% {
+  message(paste0(Sys.time(),': Aggregating 1-min MET data to 30 min flux windows for ',idxDf,' data frame. This will take a while...'))
 
-  # Find which level is measured first to get the overall start and end window of the profile pair
-  AbeforeB <- min9Diff.list[[idxDf]]$timeBgn_A < min9Diff.list[[idxDf]]$timeBgn_B
-  timeAgrBgn <- min9Diff.list[[idxDf]]$timeBgn_B
-  timeAgrBgn[AbeforeB] <- min9Diff.list[[idxDf]]$timeBgn_A[AbeforeB]
-  timeAgrEnd <- min9Diff.list[[idxDf]]$timeEnd_A
-  timeAgrEnd[AbeforeB] <- min9Diff.list[[idxDf]]$timeEnd_B[AbeforeB]
+  # use the 30-min flux window to anchor the met aggregation
+  timeAgrBgn <- min30Diff.list[[idxDf]]$datetime-(15*60-1)
+  timeAgrEnd <- min30Diff.list[[idxDf]]$datetime+(15*60+1)
   
   # Aggregate the 1-min data to the combined window of the profile pair
   MET_agr <- aggregate_averages(timeBgn=MET_1min$timeBgn,
@@ -391,15 +387,12 @@ MET_agr_list <- foreach::foreach(idxDf = names(min9Diff.list)) %dopar% {
 
 message(paste0(Sys.time(),': Aggregating 2-min ubar data to each paired profile window. This should take 5-10 min...'))
 
-ubar_agr_list <- foreach::foreach(idxDf = names(min9Diff.list)) %dopar% {
+ubar_agr_list <- foreach::foreach(idxDf = names(min30Diff.list)) %dopar% {
   message(paste0(Sys.time(),': Aggregating 2-min ubar data to paired profile windows for ',idxDf,' data frame. This will take a while...'))
   
-  # Find which level is measured first to get the overall start and end window of the profile pair
-  AbeforeB <- min9Diff.list[[idxDf]]$timeBgn_A < min9Diff.list[[idxDf]]$timeBgn_B
-  timeAgrBgn <- min9Diff.list[[idxDf]]$timeBgn_B 
-  timeAgrBgn[AbeforeB] <- min9Diff.list[[idxDf]]$timeBgn_A[AbeforeB]
-  timeAgrEnd <- min9Diff.list[[idxDf]]$timeEnd_A 
-  timeAgrEnd[AbeforeB] <- min9Diff.list[[idxDf]]$timeEnd_B[AbeforeB]
+  # use the 30-min flux window to anchor the met aggregation
+  timeAgrBgn <- min30Diff.list[[idxDf]]$datetime-(15*60-1)
+  timeAgrEnd <- min30Diff.list[[idxDf]]$datetime+(15*60+1)
   
   # Aggregate the 1-min data to the combined window of the profile pair
   ubar_agr <- aggregate_averages(timeBgn=ubar_2min$timeBgn,
@@ -412,15 +405,15 @@ ubar_agr_list <- foreach::foreach(idxDf = names(min9Diff.list)) %dopar% {
 }
 
 # Add aggregated output to the concentration diffs
-nameGas <- names(min9Diff.list)
+nameGas <- names(min30Diff.list)
 for (idxGas in 1:length(nameGas)){
-  min9Diff.list[[nameGas[idxGas]]] <- cbind(min9Diff.list[[nameGas[idxGas]]],MET_agr_list[[idxGas]],ubar_agr_list[[idxGas]])
+  min30Diff.list[[nameGas[idxGas]]] <- cbind(min30Diff.list[[nameGas[idxGas]]],MET_agr_list[[idxGas]],ubar_agr_list[[idxGas]])
 }
 rm('MET_agr_list','ubar_agr_list')
 
 # Compute vegetation height based on turbulence measurements
 # These equations stem from Eqn. 9.7.1b in Stull
-min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
+min30Diff.list <- lapply(min30Diff.list,FUN=function(var){
   var$z_veg_aero <- 10*as.numeric(attr.df$DistZaxsLvlMeasTow[attr.df$TowerPosition == lvlTow])/(exp(0.4*var[[paste0('ubar',lvlTow)]]/var$ustar_interp)+6.6) # m - aerodynamic vegetation height
   var$z_displ_calc <- 0.66*var$z_veg_aero # m - zero plane displacement height
   var$roughLength_calc <- 0.1*var$z_veg_aero # m - roughness length
@@ -428,10 +421,8 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
 })
 
 
-
-
 # -------------- Compute water flux from LE --------------------
-min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
+min30Diff.list <- lapply(min30Diff.list,FUN=function(var){
   
   # Grab Tair at tower top
   Tair_C <- var[[paste0('Tair',lvlTow)]]
@@ -463,20 +454,20 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   #var$FH2O_interp <- var$LE_interp*(1/var$lambda) 
   var$lambda <- (2.501-0.00237*Tair_C)*1E6 # lambda = J kg-1 Eqn in back of Stull pg. 641
   var$FH2O_interp <- var$LE_turb_interp/var$lambda/mv*1000 # mmol m-2 s-1
-  
+  var = as.data.frame(var) 
   return(var)
 })
 
-
-
-
+min30Diff.list$CH4 = as.data.frame(min30Diff.list$CH4)
+min30Diff.list$CO2 = as.data.frame(min30Diff.list$CO2)
+min30Diff.list$H2O = as.data.frame(min30Diff.list$H2O)
 
 # -------- Save and zip the file to the temp directory. Upload to google drive. -------
-fileSave <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min.RData'))
-fileZip <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min.zip'))
-save(min9Diff.list,file=fileSave)
+fileSave <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_30min.RData'))
+fileZip <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_30min.zip'))
+save(min30Diff.list,file=fileSave)
 wdPrev <- getwd()
 setwd(dirTmp)
-utils::zip(zipfile=fileZip,files=paste0(site,'_aligned_conc_flux_9min.RData'))
+utils::zip(zipfile=fileZip,files=paste0(site,'_aligned_conc_flux_30min.RData'))
 setwd(wdPrev)
 googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folder$id[data_folder$name==site]) # path might need work
