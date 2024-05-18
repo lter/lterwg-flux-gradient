@@ -4,7 +4,7 @@ email <- 'jaclyn_matthes@g.harvard.edu'
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: googledrive
-library(dplyr)
+#library(dplyr)
 
 # Load functions in this repo
 source(file.path("functions/MO_Length_CRS.R"))
@@ -15,7 +15,7 @@ source(file.path("functions/calculate.stability.correction.R"))
 
 # Pull averaged data for concentration difference across height
 # and associated micromet variables from Google Drive
-sitecode <- "TOOL"
+sitecode <- "NIWO"
 googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
 data_folder <- googledrive::drive_ls(path = drive_url)
@@ -62,7 +62,7 @@ min30.K.AE.list <- calc.eddydiff.aero(sitecode = sitecode, min9 = min30Diff.list
 # Optional bootstrap (1) or skip bootstrap (0) for gas conc uncertainty
 # function contains option to manual set name of eddy diffusivity column default is "EddyDiff"
 min9.FG.AE.list <- calc.gas.aero.windprof.flux(min9.K = min9.K.AE.list,
-                                               bootstrap = 1, nsamp = 1000)
+                                               bootstrap = 0, nsamp = 1000)
 min30.FG.AE.list <- calc.gas.aero.windprof.flux(min9.K = min30.K.AE.list,
                                                bootstrap = 0, nsamp = 1000)
 # Save calculated aerodynamic flux gradient fluxes as R.data objects

@@ -14,7 +14,7 @@ source(file.path("functions/calculate.stability.correction.R"))
 
 # Download aligned concentration and micromet dataframe 
 # for one site from Google Drive
-sitecode <- "TOOL"
+sitecode <- "KONZ"
 googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
 data_folder <- googledrive::drive_ls(path = drive_url)
@@ -66,13 +66,13 @@ min30.FG.WP.list <- calc.gas.aero.windprof.flux(min9.K = min30.K.WP.list,
                                                bootstrap = 0, nsamp=1000)
 
 # Save calculated wind profile flux gradient fluxes as R.data objects
-save(min9.FG.WP.list, file = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".Rdata")))
-#zip R.data objects
-zip(zipfile = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".zip")), files = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".Rdata")))
-#upload to Google Drive
-#IMPORTANT REMINDER if you have not gone through the process of valdiating your email with googledrive in R this code will not work please refer to https://nceas.github.io/scicomp.github.io/tutorials.html#using-the-googledrive-r-package
-#NOTE: you will be asked to re authenticate if your OAuth token is stale, select your already authenticated email from the list
-googledrive::drive_upload(media = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".zip")), overwrite = T, path = drive_url)
+# save(min9.FG.WP.list, file = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".Rdata")))
+# #zip R.data objects
+# zip(zipfile = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".zip")), files = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".Rdata")))
+# #upload to Google Drive
+# #IMPORTANT REMINDER if you have not gone through the process of valdiating your email with googledrive in R this code will not work please refer to https://nceas.github.io/scicomp.github.io/tutorials.html#using-the-googledrive-r-package
+# #NOTE: you will be asked to re authenticate if your OAuth token is stale, select your already authenticated email from the list
+# googledrive::drive_upload(media = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".zip")), overwrite = T, path = drive_url)
 
 user = "jhm"
 # Save 9-minute 
