@@ -28,7 +28,7 @@ calculate.stability.correction <- function(gas){
   
   # Calculate Aerodynamic Canopy Height to later calculate d and zo
   
-  daysAVG=10
+  daysAVG=20
   plotYN=1
   Mdate=gas$timeEnd_A[gas$dLevelsAminusB == TopLevel]
   ustar=gas$ustar_interp[gas$dLevelsAminusB == TopLevel]

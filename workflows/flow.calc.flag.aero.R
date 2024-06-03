@@ -16,7 +16,7 @@ source(file.path("functions/calc.aerodynamic.canopy.height.R"))
 
 # Pull averaged data for concentration difference across height
 # and associated micromet variables from Google Drive
-site <- "HARV"
+site <- "JORN"
 googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
 data_folder <- googledrive::drive_ls(path = drive_url)
@@ -85,7 +85,7 @@ wdPrev <- getwd()
 setwd(dirTmp)
 utils::zip(zipfile=fileZip,files=paste0(site,"_AE_9min_", user,"_",Sys.Date(),".Rdata"))
 setwd(wdPrev)
-googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folder$id[data_folder$name==site]) # path might need work
+#googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folder$id[data_folder$name==site]) # path might need work
 googledrive::drive_upload(media = fileSave, overwrite = T, path = data_folder$id[data_folder$name==site]) # couldn't make zip work (crs)
 
 # Save 30-minute
@@ -95,5 +95,5 @@ save(min30.FG.AE.list,file=fileSave)
 setwd(dirTmp)
 utils::zip(zipfile=fileZip,files=paste0(site,"_AE_30min_", user,"_",Sys.Date(),".Rdata"))
 setwd(wdPrev)
-googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folder$id[data_folder$name==site]) # path might need work
+#googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folder$id[data_folder$name==site]) # path might need work
 googledrive::drive_upload(media = fileSave, overwrite = T, path = data_folder$id[data_folder$name==site]) # couldn't make zip work (crs)

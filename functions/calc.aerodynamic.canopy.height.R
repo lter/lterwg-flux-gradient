@@ -43,7 +43,7 @@ calc.AeroCanopyH <- function(Mdate, ustar, z, L, u, daysAVG, plotYN) {
          xlab="Date", ylab="Aerodynamic canopy height (m)")
     points(Mdate, h_dsk, pch=19, col="blue", cex=1)
     lines(Mdate, zh_final, col="blue")
-    legend("bottomright", legend=c("initial", "Smoothed", "Gap filled"), col=c("black", "blue", "blue"), pch=c(19, 19, NA), lty=c(NA, NA, 1))
+    legend("topleft", legend=c("initial", "Smoothed", "Gap filled"), col=c("black", "blue", "blue"), pch=c(19, 19, NA), lty=c(NA, NA, 1))
   }
   
   DATA <- list(h_dsk=h_dsk, zh_final=zh_final)
