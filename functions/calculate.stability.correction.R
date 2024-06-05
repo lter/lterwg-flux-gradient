@@ -12,15 +12,51 @@ calculate.stability.correction <- function(gas){
   data.cols <- c("P_kPa", "Tair1", "H_turb_interp", "LE_turb_interp", "ustar_interp")
   #remove NAs
   gas <- gas[complete.cases(gas[,data.cols]),]
-  #calculate obukov length
+  
+  # Define top level where fluxes are measured
+  maxL=max(min9Diff.list$H2O$TowerPosition_A)
+  if (maxL==6){ TopLevel="6_5"}
+  if (maxL==5) { TopLevel="5_4"}
+  if (maxL==4) { TopLevel="4_3"}
+  if (maxL==3) { TopLevel="3_2"}
+  
+  #calculate obukov length (Obukhov lenght calculations under the canopy are not ideal but will leave it like this for now)
   MO.vars <- MOlength(press = gas$P_kPa, temp = gas$Tair1, H = gas$H_turb_interp, LE = gas$LE_turb_interp, velofric = gas$ustar_interp)
   #add OB params to data frame for eddy diffusivty calculation
-  gas <- cbind(gas, MO.vars$rho, MO.vars$vpotflux, MO.vars$L)
-  #rename columns
-  old.names <- grep("MO", names(gas))
-  names(gas)[old.names[1]] <- "rho"
-  names(gas)[old.names[2]] <- "vpotflux"
-  names(gas)[old.names[3]] <- "L"
+  #gas <- cbind(gas, MO.vars$rho, MO.vars$vpotflux, MO.vars$L)
+  gas <- data.frame(gas, rho = MO.vars$rho, vpotflux = MO.vars$vpotflux, L = MO.vars$L)
+  
+  # Calculate Aerodynamic Canopy Height to later calculate d and zo
+  
+  daysAVG=20
+  plotYN=1
+  Mdate=gas$timeEnd_A[gas$dLevelsAminusB == TopLevel]
+  ustar=gas$ustar_interp[gas$dLevelsAminusB == TopLevel]
+  gas$mean_TowerH <- rowMeans((cbind(as.numeric(gas$TowerHeight_A), as.numeric(gas$TowerHeight_B))), na.rm = TRUE)
+  z=mean(as.numeric((gas$mean_TowerH[gas$dLevelsAminusB == TopLevel])))
+  L=gas$L[gas$dLevelsAminusB == TopLevel]
+  if (maxL==6) {ubar=gas$ubar6}
+  if (maxL==5) {ubar=gas$ubar5}
+  if (maxL==4) {ubar=gas$ubar4}
+  if (maxL==3) {ubar=gas$ubar3}
+  u=ubar[gas$dLevelsAminusB == TopLevel]
+
+  AeroVars=calc.AeroCanopyH(Mdate=Mdate, ustar=ustar, z=z, L=L, u=u, daysAVG=daysAVG, plotYN=plotYN)
+  
+  # Interpolate AeroCanopy Height to the other levels
+  levels=unique(gas$dLevelsAminusB)
+  for(i in 1:length(levels)){
+    iLevel=levels[i]
+    Mdate_new=gas$timeEnd_A[gas$dLevelsAminusB == iLevel]
+    zh_interp <- approx(Mdate, AeroVars$zh_final, Mdate_new, method="linear", rule=2)$y
+    gas$z_veg_aero[gas$dLevelsAminusB == iLevel] = zh_interp
+  }
+  
+
+  #set d as canopy displacement height
+  gas$z_displ_calc = gas$z_veg_aero*0.66
+  gas$roughLength_calc = gas$z_veg_aero*0.1
+  
   #grab canopy height
   #want to calculate stability param with respect to tower heights A & B
   #want to use heights where min(TowerHeight_A, TowerHeight_B) > d
@@ -29,22 +65,26 @@ calculate.stability.correction <- function(gas){
   gas$phih <- "hold"
   gas$phim <- "hold"
   gas$canopy.flag <- "hold"
-  for(k in 1:dim(gas)[1]){
+
+  for(k in 1:nrow(gas)){
     #pull out row for looping
     row.loop <- gas[k,]
     #set z as mean of tower positions A & B
     z = mean(c(as.numeric(row.loop$TowerHeight_A), as.numeric(row.loop$TowerHeight_B)))
-    #set d as canopy displacement height
-    d = as.numeric(row.loop$z_displ_calc)
+    #Set d
+    d= as.numeric(row.loop$z_displ_calc)
     #calculate obukhov parameter
-    gas[k,"MO.param"] <- as.numeric((z - d)/as.numeric(row.loop$L))
+    effect_h=z - d
+    effect_h[effect_h<0.1]<-0.1
+    gas[k,"effective_h"]<-effect_h
+    gas[k,"MO.param"] <- as.numeric((effect_h)/as.numeric(row.loop$L))
     mo.param <- as.numeric(gas[k,"MO.param"])
     #add canopy.flag
     min.height <- as.numeric(min(row.loop$TowerHeight_A, row.loop$TowerHeight_B))
     if(min.height < d){
-      gas[k,"canopy.flag"] <- "0"
+     gas[k,"canopy.flag"] <- "0"
     }else{
-      gas[k,"canopy.flag"] <- "1"
+     gas[k,"canopy.flag"] <- "1"
     }
     #calculate stability correction for each row
     if(mo.param > 0){

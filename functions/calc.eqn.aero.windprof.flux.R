@@ -51,7 +51,7 @@ calc.eqn.aero.windprof.flux <- function(min9, eddy.diff.name, bootstrap, nsamp){
       diff.heights <- as.numeric(min9$dHeight)[i] # m
       k <- as.numeric(min9[,paste0(eddy.diff.name)])[i]
       rho <- as.numeric(min9$rhoa_kgm3)[i] #kg m-3
-      rho_mol <- rho*.0289 # mol m-3
+      rho_mol <- rho/.0289 # mol m-3 (divided by molar mass of dry air 0.0289 kg/mol)
       
       # loop over each sampled dConc at one timestep to apply FG equation
       FG = vector()
@@ -80,7 +80,7 @@ calc.eqn.aero.windprof.flux <- function(min9, eddy.diff.name, bootstrap, nsamp){
     #select for desired eddy diffusivity using eddy.diff.name
     k <- as.numeric(min9[,paste0(eddy.diff.name)]) #m-2 s-1
     rho <- as.numeric(min9$rhoa_kgm3) #kg m-3
-    rho_mol <- rho*.0289 # mol m-3
+    rho_mol <- rho/.0289 # mol m-3 (divided by molar mass of dry air 0.0289 kg/mol)
     min9$FG_mean <- rho_mol*(-k)*(diff.conc)/(diff.heights) # CO2 umol m-2 s-1, CH4 nmol m-2 s-1, H2O mmol m-2 s-1
     min9$FG_sd <- NA # does not exist for non-bootstrap
     min9$dConc_sd <- NA # does not exist for non-bootstrap
