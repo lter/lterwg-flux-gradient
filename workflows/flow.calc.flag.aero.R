@@ -16,7 +16,7 @@ source(file.path("functions/calc.aerodynamic.canopy.height.R"))
 
 # Pull averaged data for concentration difference across height
 # and associated micromet variables from Google Drive
-site <- "JORN"
+site <- "CPER"
 googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
 data_folder <- googledrive::drive_ls(path = drive_url)
@@ -97,3 +97,27 @@ utils::zip(zipfile=fileZip,files=paste0(site,"_AE_30min_", user,"_",Sys.Date(),"
 setwd(wdPrev)
 #googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folder$id[data_folder$name==site]) # path might need work
 googledrive::drive_upload(media = fileSave, overwrite = T, path = data_folder$id[data_folder$name==site]) # couldn't make zip work (crs)
+
+# Optional. Save csv to analyze in Matlab
+
+# Min 9
+
+MyFile=paste0("Q:/My Drive/NC-State/flux_gradient/data/", site, "/min9_AE_CO2_data_", site, ".csv")
+write.csv(min9.FG.AE.list$CO2, MyFile, row.names = FALSE)
+
+MyFile=paste0("Q:/My Drive/NC-State/flux_gradient/data/", site, "/min9_AE_CH4_data_", site, ".csv")
+write.csv(min9.FG.AE.list$CH4, MyFile, row.names = FALSE)
+
+MyFile=paste0("Q:/My Drive/NC-State/flux_gradient/data/", site, "/min9_AE_H2O_data_", site, ".csv")
+write.csv(min9.FG.AE.list$H2O, MyFile, row.names = FALSE)
+
+# Min 30
+
+MyFile=paste0("Q:/My Drive/NC-State/flux_gradient/data/", site, "/min30_AE_CO2_data_", site, ".csv")
+write.csv(min30.FG.AE.list$CO2, MyFile, row.names = FALSE)
+
+MyFile=paste0("Q:/My Drive/NC-State/flux_gradient/data/", site, "/min30_AE_CH4_data_", site, ".csv")
+write.csv(min30.FG.AE.list$CH4, MyFile, row.names = FALSE)
+
+MyFile=paste0("Q:/My Drive/NC-State/flux_gradient/data/", site, "/min30_AE_H2O_data_", site, ".csv")
+write.csv(min30.FG.AE.list$H2O, MyFile, row.names = FALSE)
