@@ -6,6 +6,9 @@ email <- 'areysan@ncsu.edu'
 # Also requires packages: googledrive
 #library(dplyr)
 
+DoWP=1 # Do Wind Profile Method here as well? 1 for true O for False.
+Savecsv=1 # Save csv files to analyze in matlab? 1 for true 0 for False.
+
 # Load functions in this repo
 source(file.path("functions/MO_Length_CRS.R"))
 source(file.path("functions/calc.eddydiff.aero.R"))
@@ -17,7 +20,9 @@ source(file.path("functions/calc.aerodynamic.canopy.height.R"))
 
 # Pull averaged data for concentration difference across height
 # and associated micromet variables from Google Drive
-site <- "TOOL"
+
+site <- "NIWO"
+
 googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
 data_folder <- googledrive::drive_ls(path = drive_url)
@@ -69,11 +74,13 @@ min9.FG.AE.list <- calc.gas.aero.windprof.flux(min9.K = min9.K.AE.list,
 min30.FG.AE.list <- calc.gas.aero.windprof.flux(min9.K = min30.K.AE.list,
                                                bootstrap = 0, nsamp = 1000)
 
+if (DoWP==1){
 # Apply Wind Profile Method
 min9.FG.WP.list <- calc.gas.aero.windprof.flux_WP(min9.K = min9.K.AE.list,
                                                bootstrap = 0, nsamp = 1000)
 min30.FG.WP.list <- calc.gas.aero.windprof.flux_WP(min9.K = min30.K.AE.list,
                                                 bootstrap = 0, nsamp = 1000)
+}
 
 
 # Save calculated aerodynamic flux gradient fluxes as R.data objects
@@ -109,6 +116,7 @@ googledrive::drive_upload(media = fileSave, overwrite = T, path = data_folder$id
 
 # Optional. Save csv to analyze in Matlab
 
+if (Savecsv==1){
 ## AE Method
 # Min 9
 
@@ -154,3 +162,4 @@ write.csv(min30.FG.WP.list$CH4, MyFile, row.names = FALSE)
 
 MyFile=paste0("Q:/My Drive/NC-State/flux_gradient/data/", site, "/min30_WP_H2O_data_", site, ".csv")
 write.csv(min30.FG.WP.list$H2O, MyFile, row.names = FALSE)
+}
