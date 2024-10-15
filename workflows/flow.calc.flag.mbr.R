@@ -1,7 +1,7 @@
 # Pull data from google drive
-#email <- 'jaclyn_matthes@g.harvard.edu'
+email <- 'jaclyn_matthes@g.harvard.edu'
 #email <- 'kyle.delwiche@gmail.com'
-site <- 'BONA'
+site <- 'KONZ'
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Requires packages: fs, googledrive, ggplot2
@@ -199,11 +199,11 @@ MBRflux_align$dConc_H2O_bin = ifelse((MBRflux_align$dConc_H2O_mean-MBRflux_align
 MBRflux_align$dConc_CH4_bin = ifelse((MBRflux_align$dConc_CH4_mean-MBRflux_align$dConc_CH4_sd*2)<0 &
                                        (MBRflux_align$dConc_CH4_mean+MBRflux_align$dConc_CH4_sd*2)>0,1,0)
 
-# FC with H2O as tracer
-data <- MBRflux_align[c("FC_turb_interp_CO2","FCO2_MBR_H2Otrace_mean")]
-dataComp <- data[complete.cases(data),]
-RFCO2 <- cor.test(data$FC_turb_interp_CO2,data$FCO2_MBR_H2Otrace_mean)
-print(paste0('RFCO2 R-squared = ',round(RFCO2$estimate^2,2)*100,' %'))
+# # FC with H2O as tracer
+# data <- MBRflux_align[c("FC_turb_interp_CO2","FCO2_MBR_H2Otrace_mean")]
+# dataComp <- data[complete.cases(data),]
+# RFCO2 <- cor.test(data$FC_turb_interp_CO2,data$FCO2_MBR_H2Otrace_mean)
+# print(paste0('RFCO2 R-squared = ',round(RFCO2$estimate^2,2)*100,' %'))
 
 # ggplot(data=dplyr::filter(MBRflux_align, dConc_H2O_bin==0)) +
 #   geom_point(aes(x=FC_turb_interp_CO2, y=FCO2_MBR_H2Otrace_mean)) +
@@ -229,12 +229,11 @@ print(paste0('RFCO2 R-squared = ',round(RFCO2$estimate^2,2)*100,' %'))
 #   labs(title=site) +
 #   theme_minimal()
 
-
-#data <- dplyr::filter(MBRflux_align, dLevelsAminusB_CH4=="4_1")[c("FCH4_turb_interp_CH4","FCH4_MBR_CO2trace_mean")]
-data <- MBRflux_align[c("FCH4_turb_interp_CH4","FCH4_MBR_CO2trace_mean")]
-dataComp <- data[complete.cases(data),]
-RFCH4 <- cor.test(data$FCH4_turb_interp_CH4,data$FCH4_MBR_CO2trace_mean)
-print(paste0('FCH4 R-squared = ',round(RFCH4$estimate^2,2)*100,' %'))
+# #data <- dplyr::filter(MBRflux_align, dLevelsAminusB_CH4=="4_1")[c("FCH4_turb_interp_CH4","FCH4_MBR_CO2trace_mean")]
+# data <- MBRflux_align[c("FCH4_turb_interp_CH4","FCH4_MBR_CO2trace_mean")]
+# dataComp <- data[complete.cases(data),]
+# RFCH4 <- cor.test(data$FCH4_turb_interp_CH4,data$FCH4_MBR_CO2trace_mean)
+# print(paste0('FCH4 R-squared = ',round(RFCH4$estimate^2,2)*100,' %'))
 
 # ggplot(data=dplyr::filter(MBRflux_align, dConc_CO2_bin==0)) +
 #   geom_point(aes(x=FCH4_turb_interp_CH4, y=FCH4_MBR_CO2trace_mean)) +

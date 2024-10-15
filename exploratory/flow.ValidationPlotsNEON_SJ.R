@@ -13,17 +13,17 @@ library(ggh4x)
 library(googledrive)
 
 # Load functions in this repo
-source(file.path("R/plot.all.sites.1to1.R"))
-source(file.path("R/plot.single.site.1to1.R"))
-source(file.path("R/plot.all.sites.bar.R"))
-source(file.path("R/light.response.curve.R"))
-source(file.path("R/plot.light.response.R"))
-source(file.path("R/temp.response.curve.R"))
-source(file.path("R/plot.temp.response.R"))
-source(file.path("R/plot.all.sites.diurnal.R"))
-source(file.path("R/calculate.all.sites.diurnal.avg.R"))
-source(file.path("R/all.sites.light.response.curve.R"))
-source(file.path("R/all.sites.temp.response.curve.R"))
+source(file.path("functions/plot.all.sites.1to1.R"))
+source(file.path("functions/plot.single.site.1to1.R"))
+source(file.path("functions/plot.all.sites.bar.R"))
+source(file.path("functions/light.response.curve.R"))
+source(file.path("functions/plot.light.response.R"))
+source(file.path("functions/temp.response.curve.R"))
+source(file.path("functions/plot.temp.response.R"))
+source(file.path("functions/plot.all.sites.diurnal.R"))
+source(file.path("functions/calculate.all.sites.diurnal.avg.R"))
+source(file.path("functions/all.sites.light.response.curve.R"))
+source(file.path("functions/all.sites.temp.response.curve.R"))
 
 #Pull data from gdrive
 # Authenticate with Google Drive and get site data
@@ -164,6 +164,8 @@ mtext(subtitle)
 
 
 
+
+
 ############################CO2###
 
 df <- cross_grad_flag( df_CO2,df_CO2$dConc, df_CO2$FC_turb_interp)
@@ -239,8 +241,8 @@ all.sites.diurnal.ae <- calculate.all.sites.diurnal.avg(all.sites = all.sites.ae
 
 EC <- all.sites.diurnal.ae %>% filter(flux.name == "EC")
 FG <- all.sites.diurnal.ae %>% filter(flux.name == "FG")
-plot(EC$mean_flux,FG$mean_flux)
-title("Diurnal AE Averages All Sites")
+plot(EC$mean_flux,FG$mean_flux, ylim = c(-200,50))
+title("Diurnal AE Averages All Sites CO2")
 abline(a=0,b=1,col="red")
 text(-7.5,20,"R-squared = .568")
 
@@ -260,14 +262,98 @@ all.sites.diurnal.ae <- calculate.all.sites.diurnal.avg(all.sites = df)
 
 EC <- all.sites.diurnal.ae %>% filter(flux.name == "EC")
 FG <- all.sites.diurnal.ae %>% filter(flux.name == "FG")
-plot(EC$mean_flux,FG$mean_flux)
+plot(EC$mean_flux,FG$mean_flux, ylim = c(-200,50))
 abline(a=0,b=1,col="red")
 cross_grad_model <- lm(FG$mean_flux ~ EC$mean_flux)
-title("Diurnal AE Averages Cross-Flux Filtered All Sites")
+title("Diurnal AE Averages Cross-Flux Filtered All Sites CO2")
 text(-7.5,20,"R-squared = .634")
 summary(cross_grad_model)
 
+############WP CO2 Cross Gradient Filter and Reference Comparisons##############
 
+
+df_CO2 <- all.sites.wp %>% filter(gas == "CO2")
+df_H2O <- all.sites.wp %>% filter(gas == "H2O")
+df_CH4 <- all.sites.wp %>% filter(gas == "CH4")
+
+
+all.sites.diurnal.wp <- calculate.all.sites.diurnal.avg(all.sites =df_CO2)
+EC <- all.sites.diurnal.wp %>% filter(flux.name == "EC")
+FG <- all.sites.diurnal.wp %>% filter(flux.name == "FG")
+plot(EC$mean_flux,FG$mean_flux,ylim = c(-200,50))
+abline(a=0,b=1,col="red")
+cross_grad_model <- lm(FG$mean_flux ~ EC$mean_flux)
+title("Diurnal WP Averages All Sites CO2")
+text(-7.5,20,"R-squared = .477")
+summary(cross_grad_model)
+
+
+
+
+#this is the relationship between EC and FG when there are cross gradients
+all.sites.diurnal.wp <- calculate.all.sites.diurnal.avg(all.sites =df_CO2)
+
+df <- cross_grad_flag(df_CO2,df_CO2$dConc, df_CO2$FC_turb_interp)
+df$cross_grad_flag
+df <- df %>% filter(df$cross_grad_flag == 0)
+df$cross_grad_flag
+all.sites.diurnal.wp <- calculate.all.sites.diurnal.avg(all.sites = df)
+
+
+EC <- all.sites.diurnal.wp %>% filter(flux.name == "EC")
+FG <- all.sites.diurnal.wp %>% filter(flux.name == "FG")
+plot(EC$mean_flux,FG$mean_flux, ylim = c(-200,50))
+abline(a=0,b=1,col="red")
+cross_grad_model <- lm(FG$mean_flux ~ EC$mean_flux)
+title("Diurnal WP Averages Cross-Flux Filtered All Sites CO2")
+text(-7.5,20,"R-squared = .586")
+summary(cross_grad_model)
+
+
+#########################Diurnal Average of DConc###############################
+
+#In calculating ae, eddy diff is not negative since that is not possible in equation
+#it is negative from EC data due to cross gradient fluxes (they must be filtered out)
+
+#Most likley large positive conc differences between 4 and 3
+
+#when is the conc positive or negative, if it is all negative
+#What are the days like when the dconc is positive? Is it when RH is high and turbulence is low (ustar)
+#is the time period off?
+#is the code wrongm and is actually just showing CO2?
+
+
+
+
+
+
+#####FOR KONZA FIRST#####
+
+
+df_H2O_KONZ <- df_H2O %>% filter(site == "KONZ")
+
+df_H2O_KONZ$hour <- substr(as.character(df_H2O_KONZ$match_time), start =12,stop=13 )
+
+df_H2O_KONZ_DIURNAL <- df_H2O_KONZ %>% group_by(hour) %>% summarise(dConc.avg = mean(dConc, na.rm=TRUE),
+                                                                    temp.avg = mean(Tair1,na.rm =TRUE),
+                                                                    EddyDiff.avg = mean(EddyDiff,na.rm=TRUE),
+                                                                    FG.avg = mean(FG,na.rm=TRUE),
+                                                                    LE.avg = mean(LE_turb_interp,na.rm=TRUE))
+
+
+
+
+
+plot(df_H2O_KONZ_DIURNAL$dConc.avg*100, type ="l", lwd = 3, col ="cadetblue", ylim = c(-20,30),
+     xlab = "Hour", ylab = "Temp [C], Eddy Diff [(m/s)*10], dConc [mmols*100]")
+lines(df_H2O_KONZ_DIURNAL$temp.avg, lwd = 3, col ="red")
+lines(df_H2O_KONZ_DIURNAL$EddyDiff.avg*10)
+title("KONZA dConc, Temp, and EddyDiff Diurnal check")
+
+plot(df_H2O_KONZ_DIURNAL$FG.avg*(2.25*10**6)*(.01801/1000), ylim = c(-30,150),
+     xlab = "Hours", ylab = "Latent Heat (W/m^2)", type = "l", lty = 2, lwd =2, col ="red")
+lines(df_H2O_KONZ_DIURNAL$LE.avg, type = "l", lty = 1, lwd =2)
+title("KONZA Aerodynamic Method Latent Heat Diurnal Average")
 
 
 
@@ -489,7 +575,7 @@ plot.temp.response(model = model.TRC.EC.WP, site = all.sites.ae %>% filter(gas =
 #OPTION TO FILTER DATA BEFORE TAKING HOURLY AVERAGE BY FILTERING COLUMN IQR.flag == "0" or spike.flag == "0"
 #ALL SITES
 #METHOD AE
-all.sites.diurnal.ae <- calculate.all.sites.diurnal.avg(all.sites = all.sites.ae)
+all.sites.diurnal.ae <- calculate.all.sites.diurnal.avg(all.sites = all.sites.ae %>% filter(gas == "H2O"))
 #plot dirnual cycle for all sites
 plot.all.sites.diurnal(all.sites = all.sites.diurnal.ae, plot.title = "Aerodynamic Method")
 #METHOD WP
