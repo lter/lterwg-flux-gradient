@@ -67,6 +67,52 @@ min9.FG.AE.list <- calc.gas.aero.windprof.flux(min9.K = min9.K.AE.list,
                                                bootstrap = 0, nsamp = 1000)
 min30.FG.AE.list <- calc.gas.aero.windprof.flux(min9.K = min30.K.AE.list,
                                                bootstrap = 0, nsamp = 1000)
+
+# # Plot FH2O comparison between FG and EC
+# data <- dplyr::filter(min9.FG.AE.list$H2O, dLevelsAminusB=="4_1")[c("FH2O_interp","FG_mean")]
+# dataComp <- data[complete.cases(data),]
+# RFH2O <- cor.test(data$FH2O_interp,data$FG_mean)
+# print(paste0('FH2O R-squared = ',round(RFH2O$estimate^2,2),' %'))
+# 
+# ggplot(data=dplyr::filter(min9.FG.AE.list$H2O, dLevelsAminusB=="4_1")) +
+#   #ggplot(data=min9.FG.AE.list$H2O) +
+#   geom_point(aes(x=FH2O_interp, y=FG_mean)) +
+#   geom_abline(aes(intercept=0,slope=1),lty=2) +
+#   ylim(c(-3000,3000)) +
+#   xlim(c(-3000,3000)) +
+#   labs(title=paste0(site, ' Aerodynamic method (levels 4-1); R-squared = ',round(RFH2O$estimate^2,2)*100,'%')) +
+#   theme_minimal()
+# 
+# # Plot CO2 comparison between FG and EC
+# data <- dplyr::filter(min9.FG.AE.list$CO2, dLevelsAminusB=="4_1")[c("FC_turb_interp","FG_mean")]
+# dataComp <- data[complete.cases(data),]
+# RFCO2 <- cor.test(data$FC_turb_interp,data$FG_mean)
+# print(paste0('FCO2 R-squared = ',round(RFCO2$estimate^2,2)*100,'%'))
+# 
+# ggplot(data=dplyr::filter(min9.FG.AE.list$CO2, dLevelsAminusB=="4_1")) +
+#   #ggplot(data=min9.FG.AE.list$CO2) +
+#   geom_point(aes(x=FC_turb_interp, y=FG_mean)) +
+#   geom_abline(aes(intercept=0,slope=1),lty=2) +
+#   ylim(c(-50,50)) +
+#   xlim(c(-50,50)) +
+#   labs(title=paste0(site, ' Aerodynamic method (levels 4-1); R-squared = ',round(RFCO2$estimate^2,2)*100,'%')) +
+#   theme_minimal()
+# 
+# # Plot CH4 comparison between FG and EC
+# data <- dplyr::filter(min9.FG.AE.list$CH4, dLevelsAminusB=="4_1")[c("FCH4_turb_interp","FG_mean")]
+# dataComp <- data[complete.cases(data),]
+# RFCH4 <- cor.test(data$FCH4_turb_interp,data$FG_mean)
+# print(paste0('FCH4 R-squared = ',round(RFCH4$estimate^2,2)*100,' %'))
+# 
+# ggplot(data=dplyr::filter(min9.FG.AE.list$CH4, dLevelsAminusB=="4_1")) +
+#   #ggplot(data=min9.FG.AE.list$CH4) +
+#   geom_point(aes(x=FCH4_turb_interp, y=FG_mean)) +
+#   geom_abline(aes(intercept=0,slope=1),lty=2) +
+#   ylim(c(-75,75)) +
+#   xlim(c(-75,75)) +
+#   labs(title=paste0(site, ' Aerodynamic method (levels 4-1); R-squared = ',round(RFCH4$estimate^2,2)*100,'%')) +
+#   theme_minimal()
+
 # Save calculated aerodynamic flux gradient fluxes as R.data objects
 # save(min9.FG.AE.list, file = file.path("data", sitecode, paste0(sitecode,"_AE_", user, "_", Sys.Date(),".Rdata")))
 # #zip R.data objects
