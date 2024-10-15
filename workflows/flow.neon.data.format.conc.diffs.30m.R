@@ -19,8 +19,8 @@
 
 # Pull data from google drive
 #email <- 'alexisrose0525@gmail.com'
-# email <- 'csturtevant@battelleecology.org'
-email <- 'jaclyn_matthes@g.harvard.edu'
+email <- 'csturtevant@battelleecology.org'
+# email <- 'jaclyn_matthes@g.harvard.edu'
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: fs, googledrive
@@ -35,6 +35,8 @@ source(file.path("functions/aggregate_averages.R"))
 # -------------------------------------------------------
 sites <- c("BONA","CPER","GUAN","HARV","JORN","KONZ","NIWO","TOOL")
 for(site in sites){
+  rm(c('min9.list','min30.list','attr.df','min1.list','min9Diff.list'))
+  
   # Authenticate with Google Drive and get site data
   googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
   drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
@@ -110,24 +112,33 @@ for(site in sites){
     # Do any filtering desired to restrict to particular tower levels (e.g. 1 & 3 to get that diff)
     
     # Create output data frame where conc diffs are in the same row
-    OUT <- var
-    var <- names(OUT)
-    ncol <- ncol(OUT)
-    nrow <- nrow(OUT)
-    OUT[1:(nrow-1),(ncol+1):(ncol*2)] <- OUT[2:(nrow),]
-    OUT <- OUT[1:(nrow-1),] #last row removed because becomes NA
-    
-    names(OUT)[1:ncol] <- paste0(var,'_A')
-    names(OUT)[(ncol+1):(ncol*2)] <- paste0(var,'_B')
-    
-    #YOU MUST RUN THIS BEFORE CHANGING THE TOWER POSITIONS OTHERWISE YOU WILL END UP REMOVING COMBINATION OF TOWERPOSITION_A = 4 AND TOWERPOSITION_B = 1
+    # Loop through the combinations of levels. This is accomplished by incrementing the 
+    # row difference up to N/2 (rounding down), where N is the number of tower levels.
+    # This ensures that we have every combination of tower levels, while restricting the
+    # data to when those two tower levels are measured closest in time
+    for (diffRowIdx in seq_len(floor(max(attr.df$LvlMeasTow,na.rm=TRUE)/2))){
+      OUTidx <- var
+      vars <- names(OUTidx)
+      ncol <- ncol(OUTidx)
+      nrow <- nrow(OUTidx)
+      OUTidx[1:(nrow-diffRowIdx),(ncol+1):(ncol*2)] <- OUTidx[(1+diffRowIdx):(nrow),]
+      OUTidx <- OUTidx[1:(nrow-diffRowIdx),] #last row removed because becomes NA
+      
+      names(OUTidx)[1:ncol] <- paste0(vars,'_A')
+      names(OUTidx)[(ncol+1):(ncol*2)] <- paste0(vars,'_B')
+      
+      # Combine results
+      if(diffRowIdx == 1){
+        OUT <- OUTidx
+      } else {
+        OUT <- rbind(OUT,OUTidx)
+      }
+    }
+
+    #YOU MUST RUN THIS BEFORE CHANGING THE TOWER POSITIONS OTHERWISE YOU WILL END UP REMOVING COMBINATION OF top-bottom levels
     # Apply quality control
     timeChk <- difftime(OUT$timeBgn_B, OUT$timeEnd_A, units = "secs") # looking for short positive lag (flush time is 1 min for CH4 but 3 min for CO2 and H2O)
-    if(scalar == "CH4"){
-      bad <- timeChk < 45 | timeChk > 100 | OUT$qfFinl_A == 1 | OUT$qfFinl_B == 1
-    } else {
-      bad <- timeChk < 200 | timeChk > 300 | OUT$qfFinl_A == 1 | OUT$qfFinl_B == 1
-    }
+    bad <- timeChk < 45 | timeChk > 3600 | OUT$qfFinl_A == 1 | OUT$qfFinl_B == 1
     OUT <- OUT[!bad,]
     
     # Compute tower level diff A-B
