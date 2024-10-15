@@ -75,13 +75,6 @@ all.sites.ae <- bind_rows(SITES_AE_validation)
 #Comparing all sites, use all.sites.[method]
 #Comparing chosen sites, use SITES_[method]_validation
 
-
-site <- SITES_AE_validation$KONZ
-
-
-
-
-
 #Real Eddy Diff. converter - Sam J.
 
 "This code is intended to take the EC fluxes and concetration observations from NEON
@@ -96,69 +89,82 @@ diffusivities calculated from flux gradient methods."
 #'W/m^2 to kinematic forms (h2O conc /m^2s or K/m^2s) 
 
 ###EC Eddy Diffusivity###
+
+#add a filter for tower heights
 eddy_diff_real <- function(rho,flux,dz,dx,fluxtype = "type"){
-  cp = 1005 #J/kgK
   
+  cp = 1005 #J/kgK
+  mol_air = rho*34.53
   if(fluxtype == "LE"){
-    flux = (flux/(2.25*10**6)) #converted to kg/m^2s 
+    flux = (flux/(2.25*10**6)) #converted to kg/m^2s by dividing heat of vaporization
     flux = (flux/(.01801))*1000 # divided by molecular weight of water and multiplied by 1000 to get mmol/m^2s
     mol_air = rho*34.53 #multiply kg/m3 of air by # of moles per kg of air to get mol air/m3
     Kgas = -(flux*dz)/(dx*mol_air) #m2/s
+  }else {
+    Kgas = -(flux*dz)/(dx*mol_air)
   }
-  if(fluxtype == "H"){
-    flux = flux/(cp*rho)
-    Kgas = -(flux*dz)/(dx) #m2/s
-  }
-  mol_air = rho*34.53
-  Kgas = -(flux*dz)/(dx*mol_air) #m2/s
   
   return(Kgas)
 }
 
-
-df_CO2 <- all.sites.ae %>% filter(gas == "CO2")
-df_H2O <- all.sites.ae %>% filter(gas == "H2O")
-df_CH4 <- all.sites.ae %>% filter(gas == "CH4")
+###Choose one site or all###
+site <- SITES_AE_validation$KONZ
 
 
-kco2 <- eddy_diff_real(df_CO2$rhoa_kgm3,df_CO2$FC_turb_interp,df_CO2$dHeight,df_CO2$dConc,fluxtype = "CO2")
-kh2o <- eddy_diff_real(df_H2O$rhoa_kgm3,df_H2O$LE_turb_interp,df_H2O$dHeight,df_H2O$dConc,fluxtype = "LE")
-kheat <- eddy_diff_real(df_CO2$rhoa_kgm3,df_CO2$H_turb_interp,df_CO2$dHeight,df_CO2$Tair4-df_CO2$Tair3,fluxtype = "H")
+###Choose which gas to use###
+df_CO2 <- site  %>% filter(gas == "CO2")
+df_H2O <- site  %>% filter(gas == "H2O")
+df_CH4 <- site  %>% filter(gas == "CH4")
 
 
+df_CO2$kco2 <- eddy_diff_real(df_CO2$rhoa_kgm3,df_CO2$FC_turb_interp,df_CO2$dHeight,df_CO2$dConc,fluxtype = "CO2")
+df_H2O$kh2o <- eddy_diff_real(df_H2O$rhoa_kgm3,df_H2O$LE_turb_interp,df_H2O$dHeight,df_H2O$dConc,fluxtype = "LE")
 
-#Comparison plot#
+#Compare FG eddy to EC eddy diffs
 
-hist(df_CO2$EddyDiff,breaks = 1000)
+plot(df_H2O$EddyDiff,df_H2O$kh2o, ylim =c(-6,6), xlim = c(0,6))
+hist(df_H2O$EddyDiff,breaks = 40,ylim = c(0,1000))
 
-hist(kco2,breaks = 1000, xlim = c(-100,100))
+df_H2O_filtered <- df_H2O %>% filter(df_H2O$kh2o < 3)
 
+df_H2O_filtered <-df_H2O_filtered%>% filter(df_H2O_filtered$kh2o > -2)
 
-plot(kco2,df_CO2$EddyDiff, xlim =c(-100,100))
+hist(df_H2O_filtered$kh2o,breaks=50)
 
-
-
-#MO_param
-plot(df_CO2$MO.param,df_CO2$EddyDiff,col ="red", xlab = "MO Parameter",
-     ylab = "Eddy Diffusivity", ylim = c(-10,50))
-points(df_CO2$MO.param,kco2, col = alpha("black",.25))
-title("Back-Calc Eddy Diff and MO")
-subtitle ="All Sites, H2O"
-mtext(subtitle)
+plot(df_CO2$EddyDiff,df_CO2$kco2, ylim =c(-6,6), xlim = c(0,6))
 
 
 
-
-#######################Eddy Diff Averaging Experiment#######################
-
-df_CO2 <- all.sites.ae %>% filter(gas == "CO2")
-df_H2O <- all.sites.ae %>% filter(gas == "H2O")
-df_CH4 <- all.sites.ae %>% filter(gas == "CH4")
+#Compare EC H2O and CO2 eddy diffs
 
 
-kco2 <- eddy_diff_real(df$rhoa_kgm3,df$FC_turb_interp,df$dHeight,df$dConc,fluxtype = "CO2")
-kh2o <- eddy_diff_real(df$rhoa_kgm3,df$LE_turb_interp,df$dHeight,df$dConc,fluxtype = "LE")
-kheat <- eddy_diff_real(df$rhoa_kgm3,df$FC_turb_interp,df$dHeight,df$dConc,fluxtype = "H")
+df_H2O_filtered <- df_H2O %>% filter(df_H2O$kh2o < 3)
+df_H2O_filtered <-df_H2O_filtered%>% filter(df_H2O_filtered$kh2o > -2)
+hist(df_H2O_filtered$kh2o,breaks=50, ylim = c(0,1000))
+
+
+df_CO2_filtered <- df_CO2 %>% filter(df_CO2$kco2 < 3)
+df_CO2_filtered <-df_CO2_filtered%>% filter(df_CO2_filtered$kco2 > -2)
+
+hist(df_CO2_filtered$kco2,breaks=50,ylim = c(0,1000))
+
+
+df_EC_k <- merge(df_H2O_filtered[, c('match_time', 'kh2o')], df_CO2_filtered[, c('match_time', 'kco2')], by = 'match_time')
+
+plot(df_EC_k$kco2,df_EC_k$kh2o)
+abline(a = 0, b = 1, col = "red")
+cor.test(df_EC_k$kco2,df_EC_k$kh2o)
+
+
+#Difference in EC and FG eddy diffs as a function of concentration difference
+
+df_CO2_filtered$kdiff <- 100*(df_CO2_filtered$EddyDiff - df_CO2_filtered$kco2)/df_CO2_filtered$EddyDiff
+
+df_H2O_filtered$kdiff <- 100*(df_H2O_filtered$EddyDiff - df_H2O_filtered$kh2o)/df_H2O_filtered$EddyDiff
+
+plot(df_CO2_filtered$dConc,df_CO2_filtered$kdiff,xlim = c(-10,10),ylab = "Percent Difference")
+plot(df_H2O_filtered$dConc,df_H2O_filtered$kdiff,xlim = c(-4,4),ylim = c(-100,500),ylab = "Percent Difference")
+
 
 
 
@@ -175,3 +181,4 @@ cross_grad_flag <- function(df,dConc,flux){
   return(df)
 }
 
+sort(unique(SITES_AE_validation$KONZ$TowerPosition_B))
