@@ -1,11 +1,16 @@
 # Pull data from google drive
-email <- 'jaclyn_matthes@g.harvard.edu'
+#email <- 'jaclyn_matthes@g.harvard.edu'
 #email <- 'kyle.delwiche@gmail.com'
+<<<<<<< HEAD
 site <- 'BONA'
+=======
+email <- 'csturtevant@battelleecology.org'
+site <- 'US-Uaf'
+>>>>>>> 12f4a13511af06bbac9ae30dc5422f0c680faed3
 
 # ------ Prerequisites! Make sure these packages are installed ----
-# Requires packages: fs, googledrive
-
+# Requires packages: fs, googledrive, ggplot2
+library(ggplot2)
 # -------------------------------------------------------
 
 # Authenticate with Google Drive
@@ -199,12 +204,27 @@ MBRflux_align$dConc_H2O_bin = ifelse((MBRflux_align$dConc_H2O_mean-MBRflux_align
 MBRflux_align$dConc_CH4_bin = ifelse((MBRflux_align$dConc_CH4_mean-MBRflux_align$dConc_CH4_sd*2)<0 &
                                        (MBRflux_align$dConc_CH4_mean+MBRflux_align$dConc_CH4_sd*2)>0,1,0)
 
+<<<<<<< HEAD
 # ggplot(data=dplyr::filter(MBRflux_align, dConc_H2O_bin==0)) +
 #   geom_point(aes(x=FC_turb_interp_CO2, y=FCO2_MBR_H2Otrace_mean)) +
 #   geom_abline(aes(intercept=0,slope=1),lty=2) +
 #   ylim(c(-10,10)) +
 #   xlim(c(-10,10)) +
 #   labs(title=site) +
+=======
+# FC with H2O as tracer
+data <- MBRflux_align[c("FC_turb_interp_CO2","FCO2_MBR_H2Otrace_mean")]
+dataComp <- data[complete.cases(data),]
+RFCO2 <- cor.test(data$FC_turb_interp_CO2,data$FCO2_MBR_H2Otrace_mean)
+print(paste0('RFCO2 R-squared = ',round(RFCO2$estimate^2,2)*100,' %'))
+
+# ggplot(data=dplyr::filter(MBRflux_align, dConc_H2O_bin==0)) +
+#   geom_point(aes(x=FC_turb_interp_CO2, y=FCO2_MBR_H2Otrace_mean)) +
+#   geom_abline(aes(intercept=0,slope=1),lty=2) +
+#   ylim(c(-15,15)) +
+#   xlim(c(-15,15)) +
+#   labs(title=paste0(site, ' MBR method (levels 4-3); R-squared = ',round(RFCO2$estimate^2,2)*100,'%')) +
+>>>>>>> 12f4a13511af06bbac9ae30dc5422f0c680faed3
 #   theme_minimal()
 # 
 # ggplot(data=dplyr::filter(MBRflux_align, dConc_CO2_bin==0)) +
@@ -214,6 +234,32 @@ MBRflux_align$dConc_CH4_bin = ifelse((MBRflux_align$dConc_CH4_mean-MBRflux_align
 #   xlim(c(-1,5)) +
 #   labs(title = site) +
 #   theme_minimal()
+<<<<<<< HEAD
+=======
+# 
+# ggplot(data=dplyr::filter(MBRflux_align, dConc_CO2_bin==0)) +
+#   geom_point(aes(x=FCH4_turb_interp_CH4, y=FCH4_MBR_H2Otrace_mean)) +
+#   geom_abline(aes(intercept=0,slope=1),lty=2) +
+#   ylim(c(-50,50)) +
+#   xlim(c(-50,50)) +
+#   labs(title=site) +
+#   theme_minimal()
+
+
+#data <- dplyr::filter(MBRflux_align, dLevelsAminusB_CH4=="4_1")[c("FCH4_turb_interp_CH4","FCH4_MBR_CO2trace_mean")]
+data <- MBRflux_align[c("FCH4_turb_interp_CH4","FCH4_MBR_CO2trace_mean")]
+dataComp <- data[complete.cases(data),]
+RFCH4 <- cor.test(data$FCH4_turb_interp_CH4,data$FCH4_MBR_CO2trace_mean)
+print(paste0('FCH4 R-squared = ',round(RFCH4$estimate^2,2)*100,' %'))
+
+# ggplot(data=dplyr::filter(MBRflux_align, dConc_CO2_bin==0)) +
+#   geom_point(aes(x=FCH4_turb_interp_CH4, y=FCH4_MBR_CO2trace_mean)) +
+#   geom_abline(aes(intercept=0,slope=1),lty=2) +
+#   ylim(c(-100,100)) +
+#   xlim(c(-100,100)) +
+#   labs(title=paste0(site, ' MBR method (levels 4-3); R-squared = ',round(RFCH4$estimate^2,2)*100,'%')) +
+#   theme_minimal()
+>>>>>>> 12f4a13511af06bbac9ae30dc5422f0c680faed3
 
 # -------- Save and zip the file to the temp directory. Upload to google drive. -------
 fileSave <- fs::path(dirTmp,paste0(site,'_MBRflux_bootstrap.RData'))
