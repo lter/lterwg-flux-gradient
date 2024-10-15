@@ -6,17 +6,23 @@ email <- 'areysan@ncsu.edu'
 # Also requires packages: googledrive
 #library(dplyr)
 
+DoWP=1 # Do Wind Profile Method here as well? 1 for true O for False.
+Savecsv=1 # Save csv files to analyze in matlab? 1 for true 0 for False.
+
 # Load functions in this repo
 source(file.path("functions/MO_Length_CRS.R"))
 source(file.path("functions/calc.eddydiff.aero.R"))
 source(file.path("functions/calc.gas.aero.windprof.flux.R"))
+source(file.path("functions/calc.gas.aero.windprof.flux_WP.R"))
 source(file.path("functions/calc.eqn.aero.windprof.flux.R"))
 source(file.path("functions/calculate.stability.correction.R"))
 source(file.path("functions/calc.aerodynamic.canopy.height.R"))
 
 # Pull averaged data for concentration difference across height
 # and associated micromet variables from Google Drive
-site <- "JORN"
+
+site <- "NIWO"
+
 googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
 data_folder <- googledrive::drive_ls(path = drive_url)
@@ -113,6 +119,16 @@ min30.FG.AE.list <- calc.gas.aero.windprof.flux(min9.K = min30.K.AE.list,
 #   labs(title=paste0(site, ' Aerodynamic method (levels 4-1); R-squared = ',round(RFCH4$estimate^2,2)*100,'%')) +
 #   theme_minimal()
 
+
+if (DoWP==1){
+# Apply Wind Profile Method
+min9.FG.WP.list <- calc.gas.aero.windprof.flux_WP(min9.K = min9.K.AE.list,
+                                               bootstrap = 0, nsamp = 1000)
+min30.FG.WP.list <- calc.gas.aero.windprof.flux_WP(min9.K = min30.K.AE.list,
+                                                bootstrap = 0, nsamp = 1000)
+}
+
+
 # Save calculated aerodynamic flux gradient fluxes as R.data objects
 # save(min9.FG.AE.list, file = file.path("data", sitecode, paste0(sitecode,"_AE_", user, "_", Sys.Date(),".Rdata")))
 # #zip R.data objects
@@ -143,3 +159,53 @@ utils::zip(zipfile=fileZip,files=paste0(site,"_AE_30min_", user,"_",Sys.Date(),"
 setwd(wdPrev)
 #googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folder$id[data_folder$name==site]) # path might need work
 googledrive::drive_upload(media = fileSave, overwrite = T, path = data_folder$id[data_folder$name==site]) # couldn't make zip work (crs)
+
+# Optional. Save csv to analyze in Matlab
+
+if (Savecsv==1){
+## AE Method
+# Min 9
+
+MyFile=paste0("Q:/My Drive/NC-State/flux_gradient/data/", site, "/min9_AE_CO2_data_", site, ".csv")
+write.csv(min9.FG.AE.list$CO2, MyFile, row.names = FALSE)
+
+MyFile=paste0("Q:/My Drive/NC-State/flux_gradient/data/", site, "/min9_AE_CH4_data_", site, ".csv")
+write.csv(min9.FG.AE.list$CH4, MyFile, row.names = FALSE)
+
+MyFile=paste0("Q:/My Drive/NC-State/flux_gradient/data/", site, "/min9_AE_H2O_data_", site, ".csv")
+write.csv(min9.FG.AE.list$H2O, MyFile, row.names = FALSE)
+
+# Min 30
+
+MyFile=paste0("Q:/My Drive/NC-State/flux_gradient/data/", site, "/min30_AE_CO2_data_", site, ".csv")
+write.csv(min30.FG.AE.list$CO2, MyFile, row.names = FALSE)
+
+MyFile=paste0("Q:/My Drive/NC-State/flux_gradient/data/", site, "/min30_AE_CH4_data_", site, ".csv")
+write.csv(min30.FG.AE.list$CH4, MyFile, row.names = FALSE)
+
+MyFile=paste0("Q:/My Drive/NC-State/flux_gradient/data/", site, "/min30_AE_H2O_data_", site, ".csv")
+write.csv(min30.FG.AE.list$H2O, MyFile, row.names = FALSE)
+
+## WP Method
+# Min 9
+
+MyFile=paste0("Q:/My Drive/NC-State/flux_gradient/data/", site, "/min9_WP_CO2_data_", site, ".csv")
+write.csv(min9.FG.WP.list$CO2, MyFile, row.names = FALSE)
+
+MyFile=paste0("Q:/My Drive/NC-State/flux_gradient/data/", site, "/min9_WP_CH4_data_", site, ".csv")
+write.csv(min9.FG.WP.list$CH4, MyFile, row.names = FALSE)
+
+MyFile=paste0("Q:/My Drive/NC-State/flux_gradient/data/", site, "/min9_WP_H2O_data_", site, ".csv")
+write.csv(min9.FG.WP.list$H2O, MyFile, row.names = FALSE)
+
+# Min 30
+
+MyFile=paste0("Q:/My Drive/NC-State/flux_gradient/data/", site, "/min30_WP_CO2_data_", site, ".csv")
+write.csv(min30.FG.WP.list$CO2, MyFile, row.names = FALSE)
+
+MyFile=paste0("Q:/My Drive/NC-State/flux_gradient/data/", site, "/min30_WP_CH4_data_", site, ".csv")
+write.csv(min30.FG.WP.list$CH4, MyFile, row.names = FALSE)
+
+MyFile=paste0("Q:/My Drive/NC-State/flux_gradient/data/", site, "/min30_WP_H2O_data_", site, ".csv")
+write.csv(min30.FG.WP.list$H2O, MyFile, row.names = FALSE)
+}
