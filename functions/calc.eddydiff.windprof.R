@@ -16,7 +16,7 @@ calc.eddydiff.windprof <- function(sitecode, min9){
   #select for data columns -> remember there are as many ubar cols as there are TowerPositions for a given site
   data.cols <- c("roughLength_interp", grep("ubar", names(H2O), value = TRUE))
   #remove NAs
-  H2O <- H2O[complete.cases(H2O[,data.cols]),]
+  #H2O <- H2O[complete.cases(H2O[,data.cols]),]
   #calculate obukhov length and stability parameters
   H2O <- calculate.stability.correction(gas = H2O)
   #calculate eddy diffusivty using WP
@@ -40,7 +40,7 @@ calc.eddydiff.windprof <- function(sitecode, min9){
   #grab CO2
   CO2 <- min9[[which(names(min9) == "CO2")]]
   #remove NAs
-  CO2 <- CO2[complete.cases(CO2[,data.cols]),]
+  #CO2 <- CO2[complete.cases(CO2[,data.cols]),]
   #calculate obukhov length and stability columns
   CO2 <- calculate.stability.correction(gas = CO2)
   #calculate eddy diffusivty using WP
@@ -63,7 +63,7 @@ calc.eddydiff.windprof <- function(sitecode, min9){
   #grab CH4
   CH4 <- min9[[which(names(min9) == "CH4")]]
   #remove NAs
-  CH4 <- CH4[complete.cases(CH4[,data.cols]),]
+  #CH4 <- CH4[complete.cases(CH4[,data.cols]),]
   #calculate obukhov length and stability parameter
   CH4 <- calculate.stability.correction(gas = CH4)
   #calculate eddy diffusivty using WP
