@@ -1,7 +1,7 @@
 # Pull data from google drive
 email <- 'jaclyn_matthes@g.harvard.edu'
 #email <- 'kyle.delwiche@gmail.com'
-site <- 'TOOL'
+site <- 'BONA'
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Requires packages: fs, googledrive
@@ -46,11 +46,14 @@ load(fileIn)
 
 # Calculate modified Bowen ratio (MBR) gradient fluxes:
 # Filter for top-most tower level - use top two
-topht_1 = max(min9Diff.list[["CO2"]]$TowerPosition_A)
-topht = paste0(topht_1,"_",topht_1-1)
-CO2 = dplyr::filter(min9Diff.list[["CO2"]], dLevelsAminusB == topht)
-CH4 = dplyr::filter(min9Diff.list[["CH4"]], dLevelsAminusB == topht)
-H2O = dplyr::filter(min9Diff.list[["H2O"]], dLevelsAminusB == topht)
+#topht_1 = max(min9Diff.list[["CO2"]]$TowerPosition_A)
+#topht = paste0(topht_1,"_",topht_1-1)
+# CO2 = dplyr::filter(min9Diff.list[["CO2"]], dLevelsAminusB == topht)
+# CH4 = dplyr::filter(min9Diff.list[["CH4"]], dLevelsAminusB == topht)
+# H2O = dplyr::filter(min9Diff.list[["H2O"]], dLevelsAminusB == topht)
+CO2 = min9Diff.list[["CO2"]]
+CH4 = min9Diff.list[["CH4"]]
+H2O = min9Diff.list[["H2O"]]
 
 # Add gas suffix to all column names to track into combined table
 colnames(CO2) <- paste0(colnames(CO2), '_CO2')
@@ -196,21 +199,21 @@ MBRflux_align$dConc_H2O_bin = ifelse((MBRflux_align$dConc_H2O_mean-MBRflux_align
 MBRflux_align$dConc_CH4_bin = ifelse((MBRflux_align$dConc_CH4_mean-MBRflux_align$dConc_CH4_sd*2)<0 &
                                        (MBRflux_align$dConc_CH4_mean+MBRflux_align$dConc_CH4_sd*2)>0,1,0)
 
-ggplot(data=dplyr::filter(MBRflux_align, dConc_H2O_bin==0)) +
-  geom_point(aes(x=FC_turb_interp_CO2, y=FCO2_MBR_H2Otrace_mean)) +
-  geom_abline(aes(intercept=0,slope=1),lty=2) +
-  ylim(c(-10,10)) +
-  xlim(c(-10,10)) +
-  labs(title=site) +
-  theme_minimal()
-
-ggplot(data=dplyr::filter(MBRflux_align, dConc_CO2_bin==0)) +
-  geom_point(aes(x=FH2O_interp_H2O, y=FH2O_MBR_CO2trace_mean)) +
-  geom_abline(aes(intercept=0,slope=1),lty=2) +
-  ylim(c(-1,5)) +
-  xlim(c(-1,5)) +
-  labs(title = site) +
-  theme_minimal()
+# ggplot(data=dplyr::filter(MBRflux_align, dConc_H2O_bin==0)) +
+#   geom_point(aes(x=FC_turb_interp_CO2, y=FCO2_MBR_H2Otrace_mean)) +
+#   geom_abline(aes(intercept=0,slope=1),lty=2) +
+#   ylim(c(-10,10)) +
+#   xlim(c(-10,10)) +
+#   labs(title=site) +
+#   theme_minimal()
+# 
+# ggplot(data=dplyr::filter(MBRflux_align, dConc_CO2_bin==0)) +
+#   geom_point(aes(x=FH2O_interp_H2O, y=FH2O_MBR_CO2trace_mean)) +
+#   geom_abline(aes(intercept=0,slope=1),lty=2) +
+#   ylim(c(-1,5)) +
+#   xlim(c(-1,5)) +
+#   labs(title = site) +
+#   theme_minimal()
 
 # -------- Save and zip the file to the temp directory. Upload to google drive. -------
 fileSave <- fs::path(dirTmp,paste0(site,'_MBRflux_bootstrap.RData'))
