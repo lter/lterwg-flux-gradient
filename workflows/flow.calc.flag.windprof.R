@@ -62,26 +62,26 @@ min30.K.WP.list <- calc.eddydiff.windprof(sitecode = sitecode, min9 = min30Diff.
 # Optional bootstrap (1) or skip bootstrap (0) for gas conc uncertainty
 # function contains option to manual set name of eddy diffusivity column default is "EddyDiff"
 min9.FG.WP.list <- calc.gas.aero.windprof.flux(min9.K = min9.K.WP.list, 
-                                               bootstrap = 0, nsamp=1000)
+                                               bootstrap = 1, nsamp=1000)
 min30.FG.WP.list <- calc.gas.aero.windprof.flux(min9.K = min30.K.WP.list, 
                                                bootstrap = 0, nsamp=1000)
 
 
-# # Plot FCO2 comparison between FG and EC
-# data <- dplyr::filter(min9.FG.WP.list$CO2, dLevelsAminusB=="4_1")[c("FC_turb_interp","FG_mean")]
-# dataComp <- data[complete.cases(data),]
-# RFCO2 <- cor.test(data$FC_turb_interp,data$FG_mean)
-# print(paste0('FCO2 R-squared = ',round(RFCO2$estimate^2,2)*100,'%'))
-# 
-# ggplot(data=dplyr::filter(min9.FG.WP.list$CO2, dLevelsAminusB=="4_1")) +
-#   # ggplot(data=min9.FG.WP.list$CO2) +
-#   geom_point(aes(x=FC_turb_interp, y=FG_mean)) +
-#   geom_abline(aes(intercept=0,slope=1),lty=2) +
-#   ylim(c(-50,50)) +
-#   xlim(c(-50,50)) +
-#   labs(title=paste0(site, ' Wind Profile method (levels 4-1); R-squared = ',round(RFCO2$estimate^2,2)*100,'%')) +
-#   theme_minimal()
-# 
+# Plot FCO2 comparison between FG and EC
+data <- dplyr::filter(min9.FG.WP.list$CO2, dLevelsAminusB=="4_1")[c("FC_turb_interp","FG_mean")]
+dataComp <- data[complete.cases(data),]
+RFCO2 <- cor.test(data$FC_turb_interp,data$FG_mean)
+print(paste0('FCO2 R-squared = ',round(RFCO2$estimate^2,2)*100,'%'))
+
+ggplot(data=dplyr::filter(min9.FG.WP.list$CO2, dLevelsAminusB=="4_2")) +
+  # ggplot(data=min9.FG.WP.list$CO2) +
+  geom_point(aes(x=FC_turb_interp, y=FG_mean)) +
+  geom_abline(aes(intercept=0,slope=1),lty=2) +
+  ylim(c(-50,50)) +
+  xlim(c(-50,50)) +
+  labs(title=paste0(site, ' Wind Profile method (levels 4-1); R-squared = ',round(RFCO2$estimate^2,2)*100,'%')) +
+  theme_minimal()
+
 # 
 # # Plot FH2O comparison between FG and EC
 # data <- dplyr::filter(min9.FG.WP.list$H2O, dLevelsAminusB=="4_1")[c("FH2O_interp","FG_mean")]
@@ -126,7 +126,7 @@ user = "jhm"
 # Save 9-minute 
 fileSave <- fs::path(dirTmp,paste0(sitecode,"_WP_", user,"_",Sys.Date(),".Rdata"))
 fileZip <- fs::path(dirTmp,paste0(sitecode,"_WP_", user,"_",Sys.Date(),".zip"))
-save(min30.FG.WP.list,file=fileSave)
+save(min9.FG.WP.list,file=fileSave)
 wdPrev <- getwd()
 setwd(dirTmp)
 utils::zip(zipfile=fileZip,files=paste0(sitecode,"_WP_", user,"_",Sys.Date(),".Rdata"))

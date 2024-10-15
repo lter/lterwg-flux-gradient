@@ -1,7 +1,7 @@
 # Pull data from google drive
 email <- 'jaclyn_matthes@g.harvard.edu'
 #email <- 'kyle.delwiche@gmail.com'
-site <- 'BONA'
+site <- 'KONZ'
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Requires packages: fs, googledrive, ggplot2

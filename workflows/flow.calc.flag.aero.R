@@ -21,7 +21,7 @@ source(file.path("functions/calc.aerodynamic.canopy.height.R"))
 # Pull averaged data for concentration difference across height
 # and associated micromet variables from Google Drive
 
-site <- "NIWO"
+site <- "KONZ"
 
 googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
@@ -70,7 +70,7 @@ min30.K.AE.list <- calc.eddydiff.aero(sitecode = sitecode, min9 = min30Diff.list
 # Optional bootstrap (1) or skip bootstrap (0) for gas conc uncertainty
 # function contains option to manual set name of eddy diffusivity column default is "EddyDiff"
 min9.FG.AE.list <- calc.gas.aero.windprof.flux(min9.K = min9.K.AE.list,
-                                               bootstrap = 0, nsamp = 1000)
+                                               bootstrap = 1, nsamp = 1000)
 min30.FG.AE.list <- calc.gas.aero.windprof.flux(min9.K = min30.K.AE.list,
                                                bootstrap = 0, nsamp = 1000)
 
@@ -137,7 +137,7 @@ min30.FG.WP.list <- calc.gas.aero.windprof.flux_WP(min9.K = min30.K.AE.list,
 # #IMPORTANT REMINDER if you have not gone through the process of valdiating your email with googledrive in R this code will not work please refer to https://nceas.github.io/scicomp.github.io/tutorials.html#using-the-googledrive-r-package
 # #NOTE: you will be asked to re authenticate if your OAuth token is stale, select your already authenticated email from the list
 # googledrive::drive_upload(media = file.path("data", sitecode, paste0(sitecode,"_AE_", user, "_", Sys.Date(),".zip")), overwrite = T, path = drive_url)
-user = "crs"
+user = "jhm"
 
 # Save 9-minute 
 fileSave <- fs::path(dirTmp,paste0(site,"_AE_9min_", user,"_",Sys.Date(),".Rdata"))
