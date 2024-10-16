@@ -147,8 +147,8 @@ wdPrev <- getwd()
 setwd(dirTmp)
 utils::zip(zipfile=fileZip,files=paste0(site,"_AE_9min_", user,"_",Sys.Date(),".Rdata"))
 setwd(wdPrev)
-#googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folder$id[data_folder$name==site]) # path might need work
-googledrive::drive_upload(media = fileSave, overwrite = T, path = data_folder$id[data_folder$name==site]) # couldn't make zip work (crs)
+googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folder$id[data_folder$name==site]) # path might need work
+#googledrive::drive_upload(media = fileSave, overwrite = T, path = data_folder$id[data_folder$name==site]) # couldn't make zip work (crs)
 
 # Save 30-minute
 fileSave <- fs::path(dirTmp,paste0(site,"_AE_30min_", user,"_",Sys.Date(),".Rdata"))
