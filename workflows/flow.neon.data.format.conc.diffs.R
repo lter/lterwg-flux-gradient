@@ -17,9 +17,11 @@
 # Pull data from google drive
 # email <- 'alexisrose0525@gmail.com'
 #email <- 'jaclyn_matthes@g.harvard.edu'
-sites <- c("BONA","CPER","GUAN","HARV","JORN","KONZ","NIWO","TOOL")
 email <- 'csturtevant@battelleecology.org'
 #email <- 'jaclyn_matthes@g.harvard.edu'
+
+# sites <- c("CPER","GUAN","HARV","JORN","NIWO","TOOL","BONA","KONZ")
+sites <- c("CPER","GUAN","HARV","JORN","NIWO","TOOL")
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: fs, googledrive
@@ -33,7 +35,7 @@ source(file.path("functions/aggregate_averages.R"))
 # Final note: This script takes approx 45 min to run per site. 
 # -------------------------------------------------------
 for (site in sites){
-  rm(c('min9.list','min30.list','attr.df','min1.list','min9Diff.list'))
+  rm('min9.list','min30.list','attr.df','min1.list','min9Diff.list')
   
   # Authenticate with Google Drive and get site data
   googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
