@@ -1,8 +1,4 @@
-# Pull data from google drive
-email <- 'saj82@cornell.edu'
-#copy this browser url from the site folder on the shared G drive (located at https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3) you wish to upload your zip files to
-#this url should point to the NEONSITES_Validation folder
-drive_url <- googledrive::as_id("https://drive.google.com/drive/u/3/folders/1hzWPskSodKkHiempx7HUjLesXAxku2AB")
+
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: googledrive
 library(dplyr)
@@ -25,60 +21,50 @@ source(file.path("functions/calculate.all.sites.diurnal.avg.R"))
 source(file.path("functions/all.sites.light.response.curve.R"))
 source(file.path("functions/all.sites.temp.response.curve.R"))
 
-#Pull data from gdrive
-# Authenticate with Google Drive and get site data
+###TO MODIFY CHANGE SITE AND fileDnld zip files###
+
+# Pull data from google drive
+email <- 'saj82@cornell.edu'
+#email <- 'jaclyn_matthes@g.harvard.edu'
+#email <- 'kyle.delwiche@gmail.com'
+site <- 'NIWO' #'KONZ' BONA CPER GUAN HARV JORN NIWO TOOL
+#PairLvl <- '4_3' # Not needed
+
+# Authenticate with Google Drive
 googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
-validation_folder <- googledrive::drive_ls(path = drive_url)
-#site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==sitecode])
-dirTmp <- fs::path(tempdir())
+drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
+data_folder <- googledrive::drive_ls(path = drive_url)
+site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==site])
+
+# Download data
+dirTmp <- fs::path(tempdir(),site)
 dir.create(dirTmp)
-for(focal_file in validation_folder$name){
+
+fileDnld <- paste0(site,c("_AE_9min_crf_2024-10-16.zip"))
+
+message(paste0('Downloading MBR bootstrapped data for ',site))
+for(focal_file in fileDnld){
   
   # Find the file identifier for that file
-  file_id <- subset(validation_folder, name == focal_file)
+  file_id <- subset(site_folder, name == focal_file)
   
   # Download that file
   pathDnld <- fs::path(dirTmp,focal_file)
   googledrive::drive_download(file = file_id$id, 
                               path = pathDnld,
                               overwrite = T)
-#Unzip
-#if(grepl(pattern='.zip',focal_file)){
-#  utils::unzip(pathDnld,exdir=dirTmp)
-# }
-  
+  # Unzip
+  if(grepl(pattern='.zip',focal_file)){
+    utils::unzip(pathDnld,exdir=dirTmp)
+  }
+  # Load the data 
+  fileIn <- sub('.zip',".Rdata",pathDnld)
+  load(fileIn)
 }
 
-#Load validation data frames 
-#the R.data/zipfiles are labeled based on the method used to calculate the fluxes (i.e. AE, WP, MBR)
-#problem loading in .Rdata objects currently being saved to 2 different directories?
-#TO DO: better understand how to control where files are unzipped to when downloaded off of gdriv
 
 
-fileIn <- "KONZ_WP_jhm_2024-10-15.zip"
-pathIn <- fs::path(dirTmp,fileIn)
 
-utils::unzip(pathIn,exdir=dirTmp)
-
-file_unzipped <- fs::path(dirTmp,
-                          sub(pattern="zip", replacement = "Rdata",x = fileIn))
-load(file_unzipped)
-
-#fileIn <- fs::path(dirTmp, paste0("SITES_WP_Stability.Rdata"))
-#load(fileIn)
-#fileIn <- fs::path(dirTmp, paste0("SITES_MBR_Stability.Rdata"))
-#load(fileIn)
-#if data is already downloaded and saved
-#load(file.path("data", "Validation", paste0("SITES_AE_val.Rdata")))
-#load(file.path("data", "Validation", paste0("SITES_WP_val.Rdata")))
-#load(file.path("data", "Validation", paste0("SITES_MBR.Rdata")))
-
-#bind all site dataframes together
-#all.sites.ae <- bind_rows(SITES_AE_validation)
-# all.sites.wp <- bind_rows(SITES_WP_validation)
-# all.sites.mbr <- bind_rows(SITES_MBR)
-#TO DO ADD MBR, NOT YET AVAILABLE
-# all.sites.mbr <- bind_rows(SITES_MBR_validation)
 
 
 #Real Eddy Diff. converter - Sam J.
@@ -131,7 +117,7 @@ eddy_diff_real <- function(site) {
 
 #Generate Back Calculated Eddy Diffusivity
 
-KONZ <- eddy_diff_real(min9.FG.WP.list)
+NIWO <- eddy_diff_real(min9.FG.AE.list)
 
 
 
@@ -140,9 +126,12 @@ KONZ <- eddy_diff_real(min9.FG.WP.list)
 ###Site is the data in the format of a list of H2O and CO2 data frames
 ###Site name is a string such as "KONZ"
 ###method is the FG method employred "WP" or "AE"
-eddy_diff_compare <- function(site,site_name,method){
+#p-value is of correlation
+
+
+eddy_diff_compare <- function(site,site_name){
   
-  df_comp <- data.frame("Method" = character(0), "Site" = character(0), "Levels" = character(0), 
+  df_comp <- data.frame( "Site" = character(0), "Levels" = character(0), 
                         "Mean_KH2O" = integer(0), "Mean_KCO2"= integer(0),
                         "low_95"=integer(0),"high_95"=integer(0), 
                         "p_value" = integer(0), "cor_test"=integer(0))
@@ -179,7 +168,7 @@ eddy_diff_compare <- function(site,site_name,method){
     corr <- as.numeric(cor_test$estimate[1])
     
     #add to data_frame
-    df_comp <- add_row(df_comp, Method = method,Site = site_name, Levels = level, Mean_KH2O =Mean_H2O, 
+    df_comp <- add_row(df_comp,Site = site_name, Levels = level, Mean_KH2O =Mean_H2O, 
                        Mean_KCO2 = Mean_CO2, low_95 = l_95, high_95 = h_95,
                        p_value = p, cor_test = corr)
     
@@ -191,8 +180,104 @@ eddy_diff_compare <- function(site,site_name,method){
 
 
 
-test <- eddy_diff_compare(KONZ, site_name = "KONZ", "WP")
-    
+# Assuming df1, df2, df3, df4, df5, and df6 are your data frames
+combined_df <- rbind(test, test2, test3, test4, test5, test6)
+
+
+setwd("/Users/jurado/Documents")
+write.csv(combined_df, file = "eddy_diff_comp.csv")
+
+
+#######Plotting combined_df#######
+
+
+# Calculate average low_95 and high_95 for each site
+avg_values <- combined_df %>%
+  group_by(Site) %>%
+  summarize(
+    avg_low_95 = mean(low_95, na.rm = TRUE),
+    avg_high_95 = mean(high_95, na.rm = TRUE),
+    #avg_perc_diff = mean(perc_diff, na.rm = TRUE)
+  )
+
+# Print the summarized data frame with averages
+print(avg_values)
+
+# Load necessary libraries
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+# Reshape the data to long format
+avg_values_long <- avg_values %>%
+  pivot_longer(cols = starts_with("avg_"), names_to = "type", values_to = "value")
+
+# Print the reshaped data frame
+print(avg_values_long)
+
+# Grouped
+ggplot(avg_values_long, aes(fill=type, y=value, x=Site)) + 
+  geom_bar(position="dodge", stat="identity")+
+labs(title = "CO2 & H2O Eddy Diffusivity Differences by Site ",
+     x = "Site",
+     y = "KH2O - KCO2 [m2/s]",
+     fill = "Type") +
+  theme_minimal()
+
+
+
+combined_df$perc_diff <- 100*abs(combined_df$Mean_KH2O-combined_df$Mean_KCO2)/(combined_df$Mean_KH2O+combined_df$Mean_KCO2/2)
+
+# Calculate average low_95 and high_95 for each site
+avg_values <- combined_df %>%
+  group_by(Site) %>%
+  summarize(
+    avg_perc_diff = mean(perc_diff,na.rm=TRUE)
+    #avg_perc_diff = mean(perc_diff, na.rm = TRUE)
+  )
+
+
+# Print the summarized data frame with averages
+print(avg_values)
+# Reshape the data to long format
+avg_values_long <- avg_values %>%
+  pivot_longer(cols = starts_with("avg_"), names_to = "type", values_to = "value")
+
+
+ggplot(avg_values_long, aes(fill=type, y=value, x=Site)) + 
+  geom_bar(position="dodge", stat="identity")+
+  labs(title = "CO2 & H2O Eddy Diffusivity Percent Differences by Site ",
+       x = "Site",
+       y = "KH2O - KCO2 [%]",
+       fill = "Type") +
+  theme_minimal()
+
+#####Correlations 
+
+# Calculate average low_95 and high_95 for each site
+avg_values <- combined_df %>%
+  group_by(Site) %>%
+  summarize(
+    avg_corr = mean(cor_test,na.rm=TRUE)
+    #avg_perc_diff = mean(perc_diff, na.rm = TRUE)
+  )
+
+
+# Print the summarized data frame with averages
+print(avg_values)
+# Reshape the data to long format
+avg_values_long <- avg_values %>%
+  pivot_longer(cols = starts_with("avg_"), names_to = "type", values_to = "value")
+
+
+ggplot(avg_values_long, aes(fill=type, y=value, x=Site)) + 
+  geom_bar(position="dodge", stat="identity")+
+  labs(title = "Correlation of H2O and CO2 diffusivities by Site ",
+       x = "Site",
+       y = "Corr.t-test",
+       fill = "Type") +
+  theme_minimal()
+
 
 
 
