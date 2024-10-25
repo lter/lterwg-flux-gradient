@@ -8,64 +8,6 @@ library(gslnls)
 library(ggh4x)
 library(googledrive)
 
-# Load functions in this repo
-source(file.path("functions/plot.all.sites.1to1.R"))
-source(file.path("functions/plot.single.site.1to1.R"))
-source(file.path("functions/plot.all.sites.bar.R"))
-source(file.path("functions/light.response.curve.R"))
-source(file.path("functions/plot.light.response.R"))
-source(file.path("functions/temp.response.curve.R"))
-source(file.path("functions/plot.temp.response.R"))
-source(file.path("functions/plot.all.sites.diurnal.R"))
-source(file.path("functions/calculate.all.sites.diurnal.avg.R"))
-source(file.path("functions/all.sites.light.response.curve.R"))
-source(file.path("functions/all.sites.temp.response.curve.R"))
-
-###TO MODIFY CHANGE SITE AND fileDnld zip files###
-
-# Pull data from google drive
-email <- 'saj82@cornell.edu'
-#email <- 'jaclyn_matthes@g.harvard.edu'
-#email <- 'kyle.delwiche@gmail.com'
-site <- 'NIWO' #'KONZ' BONA CPER GUAN HARV JORN NIWO TOOL
-#PairLvl <- '4_3' # Not needed
-
-# Authenticate with Google Drive
-googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
-drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
-data_folder <- googledrive::drive_ls(path = drive_url)
-site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==site])
-
-# Download data
-dirTmp <- fs::path(tempdir(),site)
-dir.create(dirTmp)
-
-fileDnld <- paste0(site,c("_AE_9min_crf_2024-10-16.zip"))
-
-message(paste0('Downloading MBR bootstrapped data for ',site))
-for(focal_file in fileDnld){
-  
-  # Find the file identifier for that file
-  file_id <- subset(site_folder, name == focal_file)
-  
-  # Download that file
-  pathDnld <- fs::path(dirTmp,focal_file)
-  googledrive::drive_download(file = file_id$id, 
-                              path = pathDnld,
-                              overwrite = T)
-  # Unzip
-  if(grepl(pattern='.zip',focal_file)){
-    utils::unzip(pathDnld,exdir=dirTmp)
-  }
-  # Load the data 
-  fileIn <- sub('.zip',".Rdata",pathDnld)
-  load(fileIn)
-}
-
-
-
-
-
 
 #Real Eddy Diff. converter - Sam J.
 
@@ -75,7 +17,9 @@ diffusivities calculated from flux gradient methods."
 
 ###EC Eddy Diffusivity###
 "input site file is a list of 3 data frames, CO2,H2O,and CH4. Back calculates 
-CO2 and H2O"
+CO2 and H2O and returns original frames with added columns KCO2 and KH2O"
+
+
 
 
 eddy_diff_real <- function(site) {
@@ -115,9 +59,6 @@ eddy_diff_real <- function(site) {
 }
 
 
-#Generate Back Calculated Eddy Diffusivity
-
-NIWO <- eddy_diff_real(min9.FG.AE.list)
 
 
 
@@ -125,17 +66,23 @@ NIWO <- eddy_diff_real(min9.FG.AE.list)
 
 ###Site is the data in the format of a list of H2O and CO2 data frames
 ###Site name is a string such as "KONZ"
-###method is the FG method employred "WP" or "AE"
-#p-value is of correlation
+
+#means and 95% confidence difference in mean intervals are calculated from t.test
+#p-value and corr variable calculated from cor.test
+
+##################################WARNING#######################################
+'Arbitrary detection limits constrain eddy diff between -2 and 4'
+'Eventually change to detection limits Jackie and Cove find'
+################################################################################
 
 
 eddy_diff_compare <- function(site,site_name){
   
   df_comp <- data.frame( "Site" = character(0), "Levels" = character(0), 
-                        "Mean_KH2O" = integer(0), "Mean_KCO2"= integer(0),
-                        "low_95"=integer(0),"high_95"=integer(0), 
-                        "p_value" = integer(0), "cor_test"=integer(0))
-
+                         "Mean_KH2O" = integer(0), "Mean_KCO2"= integer(0),
+                         "low_95"=integer(0),"high_95"=integer(0), 
+                         "p_value" = integer(0), "cor_test"=integer(0))
+  
   df_CO2 <- site[["CO2"]]
   df_H2O <- site[["H2O"]]
   levels <- sort(unique(df_H2O$dLevelsAminusB)) #assuming same for all gases
@@ -179,16 +126,130 @@ eddy_diff_compare <- function(site,site_name){
 
 
 
+####Cross Gradient Flux Flagger###
+"Flags all instances of a cross gradient flux"
+#' dConc is a vector of the difference in concentration
+#' flux is the EC flux measured
+#' df is the dataframe of interest
+#' 
 
-# Assuming df1, df2, df3, df4, df5, and df6 are your data frames
-combined_df <- rbind(test, test2, test3, test4, test5, test6)
+cross_grad_flag <- function(df,K){
+  df <- cbind(df, cross_grad_flag = NA)
+  df$cross_grad_flag <- ifelse(df$K < 0,1,0 )
+  return(df)
+}
 
 
-setwd("/Users/jurado/Documents")
-write.csv(combined_df, file = "eddy_diff_comp.csv")
+
+####What percent of each dataset is cross gradient fluxes?#####
+
+percent_cross_grad <- function(cross_grad_flag) {
+  
+  # Calculate the number of 1's
+  num_ones <- sum(cross_grad_flag, na.rm = TRUE)
+  
+  # Calculate the total number of entries
+  total_entries <- length(cross_grad_flag)
+  
+  # Calculate the percentage of 1's
+  percentage_ones <- (num_ones / total_entries) * 100
+  
+  return(percentage_ones)
+}
 
 
-#######Plotting combined_df#######
+###TO MODIFY CHANGE SITE AND fileDnld zip files###
+
+# Pull data from google drive
+email <- 'saj82@cornell.edu'
+#email <- 'jaclyn_matthes@g.harvard.edu'
+#email <- 'kyle.delwiche@gmail.com'
+
+
+###Broken because the Rdata files inside of the folders are all named wacky and differently
+#GUAN, TOOL
+site_list <- c('KONZ','BONA','CPER','HARV','JORN','NIWO', 'GUAN')
+
+# Authenticate with Google Drive
+googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
+drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
+data_folder <- googledrive::drive_ls(path = drive_url)
+
+
+#Initialize an empty dataframe
+K_comp <- data.frame() 
+cross_grad_perc <- data.frame() 
+
+for (site in site_list){
+
+  site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==site])
+  
+  # Download data
+  dirTmp <- fs::path(tempdir(),site)
+  dir.create(dirTmp)
+  
+  fileDnld <- paste0(site,c("_AE_9min.zip")) #insert zip file to pull here
+  
+  message(paste0('Downloading AE data for ',site))
+  for(focal_file in fileDnld){
+    
+    # Find the file identifier for that file
+    file_id <- subset(site_folder, name == focal_file)
+    
+    # Download that file
+    pathDnld <- fs::path(dirTmp,focal_file)
+    googledrive::drive_download(file = file_id$id, 
+                                path = pathDnld,
+                                overwrite = T)
+    # Unzip
+    if(grepl(pattern='.zip',focal_file)){
+      utils::unzip(pathDnld,exdir=dirTmp)
+    }
+    # Load the data 
+    fileIn <- sub('.zip',".Rdata",pathDnld)
+    load(fileIn)
+  }
+  
+  ####DATA LOADED, ANALYSIS START####
+  
+  result <- eddy_diff_real(min9.FG.AE.list) #calculates eddy diffusivity 
+  
+  assign(site, result, envir = .GlobalEnv) #names new data frame after the site
+  
+  comparison_result <- eddy_diff_compare(get(site), site) #compares eddy diffusivities 
+  
+  K_comp <- rbind(K_comp, comparison_result)
+  
+  K_comp <- na.omit(K_comp)
+  
+  #####Analysis of Cross Gradient flux####
+  
+  site_CO2_Flagged <- cross_grad_flag(get(site)$CO2,get(site)$CO2$KCO2)
+  
+  # Loop through unique dLevelAminusB values
+  for (level in unique(site_CO2_Flagged$dLevelsAminusB)) {
+    # Filter the flagged data for the current level
+    level_data <- site_CO2_Flagged[site_CO2_Flagged$dLevelsAminusB == level, ]
+    
+    # Compute the percent cross gradient for the current level
+    site_percent_cross <- percent_cross_grad(level_data$cross_grad_flag)
+    
+    # Create a new dataframe for the current site and level
+    current_result <- data.frame(Site = site, Percent = site_percent_cross, dLevelsAminusB = level)
+    
+    # Stack the results
+    cross_grad_perc <- rbind(cross_grad_perc, current_result)
+  }
+  cross_grad_perc <- cross_grad_perc %>%
+    filter(Percent != 0)
+}
+
+
+
+
+
+
+#######Plotting#####################################################
 
 
 # Calculate average low_95 and high_95 for each site
@@ -279,12 +340,46 @@ ggplot(avg_values_long, aes(fill=type, y=value, x=Site)) +
   theme_minimal()
 
 
+####How to compare eddy diffusivities for different methods at different heights
+####
+# Create a sample structure for KONZ
+
+# Function to summarize eddy diffusivities for a given gas
+summarize_eddy_diffusivities <- function(df) {
+  df %>%
+    pivot_longer(cols = starts_with("EddyDiff"), names_to = "method", values_to = "EddyDiff") %>%
+    group_by(dLevelsAminusB, method) %>%
+    summarize(
+      mean_EddyDiff = mean(EddyDiff, na.rm = TRUE),
+      median_EddyDiff = median(EddyDiff, na.rm = TRUE),
+      sd_EddyDiff = sd(EddyDiff, na.rm = TRUE),
+      n = n()
+    ) %>%
+    arrange(dLevelsAminusB, method)
+}
+
+# Summarize for H2O
+summary_HARV <- summarize_eddy_diffusivities(HARV$H2O)
+print("Summary for H2O:")
 
 
 
 
 
 
+
+
+
+
+
+
+
+####
+plot(summary_HARV$mean_EddyDiff, pch = 1, ylab= "EddyDiff [m2/s]")
+points(summary_NIWO$mean_EddyDiff, pch = 2)
+points(summary_KONZ$mean_EddyDiff, pch = 3)
+points(summary_BONA$mean_EddyDiff, pch = 4)
+points(summary_CPER$mean_EddyDiff, pch = 5)
 
 
 
@@ -351,36 +446,6 @@ title("KONZ Conc. Diff and Percent Difference H2O")
 
 
 
-#######T-Test#####
-
-
-
-#H2O is larger by around 20%
-
-#####Difference by diurnal/ seasonal  Average####
-
-
-
-
-
-
-
-
-
-
-
-
-####Cross Gradient Flux Flagger###
-
-#' dConc is a vector of the difference in concentration
-#' flux is the EC flux measured
-#' df is the dataframe of interest
-#' 
-
-cross_grad_flag <- function(df,dConc,flux){
-  df <- cbind(df, cross_grad_flag = NA)
-  df$cross_grad_flag <- ifelse(dConc < 0 & flux < 0 |dConc > 0 & flux > 0,1,0 )
-  return(df)
-}
-
-sort(unique(SITES_AE_validation$KONZ$TowerPosition_B))
+  
+    
+        
