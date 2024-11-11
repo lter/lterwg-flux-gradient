@@ -32,6 +32,7 @@ library(doParallel)
 # Load functions in this repo
 source(file.path("functions/interp.flux.R"))
 source(file.path("functions/aggregate_averages.R"))
+source('./functions/MO_Length_CRS.R')
 
 # Final note: This script takes approx 45 min to run per site. 
 # -------------------------------------------------------
@@ -44,40 +45,26 @@ for(site in sites){
   data_folder <- googledrive::drive_ls(path = drive_url)
   site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==site])
   
-  # Only grab the files with the 1- 2- 9- or 30-minute data needed 
-  site_minfiles <- site_folder[grep("min", site_folder$name),]
+  focal_files = paste0(site,c('_9min.zip','_30min.zip','_1min.zip','_WS2D2min.zip','_attr.zip'))
   
   dirTmp <- fs::path(tempdir(),site)
   dir.create(dirTmp)
   
-  #for(focal_file in site_folder$name){
-  for(focal_file in site_minfiles$name){
-    # # Find the file identifier for that file
-    # file_id <- subset(site_folder, name == focal_file)
-    file_id <- subset(site_minfiles, name == focal_file)
-    # 
+  for(focal_file in focal_files){
+    
+    # Find the file identifier for that file
+    file_id <- subset(site_folder, name == focal_file)
+     
     # Download that file
     pathDnld <- fs::path(dirTmp,focal_file)
-    # googledrive::drive_download(file = file_id$id, 
-    #                             path = pathDnld,
-    #                             overwrite = T)
     googledrive::drive_download(file = file_id$id, 
-                                path = pathDnld,
-                                overwrite = T)
+                            path = pathDnld,
+                            overwrite = T)
     # Unzip
     if(grepl(pattern='.zip',focal_file)){
       utils::unzip(pathDnld,exdir=dirTmp)
     }
     
-  }
-  
-  # Download site attribute table
-  site_attrfiles <- site_folder[grep("attr", site_folder$name),]
-  pathDnld <- fs::path(dirTmp,site_attrfiles$name)
-  googledrive::drive_download(file = site_attrfiles$id, 
-                              path = pathDnld, overwrite = T)
-  if(grepl(pattern='.zip',site_attrfiles$name)){
-    utils::unzip(pathDnld,exdir=dirTmp)
   }
   
   # Extract data in 1, 2, 9, and 30 min & attribute files
@@ -156,6 +143,18 @@ for(site in sites){
     
     # Compute concentration diffs
     OUT$dConc <- OUT$mean_A-OUT$mean_B
+    
+    # Compute the p-value of the concentration differences
+    # Welch's two-sample t-test with unequal variances
+    t <- OUT$dConc/sqrt(OUT$vari_A/OUT$numSamp_A + OUT$vari_B/OUT$numSamp_B)
+    df <- ((OUT$vari_A/OUT$numSamp_A + OUT$vari_B/OUT$numSamp_B)^2)/
+      ((OUT$vari_A^2)/((OUT$numSamp_A^2)*(OUT$numSamp_A-1))+(OUT$vari_B^2)/((OUT$numSamp_B^2)*(OUT$numSamp_B-1)))
+    p <- rep(as.numeric(NA),length(df))
+    setNeg <- !is.na(t+df) & t <= 0
+    setPos <- !is.na(t+df) & t > 0
+    p[setNeg] <- stats::pt(t[setNeg],df[setNeg])
+    p[setPos] <- stats::pt(t[setPos],df[setPos],lower.tail=FALSE)
+    OUT$dConc_pvalue <- p # p-value (probability) that the concentration difference is zero (1-sided)
     
     OUT$timeMid <- OUT$timeEnd_A+(0.5*difftime(OUT$timeBgn_B, OUT$timeEnd_A, units = "secs"))
     
@@ -460,12 +459,15 @@ for(site in sites){
     var$Ftemp = var$H_turb_interp / (var$Cp_moist*var$rho_kgm3) 
     
     # Convert LE (W m-2) to w'q' (FH2O, mmol m-2 s-1)
-    # lambda = latent heat of vaporiz. [J/kg] - Eqn in back of Stull pg. 641
-    #var$lambda <- (3149000-2370*(Tair_C+273.16))*1e-6 # J g-1
-    #var$FH2O_interp <- var$LE_interp*(1/var$lambda) 
     var$lambda <- (2.501-0.00237*Tair_C)*1E6 # lambda = J kg-1 Eqn in back of Stull pg. 641
     var$FH2O_interp <- var$LE_turb_interp/var$lambda/mv*1000 # mmol m-2 s-1
+    
+    # Monin-Obukhov length & stability parameter (z/L)
+    var$L_obukhov <- MOlength(var$P_kPa,Tair_C,var$H_turb_interp,var$LE_turb_interp,var$ustar_interp)$L
+    var$zoL <- as.numeric(attr.df$DistZaxsTow[1])/var$L_obukhov
+    
     var = as.data.frame(var) 
+    
     return(var)
   })
   

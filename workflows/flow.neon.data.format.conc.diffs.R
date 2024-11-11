@@ -13,15 +13,14 @@
 #
 # Saves output as SITE_aligned_conc_flux_9min.RData, where SITE is the NEON site code. 
 # Zips and uploads to Google Drive.
+rm(list=ls())
 
 # Pull data from google drive
 # email <- 'alexisrose0525@gmail.com'
 #email <- 'jaclyn_matthes@g.harvard.edu'
 email <- 'csturtevant@battelleecology.org'
-#email <- 'jaclyn_matthes@g.harvard.edu'
 
-# sites <- c("CPER","GUAN","HARV","JORN","NIWO","TOOL","BONA","KONZ")
-sites <- c("CPER","GUAN","HARV","JORN","NIWO","TOOL")
+sites <- c("CPER","GUAN","HARV","JORN","NIWO","TOOL","BONA","KONZ")
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: fs, googledrive
@@ -31,6 +30,8 @@ library(doParallel)
 # Load functions in this repo
 source(file.path("functions/interp.flux.R"))
 source(file.path("functions/aggregate_averages.R"))
+source('./functions/MO_Length_CRS.R')
+
 
 # Final note: This script takes approx 45 min to run per site. 
 # -------------------------------------------------------
@@ -42,10 +43,12 @@ for (site in sites){
   drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
   data_folder <- googledrive::drive_ls(path = drive_url)
   site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==site])
+  
+  focal_files = paste0(site,c('_9min.zip','_30min.zip','_1min.zip','_WS2D2min.zip','_attr.zip'))
+
   dirTmp <- fs::path(tempdir(),site)
   dir.create(dirTmp)
-  focal_files = paste0(site,c('_9min.zip','_30min.zip','_1min.zip','_WS2D2min.zip','_attr.zip'))
-  # for(focal_file in site_folder$name){
+  
   for(focal_file in focal_files){
   
     # Find the file identifier for that file
@@ -56,14 +59,14 @@ for (site in sites){
     googledrive::drive_download(file = file_id$id, 
                                 path = pathDnld,
                                 overwrite = T)
-  # Unzip
+    # Unzip
     if(grepl(pattern='.zip',focal_file)){
       utils::unzip(pathDnld,exdir=dirTmp)
     }
     
   }
   
-  # Extract 9 minute data
+  # Extract data in 1, 2, 9, and 30 min & attribute files
   fileIn <- fs::path(dirTmp,'data',site,paste0(site,'_9min.Rdata'))
   load(fileIn)
   
@@ -141,6 +144,18 @@ for (site in sites){
     # Compute concentration diffs
     OUT$dConc <- OUT$mean_A-OUT$mean_B
     
+    # Compute the p-value of the concentration differences
+    # Welch's two-sample t-test with unequal variances
+    t <- OUT$dConc/sqrt(OUT$vari_A/OUT$numSamp_A + OUT$vari_B/OUT$numSamp_B)
+    df <- ((OUT$vari_A/OUT$numSamp_A + OUT$vari_B/OUT$numSamp_B)^2)/
+      ((OUT$vari_A^2)/((OUT$numSamp_A^2)*(OUT$numSamp_A-1))+(OUT$vari_B^2)/((OUT$numSamp_B^2)*(OUT$numSamp_B-1)))
+    p <- rep(as.numeric(NA),length(df))
+    setNeg <- !is.na(t+df) & t <= 0
+    setPos <- !is.na(t+df) & t > 0
+    p[setNeg] <- stats::pt(t[setNeg],df[setNeg])
+    p[setPos] <- stats::pt(t[setPos],df[setPos],lower.tail=FALSE)
+    OUT$dConc_pvalue <- p # p-value (probability) that the concentration difference is zero (1-sided)
+    
     OUT$timeMid <- OUT$timeEnd_A+(0.5*difftime(OUT$timeBgn_B, OUT$timeEnd_A, units = "secs"))
     
     # Make match column for CH4 & CO2/H2O
@@ -161,7 +176,7 @@ for (site in sites){
       OUT[which(OUT$TowerPosition_A == height),"TowerHeight_A"] <- tower.heights[which(tower.heights$TowerPosition == height),1]
       #loop over position B
       OUT[which(OUT$TowerPosition_B == height),"TowerHeight_B"] <- tower.heights[which(tower.heights$TowerPosition == height),1]
-      }
+    }
     
     return(OUT)
   })
@@ -479,7 +494,7 @@ for (site in sites){
   
   
   
-  # -------------- Compute water flux from LE --------------------
+  # ---------- Compute water flux from LE & Monin-Obukhov length --------------
   min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
     
     # Grab Tair at tower top
@@ -507,17 +522,14 @@ for (site in sites){
     var$Ftemp = var$H_turb_interp / (var$Cp_moist*var$rho_kgm3) 
     
     # Convert LE (W m-2) to w'q' (FH2O, mmol m-2 s-1)
-    # lambda = latent heat of vaporiz. [J/kg] - Eqn in back of Stull pg. 641
-    #var$lambda <- (3149000-2370*(Tair_C+273.16))*1e-6 # J g-1
-    #var$FH2O_interp <- var$LE_interp*(1/var$lambda) 
     var$lambda <- (2.501-0.00237*Tair_C)*1E6 # lambda = J kg-1 Eqn in back of Stull pg. 641
     var$FH2O_interp <- var$LE_turb_interp/var$lambda/mv*1000 # mmol m-2 s-1
     
+    # Monin-Obukhov length & stability parameter (z/L)
+    var$L_obukhov <- MOlength(var$P_kPa,Tair_C,var$H_turb_interp,var$LE_turb_interp,var$ustar_interp)$L
+    var$zoL <- as.numeric(attr.df$DistZaxsTow[1])/var$L_obukhov
     return(var)
   })
-  
-  
-  
   
   
   # -------- Save and zip the file to the temp directory. Upload to google drive. -------
