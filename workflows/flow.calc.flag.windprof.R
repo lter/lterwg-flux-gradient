@@ -1,9 +1,12 @@
+rm(list=ls())
 # Pull data from google drive
-email <- 'jaclyn_matthes@g.harvard.edu'
+# email <- 'jaclyn_matthes@g.harvard.edu'
+email <- 'csturtevant@battelleecology.org'
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: googledrive
-#library(dplyr)
+library(dplyr)
+library(ggplot2)
 
 # Load functions for the wind profile flux gradient calculation
 source(file.path("functions/MO_Length_CRS.R"))
@@ -15,7 +18,7 @@ source(file.path("functions/calc.aerodynamic.canopy.height.R"))
 
 # Download aligned concentration and micromet dataframe 
 # for one site from Google Drive
-sitecode <- "KONZ"
+site <- "CPER"
 googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
 data_folder <- googledrive::drive_ls(path = drive_url)
@@ -55,8 +58,8 @@ fileIn <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_30min.RData'))
 load(fileIn)
 
 # Calculate eddy diffusivity with the wind profile method
-min9.K.WP.list <- calc.eddydiff.windprof(sitecode = sitecode, min9 = min9Diff.list)
-min30.K.WP.list <- calc.eddydiff.windprof(sitecode = sitecode, min9 = min30Diff.list)
+min9.K.WP.list <- calc.eddydiff.windprof(site = site, min9 = min9Diff.list)
+min30.K.WP.list <- calc.eddydiff.windprof(site = site, min9 = min30Diff.list)
 
 # Compute wind profile flux gradient fluxes for all gases.
 # Optional bootstrap (1) or skip bootstrap (0) for gas conc uncertainty
@@ -73,14 +76,15 @@ dataComp <- data[complete.cases(data),]
 RFCO2 <- cor.test(data$FC_turb_interp,data$FG_mean)
 print(paste0('FCO2 R-squared = ',round(RFCO2$estimate^2,2)*100,'%'))
 
-ggplot(data=dplyr::filter(min9.FG.WP.list$CO2, dLevelsAminusB=="4_2")) +
-  # ggplot(data=min9.FG.WP.list$CO2) +
-  geom_point(aes(x=FC_turb_interp, y=FG_mean)) +
-  geom_abline(aes(intercept=0,slope=1),lty=2) +
-  ylim(c(-50,50)) +
-  xlim(c(-50,50)) +
-  labs(title=paste0(site, ' Wind Profile method (levels 4-1); R-squared = ',round(RFCO2$estimate^2,2)*100,'%')) +
-  theme_minimal()
+
+# ggplot(data=dplyr::filter(min9.FG.WP.list$CO2, dLevelsAminusB=="4_2")) +
+#   # ggplot(data=min9.FG.WP.list$CO2) +
+#   geom_point(aes(x=FC_turb_interp, y=FG_mean)) +
+#   geom_abline(aes(intercept=0,slope=1),lty=2) +
+#   ylim(c(-50,50)) +
+#   xlim(c(-50,50)) +
+#   labs(title=paste0(site, ' Wind Profile method (levels 4-1); R-squared = ',round(RFCO2$estimate^2,2)*100,'%')) +
+#   theme_minimal()
 
 # 
 # # Plot FH2O comparison between FG and EC
@@ -114,32 +118,32 @@ ggplot(data=dplyr::filter(min9.FG.WP.list$CO2, dLevelsAminusB=="4_2")) +
 #   theme_minimal()
 
 # Save calculated wind profile flux gradient fluxes as R.data objects
-# save(min9.FG.WP.list, file = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".Rdata")))
+# save(min9.FG.WP.list, file = file.path("data", site, paste0(site,"_WP_", user, "_", Sys.Date(),".Rdata")))
 # #zip R.data objects
-# zip(zipfile = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".zip")), files = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".Rdata")))
+# zip(zipfile = file.path("data", site, paste0(site,"_WP_", user, "_", Sys.Date(),".zip")), files = file.path("data", site, paste0(site,"_WP_", user, "_", Sys.Date(),".Rdata")))
 # #upload to Google Drive
 # #IMPORTANT REMINDER if you have not gone through the process of valdiating your email with googledrive in R this code will not work please refer to https://nceas.github.io/scicomp.github.io/tutorials.html#using-the-googledrive-r-package
 # #NOTE: you will be asked to re authenticate if your OAuth token is stale, select your already authenticated email from the list
-# googledrive::drive_upload(media = file.path("data", sitecode, paste0(sitecode,"_WP_", user, "_", Sys.Date(),".zip")), overwrite = T, path = drive_url)
+# googledrive::drive_upload(media = file.path("data", site, paste0(site,"_WP_", user, "_", Sys.Date(),".zip")), overwrite = T, path = drive_url)
 
-user = "jhm"
+user = "css"
 # Save 9-minute 
-fileSave <- fs::path(dirTmp,paste0(sitecode,"_WP_", user,"_",Sys.Date(),".Rdata"))
-fileZip <- fs::path(dirTmp,paste0(sitecode,"_WP_", user,"_",Sys.Date(),".zip"))
+fileSave <- fs::path(dirTmp,paste0(site,"_WP_", user,"_",Sys.Date(),".Rdata"))
+fileZip <- fs::path(dirTmp,paste0(site,"_WP_", user,"_",Sys.Date(),".zip"))
 save(min9.FG.WP.list,file=fileSave)
 wdPrev <- getwd()
 setwd(dirTmp)
-utils::zip(zipfile=fileZip,files=paste0(sitecode,"_WP_", user,"_",Sys.Date(),".Rdata"))
+utils::zip(zipfile=fileZip,files=paste0(site,"_WP_", user,"_",Sys.Date(),".Rdata"))
 setwd(wdPrev)
 googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folder$id[data_folder$name==site]) # path might need work
 
 # Save 30-minute
-fileSave <- fs::path(dirTmp,paste0(sitecode,"_WP_30min_", user,"_",Sys.Date(),".Rdata"))
-fileZip <- fs::path(dirTmp,paste0(sitecode,"_WP_30min_", user,"_",Sys.Date(),".zip"))
+fileSave <- fs::path(dirTmp,paste0(site,"_WP_30min_", user,"_",Sys.Date(),".Rdata"))
+fileZip <- fs::path(dirTmp,paste0(site,"_WP_30min_", user,"_",Sys.Date(),".zip"))
 save(min30.FG.WP.list,file=fileSave)
 wdPrev <- getwd()
 setwd(dirTmp)
-utils::zip(zipfile=fileZip,files=paste0(sitecode,"_WP_30min_", user,"_",Sys.Date(),".Rdata"))
+utils::zip(zipfile=fileZip,files=paste0(site,"_WP_30min_", user,"_",Sys.Date(),".Rdata"))
 setwd(wdPrev)
 googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folder$id[data_folder$name==site]) # path might need work
 
