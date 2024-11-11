@@ -36,11 +36,11 @@
 #     original creation
 ##############################################################################################
 
-def.diel.ptrn <- function (time,
+calculate.diel.ptrn <- function (time,
                            data,
                            Int=as.difftime(30,units='mins'),
                            Stat=c('mean','median')[1],
-                           Ucrt=c('sd','var','mad')[1],
+                           Ucrt=c('sd','var','mad','se')[1],
                            NumSampMin=1,
                            Plot=FALSE,
                            TitlPlot='Diel Pattern'
@@ -101,6 +101,9 @@ def.diel.ptrn <- function (time,
         ucrt <- stats::var(data[setData],na.rm=TRUE)
       } else if(Ucrt == 'mad') {
         ucrt <- stats::mad(data[setData],na.rm=TRUE)
+      } else if(Ucrt == 'se') {
+        sd <- stats::sd(data[setData],na.rm=TRUE)
+        ucrt <- sd/sqrt(sum(!is.na(data[setData])))
       }
       
       rpt <- base::data.frame(time=timeDiel[idxDiel],stat=stat,ucrt=ucrt,stringsAsFactors=FALSE)
