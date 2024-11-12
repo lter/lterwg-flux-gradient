@@ -1,7 +1,8 @@
 # Pull data from google drive
-email <- 'jaclyn_matthes@g.harvard.edu'
+email <- 'csturtevant@battelleecology.org'
+# email <- 'jaclyn_matthes@g.harvard.edu'
 #email <- 'kyle.delwiche@gmail.com'
-site <- 'KONZ'
+site <- 'CPER'
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Requires packages: fs, googledrive, ggplot2
@@ -75,16 +76,22 @@ MBRflux_align = dplyr::mutate(MBRflux_align,
                               year = lubridate::year(match_time))
 
 # Sample over concentration mean & variance 
-FCO2_MBR_H2Otrace = FH2O_MBR_CO2trace = FCH4_MBR_CO2trace = FCH4_MBR_H2Otrace = vector()
-FCH4_MBR_H2Otrace_mean = FCH4_MBR_H2Otrace_lo = FCH4_MBR_H2Otrace_hi = FCH4_MBR_H2Otrace_sd = vector()
-FCO2_MBR_H2Otrace_mean = FCO2_MBR_H2Otrace_lo = FCO2_MBR_H2Otrace_hi = FCO2_MBR_H2Otrace_sd = vector()
-FCH4_MBR_CO2trace_mean = FCH4_MBR_CO2trace_lo = FCH4_MBR_CO2trace_hi = FCH4_MBR_CO2trace_sd = vector()
-FH2O_MBR_CO2trace_mean = FH2O_MBR_CO2trace_lo = FH2O_MBR_CO2trace_hi = FH2O_MBR_CO2trace_sd = vector()
-dConc_CO2_mean = dConc_CO2_sd = dConc_H2O_mean = dConc_H2O_sd = dConc_CH4_mean = dConc_CH4_sd = vector()
+dmmyNrow <- rep(as.numeric(NA),nrow(MBRflux_align))
+FCH4_MBR_H2Otrace_mean = FCH4_MBR_H2Otrace_lo = FCH4_MBR_H2Otrace_hi = FCH4_MBR_H2Otrace_sd = dmmyNrow
+FCO2_MBR_H2Otrace_mean = FCO2_MBR_H2Otrace_lo = FCO2_MBR_H2Otrace_hi = FCO2_MBR_H2Otrace_sd = dmmyNrow
+FCH4_MBR_CO2trace_mean = FCH4_MBR_CO2trace_lo = FCH4_MBR_CO2trace_hi = FCH4_MBR_CO2trace_sd = dmmyNrow
+FH2O_MBR_CO2trace_mean = FH2O_MBR_CO2trace_lo = FH2O_MBR_CO2trace_hi = FH2O_MBR_CO2trace_sd = dmmyNrow
+dConc_CO2_mean = dConc_CO2_sd = dConc_H2O_mean = dConc_H2O_sd = dConc_CH4_mean = dConc_CH4_sd = dmmyNrow
 
 nsamp = 1000
+dmmyNsamp <- rep(as.numeric(NA),nsamp)
 
+rptInt <- seq(from=1,to=nrow(MBRflux_align),by=round(nrow(MBRflux_align)/10))
 for(i in 1:nrow(MBRflux_align)){ # loop over time to sample conc 
+  if(i %in% rptInt){
+    message(paste0(Sys.time(), ': Processing ... ',round(i/nrow(MBRflux_align)*100),'%'))
+  }
+  
   
   # Draw nsamp from normal with mean & sd of concentration
   cConc_CO2_A = rnorm(n = nsamp, mean = MBRflux_align$mean_A_CO2[i],
@@ -113,6 +120,7 @@ for(i in 1:nrow(MBRflux_align)){ # loop over time to sample conc
   dConc_H2O_mean[i] = mean(dConc_H2O)
   dConc_H2O_sd[i] = sd(dConc_H2O)
   
+  FCO2_MBR_H2Otrace = FH2O_MBR_CO2trace = FCH4_MBR_CO2trace = FCH4_MBR_H2Otrace = dmmyNsamp # re-initialize
   for(j in 1:nsamp){ # loop over sampled conc to calculate flux
     # Calculate MBR fluxes for all tracer combos
     FCO2_MBR_H2Otrace[j] = ifelse(!is.na(MBRflux_align$FH2O_interp_H2O[i] * 
