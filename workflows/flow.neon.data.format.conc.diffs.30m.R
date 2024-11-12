@@ -28,6 +28,7 @@ sites <- c("BONA","CPER","GUAN","HARV","JORN","KONZ","NIWO","TOOL")
 # Also requires packages: fs, googledrive
 library(foreach)
 library(doParallel)
+library(dplyr)
 
 # Load functions in this repo
 source(file.path("functions/interp.flux.R"))
@@ -276,60 +277,58 @@ for(site in sites){
   message(paste0(Sys.time(),': Combining the data frames of the 1-min MET data. This should take 5-10 min...'))
   
   # RH (round times to minute mark)
-  timeBgn <- round(as.POSIXct(min1.list$RH$startDateTime),units='mins')
-  timeEnd <- round(as.POSIXct(min1.list$RH$endDateTime),units='mins')
-  RH <- min1.list$RH$RHMean
-  qf <- min1.list$RH$RHFinalQF # quality flag
-  RH[qf == 1] <- NA # filter
-  RH_1min <- data.frame(timeBgn=timeBgn,
-                        timeEnd=timeEnd,
-                        RH=RH)
+  # Restrict to tower top
+  RH_1min <- min1.list$RH
+  setTT <- RH_1min$TowerPosition == attr.df$LvlMeasTow[1] # Keep only tower top value
+  RH_1min <- RH_1min[setTT,]
+  RH_1min$timeBgn <- as.POSIXct(round(RH_1min$startDateTime,units='mins'))
+  RH_1min$timeEnd <- as.POSIXct(round(RH_1min$endDateTime,units='mins'))
+  RH_1min$RH <- RH_1min$RHMean
+  RH_1min$RH[RH_1min$RHFinalQF==1] <- NA # filter
+  RH_1min <- RH_1min[,c('timeBgn','timeEnd','RH')]
   
   # Air Pressure (round times to minute mark)
-  timeBgn <- round(as.POSIXct(strptime(min1.list$Press$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT')),units='mins')
-  timeEnd <- round(as.POSIXct(strptime(min1.list$Press$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT')),units='mins')
-  P_kPa <- min1.list$Press$mean
-  qf <- min1.list$Press$qfFinl # quality flag
-  P_kPa[qf == 1] <- NA # filter
-  P_kPa_1min <- data.frame(timeBgn=timeBgn,
-                           timeEnd=timeEnd,
-                           P_kPa=P_kPa)
+  P_kPa_1min <- min1.list$Press
+  P_kPa_1min$timeBgn <- as.POSIXct(round(strptime(P_kPa_1min$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'),units='mins'))
+  P_kPa_1min$timeEnd <- as.POSIXct(round(strptime(P_kPa_1min$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'),units='mins'))
+  P_kPa_1min$P_kPa <- P_kPa_1min$mean
+  P_kPa_1min$P_kPa[P_kPa_1min$qfFinl==1] <- NA # filter
+  P_kPa_1min <- P_kPa_1min[,c('timeBgn','timeEnd','P_kPa')]
   
   # PAR (round times to minute mark)
-  timeBgn <- round(as.POSIXct(min1.list$PAR$startDateTime),units='mins')
-  timeEnd <- round(as.POSIXct(min1.list$PAR$endDateTime),units='mins')
-  PAR <- min1.list$PAR$PARMean
-  qf <- min1.list$PAR$PARFinalQF # quality flag
-  PAR[qf == 1] <- NA # filter
-  PAR_1min <- data.frame(timeBgn=timeBgn,
-                         timeEnd=timeEnd,
-                         PAR=PAR)
+  # Restrict to tower top
+  PAR_1min <- min1.list$PAR
+  setTT <- PAR_1min$TowerPosition == attr.df$LvlMeasTow[1] # Keep only tower top value
+  PAR_1min <- PAR_1min[setTT,]
+  PAR_1min$timeBgn <- as.POSIXct(round(PAR_1min$startDateTime,units='mins'))
+  PAR_1min$timeEnd <- as.POSIXct(round(PAR_1min$endDateTime,units='mins'))
+  PAR_1min$PAR <- PAR_1min$PARMean
+  PAR_1min$PAR[PAR_1min$PARFinalQF==1] <- NA # filter
+  PAR_1min <- PAR_1min[,c('timeBgn','timeEnd','PAR')]
   
   # Merge the 1-min MET data frames and clear space
-  MET_1min <- base::merge(RH_1min,P_kPa_1min,all=TRUE)
-  MET_1min <- base::merge(MET_1min,PAR_1min,all=TRUE)
-  rm('RH_1min','RH','qf','P_kPa_1min','P_kPa','PAR_1min','PAR')
+  MET_1min <- dplyr::full_join(RH_1min,P_kPa_1min)
+  MET_1min <- dplyr::full_join(MET_1min,PAR_1min)
+  rm('RH_1min','P_kPa_1min','PAR_1min')
   
   # 3D wind (round times to minute mark)
   lvlTow <- attr.df$LvlMeasTow[1] # how many measurement levels
   nameWS3D <- paste0('ubar',lvlTow) # This is what we will eventually name the 3D wind
-  timeBgn <- round(as.POSIXct(strptime(min1.list$WS3D$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT')),units='mins')
-  timeEnd <- round(as.POSIXct(strptime(min1.list$WS3D$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT')),units='mins')
-  WS3D <- min1.list$WS3D$mean
-  qf <- min1.list$WS3D$qfFinl # quality flag
-  WS3D[qf == 1] <- NA # filter
-  WS3D_1min <- data.frame(timeBgn=timeBgn,
-                          timeEnd=timeEnd,
-                          WS3D=WS3D)
+  WS3D_1min <- min1.list$WS3D
+  WS3D_1min$timeBgn <- as.POSIXct(round(strptime(WS3D_1min$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'),units='mins'))
+  WS3D_1min$timeEnd <- as.POSIXct(round(strptime(WS3D_1min$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'),units='mins'))
+  WS3D_1min$WS3D <- WS3D_1min$mean
+  WS3D_1min$WS3D[WS3D_1min$qfFinl==1] <- NA # filter
+  WS3D_1min <- WS3D_1min[,c('timeBgn','timeEnd','WS3D')]
   names(WS3D_1min)[3] <- nameWS3D
   
   # Merge the 1-min MET data frames and clear space. 
-  MET_1min <- base::merge(MET_1min,WS3D_1min,all=TRUE)
-  rm('WS3D_1min','WS3D','qf')
+  MET_1min <- dplyr::full_join(MET_1min,WS3D_1min)
+  rm('WS3D_1min')
   
   # Tair profile 
-  timeBgn <- round(as.POSIXct(strptime(min1.list$Tair$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT')),units='mins')
-  timeEnd <- round(as.POSIXct(strptime(min1.list$Tair$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT')),units='mins')
+  timeBgn <- as.POSIXct(round(strptime(min1.list$Tair$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'),units='mins'))
+  timeEnd <- as.POSIXct(round(strptime(min1.list$Tair$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'),units='mins'))
   Tair <- min1.list$Tair$mean
   qf <- min1.list$Tair$qfFinl # quality flag
   Tair[qf == 1] <- NA # filter
@@ -348,12 +347,17 @@ for(site in sites){
   }
   
   # Merge the 1-min MET data frames and clear space
-  MET_1min <- base::merge(MET_1min,Tair_1min,all=TRUE)
+  MET_1min <- dplyr::full_join(MET_1min,Tair_1min)
   rm('Tair_1min','Tair_df','Tair','qf')
   
+  # Get rid of rows with all missing values (for some reason they are in here)
+  rowNotNa <- rowSums(!is.na(MET_1min[,c(-1,-2)]),na.rm=TRUE) > 0 # Remove rows with all NA
+  MET_1min <- MET_1min[rowNotNa,] 
+  MET_1min <- MET_1min[order(MET_1min$timeBgn,decreasing=FALSE),] 
+
   # 2-min ubar profile 
-  timeBgn <- round(as.POSIXct(WS2D2min$startDateTime),units='mins')
-  timeEnd <- round(as.POSIXct(WS2D2min$endDateTime),units='mins')
+  timeBgn <- as.POSIXct(round(WS2D2min$startDateTime,units='mins'))
+  timeEnd <- as.POSIXct(round(WS2D2min$endDateTime,units='mins'))
   ubar <- WS2D2min$windSpeedMean
   qf <- WS2D2min$windSpeedFinalQF # quality flag
   ubar[qf == 1] <- NA # filter
@@ -370,6 +374,9 @@ for(site in sites){
       ubar_2min <- base::merge(ubar_2min,ubar_df,all=TRUE)
     }
   }
+  rowNotNa <- rowSums(!is.na(ubar_2min[,c(-1,-2)]),na.rm=TRUE) > 0 # Remove rows with all NA
+  ubar_2min <- ubar_2min[rowNotNa,]
+  ubar_2min <- ubar_2min[order(ubar_2min$timeBgn,decreasing=FALSE),] # Sort
   
   
   # Aggregate!
