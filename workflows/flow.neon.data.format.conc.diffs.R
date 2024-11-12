@@ -20,7 +20,7 @@ rm(list=ls())
 #email <- 'jaclyn_matthes@g.harvard.edu'
 email <- 'csturtevant@battelleecology.org'
 
-sites <- c("CPER","GUAN","HARV","JORN","NIWO","TOOL","BONA","KONZ")[1]
+sites <- c("CPER","GUAN","HARV","JORN","NIWO","TOOL","BONA","KONZ")
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: fs, googledrive
@@ -155,7 +155,7 @@ for (site in sites){
     setPos <- !is.na(t+df) & t > 0
     p[setNeg] <- stats::pt(t[setNeg],df[setNeg])
     p[setPos] <- stats::pt(t[setPos],df[setPos],lower.tail=FALSE)
-    OUT$dConc_pvalue <- p # p-value (probability) that the concentration difference is zero (1-sided)
+    OUT$dConc_pvalue <- p # p-value (probability) to achieve a value greater/less than this difference if they were from the same population
     
     OUT$timeMid <- OUT$timeEnd_A+(0.5*difftime(OUT$timeBgn_B, OUT$timeEnd_A, units = "secs"))
     

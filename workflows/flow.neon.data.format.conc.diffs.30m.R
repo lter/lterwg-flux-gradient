@@ -155,7 +155,7 @@ for(site in sites){
     setPos <- !is.na(t+df) & t > 0
     p[setNeg] <- stats::pt(t[setNeg],df[setNeg])
     p[setPos] <- stats::pt(t[setPos],df[setPos],lower.tail=FALSE)
-    OUT$dConc_pvalue <- p # p-value (probability) that the concentration difference is zero (1-sided)
+    OUT$dConc_pvalue <- p # 1-tailed probability to achieve a difference greater than the measured concentration difference if the two concentration values were were sampled from the same distribution
     
     OUT$timeMid <- OUT$timeEnd_A+(0.5*difftime(OUT$timeBgn_B, OUT$timeEnd_A, units = "secs"))
     
