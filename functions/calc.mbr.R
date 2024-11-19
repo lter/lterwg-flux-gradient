@@ -28,14 +28,6 @@ calc.mbr <- function(min9, bootstrap, nsamp){
   MBRflux_align = merge(CO2, CH4, by.x = "match_time", by.y = "match_time") 
   MBRflux_align = merge(MBRflux_align, H2O, by.x = "match_time", by.y = "match_time") 
   
-  # MBRflux_align = dplyr::full_join(CO2, H2O, by = "match_time") 
-  # MBRflux_align = dplyr::full_join(MBRflux_align, CH4, by = "match_time") 
-  # MBRflux_align = dplyr::mutate(MBRflux_align, 
-  #                               month = lubridate::month(match_time), 
-  #                               date = lubridate::date(match_time),
-  #                               hour = lubridate::hour(match_time),
-  #                               year = lubridate::year(match_time))
-  
   if(bootstrap == 1){
     # Sample over concentration mean & variance 
     dmmyNrow <- rep(as.numeric(NA),nrow(MBRflux_align))
@@ -83,24 +75,39 @@ calc.mbr <- function(min9, bootstrap, nsamp){
       dConc_H2O_sd[i] = sd(dConc_H2O)
       
       FCO2_MBR_H2Otrace = FH2O_MBR_CO2trace = FCH4_MBR_CO2trace = FCH4_MBR_H2Otrace = dmmyNsamp # re-initialize
-      for(j in 1:nsamp){ # loop over sampled conc to calculate flux
-        # Calculate MBR fluxes for all tracer combos
-        FCO2_MBR_H2Otrace[j] = ifelse(!is.na(MBRflux_align$FH2O_interp_H2O[i] * 
-                                               (dConc_CO2[j] / dConc_H2O[j])),MBRflux_align$FH2O_interp_H2O[i] * 
-                                        (dConc_CO2[j] / dConc_H2O[j]),NA)
-        
-        FH2O_MBR_CO2trace[j] = ifelse(!is.na(MBRflux_align$FC_turb_interp_CO2[i] *
-                                               (dConc_H2O[j] / dConc_CO2[j])),MBRflux_align$FC_turb_interp_CO2[i] *
-                                        (dConc_H2O[j] / dConc_CO2[j]), NA)
-        
-        FCH4_MBR_CO2trace[j] = ifelse(!is.na(MBRflux_align$FC_turb_interp_CO2[i] *
-                                               (dConc_CH4[j] /dConc_CO2[j])), MBRflux_align$FC_turb_interp_CO2[i] *
-                                        (dConc_CH4[j] /dConc_CO2[j]), NA)
-        
-        FCH4_MBR_H2Otrace[j] = ifelse(!is.na(MBRflux_align$FH2O_interp_H2O[i] * 
-                                               (dConc_CH4[j] / dConc_H2O[j])), MBRflux_align$FH2O_interp_H2O[i] * 
-                                        (dConc_CH4[j] / dConc_H2O[j]), NA)
-      }
+      #for(j in 1:nsamp){ # loop over sampled conc to calculate flux
+      # Calculate MBR fluxes for all tracer combos
+      # FCO2_MBR_H2Otrace[j] = ifelse(!is.na(MBRflux_align$FH2O_interp_H2O[i] * 
+      #                                        (dConc_CO2[j] / dConc_H2O[j])),MBRflux_align$FH2O_interp_H2O[i] * 
+      #                                 (dConc_CO2[j] / dConc_H2O[j]),NA)
+      # 
+      # FH2O_MBR_CO2trace[j] = ifelse(!is.na(MBRflux_align$FC_turb_interp_CO2[i] *
+      #                                        (dConc_H2O[j] / dConc_CO2[j])),MBRflux_align$FC_turb_interp_CO2[i] *
+      #                                 (dConc_H2O[j] / dConc_CO2[j]), NA)
+      # 
+      # FCH4_MBR_CO2trace[j] = ifelse(!is.na(MBRflux_align$FC_turb_interp_CO2[i] *
+      #                                        (dConc_CH4[j] /dConc_CO2[j])), MBRflux_align$FC_turb_interp_CO2[i] *
+      #                                 (dConc_CH4[j] /dConc_CO2[j]), NA)
+      # 
+      # FCH4_MBR_H2Otrace[j] = ifelse(!is.na(MBRflux_align$FH2O_interp_H2O[i] * 
+      #                                        (dConc_CH4[j] / dConc_H2O[j])), MBRflux_align$FH2O_interp_H2O[i] * 
+      #                                 (dConc_CH4[j] / dConc_H2O[j]), NA)
+      #}
+      FCO2_MBR_H2Otrace = ifelse(!is.na(MBRflux_align$FH2O_interp_H2O[i] * 
+                                          (dConc_CO2 / dConc_H2O)),MBRflux_align$FH2O_interp_H2O[i] * 
+                                   (dConc_CO2 / dConc_H2O),NA)
+      
+      FH2O_MBR_CO2trace = ifelse(!is.na(MBRflux_align$FC_turb_interp_CO2[i] *
+                                          (dConc_H2O[j] / dConc_CO2[j])),MBRflux_align$FC_turb_interp_CO2[i] *
+                                   (dConc_H2O[j] / dConc_CO2[j]), NA)
+      
+      FCH4_MBR_CO2trace = ifelse(!is.na(MBRflux_align$FC_turb_interp_CO2[i] *
+                                          (dConc_CH4 /dConc_CO2)), MBRflux_align$FC_turb_interp_CO2[i] *
+                                   (dConc_CH4 /dConc_CO2), NA)
+      
+      FCH4_MBR_H2Otrace = ifelse(!is.na(MBRflux_align$FH2O_interp_H2O[i] * 
+                                          (dConc_CH4 / dConc_H2O)), MBRflux_align$FH2O_interp_H2O[i] * 
+                                   (dConc_CH4 / dConc_H2O), NA)
       
       #calculate lower and upper bounds of confidence interval
       FCH4_MBR_H2Otrace_mean[i] = mean(FCH4_MBR_H2Otrace)
@@ -169,30 +176,25 @@ calc.mbr <- function(min9, bootstrap, nsamp){
                                            (MBRflux_align$dConc_CH4_mean+MBRflux_align$dConc_CH4_sd*2)>0,1,0)
   } else {
     
-    # MBRflux_align$FCO2_MBR_H2Otrace = ifelse(!is.na(MBRflux_align$FH2O_interp_H2O * 
-    #                                        (MBRflux_align$dConc_CO2 / MBRflux_align$dConc_H2O)),
-    #                                        MBRflux_align$FH2O_interp_H2O * 
-    #                                 (MBRflux_align$dConc_CO2 / MBRflux_align$dConc_H2O),NA)
-    # 
     MBRflux_align$FCO2_MBR_H2Otrace = ifelse(!is.na(MBRflux_align$FH2O_interp_H2O * 
                                                       (MBRflux_align$dConc_CO2 / MBRflux_align$dConc_H2O)),
                                              MBRflux_align$FH2O_interp_H2O * 
                                                (MBRflux_align$dConc_CO2 / MBRflux_align$dConc_H2O),NA)
     
     MBRflux_align$FH2O_MBR_CO2trace = ifelse(!is.na(MBRflux_align$FC_turb_interp_CO2 *
-                                           (MBRflux_align$dConc_H2O / MBRflux_align$dConc_CO2)),
-                                           MBRflux_align$FC_turb_interp_CO2 *
-                                    (MBRflux_align$dConc_H2O / MBRflux_align$dConc_CO2), NA)
+                                                      (MBRflux_align$dConc_H2O / MBRflux_align$dConc_CO2)),
+                                             MBRflux_align$FC_turb_interp_CO2 *
+                                               (MBRflux_align$dConc_H2O / MBRflux_align$dConc_CO2), NA)
     
     MBRflux_align$FCH4_MBR_CO2trace = ifelse(!is.na(MBRflux_align$FC_turb_interp_CO2 *
-                                           (MBRflux_align$dConc_CH4 /MBRflux_align$dConc_CO2)), 
-                                           MBRflux_align$FC_turb_interp_CO2 *
-                                    (MBRflux_align$dConc_CH4 /MBRflux_align$dConc_CO2), NA)
+                                                      (MBRflux_align$dConc_CH4 /MBRflux_align$dConc_CO2)), 
+                                             MBRflux_align$FC_turb_interp_CO2 *
+                                               (MBRflux_align$dConc_CH4 /MBRflux_align$dConc_CO2), NA)
     
     MBRflux_align$FCH4_MBR_H2Otrace = ifelse(!is.na(MBRflux_align$FH2O_interp_H2O * 
-                                           (MBRflux_align$dConc_CH4 / MBRflux_align$dConc_H2O)), 
-                                           MBRflux_align$FH2O_interp_H2O * 
-                                             (MBRflux_align$dConc_CH4 / MBRflux_align$dConc_H2O), NA)
+                                                      (MBRflux_align$dConc_CH4 / MBRflux_align$dConc_H2O)), 
+                                             MBRflux_align$FH2O_interp_H2O * 
+                                               (MBRflux_align$dConc_CH4 / MBRflux_align$dConc_H2O), NA)
   }
   return(MBRflux_align)
 }
