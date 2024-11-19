@@ -7,7 +7,7 @@
 #'
 #' @return list of gas concentration dataframes containing variables associated with modified bowen ratio calculation
 #' 
-calc.mbr <- function(min9Diff.list, bootstrap){
+calc.mbr <- function(min9, bootstrap, nsamp){
   
   # Calculate modified Bowen ratio (MBR) gradient fluxes:
   CO2 = min9Diff.list[["CO2"]]
