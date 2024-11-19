@@ -75,24 +75,7 @@ calc.mbr <- function(min9, bootstrap, nsamp){
       dConc_H2O_sd[i] = sd(dConc_H2O)
       
       FCO2_MBR_H2Otrace = FH2O_MBR_CO2trace = FCH4_MBR_CO2trace = FCH4_MBR_H2Otrace = dmmyNsamp # re-initialize
-      #for(j in 1:nsamp){ # loop over sampled conc to calculate flux
-      # Calculate MBR fluxes for all tracer combos
-      # FCO2_MBR_H2Otrace[j] = ifelse(!is.na(MBRflux_align$FH2O_interp_H2O[i] * 
-      #                                        (dConc_CO2[j] / dConc_H2O[j])),MBRflux_align$FH2O_interp_H2O[i] * 
-      #                                 (dConc_CO2[j] / dConc_H2O[j]),NA)
-      # 
-      # FH2O_MBR_CO2trace[j] = ifelse(!is.na(MBRflux_align$FC_turb_interp_CO2[i] *
-      #                                        (dConc_H2O[j] / dConc_CO2[j])),MBRflux_align$FC_turb_interp_CO2[i] *
-      #                                 (dConc_H2O[j] / dConc_CO2[j]), NA)
-      # 
-      # FCH4_MBR_CO2trace[j] = ifelse(!is.na(MBRflux_align$FC_turb_interp_CO2[i] *
-      #                                        (dConc_CH4[j] /dConc_CO2[j])), MBRflux_align$FC_turb_interp_CO2[i] *
-      #                                 (dConc_CH4[j] /dConc_CO2[j]), NA)
-      # 
-      # FCH4_MBR_H2Otrace[j] = ifelse(!is.na(MBRflux_align$FH2O_interp_H2O[i] * 
-      #                                        (dConc_CH4[j] / dConc_H2O[j])), MBRflux_align$FH2O_interp_H2O[i] * 
-      #                                 (dConc_CH4[j] / dConc_H2O[j]), NA)
-      #}
+      
       FCO2_MBR_H2Otrace = ifelse(!is.na(MBRflux_align$FH2O_interp_H2O[i] * 
                                           (dConc_CO2 / dConc_H2O)),MBRflux_align$FH2O_interp_H2O[i] * 
                                    (dConc_CO2 / dConc_H2O),NA)
