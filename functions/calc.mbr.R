@@ -91,6 +91,12 @@ calc.mbr <- function(min9, bootstrap, nsamp){
       FCH4_MBR_H2Otrace = ifelse(!is.na(MBRflux_align$FH2O_interp_H2O[i] * 
                                           (dConc_CH4 / dConc_H2O)), MBRflux_align$FH2O_interp_H2O[i] * 
                                    (dConc_CH4 / dConc_H2O), NA)
+    
+      # Remove infinite values - happens when denominator is missing/zero
+      FCO2_MBR_H2Otrace[is.infinite(FH2O_MBR_CO2trace)] = NA
+      FH2O_MBR_CO2trace[is.infinite(FH2O_MBR_CO2trace)] = NA
+      FCH4_MBR_CO2trace[is.infinite(FCH4_MBR_CO2trace)] = NA
+      FCH4_MBR_H2Otrace[is.infinite(FCH4_MBR_H2Otrace)] = NA
       
       #calculate lower and upper bounds of confidence interval
       FCH4_MBR_H2Otrace_mean[i] = mean(FCH4_MBR_H2Otrace)
