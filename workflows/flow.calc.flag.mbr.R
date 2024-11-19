@@ -48,12 +48,13 @@ load(fileIn)
 fileIn <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_30min.RData'))
 load(fileIn)
 
-# Calculate MBR flux combos 9 min (e.g. CO2 with H2O tracer ...)
+# Calculate MBR flux combos 9 min (CO2 with H2O trace, CH4 with H2O trace, etc)
 MBRflux_align = calc.mbr(min9=min9Diff.list, bootstrap=1,
-                         nsamp=100)
+                         nsamp=1000)
 
 # Calculate MBR flux combos 30 min (e.g. CO2 with H2O tracer ...)
-MBRflux_align_30min = calc.mbr(min9=min30Diff.list, bootstrap=1, nsamp=100)
+MBRflux_align_30min = calc.mbr(min9=min30Diff.list, bootstrap=1, 
+                               nsamp=1000)
 
 # # FC with H2O as tracer
 # data <- MBRflux_align[c("FC_turb_interp_CO2","FCO2_MBR_H2Otrace_mean")]
@@ -119,4 +120,3 @@ utils::zip(zipfile=fileZip,files=paste0(site,'_MBR_30min.RData'))
 setwd(wdPrev)
 googledrive::drive_upload(media = fileZip, overwrite = T, 
                           path = data_folder$id[data_folder$name==site]) # path might need work
-
