@@ -1,7 +1,7 @@
 rm(list=ls())
 # Pull data from google drive
 # email <- 'jaclyn_matthes@g.harvard.edu'
-email <- 'csturtevant@battelleecology.org'
+#email <- 'csturtevant@battelleecology.org'
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: googledrive
@@ -18,7 +18,7 @@ source(file.path("functions/calc.aerodynamic.canopy.height.R"))
 
 # Download aligned concentration and micromet dataframe 
 # for one site from Google Drive
-site <- "CPER"
+#site <- "CPER"
 googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
 data_folder <- googledrive::drive_ls(path = drive_url)

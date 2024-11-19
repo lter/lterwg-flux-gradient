@@ -6,7 +6,7 @@ email <- 'sparklelmalone@gmail.com'
 googledrive::drive_auth(email = email) 
 
 # Add all sites here:
-site.list <- c( 'HARV', 'KONZ', 'GUAN', 'JORN')
+site.list <- c('KONZ', 'GUAN', 'JORN')
 
 for( site in site.list){
   print(site)

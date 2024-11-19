@@ -1,6 +1,6 @@
 # Pull data from google drive
 #email <- 'alexisrose0525@gmail.com'
-email <- 'areysan@ncsu.edu'
+#email <- 'areysan@ncsu.edu'
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: googledrive
@@ -21,7 +21,7 @@ source(file.path("functions/calc.aerodynamic.canopy.height.R"))
 # Pull averaged data for concentration difference across height
 # and associated micromet variables from Google Drive
 
-site <- "HARV"
+#site <- "HARV"
 
 googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
