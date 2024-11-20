@@ -1,20 +1,27 @@
 # flow.batch.flux
 
+library(fs)
+library(googledrive)
+
 email <- 'sparklelmalone@gmail.com'
-
-
-googledrive::drive_auth(email = email) 
+googledrive::drive_auth(email = TRUE) 
 
 # Add all sites here:
-site.list <- c('KONZ', 'GUAN', 'JORN')
+site.list <- c('HARV' ,'KONZ', 'GUAN', 'JORN')
 
-for( site in site.list){
+for( site in site.list ){
+  site <- site
   print(site)
-  #print( 'Running MBR')
- # source(file.path("workflows/flow.calc.flag.mbr.R"))
+  
+  # Download the aligned concentration data for the site
+  source(file.path("exploratory/flow.calc.flag.mbr.batch.R"))
+  print('data downloaded')
+  
+  print( 'Running MBR')
+  source(file.path("exploratory/flow.calc.flag.mbr.batch.R"))
   print( 'Running AE')
-  source(file.path("workflows/flow.calc.flag.aero.R"))
+  source(file.path("exploratory/flow.calc.flag.aero.batch.R"))
   print( 'Running WP')
-  source(file.path("workflows/flow.calc.flag.windprof.R"))
+  source(file.path("exploratory/flow.calc.flag.windprof.batch.R"))
 
 }
