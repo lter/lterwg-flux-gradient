@@ -81,8 +81,8 @@ calc.mbr <- function(min9, bootstrap, nsamp){
                                    (dConc_CO2 / dConc_H2O),NA)
       
       FH2O_MBR_CO2trace = ifelse(!is.na(MBRflux_align$FC_turb_interp_CO2[i] *
-                                          (dConc_H2O[j] / dConc_CO2[j])),MBRflux_align$FC_turb_interp_CO2[i] *
-                                   (dConc_H2O[j] / dConc_CO2[j]), NA)
+                                          (dConc_H2O / dConc_CO2)),MBRflux_align$FC_turb_interp_CO2[i] *
+                                   (dConc_H2O / dConc_CO2), NA)
       
       FCH4_MBR_CO2trace = ifelse(!is.na(MBRflux_align$FC_turb_interp_CO2[i] *
                                           (dConc_CH4 /dConc_CO2)), MBRflux_align$FC_turb_interp_CO2[i] *

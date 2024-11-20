@@ -10,8 +10,8 @@ site.list <- c('KONZ', 'GUAN', 'JORN')
 
 for( site in site.list){
   print(site)
-  print( 'Running MBR')
-  source(file.path("workflows/flow.calc.flag.mbr.R"))
+  #print( 'Running MBR')
+ # source(file.path("workflows/flow.calc.flag.mbr.R"))
   print( 'Running AE')
   source(file.path("workflows/flow.calc.flag.aero.R"))
   print( 'Running WP')
