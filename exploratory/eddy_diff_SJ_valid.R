@@ -128,8 +128,7 @@ eddy_diff_compare <- function(site,site_name){
 
 ####Cross Gradient Flux Flagger###
 "Flags all instances of a cross gradient flux"
-#' dConc is a vector of the difference in concentration
-#' flux is the EC flux measured
+#' K is eddy diffusivity of gas H2O or CO2
 #' df is the dataframe of interest
 #' 
 
@@ -270,9 +269,78 @@ for (site in site_list){
     filter(Percent != 0)
 }
 
+####Add Cross grad flag####
 
-####Final Data in files Cross_grad_perc and comparison_result
+# Assuming cross_grad_flag() is already defined and works like this:
+# cross_grad_flag <- function(df, K) { ... }
 
+# List of site names
+site_names <- c("HARV", "GUAN", "JORN", "KONZ")
+
+# Loop through each site list
+for (site in site_names) {
+  
+  # Access the list for the current site (e.g., HARV, GUAN, JORN, KONZ)
+  site_list <- get(site)  # Retrieve the site list (HARV, GUAN, JORN, KONZ)
+  
+  # Loop through the gas types (CO2 and H2O, excluding CH4)
+  for (gas in c("CO2", "H2O")) {
+    
+    # Access the data frame for the current site and gas (e.g., HARV$CO2, HARV$H2O)
+    df <- site_list[[gas]]
+    
+    # Determine the K column for the current gas type
+    K_column <- ifelse(gas == "H2O", "KH2O", "KCO2")
+    
+    # Apply the function to the data frame with the appropriate K column
+    result_df <- cross_grad_flag(df, K_column)
+    
+    # Store the updated data frame back into the site list (replacing the original)
+    site_list[[gas]] <- result_df
+  }
+  
+  # Reassign the updated site list back to its original variable (e.g., HARV, GUAN, JORN, KONZ)
+  assign(site, site_list)
+}
+
+######REBUILD ORIGINAL DATAFRAME####
+
+
+# Initialize an empty list to store the combined data frames
+SITES_AE_9min <- list()
+
+# List of site names
+site_names <- c("GUAN", "HARV", "KONZ", "JORN")
+
+# Loop through each site
+for (site in site_names) {
+  
+  # Access the list for the current site (GUAN, HARV, KONZ, JORN)
+  site_list <- get(site)  # Retrieve the site list (GUAN, HARV, KONZ, JORN)
+  
+  # Combine CO2 and H2O data frames for the current site
+  combined_df <- bind_rows(site_list$CO2, site_list$H2O)
+  
+  # Create the new data frame name dynamically (e.g., GUAN_AE_9min)
+  new_df_name <- paste0(site, "_AE_9min")
+  
+  # Assign the combined data frame to the new variable in the global environment
+  assign(new_df_name, combined_df)
+  
+  # Store the combined data frame in the list SITES_AE_9min
+  SITES_AE_9min[[new_df_name]] <- combined_df
+}
+
+
+
+
+
+
+
+####Final Data
+###cross_grad_perc : Percentage of datapoints with cross gradient flow by site and height
+###K_comp: Comparison of KCO2 and KH2O via t.test and correlation
+###SITES_AE_9min: Now with EC derived KCO2 and KH2O columns with cross gradient flag.
 
 
 
