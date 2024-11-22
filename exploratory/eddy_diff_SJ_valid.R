@@ -12,8 +12,8 @@ library(googledrive)
 #Real Eddy Diff. converter - Sam J.
 
 "This code is intended to take the EC fluxes and concetration observations from NEON
-towers and convert them into an eddy diffusivity for comparison against the eddy
-diffusivities calculated from flux gradient methods."
+towers and convert them into an eddy diffusivity for comparison between H2O and CO2 K's
+and cross-gradient analysis"
 
 ###EC Eddy Diffusivity###
 "input site file is a list of 3 data frames, CO2,H2O,and CH4. Back calculates 
