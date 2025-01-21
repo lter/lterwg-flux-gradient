@@ -72,7 +72,7 @@ min30.K.AE.list <- calc.eddydiff.aero(sitecode = sitecode, min9 = min30Diff.list
 min9.FG.AE.list <- calc.gas.aero.windprof.flux(min9.K = min9.K.AE.list,
                                                bootstrap = 1, nsamp = 1000)
 min30.FG.AE.list <- calc.gas.aero.windprof.flux(min9.K = min30.K.AE.list,
-                                               bootstrap = 0, nsamp = 1000)
+                                               bootstrap = 1, nsamp = 1000)
 
 # # Plot FH2O comparison between FG and EC
 # data <- dplyr::filter(min9.FG.AE.list$H2O, dLevelsAminusB=="4_1")[c("FH2O_interp","FG_mean")]
