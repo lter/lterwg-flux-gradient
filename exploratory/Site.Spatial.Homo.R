@@ -121,6 +121,7 @@ zone.var <- function( shp, rast){
   
   return(shp)
 }
+} 
 
 BONA.shp.var <- zone.var(BONA.shp, BONA.evi.proj.cm)
 CPER.shp.var <- zone.var(CPER.shp, CPER.evi.proj.cm)
@@ -243,29 +244,51 @@ ggplot( ) + geom_spatraster(data = GUAN.evi.proj.cm) + geom_sf( data = GUAN.shp,
 ggplot( ) + geom_spatraster(data = HARV.evi.proj.cm) + geom_sf( data = HARV.shp, color="black", fill=NA)+
   scale_fill_whitebox_c(limits = c(0,1), direction = -1)
 ggplot( ) + geom_spatraster(data = KONZ.evi.proj.cm) + geom_sf( data = KONZ.shp, color="black", fill=NA)+
-  scale_fill_whitebox_c(limits = c(0,1), direction = -1)
-ggplot( ) + geom_spatraster(data = TOOL.evi.proj.cm) + geom_sf( data = TOOL.shp, color="black", fill=NA)+
-  scale_fill_whitebox_c(limits = c(0,1), direction = -1)
-ggplot( ) + geom_spatraster(data = JORN.evi.proj.cm) + geom_sf( data = JORN.shp, color="black", fill=NA)+
-  scale_fill_whitebox_c(limits = c(0,1), direction = -1)
-ggplot( ) + geom_spatraster(data = NIWO.evi.proj.cm) + geom_sf( data = NIWO.shp, color="black", fill=NA)+
-  scale_fill_whitebox_c(limits = c(0,1), direction = -1)
+
+plot.dist.BONA.w <- ggplot( ) + 
+  geom_smooth( data= BONA.shp.var, aes( x=wedge, y = VAR), color="black", method=lm) +
+  geom_point( data= BONA.shp.var, aes( x=wedge, y = VAR), color="black")+
+  xlab("Wedge") + ylab( "Variance %") + ylim(0, 0.3)+ ggtitle("BONA")
+
+plot.dist.CPER.w <-ggplot( ) +
+  geom_smooth( data= CPER.shp.var, aes( x=wedge, y = VAR), color="black", method=lm) +
+  geom_point( data= CPER.shp.var, aes( x=wedge, y = VAR), color="black")+
+  xlab("Wedge") + ylab( "Variance %")+ ylim(0, 0.3)+ ggtitle("CPER")
+
+plot.dist.GUAN.w <-ggplot( ) + 
+  geom_smooth( data= GUAN.shp.var, aes( x=wedge, y = VAR), color="black", method=lm) +
+  geom_point( data= GUAN.shp.var, aes( x=wedge, y = VAR), color="black")+
+  xlab("Wedge") +ylab( "Variance %")+ ylim(0, 0.3)+ ggtitle("GUAN")
+
+plot.dist.HARV.w <-ggplot( ) + 
+  geom_smooth( data= HARV.shp.var, aes( x=wedge, y = VAR), color="black", method=lm) +
+  geom_point( data= HARV.shp.var, aes( x=wedge, y = VAR), color="black") + ylim(0, 100)+
+  xlab("Wedge") + ylab( "Variance %")+ ylim(0, 0.3)+ ggtitle("HARV")
+
+plot.dist.KONZ.w <-ggplot( ) +
+  geom_smooth( data= KONZ.shp.var, aes( x=wedge, y = VAR), color="black", method=lm) +
+  geom_point( data= KONZ.shp.var, aes( x=wedge, y = VAR), color="black")+ ylim(0, 100)+
+  xlab("Wedge") + ylab( "Variance %")+ ylim(0, 0.3)+ ggtitle("KONZ")
+
+plot.dist.TOOL.w <-plot.dist.BONA <-ggplot( ) +
+  geom_smooth( data= TOOL.shp.var, aes( x=wedge, y = VAR), color="black", method=lm) +
+  geom_point( data= TOOL.shp.var, aes( x=wedge, y = VAR), color="black")+ ylim(0, 100)+
+  xlab("Wedge") + ylab( "Variance %")+ ylim(0, 0.3)+ ggtitle("TOOL")
+
+plot.dist.JORN.w <-ggplot( ) +
+  geom_smooth( data= JORN.shp.var, aes( x=wedge, y = VAR), color="black", method=lm) +
+  geom_point( data= JORN.shp.var, aes( x=wedge, y = VAR), color="black")+ ylim(0, 100)+
+  xlab("Wedge") + ylab( "Variance %")+ ylim(0, 0.3)+ ggtitle("JORN")
+
+plot.dist.NIWO.w <-ggplot( ) +
+  geom_smooth( data= NIWO.shp.var, aes( x=wedge, y = VAR), color="black", method=lm) +
+  geom_point( data= NIWO.shp.var, aes( x=wedge, y = VAR), color="black")+ ylim(0, 100) +
+  xlab("Wedge") + ylab( "Variance %")+ ylim(0, 0.3)+ ggtitle("NIWO")
 
 
-# Mean SD
-
-mean(BONA.shp.var$VAR)
-mean(KONZ.shp.var$VAR)
-mean(NIWO.shp.var$VAR)
-
-mean(GUAN.shp.var$VAR)
-mean(HARV.shp.var$VAR)
-
-mean(CPER.shp.var$VAR)
-mean(TOOL.shp.var$VAR)
-mean(JORN.shp.var$VAR)
-
-
-
-
-
+ggarrange(plot.dist.HARV.w, plot.dist.GUAN.w, plot.dist.BONA.w, plot.dist.CPER.w,
+          plot.dist.TOOL.w, plot.dist.KONZ.w,plot.dist.NIWO.w, plot.dist.JORN.w, 
+          labels= c('A', 'B', 'C', 'D',
+                    'E', 'F','G', 'H'),
+          ncol=4, nrow=2,
+          common.legend = TRUE)
