@@ -23,6 +23,7 @@ source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-fl
 
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/Flow.CrossGradient.R' )
 
+
 for ( i in 1:length(SITES_AE_30min )){
   SITES_WP_9min[[i]] <- flag.all.gas.stability(flux.df = SITES_WP_9min[[i]], L='L_obukhov')
   SITES_WP_30min[[i]] <- flag.all.gas.stability(flux.df = SITES_WP_30min[[i]], L='L_obukhov')

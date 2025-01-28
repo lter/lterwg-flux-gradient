@@ -1,6 +1,6 @@
 
-DoWP=1 # Do Wind Profile Method here as well? 1 for true O for False.
-Savecsv=0 # Save csv files to analyze in matlab? 1 for true 0 for False.
+DoWP = 1 # Do Wind Profile Method here as well? 1 for true O for False.
+Savecsv = 0 # Save csv files to analyze in matlab? 1 for true 0 for False.
 
 # Load functions in this repo
 source(file.path("functions/MO_Length_CRS.R"))
@@ -22,7 +22,6 @@ min30.K.AE.list <- calc.eddydiff.aero(sitecode = sitecode, min9 = min30Diff.list
 min9.FG.AE.list <- calc.gas.aero.windprof.flux(min9.K = min9.K.AE.list,
                                                bootstrap = 1, nsamp = 1000)
 min30.FG.AE.list <- calc.gas.aero.windprof.flux(min9.K = min30.K.AE.list,
-                                                
                                                bootstrap = 1, nsamp = 1000)
 
 # # Plot FH2O comparison between FG and EC
