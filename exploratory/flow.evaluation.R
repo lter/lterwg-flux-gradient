@@ -5,6 +5,7 @@ library(tidyverse)
 library(ggplot2)
 library(ggpubr)
 
+
 # Import data from a  site:
 localdir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/Data'
 
@@ -83,8 +84,11 @@ HARV_H_FILTER <- c("6_2", "6_3" , "6_4" ,"6_5")
 JORN_H_FILTER <- c("4_2", "4_3" )
 KONZ_H_FILTER <- c("4_2", "4_3" )
 
-# Observed versus Predicted: Run analysis by height to understand the gradient strength:
-# R2; RMSE; Slope; force 0 intercept. What explains residuals?
+}
+
+# Calculate the difference between EC and gradient FLux:
+SITES_AE_30min[[i]] <- SITES_AE_30min[[i]] %>% mutate(Diff_EC_GF= FC_turb_interp - FG_mean )
+SITES_WP_30min[[i]] <- SITES_WP_30min[[i]] %>% mutate(Diff_EC_GF= FC_turb_interp - FG_mean )
 
 # Application of Flitering Functions: ####
 
@@ -244,3 +248,28 @@ ggplot( data = SITES_WP_30min$GUAN %>% filter(YearMon == '2023-07', TowerH == '5
 
 ggplot( data = SITES_AE_30min$GUAN %>% filter(YearMon == '2023-07', TowerH == '5_3') ) + stat_smooth(aes(x = Hour , y = FG_mean)) + stat_smooth( aes(x = Hour , y = FC_turb_interp ), col="red") + ylab("AE") ,
 ncol=1, nrow=3)
+
+MBR$ustar_interp_CO2 %>%  hist
+MBR$dConc_CO2
+MBR$dConc_pvalue_CO2 %>% hist(n=100)
+MBR$FC_nee_interp_CO2
+MBR$L_obukhov_CO2 %>% hist(n=100)
+MBR$Stability_100 %>% unique
+MBR$dLevelsAminusB_CO2
+MBR$diffTowerPosition_CO2
+MBR$FC_turb_interp_H2O
+
+
+MBR.sub$diff_H20 <- 
+MBR.sub <- MBR %>% filter(dConc_pvalue_H2O <= 0.01, 
+                          FH2O_MBR_CO2trace_mean < 60 & FH2O_MBR_CO2trace_mean > -60, ustar_interp_CO2 > 0.25)
+
+MBR.sub %>% ggplot( ) + geom_point( aes(x = FC_turb_interp_H2O, y = FH2O_MBR_CO2trace_mean ) ) + facet_wrap(~dLevelsAminusB_CO2)
+
+
+
+
+# Define Diurnal expectation based on EC data and measure the Diurnal at each height:
+
+MBR %>% filter(dConc_pvalue_H2O <= 0.05, 
+               FCH4_MBR_H2Otrace_mean < 60 & FCH4_MBR_H2Otrace_mean > -60) %>% select( dConc_pvalue_H2O , FCH4_MBR_H2Otrace_mean) %>% summary

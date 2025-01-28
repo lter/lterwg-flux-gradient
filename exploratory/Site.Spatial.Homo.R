@@ -2,8 +2,10 @@
 
 rm(list=ls())
 
-# Load shapefile created in Site.Spatial.Homo:
+# Load shapefile created in flow.neon.site.simplefeatures:
 load('/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/data/NEONLTERsiteBuffers.Rdata')
+
+load('/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/FG_Site_Wdges.RDATA')
 
 library( sf)
 library(terra)
@@ -11,10 +13,10 @@ library(AOI)
 library(ggplot2)
 library(tidyverse)
 library(tidyterra)
+library(ggpubr)
 
 # Data Prep : ####
-# Need to download a different date for GUAN. the data doesnt 
-# Load EVI tiffs for NEON sites:
+# Load EVI tiffs for NEON sites made in flow.NEONAOP.EVI.Download.R:
 BONA.evi <- rast("/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic/SiteEVI/BONA_evi_2021.tif")
 CPER.evi <- rast("/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic/SiteEVI/CPER_evi_2021.tif")
 GUAN.evi <- rast("/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic/SiteEVI/GUAN_evi_2018.tif")
@@ -25,12 +27,12 @@ NIWO.evi <- rast("/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/NEON_indices
 TOOL.evi <- rast("/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic/SiteEVI/TOOL_evi_2020.tif")
 
 # filter the EVI :
-
 filterOutofBounds <- function(raster, min, max){
   raster[raster > max]<- NA
   raster[raster < min]<- NA
   return(raster)
 }
+
 BONA.evi <- filterOutofBounds(BONA.evi, max=1, min=0)
 CPER.evi <- filterOutofBounds(CPER.evi, max=1, min=0)
 GUAN.evi <- filterOutofBounds(GUAN.evi, max=1, min=0)
@@ -41,14 +43,14 @@ NIWO.evi  <- filterOutofBounds(NIWO.evi , max=1, min=0)
 TOOL.evi  <- filterOutofBounds(TOOL.evi , max=1, min=0)
 
 # Subset Site Shapefiles:
-BONA.shp <- Site.Buffers %>% filter(Site.Buffers$Site.Id.NEON == "BONA" )
-CPER.shp <- Site.Buffers %>% filter(Site.Buffers$Site.Id.NEON == "CPER" )
-GUAN.shp <- Site.Buffers %>% filter(Site.Buffers$Site.Id.NEON == "GUAN" )
-HARV.shp <- Site.Buffers %>% filter(Site.Buffers$Site.Id.NEON == "HARV" )
-JORN.shp <- Site.Buffers %>% filter(Site.Buffers$Site.Id.NEON == "JORN" )
-KONZ.shp <- Site.Buffers %>% filter(Site.Buffers$Site.Id.NEON == "KONZ" )
-NIWO.shp <- Site.Buffers %>% filter(Site.Buffers$Site.Id.NEON == "NIWO" )
-TOOL.shp <- Site.Buffers %>% filter(Site.Buffers$Site.Id.NEON == "TOOL" )
+BONA.shp <- BONA.wedges
+CPER.shp <- CPER.wedges
+GUAN.shp <- GUAN.wedges
+HARV.shp <- HARV.wedges
+JORN.shp <- JORN.wedges
+KONZ.shp <- KONZ.wedges
+NIWO.shp <- NIWO.wedges
+TOOL.shp <- TOOL.wedges
 
 #crop and mask
 BONA.evi.proj.cm <-BONA.evi %>% crop(BONA.shp, mask=TRUE)
@@ -60,54 +62,10 @@ KONZ.evi.proj.cm <-KONZ.evi %>% crop(KONZ.shp, mask=TRUE)
 NIWO.evi.proj.cm <-NIWO.evi %>% crop(NIWO.shp, mask=TRUE)
 TOOL.evi.proj.cm <-TOOL.evi %>% crop(TOOL.shp, mask=TRUE)
 
-# Spatial Figure:
-
-plot.BONA. <- ggplot( ) + geom_spatraster(data= BONA.evi.proj.cm) + geom_sf(data= BONA.shp, fill="transparent", linewidth=1) +   scale_fill_hypso_tint_c( limits = c(0,1),  direction = -1) +   
-  theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(),
-        axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank())
-
-plot.CPER. <- ggplot( ) + geom_spatraster(data= CPER.evi.proj.cm) + geom_sf(data= CPER.shp, fill="transparent", linewidth=1) +   scale_fill_hypso_tint_c( limits = c(0,1),  direction = -1)+   
-  theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(),
-        axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank())
-
-plot.GUAN. <- ggplot( ) + geom_spatraster(data= GUAN.evi.proj.cm) + geom_sf(data= GUAN.shp, fill="transparent", linewidth=1) +   scale_fill_hypso_tint_c( limits = c(0,1),  direction = -1) +   
-  theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(),
-        axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank())
-
-plot.HARV. <- ggplot( ) + geom_spatraster(data= HARV.evi.proj.cm) + geom_sf(data= HARV.shp, fill="transparent", linewidth=1) +   scale_fill_hypso_tint_c( limits = c(0,1),  direction = -1) +   
-  theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(),
-        axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank())
-
-plot.JORN. <- ggplot( ) + geom_spatraster(data= JORN.evi.proj.cm) + geom_sf(data= JORN.shp, fill="transparent", linewidth=1) +   scale_fill_hypso_tint_c( limits = c(0,1),  direction = -1) +   
-  theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(),
-        axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank())
-
-plot.KONZ. <- ggplot( ) + geom_spatraster(data= KONZ.evi.proj.cm) + geom_sf(data= KONZ.shp, fill="transparent", linewidth=1) +   scale_fill_hypso_tint_c( limits = c(0,1),  direction = -1) +   
-  theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(),
-        axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank())
-
-plot.NIWO. <- ggplot( ) + geom_spatraster(data= NIWO.evi.proj.cm) + geom_sf(data= NIWO.shp, fill="transparent", linewidth=1) +   scale_fill_hypso_tint_c( limits = c(0,1),  direction = -1) +   
-  theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(),
-        axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank())
-
-plot.TOOL. <- ggplot( ) + geom_spatraster(data= TOOL.evi.proj.cm) + geom_sf(data= TOOL.shp, fill="transparent", linewidth=1) +   scale_fill_hypso_tint_c( limits = c(0,1),  direction = -1) +   
-  theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(),
-        axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank())
-
-
-library(ggpubr)
-
-ggarrange(plot.HARV., plot.GUAN., plot.BONA., plot.CPER.,
-          plot.TOOL., plot.KONZ.,plot.NIWO., plot.JORN., 
-          labels= c('A', 'B', 'C', 'D',
-                    'E', 'F','G', 'H'),
-          ncol=4, nrow=2,
-          common.legend = TRUE)
-
-
-# Calculate zonal statistics for the buffers:
-
+# Zonal Statistics: #####
+# Calculates the %variance (sd(EVI/mean(EVI)))
 zone.var <- function( shp, rast){
+  evi.mean <- terra::global(rast,"mean", na.rm=T)[,1]
  
    shp$VAR <- NA
 
@@ -115,7 +73,7 @@ zone.var <- function( shp, rast){
     print(i)
     evi <- terra::extract( rast, shp[i,])[,2] %>% as.data.frame()
     evi.f <- evi %>% filter(. <= 1)
-    shp$VAR[i] <- sd( evi.f$., na.rm=T) %>% round(digits = 3)
+    shp$VAR[i] <- (sd( evi.f$., na.rm=T) %>% round(digits = 3)/evi.mean)*100
     rm( evi, evi.f)
   }
   
@@ -142,71 +100,174 @@ save(BONA.shp.var, CPER.shp.var, GUAN.shp.var,
      KONZ.evi.proj.cm,
      NIWO.evi.proj.cm, 
      TOOL.evi.proj.cm,
-     file='/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/data/NEONLTERsite_varBuffers.Rdata')
-
+     file='/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/data/NEONLTERsite_varBuffersWedges.Rdata')
 
 # Homo exploration: ####
 
-
 load('/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/data/NEONLTERsite_varBuffers.Rdata')
 
-# fit lines to the var versus distance to plot for all sites together:
+# Create  Summary Table of these  results
+# the slope is the measure of homogeniety.
+table.delta.var <- data.frame( site = c('HARV', 'GUAN', 'BONA', 'CPER', 
+                                          'TOOL', 'KONZ', 'NIWO', 'JORN' ))
 
-plot.dist.BONA <- ggplot( ) + 
-  geom_smooth( data= BONA.shp.var, aes( x=dist_m, y = VAR), color="black", method=lm) +
-  geom_point( data= BONA.shp.var, aes( x=dist_m, y = VAR), color="black")+
-  xlab("Buffer (meters) ") + ylab("Standard Deviation") + ylim(0, 0.3)
+Delta.var.evi.r <- function(shp){
+  lm.site <- summary(lm( data= shp,VAR ~ dist_m))
+  lm.site$coefficients[2]
+  return( lm.site$coefficients[2])
+}
+Delta.var.evi.w <- function( shp){
+  lm.site <- summary(lm( data= shp,VAR ~ wedge))
+  lm.site$coefficients[2]
+  return( lm.site$coefficients[2])
+}
+
+table.delta.var$Delta.var.r <-NA
+
+table.delta.var$Delta.var.r[ table.delta.var$site == 'HARV'] <- Delta.var.evi.r(HARV.shp.var) %>%  round(6)
+table.delta.var$Delta.var.r[ table.delta.var$site == 'GUAN'] <- Delta.var.evi.r(GUAN.shp.var) %>%  round(6)
+table.delta.var$Delta.var.r[ table.delta.var$site == 'BONA'] <- Delta.var.evi.r(BONA.shp.var) %>%  round(6)
+table.delta.var$Delta.var.r[ table.delta.var$site == 'CPER'] <- Delta.var.evi.r(CPER.shp.var) %>%  round(6)
+table.delta.var$Delta.var.r[ table.delta.var$site == 'TOOL'] <- Delta.var.evi.r(TOOL.shp.var) %>%  round(6)
+table.delta.var$Delta.var.r[ table.delta.var$site == 'KONZ'] <- Delta.var.evi.r(KONZ.shp.var) %>%  round(6)
+table.delta.var$Delta.var.r[ table.delta.var$site == 'NIWO'] <- Delta.var.evi.r(NIWO.shp.var) %>%  round(6)
+table.delta.var$Delta.var.r[ table.delta.var$site == 'JORN'] <- Delta.var.evi.r(JORN.shp.var) %>%  round(6)
+
+table.delta.var$Delta.var.w <-NA
+
+table.delta.var$Delta.var.w[ table.delta.var$site == 'HARV'] <- Delta.var.evi.w(HARV.shp.var) %>%  round(6)
+table.delta.var$Delta.var.w[ table.delta.var$site == 'GUAN'] <- Delta.var.evi.w(GUAN.shp.var) %>%  round(6)
+table.delta.var$Delta.var.w[ table.delta.var$site == 'BONA'] <- Delta.var.evi.w(BONA.shp.var) %>%  round(6)
+table.delta.var$Delta.var.w[ table.delta.var$site == 'CPER'] <- Delta.var.evi.w(CPER.shp.var) %>%  round(6)
+table.delta.var$Delta.var.w[ table.delta.var$site == 'TOOL'] <- Delta.var.evi.w(TOOL.shp.var) %>%  round(6)
+table.delta.var$Delta.var.w[ table.delta.var$site == 'KONZ'] <- Delta.var.evi.w(KONZ.shp.var) %>%  round(6)
+table.delta.var$Delta.var.w[ table.delta.var$site == 'NIWO'] <- Delta.var.evi.w(NIWO.shp.var) %>%  round(6)
+table.delta.var$Delta.var.w[ table.delta.var$site == 'JORN'] <- Delta.var.evi.w(JORN.shp.var) %>%  round(6)
+
+# Add the Mean of the SD across all conditions (Radi and Wedge)
+table.delta.var$MEAN.SD[table.delta.var$site == "HARV" ] <- mean(HARV.shp.var$VAR)
+table.delta.var$MEAN.SD[table.delta.var$site == "GUAN" ] <- mean(GUAN.shp.var$VAR)
+table.delta.var$MEAN.SD[table.delta.var$site == "BONA" ] <- mean(BONA.shp.var$VAR)
+table.delta.var$MEAN.SD[table.delta.var$site == "CPER" ] <- mean(CPER.shp.var$VAR)
+table.delta.var$MEAN.SD[table.delta.var$site == "TOOL" ] <- mean(TOOL.shp.var$VAR)
+table.delta.var$MEAN.SD[table.delta.var$site == "KONZ" ] <- mean(KONZ.shp.var$VAR)
+table.delta.var$MEAN.SD[table.delta.var$site == "NIWO" ] <- mean(NIWO.shp.var$VAR)
+table.delta.var$MEAN.SD[table.delta.var$site == "JORN" ] <- mean(JORN.shp.var$VAR)
+
+table.delta.var$SD.SD[table.delta.var$site == "HARV" ] <- sd(HARV.shp.var$VAR)
+table.delta.var$SD.SD[table.delta.var$site == "GUAN" ] <- sd(GUAN.shp.var$VAR)
+table.delta.var$SD.SD[table.delta.var$site == "BONA" ] <- sd(BONA.shp.var$VAR)
+table.delta.var$SD.SD[table.delta.var$site == "CPER" ] <- sd(CPER.shp.var$VAR)
+table.delta.var$SD.SD[table.delta.var$site == "TOOL" ] <- sd(TOOL.shp.var$VAR)
+table.delta.var$SD.SD[table.delta.var$site == "KONZ" ] <- sd(KONZ.shp.var$VAR)
+table.delta.var$SD.SD[table.delta.var$site == "NIWO" ] <- sd(NIWO.shp.var$VAR)
+table.delta.var$SD.SD[table.delta.var$site == "JORN" ] <- sd(JORN.shp.var$VAR)
 
 
-plot.dist.CPER <-ggplot( ) +
-  geom_smooth( data= CPER.shp.var, aes( x=dist_m, y = VAR), color="black", method=lm) +
-  geom_point( data= CPER.shp.var, aes( x=dist_m, y = VAR), color="black")+
-  xlab("Buffer (meters) ") + ylab("Standard Deviation")+ ylim(0, 0.3)
-  
-  
-plot.dist.GUAN <-ggplot( ) + 
-  geom_smooth( data= GUAN.shp.var, aes( x=dist_m, y = VAR), color="black", method=lm) +
-  geom_point( data= GUAN.shp.var, aes( x=dist_m, y = VAR), color="black")+
-  xlab("Buffer (meters) ") +ylab("Standard Deviation")+ ylim(0, 0.3)
-  
+p.Delta.SD <-ggplot(data=table.delta.var, aes(x=site, y=SD.SD)) + geom_point(size=5) + ylim(0,10)
 
-plot.dist.HARV <-ggplot( ) + 
-  geom_smooth( data= HARV.shp.var, aes( x=dist_m, y = VAR), color="black", method=lm) +
-  geom_point( data= HARV.shp.var, aes( x=dist_m, y = VAR), color="black") + ylim(0,0.3)+
-  xlab("Buffer (meters) ") + ylab("Standard Deviation")+ ylim(0, 0.3)
+p.Delta.radius <- ggplot(data=table.delta.var, aes(x=site, y=Delta.var.r)) + geom_point(size=5) 
 
-plot.dist.KONZ <-ggplot( ) +
-  geom_smooth( data= KONZ.shp.var, aes( x=dist_m, y = VAR), color="black", method=lm) +
-  geom_point( data= KONZ.shp.var, aes( x=dist_m, y = VAR), color="black")+ ylim(0,0.3)+
-  xlab("Buffer (meters) ") + ylab("Standard Deviation")+ ylim(0, 0.3)
+p.Delta.wedge <-ggplot(data=table.delta.var, aes(x=site, y=Delta.var.w)) + geom_point(size=5)
 
-plot.dist.TOOL <-plot.dist.BONA <-ggplot( ) +
-  geom_smooth( data= TOOL.shp.var, aes( x=dist_m, y = VAR), color="black", method=lm) +
-  geom_point( data= TOOL.shp.var, aes( x=dist_m, y = VAR), color="black")+ ylim(0,0.3)+
-  xlab("Buffer (meters) ") + ylab("Standard Deviation")+ ylim(0, 0.3)
+ggarrange(p.Delta.SD , p.Delta.radius, p.Delta.wedge, nrow=3, ncol=1)
+
+write.csv( table.delta.var,  '/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/table.delta.var.csv')
+
+# EVI Wedge Figure: #####
+# Spatial Figure:
+
+plot.BONA. <- ggplot( ) + geom_spatraster(data= BONA.evi.proj.cm) + geom_sf(data= BONA.shp, fill="transparent", linewidth=1) +   scale_fill_hypso_tint_c( limits = c(0,1),  direction = -1) +   
+  theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) + ggtitle("BONA")
+
+plot.CPER. <- ggplot( ) + geom_spatraster(data= CPER.evi.proj.cm) + geom_sf(data= CPER.shp, fill="transparent", linewidth=1) +   scale_fill_hypso_tint_c( limits = c(0,1),  direction = -1)+   
+  theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) + ggtitle("CPER")
+
+plot.GUAN. <- ggplot( ) + geom_spatraster(data= GUAN.evi.proj.cm) + geom_sf(data= GUAN.shp, fill="transparent", linewidth=1) +   scale_fill_hypso_tint_c( limits = c(0,1),  direction = -1) +   
+  theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) + ggtitle("GUAN")
+
+plot.HARV. <- ggplot( ) + geom_spatraster(data= HARV.evi.proj.cm) + geom_sf(data= HARV.shp, fill="transparent", linewidth=1) +   scale_fill_hypso_tint_c( limits = c(0,1),  direction = -1) +   
+  theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) + ggtitle("HARV")
+
+plot.JORN. <- ggplot( ) + geom_spatraster(data= JORN.evi.proj.cm) + geom_sf(data= JORN.shp, fill="transparent", linewidth=1) +   scale_fill_hypso_tint_c( limits = c(0,1),  direction = -1) +   
+  theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) + ggtitle("JORN")
+
+plot.KONZ. <- ggplot( ) + geom_spatraster(data= KONZ.evi.proj.cm) + geom_sf(data= KONZ.shp, fill="transparent", linewidth=1) +   scale_fill_hypso_tint_c( limits = c(0,1),  direction = -1) +   
+  theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) + ggtitle("KONZ")
+
+plot.NIWO. <- ggplot( ) + geom_spatraster(data= NIWO.evi.proj.cm) + geom_sf(data= NIWO.shp, fill="transparent", linewidth=1) +   scale_fill_hypso_tint_c( limits = c(0,1),  direction = -1) +   
+  theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) + ggtitle("NIWO")
+
+plot.TOOL. <- ggplot( ) + geom_spatraster(data= TOOL.evi.proj.cm) + geom_sf(data= TOOL.shp, fill="transparent", linewidth=1) +   scale_fill_hypso_tint_c( limits = c(0,1),  direction = -1) +   
+  theme(axis.title.x=element_blank(), axis.text.x=element_blank(), axis.ticks.x=element_blank(),
+        axis.title.y=element_blank(), axis.text.y=element_blank(), axis.ticks.y=element_blank()) + ggtitle("TOOL")
 
 
-plot.dist.JORN <-ggplot( ) +
-  geom_smooth( data= JORN.shp.var, aes( x=dist_m, y = VAR), color="black", method=lm) +
-  geom_point( data= JORN.shp.var, aes( x=dist_m, y = VAR), color="black")+ ylim(0,0.3)+
-  xlab("Buffer (meters) ") + ylab("Standard Deviation")+ ylim(0, 0.3)
 
-plot.dist.NIWO <-ggplot( ) +
-  geom_smooth( data= NIWO.shp.var, aes( x=dist_m, y = VAR), color="black", method=lm) +
-  geom_point( data= NIWO.shp.var, aes( x=dist_m, y = VAR), color="black")+ ylim(0,0.3) +
-  xlab("Buffer (meters) ") + ylab("Standard Deviation")+ ylim(0, 0.3)
-
-# Create the plot and layout
-
-ggarrange(plot.dist.HARV, plot.dist.GUAN, plot.dist.BONA, plot.dist.CPER,
-          plot.dist.TOOL, plot.dist.KONZ,plot.dist.NIWO, plot.dist.JORN, 
+ggarrange(plot.HARV., plot.GUAN., plot.BONA., plot.CPER.,
+          plot.TOOL., plot.KONZ.,plot.NIWO., plot.JORN., 
           labels= c('A', 'B', 'C', 'D',
                     'E', 'F','G', 'H'),
           ncol=4, nrow=2,
           common.legend = TRUE)
 
-# Create  Summary Table of these  results
 
+# EVI LM Figures: #####
+# fit lines to the var versus distance to plot for all sites together:
+
+plot.dist.BONA.r <- ggplot( ) + 
+  geom_smooth( data= BONA.shp.var, aes( x=dist_m, y = VAR), color="black", method=lm) +
+  geom_point( data= BONA.shp.var, aes( x=dist_m, y = VAR), color="black")+
+  xlab("Delta Radii") + ylab( "Variance %") + ylim(0, 100) + ggtitle("BONA")
+
+plot.dist.CPER.r <-ggplot( ) +
+  geom_smooth( data= CPER.shp.var, aes( x=dist_m, y = VAR), color="black", method=lm) + geom_point( data= CPER.shp.var, aes( x=dist_m, y = VAR), color="black")+ xlab("Delta Radii") + ylab( "Variance %")+ ylim(0, 100)+ ggtitle("CPER")
+
+plot.dist.GUAN.r <-ggplot( ) + 
+  geom_smooth( data= GUAN.shp.var, aes( x=dist_m, y = VAR), color="black", method=lm) +
+  geom_point( data= GUAN.shp.var, aes( x=dist_m, y = VAR), color="black")+
+  xlab("Delta Radii") +ylab( "Variance %")+ ylim(0, 100)+ ggtitle("GUAN")
+
+plot.dist.HARV.r <-ggplot( ) + 
+  geom_smooth( data= HARV.shp.var, aes( x=dist_m, y = VAR), color="black", method=lm) +
+  geom_point( data= HARV.shp.var, aes( x=dist_m, y = VAR), color="black") + ylim(0, 100)+
+  xlab("Delta Radii") + ylab( "Variance %")+ ylim(0, 100)+ ggtitle("HARV")
+
+plot.dist.KONZ.r <-ggplot( ) +
+  geom_smooth( data= KONZ.shp.var, aes( x=dist_m, y = VAR), color="black", method=lm) +
+  geom_point( data= KONZ.shp.var, aes( x=dist_m, y = VAR), color="black")+ ylim(0, 100)+
+  xlab("Delta Radii") + ylab( "Variance %")+ ylim(0, 100)+ ggtitle("KONZ")
+
+plot.dist.TOOL.r <-plot.dist.BONA <-ggplot( ) +
+  geom_smooth( data= TOOL.shp.var, aes( x=dist_m, y = VAR), color="black", method=lm) +
+  geom_point( data= TOOL.shp.var, aes( x=dist_m, y = VAR), color="black")+ ylim(0, 100)+
+  xlab("Delta Radii") + ylab( "Variance %")+ ylim(0, 100)+ ggtitle("TOOL")
+
+plot.dist.JORN.r <-ggplot( ) +
+  geom_smooth( data= JORN.shp.var, aes( x=dist_m, y = VAR), color="black", method=lm) +
+  geom_point( data= JORN.shp.var, aes( x=dist_m, y = VAR), color="black")+ ylim(0, 100)+
+  xlab("Delta Radii") + ylab( "Variance %")+ ylim(0, 100)+ ggtitle("JORN")
+
+plot.dist.NIWO.r <-ggplot( ) +
+  geom_smooth( data= NIWO.shp.var, aes( x=dist_m, y = VAR), color="black", method=lm) +
+  geom_point( data= NIWO.shp.var, aes( x=dist_m, y = VAR), color="black")+ ylim(0, 100) +
+  xlab("Delta Radii") + ylab( "Variance %")+ ylim(0, 100)+ ggtitle("NIWO")
+
+# Create the plot and layout
+
+ggarrange(plot.dist.HARV.r, plot.dist.GUAN.r, plot.dist.BONA.r, plot.dist.CPER.r,
+          plot.dist.TOOL.r, plot.dist.KONZ.r,plot.dist.NIWO.r, plot.dist.JORN.r, 
+          labels= c('A', 'B', 'C', 'D',
+                    'E', 'F','G', 'H'),
+          ncol=4, nrow=2,
+          common.legend = TRUE)
 
 # the slope is the measure of homogeniety.
 table.delta.var <- data.frame( site = c('HARV', 'GUAN', 'BONA', 'CPER', 
