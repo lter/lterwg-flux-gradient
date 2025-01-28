@@ -1,3 +1,7 @@
+# Compile fluxes downloaded with flow.Download.GoogleDriveData
+
+rm(list=ls())
+
 library(dplyr)
 # Pull data from google drive
 email <- 'alexisrose0525@gmail.com'
@@ -13,10 +17,13 @@ dirTmp <- fs::path(tempdir(),sitecode)
 dir.create(dirTmp)
 #focal_file = "KONZ_30m.zip"
 for(focal_file in site_folder$name){
-  
+
   # Find the file identifier for that file
   file_id <- subset(site_folder, name == focal_file)
   
+site.list <- c('HARV', 'KONZ', 'JORN', 'GUAN')
+localdir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/Data'
+
   # Download that file
   pathDnld <- fs::path(dirTmp,focal_file)
   googledrive::drive_download(file = file_id$id, 
@@ -26,6 +33,10 @@ for(focal_file in site_folder$name){
   if(grepl(pattern='.zip',focal_file)){
     utils::unzip(pathDnld,exdir=dirTmp)
   }
+
+# Create a list to store all data in:
+for( site in site.list){
+  print(site)
   
 }
 #Load calculated fluxes
@@ -47,11 +58,11 @@ load(file.path("data", sitecode, paste0(sitecode,"_WP_AH_2024-03-13.Rdata")))
 # min9.FG.AE.list$CH4$gas <- "CH4"
 # min9.FG.AE.list$CH4$site <- paste0(sitecode)
 # 
-min9.FG.WP.list$H2O$gas <- "H2O"
+  min9.FG.WP.list$H2O$gas <- "H2O"
 min9.FG.WP.list$H2O$site <- paste0(sitecode)
-min9.FG.WP.list$CO2$gas <- "CO2"
+  min9.FG.WP.list$CO2$gas <- "CO2"
 min9.FG.WP.list$CO2$site <- paste0(sitecode)
-min9.FG.WP.list$CH4$gas <- "CH4"
+  min9.FG.WP.list$CH4$gas <- "CH4"
 min9.FG.WP.list$CH4$site <- paste0(sitecode)
 
 #MBRflux_align$site <- paste0(sitecode)

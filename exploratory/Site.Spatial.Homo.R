@@ -120,7 +120,6 @@ zone.var <- function( shp, rast){
   }
   
   return(shp)
-}
 } 
 
 BONA.shp.var <- zone.var(BONA.shp, BONA.evi.proj.cm)
