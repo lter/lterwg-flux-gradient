@@ -38,6 +38,10 @@ data/
 Data/
 ### Ignore testing folder for scripts. Roisin added
 testing/
+.RDataTmp1
+.RDataTmp2
+.Rdata
+.Rhistory
 # Ignore certain file types
 *.gz
 *.xml
@@ -49,3 +53,6 @@ testing/
 
 # Ignore certain folders
 methane/
+data/
+Data/
+testing/
