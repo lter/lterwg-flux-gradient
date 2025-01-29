@@ -3,7 +3,17 @@
 # One to One PLOT: ####
 one2one.plots.co2 <- function ( MBR.DF, AE.DF, WP.DF){ 
   
-p.1 <-ggplot(data = MBR.DF ,aes(x = FC_turb_interp_CO2, y = FCO2_MBR_H2Otrace_mean ))  + stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + geom_point(alpha=0.1) +
+  MBR.DF <- MBR.DF %>% as.data.frame
+  names(MBR.DF) <- substring( names( MBR.DF), 6)
+  
+  AE.DF <- AE.DF %>% as.data.frame
+  names(AE.DF) <- substring( names( AE.DF), 6)
+  
+  WP.DF <- WP.DF %>% as.data.frame
+  names(WP.DF) <- substring( names( WP.DF), 6)
+  
+  
+p.1 <- ggplot(data = MBR.DF ,aes(x = FC_turb_interp_CO2, y = FCO2_MBR_H2Otrace_mean ))  + stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + geom_point(alpha=0.1) +
   stat_cor(aes(label = paste(..rr.label.., ..p.label.., sep = "~`,`~")), # adds R^2 and p-value
            r.accuracy = 0.01,
            p.accuracy = 0.001,
@@ -48,7 +58,7 @@ linear.parms <- function ( Y, X, DF, TYPE){
   DF <- DF[,c(X, Y)] %>% na.omit
   predicted <- predict(model, DF)
   rmse <- sqrt(mean((DF[,Y] %>% na.omit - predicted)^2))
- 
+  
   linear.parms <- data.frame( Intercept =model$coefficients[1] , Slope = model$coefficients[2],
                               R2= summary(model)$r.squared, RMSE= rmse) %>% 
     mutate(Apprach = TYPE)
@@ -56,20 +66,77 @@ linear.parms <- function ( Y, X, DF, TYPE){
 
 one2one.parms.co2 <- function ( MBR.DF, AE.DF, WP.DF){
   
-  linear.parms.mbr <-linear.parms( Y= 'FCO2_MBR_H2Otrace_mean', 
-                                   X='FC_turb_interp_CO2', 
-                                   DF = MBR.DF, TYPE= 'MBR')
+  MBR.DF <- MBR.DF %>% as.data.frame
+  names(MBR.DF) <- substring( names( MBR.DF), 6)
+
+  AE.DF <- AE.DF %>% as.data.frame
+  names(AE.DF) <- substring( names( AE.DF), 6)
   
-  linear.parms.AE <-linear.parms( Y= 'FG_mean', 
+  WP.DF <- WP.DF %>% as.data.frame
+  names(WP.DF) <- substring( names( WP.DF), 6)
+  
+  
+  linear.parms.final <- data.frame( Intercept = as.numeric() ,
+                                    Slope = as.numeric() ,
+                                    R2 = as.numeric() ,
+                                    RMSE = as.numeric() , 
+                                    Apprach = as.character() , 
+                                    dLevelsAminusB = as.character() )
+  
+  for ( a in unique(MBR.DF$dLevelsAminusB_CO2)){
+    print(a)
+    
+    linear.parms.mbr <- try(linear.parms( Y= 'FCO2_MBR_H2Otrace_mean', 
+                                     X='FC_turb_interp_CO2', 
+                                     DF = MBR.DF %>% 
+                                       filter(dLevelsAminusB_CO2 == a), TYPE= 'MBR'), silent = T)
+    linear.parms.AE <- try(linear.parms( Y= 'FG_mean', 
                                    X='FC_nee_interp', 
-                                   DF = AE.DF, TYPE= 'AE')
+                                   DF = AE.DF %>% 
+                                    filter(dLevelsAminusB == a),
+                                  TYPE= 'AE'), silent = T)
   
-  linear.parms.WP <-linear.parms( Y= 'FG_mean', 
+  linear.parms.WP <- try(linear.parms( Y= 'FG_mean', 
                                   X='FC_nee_interp', 
-                                  DF = WP.DF, TYPE= 'WP')
+                                  DF = WP.DF %>% 
+                                    filter(dLevelsAminusB == a),
+                                  TYPE= 'WP'), silent = T)
   
   
-  linear.parms <- rbind(linear.parms.mbr, linear.parms.AE, linear.parms.WP)
+  linear.parms <- rbind(linear.parms.mbr, linear.parms.AE, linear.parms.WP) %>% mutate( dLevelsAminusB = a) 
+
+  linear.parms.final <- rbind( linear.parms.final , linear.parms )
+    
+  }
   
-  return(linear.parms)
+  row.names(linear.parms.final) <- NULL
+  
+  return(linear.parms.final)
+}
+
+one2one.parms.site <- function ( MBR.tibble, AE.tibble, WP.tibble){
+  
+  sites <- names( MBR.tibble)
+  
+  site.tibble_parms <- data.frame( Intercept = as.numeric() ,
+                                   Slope = as.numeric() ,
+                                   R2 = as.numeric() ,
+                                   RMSE = as.numeric() , 
+                                   Apprach = as.character() ,
+                                   dLevelsAminusB = as.character(), 
+                                   Site= as.character())
+  
+  for ( i in sites){
+    print(i)
+    
+    df.parms <- one2one.parms.co2( MBR.DF= MBR.tibble[i] , 
+                      AE.DF = AE.tibble[i], 
+                      WP.DF= WP.tibble[i]) %>%
+      mutate( Site = i)
+    
+    site.tibble_parms  <- rbind( site.tibble_parms ,  df.parms)
+  }
+  
+  site.tibble_parms <- site.tibble_parms %>% filter( Intercept > -100 )
+ return(site.tibble_parms ) 
 }

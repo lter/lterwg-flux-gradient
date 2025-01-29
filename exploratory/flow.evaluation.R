@@ -39,7 +39,6 @@ for ( i in 1:length(SITES_AE_30min )){
 
 SITES_AE_9min <- crossGradientDF(SITES_AE_9min )
 SITES_WP_9min <- crossGradientDF(SITES_WP_9min )
-
 SITES_AE_30min <- crossGradientDF(SITES_AE_30min )
 SITES_WP_30min <- crossGradientDF(SITES_WP_30min)
 
@@ -60,155 +59,66 @@ for( i in 1:length(dir)){
   rm(attr.df)
 }
 
-site.att %>% filter( Site == 'GUAN')
-
-SITES_AE_30min$GUAN$TowerPosition_A
-SITES_AE_30min$GUAN$TowerPosition_B
-
-SITES_AE_30min$GUAN$dLevelsAminusB %>% unique
-SITES_AE_30min$HARV$dLevelsAminusB %>% unique
-SITES_AE_30min$JORN$dLevelsAminusB %>% unique
-SITES_AE_30min$KONZ$dLevelsAminusB %>% unique
-
-SITES_WP_30min$GUAN$dLevelsAminusB %>% unique
-SITES_WP_30min$HARV$dLevelsAminusB %>% unique
-SITES_WP_30min$JORN$dLevelsAminusB %>% unique
-SITES_WP_30min$KONZ$dLevelsAminusB %>% unique
-
-SITES_MBR_30min$GUAN$dLevelsAminusB_CO2 %>% unique
-SITES_MBR_30min$HARV$dLevelsAminusB_CO2 %>% unique
-SITES_MBR_30min$JORN$dLevelsAminusB_CO2 %>% unique
-SITES_MBR_30min$KONZ$dLevelsAminusB_CO2 %>% unique
-
-GUAN_H_FILTER <- c("5_4", "5_3", "5_2")
-HARV_H_FILTER <- c("6_2", "6_3" , "6_4" ,"6_5")
-JORN_H_FILTER <- c("4_2", "4_3" )
-KONZ_H_FILTER <- c("4_2", "4_3" )
-
-}
-
-# Calculate the difference between EC and gradient FLux:
-SITES_AE_30min[[i]] <- SITES_AE_30min[[i]] %>% mutate(Diff_EC_GF= FC_turb_interp - FG_mean )
-SITES_WP_30min[[i]] <- SITES_WP_30min[[i]] %>% mutate(Diff_EC_GF= FC_turb_interp - FG_mean )
+GUAN_H_FILTER <- SITES_AE_30min$GUAN$dLevelsAminusB %>% unique
+HARV_H_FILTER <- SITES_AE_30min$HARV$dLevelsAminusB %>% unique
+JORN_H_FILTER <- SITES_AE_30min$JORN$dLevelsAminusB %>% unique
+KONZ_H_FILTER <- SITES_AE_30min$KONZ$dLevelsAminusB %>% unique
 
 # Application of Flitering Functions: ####
 
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_Filter_FG.R' )
 
+# Adjust Heights in the file:
+
+
+
 # Need to add in filter function by EC and add the SD of the gradient flux. 
 
-# MBR:
+SITES_MBR_30min_FILTER <- EC.filter.MBR ( site.tibble = SITES_MBR_30min,
+                flux.limit = 50, 
+                ustar.filter= 0.3, 
+                FG_sd.limit = 3,
+                diff.limit = 10, 
+                AE.tibble = SITES_AE_30min)
 
-SITES_MBR_30min_FILTER$GUAN <- filter.MBR.CO2.FC( df = SITES_MBR_30min$GUAN,
-                                               flux.limit = 30, 
-                                               ustar.filter = 0.25, 
-                                               H.filter.list = GUAN_H_FILTER,
-                                               FG_sd.limit = 2,
-                                               diff.limit = 1) 
-SITES_MBR_30min_FILTER$HARV <- filter.MBR.CO2.FC( df = SITES_MBR_30min$HARV,
-                                               flux.limit = 30, 
-                                               ustar.filter = 0.25, 
-                                               H.filter.list = HARV_H_FILTER,
-                                               FG_sd.limit = 2,
-                                               diff.limit = 1) 
-SITES_MBR_30min_FILTER$KONZ <- filter.MBR.CO2.FC( df = SITES_MBR_30min$KONZ,
-                                               flux.limit = 30, 
-                                               ustar.filter = 0.25, 
-                                               H.filter.list = KONZ_H_FILTER,
-                                               FG_sd.limit = 2,
-                                               diff.limit = 1) 
-SITES_MBR_30min_FILTER$JORN <- filter.MBR.CO2.FC( df = SITES_MBR_30min$JORN,
-                                               flux.limit = 30, 
-                                               ustar.filter = 0.25, 
-                                               H.filter.list = JORN_H_FILTER,
-                                               FG_sd.limit = 2,
-                                               diff.limit = 1) 
+SITES_AE_30min_FILTER <- EC.filter.AEWP ( site.tibble = SITES_AE_30min,
+                 flux.limit = 50, 
+                 ustar.filter= 0.3, 
+                 FG_sd.limit = 3,
+                 diff.limit = 10)
 
-# WP
-SITES_WP_30min_FILTER <- list()
-SITES_WP_30min_FILTER$GUAN <- filter.AEWP( df =SITES_WP_30min$GUAN, 
-                                           flux.limit=30, 
-                                           ustar.filter=0.25, 
-                                           H.filter.list = GUAN_H_FILTER, 
-                                           diff.limit = 1,
-                                           flux.sd.limit=3) 
-
-SITES_WP_30min_FILTER$HARV <- filter.AEWP(df = SITES_WP_30min$HARV, 
-                                          flux.limit=30, 
-                                          ustar=0.25,
-                                          H.filter.list = HARV_H_FILTER, 
-                                          diff.limit = 1,
-                                          flux.sd.limit=3)
-
-SITES_WP_30min_FILTER$KONZ <- filter.AEWP(df = SITES_WP_30min$KONZ, 
-                                          flux.limit=30, 
-                                          ustar=0.25, 
-                                          H.filter.list = KONZ_H_FILTER, 
-                                          diff.limit = 1,
-                                          flux.sd.limit=3) 
-
-SITES_WP_30min_FILTER$JORN <- filter.AEWP(df = SITES_WP_30min$JORN, 
-                                          flux.limit=30, 
-                                          ustar=0.25, 
-                                          H.filter.list = JORN_H_FILTER, 
-                                          diff.limit = 1,
-                                          flux.sd.limit=3)
-
-# AE
-SITES_AE_30min_FILTER <- list()
-SITES_AE_30min_FILTER$GUAN <- filter.AEWP(df = SITES_AE_30min$GUAN, 
-                                          flux.limit=30, 
-                                          ustar.filter=0.25, 
-                                          H.filter.list = GUAN_H_FILTER, 
-                                          diff.limit = 1,
-                                          flux.sd.limit=3) 
-SITES_AE_30min_FILTER$HARV <- filter.AEWP(df = SITES_AE_30min$HARV, 
-                                          flux.limit=30, 
-                                          ustar.filter=0.25, 
-                                          H.filter.list = HARV_H_FILTER, 
-                                          diff.limit = 1,
-                                          flux.sd.limit=3)
-SITES_AE_30min_FILTER$KONZ <- filter.AEWP(df = SITES_AE_30min$KONZ, 
-                                          flux.limit=30, 
-                                          ustar.filter=0.25, 
-                                          H.filter.list = KONZ_H_FILTER, 
-                                          diff.limit = 1,
-                                          flux.sd.limit=3) 
-SITES_AE_30min_FILTER$JORN <- filter.AEWP(df = SITES_AE_30min$JORN, 
-                                          flux.limit=30, 
-                                          ustar=0.25, 
-                                          H.filter.list = JORN_H_FILTER, 
-                                          diff.limit = 1,
-                                          flux.sd.limit=3)
-
-
+SITES_WP_30min_FILTER <- EC.filter.AEWP ( site.tibble = SITES_WP_30min,
+                                          flux.limit = 50, 
+                                          ustar.filter= 0.3, 
+                                          FG_sd.limit = 3,
+                                          diff.limit = 10)
 # I need to perform filtering for AE:
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_One2One.R' )
 
-one2one(MBR.DF=SITES_MBR_30min_FILTER$JORN , 
-        AE.DF = SITES_WP_30min_FILTER$JORN, 
-        WP.DF= SITES_WP_30min_FILTER$JORN)
+dir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/FIGURES'
+setwd(dir)
 
-one2one(MBR.DF=SITES_MBR_30min_FILTER$GUAN , 
-        AE.DF = SITES_WP_30min_FILTER$GUAN, 
-        WP.DF= SITES_WP_30min_FILTER$GUAN )
-
-one2one(MBR.DF=SITES_MBR_30min_FILTER$HARV , 
-        AE.DF = SITES_AE_30min_FILTER$HARV, 
-        WP.DF= SITES_WP_30min_FILTER$HARV )
-
-one2one(MBR.DF=SITES_MBR_30min_FILTER$KONZ , 
-        AE.DF = SITES_AE_30min_FILTER$KONZ, 
-        WP.DF= SITES_WP_30min_FILTER$KONZ )
-
-# example of how to fit for sites:
-one2one.parms.co2(MBR.DF=SITES_MBR_30min$JORN , 
-                  AE.DF = SITES_WP_30min$JORN, 
-                  WP.DF= SITES_WP_30min$JORN) %>% mutate( Site = 'JORN')
-
+sites <- names( SITES_MBR_30min)
+for ( i in sites){
+  print(i)
+  
+  plot.it <- one2one.plots.co2( MBR.DF = MBR.tibble[i] , 
+                                AE.DF = AE.tibble[i], 
+                                WP.DF = WP.tibble[i]) 
+  
+  plot.it 
+  setwd(dir)
+  png(paste("One2One_", i,".png", sep=""), width=6, 
+              height=5, units="in", res=1200)
+          plot.it
+          dev.off()
+          
+   print("done")       
+}
 
 # Fit Diurnal for that month:
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_DIURNAL.R' )
+
 SITES_MBR_30min_FILTER <- TIME.MBR(df.list= SITES_MBR_30min_FILTER) 
 SITES_WP_30min_FILTER  <- TIME(df.list= SITES_WP_30min_FILTER)
 SITES_AE_30min_FILTER  <- TIME(df.list= SITES_AE_30min_FILTER)
