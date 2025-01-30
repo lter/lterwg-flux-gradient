@@ -59,18 +59,9 @@ for( i in 1:length(dir)){
   rm(attr.df)
 }
 
-GUAN_H_FILTER <- SITES_AE_30min$GUAN$dLevelsAminusB %>% unique
-HARV_H_FILTER <- SITES_AE_30min$HARV$dLevelsAminusB %>% unique
-JORN_H_FILTER <- SITES_AE_30min$JORN$dLevelsAminusB %>% unique
-KONZ_H_FILTER <- SITES_AE_30min$KONZ$dLevelsAminusB %>% unique
-
 # Application of Flitering Functions: ####
 
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_Filter_FG.R' )
-
-# Adjust Heights in the file:
-
-
 
 # Need to add in filter function by EC and add the SD of the gradient flux. 
 
@@ -95,22 +86,21 @@ SITES_WP_30min_FILTER <- EC.filter.AEWP ( site.tibble = SITES_WP_30min,
 # I need to perform filtering for AE:
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_One2One.R' )
 
-dir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/FIGURES'
-setwd(dir)
-
-sites <- names( SITES_MBR_30min)
+sites <- names( SITES_MBR_30min_FILTER)
 for ( i in sites){
   print(i)
   
-  plot.it <- one2one.plots.co2( MBR.DF = MBR.tibble[i] , 
-                                AE.DF = AE.tibble[i], 
-                                WP.DF = WP.tibble[i]) 
+  try(plot.it <- one2one.plots.co2( MBR.DF = SITES_MBR_30min_FILTER[i] , 
+                                AE.DF = SITES_AE_30min_FILTER[i], 
+                                WP.DF = SITES_WP_30min_FILTER[i]) , silent = T)
+  print("Ready to plot") 
+ 
+  print(plot.it)
   
-  plot.it 
   setwd(dir)
   png(paste("One2One_", i,".png", sep=""), width=6, 
               height=5, units="in", res=1200)
-          plot.it
+          print(plot.it)
           dev.off()
           
    print("done")       
@@ -119,68 +109,98 @@ for ( i in sites){
 # Fit Diurnal for that month:
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_DIURNAL.R' )
 
+
 SITES_MBR_30min_FILTER <- TIME.MBR(df.list= SITES_MBR_30min_FILTER) 
-SITES_WP_30min_FILTER  <- TIME(df.list= SITES_WP_30min_FILTER)
-SITES_AE_30min_FILTER  <- TIME(df.list= SITES_AE_30min_FILTER)
+SITES_WP_30min_FILTER  <- TIME.AEWP(df.list= SITES_WP_30min_FILTER)
+SITES_AE_30min_FILTER  <- TIME.AEWP(df.list= SITES_AE_30min_FILTER)
 
 
-# Warning on this!!!!
-Diurnal <- list()
-Diurnal$HARV$MBR <- DIURNAL.COMPILE( dataframe=  SITES_MBR_30min_FILTER$HARV,
-                                FG_flux = 'FCO2_MBR_H2Otrace_mean' , 
-                                EC_flux = 'FC_turb_interp_CO2')
+# Calculate Diurnal Patterns by Year-month:
+Diurnal.MBR <- DIURNAL.COMPILE.Sites( FG.tibble =  SITES_MBR_30min_FILTER, 
+                               FG_flux = 'FCO2_MBR_H2Otrace_mean', 
+                               EC_flux = 'FC_turb_interp_CO2')
 
+Diurnal.WP <- DIURNAL.COMPILE.Sites( FG.tibble =  SITES_WP_30min_FILTER, 
+                               FG_flux = 'FG_mean', 
+                               EC_flux = 'FC_turb_interp')
 
-Diurnal$HARV$WP <- DIURNAL.COMPILE( dataframe=  SITES_WP_30min_FILTER$HARV %>% filter(gas == 'CO2'),
+Diurnal.AE <- DIURNAL.COMPILE.Sites( FG.tibble =  SITES_AE_30min_FILTER, 
                                      FG_flux = 'FG_mean', 
-                                    EC_flux = 'FC_turb_interp')
+                                     EC_flux = 'FC_turb_interp')
 
-Diurnal$HARV$AE <- DIURNAL.COMPILE( dataframe=  SITES_AE_30min_FILTER$HARV %>% filter(gas == 'CO2'),
-                                    FG_flux = 'FG_mean', 
-                                    EC_flux = 'FC_turb_interp')
+# DIURNAL PLOTS:
+for ( i in sites){
+ 
+  df.MBR <-  Diurnal.MBR[i] %>% as.data.frame
+  names( df.MBR ) <- substring( names(df.MBR ), 6)
+  
+  df.AE <-  Diurnal.AE[i] %>% as.data.frame
+  names( df.AE ) <- substring( names(df.AE ), 6)
+  
+  df.WP <-  Diurnal.WP[i] %>% as.data.frame
+  names( df.WP ) <- substring( names(df.WP ), 6)
+  
+  
+  p1 <- ggplot( data = df.MBR) + stat_smooth(aes(x = Hour , y = FG), col="black") + stat_smooth(aes(x = Hour , y = EC), col="black", linetype="dashed") + theme_bw() + ylab("MBR") +  facet_wrap(~TowerH, ncol = length(unique(df.MBR$TowerH)) ) 
+  
+  p2 <- ggplot( data = df.AE) + stat_smooth(aes(x = Hour , y = FG), col="black") + stat_smooth(aes(x = Hour , y = EC), col="black", linetype="dashed") + theme_bw() + ylab("AE") +  facet_wrap(~TowerH, ncol = length(unique(df.AE$TowerH)) )
+  
+  p3 <-ggplot( data = df.WP) + stat_smooth(aes(x = Hour , y = FG), col="black") + stat_smooth(aes(x = Hour , y = EC), col="black", linetype="dashed") + theme_bw() + ylab("WP") +  facet_wrap(~TowerH, ncol = length(unique(df.WP$TowerH)) )
+  
+  print(ggarrange( p1, p2, p3, nrow=3))
+  
+  setwd(dir)
+  png(paste("Diurnal_", i,".png", sep=""), width=6, 
+      height=5, units="in", res=1200)
+  print(ggarrange( p1, p2, p3, nrow=3))
+  dev.off()
+  
+  print("done")       
+
+}
+
+# DIURNAL DIFF PLOTS:
+
+diurnal.summary <- Diurnal.Summary(diurnal.tibble = Diurnal.MBR, TYP='MBR' ) %>% rbind(Diurnal.Summary(diurnal.tibble = Diurnal.AE, TYP='AE' ) ) %>% rbind(Diurnal.Summary(diurnal.tibble = Diurnal.WP, TYP='WP' ) )  
+
+# Adjust the order of type:
+
+diurnal.summary$Type <- factor( diurnal.summary$Type, levels= c('MBR', 'AE', 'WP'))
+
+for ( i in sites){
+  
+p1 <- diurnal.summary %>% filter( Site == i) %>%  ggplot( ) + geom_col( aes( y =DIFF.mean, x = TowerH)) + ylab('Diurnal Difference') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )
+  
+ 
+  print(ggarrange( p1, nrow=1))
+  
+  setwd(dir)
+  png(paste("Diurnal_DIFF_", i,".png", sep=""), width=4, 
+      height=4, units="in", res=1200)
+  print(ggarrange( p1, nrow=1))
+  dev.off()
+
+  print("done")       
+  
+}
 
 
-Diurnal$GUAN$MBR <- DIURNAL.COMPILE( dataframe=  SITES_MBR_30min_FILTER$GUAN,
-                                     FG_flux = 'FCO2_MBR_H2Otrace_mean' , 
-                                     EC_flux = 'FC_turb_interp_CO2')
+p1 <- diurnal.summary %>% filter( Site == 'HARV' ) %>%  ggplot( ) + geom_col( aes( y =DIFF.mean, x = TowerH)) + ylab('Diurnal Difference') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )
 
-test <- SITES_MBR_30min_FILTER$GUAN %>% group_by(YearMon, TowerH, Hour) %>% tally( FCO2_MBR_H2Otrace_mean, FC_turb_interp_CO2) 
-test %>% summary
-#EXAMPLE:
+p2 <- diurnal.summary %>% filter( Site == 'KONZ' ) %>%  ggplot( ) + geom_col( aes( y =DIFF.mean, x = TowerH)) + ylab('Diurnal Difference') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )
 
-Diurnal$GUAN$MBR <- Diurnal$GUAN$MBR %>% mutate( DIFF = FG-EC)
-ggplot( data = Diurnal$GUAN$MBR %>% filter(YearMon == '2023-07', TowerH == '5_3') ) + stat_smooth(aes(x = Hour , y = FG)) + stat_smooth(aes(x = Hour , y = EC), col="red") + stat_smooth(aes(x = Hour , y = DIFF), col="green") 
+p3 <- diurnal.summary %>% filter( Site == 'GUAN' ) %>%  ggplot( ) + geom_col( aes( y =DIFF.mean, x = TowerH)) + ylab('Diurnal Difference') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )
 
-library(ggpubr)
-ggarrange( 
-ggplot( data = SITES_MBR_30min$GUAN %>% filter(YearMon == '2023-07', TowerH == '5_3') ) + stat_smooth(aes(x = Hour , y = FG)) + stat_smooth( aes(x = Hour , y = FC_turb_interp_CO2 ), col="red") + ylab("MBR") ,
-
-ggplot( data = SITES_WP_30min$GUAN %>% filter(YearMon == '2023-07', TowerH == '5_3') ) + stat_smooth(aes(x = Hour , y = FG_mean)) + stat_smooth( aes(x = Hour , y = FC_turb_interp ), col="red") + ylab("WP") ,
-
-ggplot( data = SITES_AE_30min$GUAN %>% filter(YearMon == '2023-07', TowerH == '5_3') ) + stat_smooth(aes(x = Hour , y = FG_mean)) + stat_smooth( aes(x = Hour , y = FC_turb_interp ), col="red") + ylab("AE") ,
-ncol=1, nrow=3)
-
-MBR$ustar_interp_CO2 %>%  hist
-MBR$dConc_CO2
-MBR$dConc_pvalue_CO2 %>% hist(n=100)
-MBR$FC_nee_interp_CO2
-MBR$L_obukhov_CO2 %>% hist(n=100)
-MBR$Stability_100 %>% unique
-MBR$dLevelsAminusB_CO2
-MBR$diffTowerPosition_CO2
-MBR$FC_turb_interp_H2O
+p4 <- diurnal.summary %>% filter( Site == 'JORN' ) %>%  ggplot( ) + geom_col( aes( y =DIFF.mean, x = TowerH)) + ylab('Diurnal Difference') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )
 
 
-MBR.sub$diff_H20 <- 
-MBR.sub <- MBR %>% filter(dConc_pvalue_H2O <= 0.01, 
-                          FH2O_MBR_CO2trace_mean < 60 & FH2O_MBR_CO2trace_mean > -60, ustar_interp_CO2 > 0.25)
+png("Diurnal_Diff_sites.png", width=8, 
+    height=8, units="in", res=1200)
+print(ggarrange( p1,p2, p3, p4, nrow=2,ncol=2, labels=c("a.", "b.", "c.", "d")))
+dev.off()
 
-MBR.sub %>% ggplot( ) + geom_point( aes(x = FC_turb_interp_H2O, y = FH2O_MBR_CO2trace_mean ) ) + facet_wrap(~dLevelsAminusB_CO2)
+# Carbon Exchange PARMS: 
 
 
 
 
-# Define Diurnal expectation based on EC data and measure the Diurnal at each height:
-
-MBR %>% filter(dConc_pvalue_H2O <= 0.05, 
-               FCH4_MBR_H2Otrace_mean < 60 & FCH4_MBR_H2Otrace_mean > -60) %>% select( dConc_pvalue_H2O , FCH4_MBR_H2Otrace_mean) %>% summary

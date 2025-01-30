@@ -44,7 +44,7 @@ p.3 <- ggplot(data = AE.DF  ,aes(x = FC_nee_interp, y = FG_mean ))  + stat_smoot
   geom_abline(intercept = 0, slope = 1, col = 'grey50',linetype="dashed") + 
   facet_wrap(~ dLevelsAminusB, ncol = length(unique(AE.DF$dLevelsAminusB ))) + ylab("AE")+ xlim(-30, 30)+ ylim(-30, 30) + xlab("EC")+theme_bw()
 
-final.plot <- ggpubr::ggarrange(p.1, p.2, p.3,
+final.plot <- ggpubr::ggarrange(p.1, p.3, p.2,
                   ncol=1, nrow=3)
 
 return(final.plot )
