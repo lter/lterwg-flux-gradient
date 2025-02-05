@@ -59,7 +59,6 @@ DIURNAL <- function( dataframe, flux){
   return( Final.data)
 }
 
-
 DIURNAL.COMPILE <- function( dataframe, FG_flux, EC_flux){
   
   FG.DIURNAL <- try(DIURNAL( dataframe = dataframe,

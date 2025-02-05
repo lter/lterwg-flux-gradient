@@ -1,6 +1,4 @@
 
-# Filtering Functions ####
-
 filter.MBR.CO2 <- function( df, flux.limit, 
                             ustar.filter,
                             diff.limit,
@@ -9,8 +7,7 @@ filter.MBR.CO2 <- function( df, flux.limit,
   names(df) <- substring( names(df), 6)
   H.filter.list = df$dLevelsAminusB_CO2 %>% unique 
 
-  df.new <- df %>% mutate(diff.flux = abs(FCO2_MBR_H2Otrace_mean - FC_nee_interp_CO2)  ) %>% 
-    filter(dConc_pvalue_CO2 <= 0.1, 
+  df.new <- df %>% mutate(diff.flux = abs(FCO2_MBR_H2Otrace_mean - FC_nee_interp_CO2)  ) %>% filter(dConc_pvalue_CO2 <= 0.1, 
            FCO2_MBR_H2Otrace_mean < flux.limit & FCO2_MBR_H2Otrace_mean > - flux.limit, 
            ustar_interp_CO2 >  ustar.filter,
            dLevelsAminusB_CO2  %in% H.filter.list,
@@ -20,7 +17,10 @@ filter.MBR.CO2 <- function( df, flux.limit,
   return(df.new)
 }
 
-filter.AEWP.CO2 <- function( df, flux.limit, ustar.filter, diff.limit, FG_sd.limit){
+filter.AEWP.CO2 <- function( df, flux.limit, 
+                             ustar.filter, 
+                             diff.limit, 
+                             FG_sd.limit){
   df <- as.data.frame(df) 
   names(df) <- substring( names(df), 6)
 
@@ -97,5 +97,3 @@ EC.filter.AEWP <- function( site.tibble,
   
   return(site.tibble_FILTER )  
 }
-
-

@@ -50,8 +50,6 @@ final.plot <- ggpubr::ggarrange(p.1, p.3, p.2,
 return(final.plot )
 }
 
-# write a function that pulls out the linear model info(R2, LM, RMSE, and stores it in a DF)
-
 linear.parms <- function ( Y, X, DF, TYPE){
   
   model <- lm(data =   DF, DF[,Y] ~ DF[, X])

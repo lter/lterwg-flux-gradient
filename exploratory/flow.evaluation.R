@@ -5,7 +5,6 @@ library(tidyverse)
 library(ggplot2)
 library(ggpubr)
 
-
 # Import data from a  site:
 localdir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/Data'
 
@@ -22,7 +21,6 @@ load( "SITES_MBR_9min.Rdata")
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/functions/flag.all.gas.stability.R' )
 
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/Flow.CrossGradient.R' )
-
 
 for ( i in 1:length(SITES_AE_30min )){
   SITES_WP_9min[[i]] <- flag.all.gas.stability(flux.df = SITES_WP_9min[[i]], L='L_obukhov')
@@ -87,6 +85,9 @@ SITES_WP_30min_FILTER <- EC.filter.AEWP ( site.tibble = SITES_WP_30min,
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_One2One.R' )
 
 sites <- names( SITES_MBR_30min_FILTER)
+
+dir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/FIGURES'
+
 for ( i in sites){
   print(i)
   
@@ -199,8 +200,175 @@ png("Diurnal_Diff_sites.png", width=8,
 print(ggarrange( p1,p2, p3, p4, nrow=2,ncol=2, labels=c("a.", "b.", "c.", "d")))
 dev.off()
 
-# Carbon Exchange PARMS: 
+# Carbon Exchange PARMS: ####
+source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_LRC_Parms.R' )
 
 
+SITES_MBR_30min_CPARMS_EC <- PARMS_Sites( sites.tibble = SITES_MBR_30min_FILTER, 
+                             iterations = 4000, 
+                             priors.lrc= priors.lrc, 
+                             priors.trc= priors.trc, 
+                             idx = 'YearMon',
+                             PAR = 'PAR_CO2',
+                             nee = 'FC_nee_interp_CO2',
+                             TA = 'Tair1_CO2')
+
+SITES_MBR_30min_CPARMS_FG <- PARMS_Sites( sites.tibble = SITES_MBR_30min_FILTER, 
+                                          iterations = 4000, 
+                                          priors.lrc= priors.lrc, 
+                                          priors.trc= priors.trc, 
+                                          idx = 'YearMon',
+                                          PAR = 'PAR_CO2',
+                                          nee = 'FCH4_MBR_CO2trace_mean' ,
+                                          TA = 'Tair1_CO2')
+
+SITES_AE_30min_CPARMS_EC <- PARMS_Sites( sites.tibble = SITES_AE_30min_FILTER, 
+                                         iterations = 4000, 
+                                         priors.lrc= priors.lrc, 
+                                         priors.trc= priors.trc,
+                                         idx = 'YearMon',
+                                         PAR = 'PAR',
+                                         TA='Tair1',
+                                         nee = 'FG_mean' )
 
 
+SITES_AE_30min_CPARMS_FG <- PARMS_Sites( sites.tibble = SITES_AE_30min_FILTER, 
+                                         iterations = 4000, 
+                                         priors.lrc= priors.lrc, 
+                                         priors.trc= priors.trc,
+                                         idx = 'YearMon',
+                                         PAR = 'PAR',
+                                         TA='Tair1',
+                                         nee = 'FG_mean' )
+
+SITES_WP_30min_CPARMS_EC <- PARMS_Sites( sites.tibble = SITES_WP_30min_FILTER, 
+                                         iterations = 4000, 
+                                         priors.lrc= priors.lrc, 
+                                         priors.trc= priors.trc,
+                                         idx = 'YearMon',
+                                         PAR = 'PAR',
+                                         TA='Tair1',
+                                         nee = 'FG_mean' )
+
+
+SITES_WP_30min_CPARMS_FG <- PARMS_Sites( sites.tibble = SITES_WP_30min_FILTER, 
+                                         iterations = 4000, 
+                                         priors.lrc= priors.lrc, 
+                                         priors.trc= priors.trc,
+                                         idx = 'YearMon',
+                                         PAR = 'PAR',
+                                         TA='Tair1',
+                                         nee = 'FG_mean' )
+save( SITES_MBR_30min_CPARMS_FG ,
+      SITES_MBR_30min_CPARMS_EC ,
+      SITES_AE_30min_CPARMS_FG,
+      SITES_AE_30min_CPARMS_EC,
+      SITES_WP_30min_CPARMS_EC, 
+      SITES_WP_30min_CPARMS_FG , file= '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/Data/Evaluation/CarbonParms.Rdata')
+
+# Calculate parms and compare the distribution of year_mon parms for the different approaches. 
+
+merge.CParms <- function( tibble1, tibble2,  TYP1, TYP2){
+  
+  tibble <- list()
+  for( i in names(tibble1)){
+    print(i)
+    
+    df.1 <- tibble1[i] %>% as.data.frame()
+    names( df.1) <- substring( names(  df.1), 6)
+    
+    df.1n <-  df.1 %>% mutate( TYP = TYP1)
+    
+    
+    df.2 <- tibble2[i] %>% as.data.frame()
+    names( df.2) <- substring( names(  df.2), 6)
+    
+    df.2n <-  df.2 %>% mutate( TYP = TYP2)
+    
+    new.df <- rbind( df.1n, df.2n)
+    
+    tibble[i] <- list(  new.df)
+  }
+  
+  return(tibble)
+}
+
+MBR.CPARMS <- merge.CParms(tibble1 = SITES_MBR_30min_CPARMS_EC,
+                           tibble2 = SITES_MBR_30min_CPARMS_FG,
+                          TYP1 = 'EC' , TYP2 = 'FG')
+
+AE.CPARMS <- merge.CParms(tibble1 = SITES_AE_30min_CPARMS_EC,
+                          tibble2 = SITES_AE_30min_CPARMS_FG,
+                           TYP1 = 'EC' , TYP2 = 'FG')
+
+
+WP.CPARMS <- merge.CParms(tibble1 = SITES_WP_30min_CPARMS_EC,
+                          tibble2 = SITES_WP_30min_CPARMS_FG,
+                          TYP1 = 'EC' , TYP2 = 'FG')
+
+
+setwd(dir)
+
+png("CarbonExchange_LRC_MBR.png", width=10, 
+    height=8, units="in", res=1200)
+
+ggarrange( 
+ggplot() + geom_violin(data = MBR.CPARMS$HARV , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield")+ ylim(-0.15,0) ,
+ggplot() + geom_violin(data = MBR.CPARMS$KONZ , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield")+ ylim(-0.15,0),
+ggplot() + geom_violin(data = MBR.CPARMS$GUAN , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield") + ylim(-0.15,0),
+ggplot() + geom_violin(data = MBR.CPARMS$JORN , aes( x= TYP, y = a1.mean, col= TowerH)) + ylab("Quantum Yield") + ylim(-0.15,0), 
+
+  ggplot() + geom_violin(data = MBR.CPARMS$HARV , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax")+ ylim(-10,-6) ,
+  ggplot() + geom_violin(data = MBR.CPARMS$KONZ , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax")+ ylim(-10,-6),
+  ggplot() + geom_violin(data = MBR.CPARMS$GUAN , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax") + ylim(-10,-6),
+  ggplot() + geom_violin(data = MBR.CPARMS$JORN , aes( x= TYP, y = ax.mean, col= TowerH)) + ylab("Amax") + ylim(-10,-6), 
+
+  ggplot() + geom_violin(data = MBR.CPARMS$HARV , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco")+ ylim(1.75,2.25) ,
+  ggplot() + geom_violin(data = MBR.CPARMS$KONZ , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco") + ylim(1.75,2.25) ,
+  ggplot() + geom_violin(data = MBR.CPARMS$GUAN , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco") + ylim(1.75,2.25) ,
+  ggplot() + geom_violin(data = MBR.CPARMS$JORN , aes( x= TYP, y = r.mean, col= TowerH)) + ylab("Amax")+ ylim(1.75,2.25) , ncol=4, nrow=3, labels= c("a.", "b." ,"c.", "d", "e.", "f." ,"g.", "h.","i.", "j." ,"k.", "l"))
+
+dev.off()
+
+
+png("CarbonExchange_LRC_AE.png", width=10, 
+    height=8, units="in", res=1200)
+
+ggarrange( 
+  ggplot() + geom_violin(data = AE.CPARMS$HARV , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield") ,
+  ggplot() + geom_violin(data = AE.CPARMS$KONZ , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield")+ ylim(-0.15,0),
+  ggplot() + geom_violin(data = AE.CPARMS$GUAN , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield") + ylim(-0.15,0),
+  ggplot() + geom_violin(data = AE.CPARMS$JORN , aes( x= TYP, y = a1.mean, col= TowerH)) + ylab("Quantum Yield") + ylim(-0.15,0), 
+  
+  ggplot() + geom_violin(data = AE.CPARMS$HARV , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax") ,
+  ggplot() + geom_violin(data = AE.CPARMS$KONZ , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax")+ ylim(-10,-6),
+  ggplot() + geom_violin(data = AE.CPARMS$GUAN , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax") + ylim(-10,-6),
+  ggplot() + geom_violin(data = AE.CPARMS$JORN , aes( x= TYP, y = ax.mean, col= TowerH)) + ylab("Amax") + ylim(-10,-6), 
+  
+  ggplot() + geom_violin(data = AE.CPARMS$HARV , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco") ,
+  ggplot() + geom_violin(data = AE.CPARMS$KONZ , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco") + ylim(1.75,2.25) ,
+  ggplot() + geom_violin(data = AE.CPARMS$GUAN , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco") + ylim(1.75,2.25) ,
+  ggplot() + geom_violin(data = AE.CPARMS$JORN , aes( x= TYP, y = r.mean, col= TowerH)) + ylab("Amax")+ ylim(1.75,2.25) , ncol=4, nrow=3, labels= c("a.", "b." ,"c.", "d", "e.", "f." ,"g.", "h.","i.", "j." ,"k.", "l"))
+
+dev.off()
+
+png("CarbonExchange_LRC_WP.png", width=10, 
+    height=8, units="in", res=1200)
+
+ggarrange( 
+  ggplot() + geom_violin(data = WP.CPARMS$HARV , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield") ,
+  ggplot() + geom_violin(data = WP.CPARMS$KONZ , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield")+ ylim(-0.15,0),
+  ggplot() + geom_violin(data = WP.CPARMS$GUAN , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield") + ylim(-0.15,0),
+  ggplot() + geom_violin(data = WP.CPARMS$JORN , aes( x= TYP, y = a1.mean, col= TowerH)) + ylab("Quantum Yield") + ylim(-0.15,0), 
+  
+  ggplot() + geom_violin(data = WP.CPARMS$HARV , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax") ,
+  ggplot() + geom_violin(data = WP.CPARMS$KONZ , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax")+ ylim(-10,-6),
+  ggplot() + geom_violin(data = WP.CPARMS$GUAN , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax") + ylim(-10,-6),
+  ggplot() + geom_violin(data = WP.CPARMS$JORN , aes( x= TYP, y = ax.mean, col= TowerH)) + ylab("Amax") + ylim(-10,-6), 
+  
+  ggplot() + geom_violin(data = WP.CPARMS$HARV , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco") ,
+  ggplot() + geom_violin(data = WP.CPARMS$KONZ , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco") + ylim(1.75,2.25) ,
+  ggplot() + geom_violin(data = WP.CPARMS$GUAN , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco") + ylim(1.75,2.25) ,
+  ggplot() + geom_violin(data = WP.CPARMS$JORN , aes( x= TYP, y = r.mean, col= TowerH)) + ylab("Amax")+ ylim(1.75,2.25) , ncol=4, nrow=3, labels= c("a.", "b." ,"c.", "d", "e.", "f." ,"g.", "h.","i.", "j." ,"k.", "l"))
+
+dev.off()
