@@ -7,9 +7,9 @@ rm(list=ls())
 email <- 'csturtevant@battelleecology.org'
 #email <- 'jaclyn_matthes@g.harvard.edu'
 #email <- 'kyle.delwiche@gmail.com'
-site <- 'GUAN' #'KONZ' BONA CPER GUAN HARV JORN NIWO TOOL
-# PairLvl <- c('6_5','6_4','6_3','6_2','6_1','5_4','5_3','5_2','5_1','4_3','4_2','4_1','3_2','3_1','2_1')
-PairLvl <- c('5_4','5_3','4_3')
+site <- 'BONA' #'KONZ' BONA CPER GUAN HARV JORN NIWO TOOL
+PairLvl <- c('6_5','6_4','6_3','6_2','6_1','5_4','5_3','5_2','5_1','4_3','4_2','4_1','3_2','3_1','2_1')
+# PairLvl <- c('4_3','5_3','5_4','6_3','6_4','6_5')
 
 Stat <- c('mean','median')[2] # Which statistic for the diel bin
 Ucrt <- c('sd','var','mad','se')[4] # Which uncertainty measure for each diel bin
@@ -17,8 +17,8 @@ NumSampMin <- 3 # min number of samples to compute statistics for each diel bin
 sdQf <- 2 # how many standard deviations form the mean should be used to determine if the tracer flux difference is not significantly different than zero (1 ~ 66% confidence interval, 2 ~ 95% confidence, 3 ~ 99% confidence)
 
 # Choose a period over which to compute the diel averages
-TimeBgn <- as.POSIXct('2021-01-01',tz='GMT')
-TimeEnd <- as.POSIXct('2023-10-01',tz='GMT')
+TimeBgn <- as.POSIXct('2022-04-01',tz='GMT')
+TimeEnd <- as.POSIXct('2022-11-01',tz='GMT')
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Requires packages: fs, googledrive
@@ -97,9 +97,11 @@ flux_meas <- MBRflux_align$FC_turb_interp_H2O
 dConc <- MBRflux_align$dConc_CO2
 dConc_mean <- MBRflux_align$dConc_CO2_mean
 dConc_sd <- MBRflux_align$dConc_CO2_sd
+dConc_pvalue <- MBRflux_align$dConc_pvalue_CO2
 dConc_tracer <- MBRflux_align$dConc_H2O
 dConc_tracer_mean <- MBRflux_align$dConc_H2O_mean
 dConc_tracer_sd <- MBRflux_align$dConc_H2O_sd
+dConc_pvalue_tracer <- MBRflux_align$dConc_pvalue_H2O
 
 # Plot the 1:1
 fig <- plot_ly(x = flux_meas, y = flux_pred, color=tower_pair, type = 'scatter', mode = 'markers') %>%
@@ -149,37 +151,53 @@ fig <- plot_ly(x = flux_meas, y = flux_pred, color=tower_pair, type = 'scatter',
 print(fig)
 
 # Plot the residuals against some likely culprits
-fig <- plot_ly(x=flux_meas, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
-  layout(title = 'FCO2 residual vs flux magnitude',
-         xaxis = list(title = 'Measured flux magnitude'), 
-         yaxis = list(title = 'FCO2 residual')
-  )
-print(fig)
-fig <- plot_ly(x=flux_pred, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
-  layout(title = 'FCO2 residual vs flux magnitude',
-         xaxis = list(title = 'Predicted flux magnitude'), 
-         yaxis = list(title = 'FCO2 residual')
-  )
-print(fig)
+if(FALSE){
+    fig <- plot_ly(x=flux_meas, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
+    layout(title = 'FCO2 residual vs flux magnitude',
+           xaxis = list(title = 'Measured flux magnitude'), 
+           yaxis = list(title = 'FCO2 residual')
+    )
+  print(fig)
+  fig <- plot_ly(x=flux_pred, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
+    layout(title = 'FCO2 residual vs flux magnitude',
+           xaxis = list(title = 'Predicted flux magnitude'), 
+           yaxis = list(title = 'FCO2 residual')
+    )
+  print(fig)
+}
 fig <- plot_ly(x=MBRflux_align$zoL, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
   layout(title = 'FCO2 residual vs stability',
          xaxis = list(title = 'z/L'), 
          yaxis = list(title = 'FCO2 residual')
   )
 print(fig)
-fig <- plot_ly(x=dConc_tracer, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
-  layout(title = 'FCO2 residual vs H2O (tracer) concentation difference',
-         xaxis = list(title = 'dconc_H2O'), 
-         yaxis = list(title = 'FCO2 residual')
-  )
-print(fig)
-fig <- plot_ly(x=dConc, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
-  layout(title = 'FCO2 residual vs CO2 (target) concentation difference',
-         xaxis = list(title = 'dconc_CO2'), 
-         yaxis = list(title = 'FCO2 residual')
-  )
-print(fig)
-
+if(FALSE){
+  fig <- plot_ly(x=dConc_pvalue, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
+    layout(title = 'FCO2 residual vs stat. significance of target gradient',
+           xaxis = list(title = 'p-value of conc. diff for target'), 
+           yaxis = list(title = 'FCO2 residual')
+    )
+  print(fig)
+  fig <- plot_ly(x=dConc_pvalue_tracer, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
+    layout(title = 'FCO2 residual vs stat. significance of tracer gradient',
+           xaxis = list(title = 'p-value of conc. diff for tracer'), 
+           yaxis = list(title = 'FCO2 residual')
+    )
+}
+if(FALSE){
+  fig <- plot_ly(x=dConc_tracer, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
+    layout(title = 'FCO2 residual vs H2O (tracer) concentation difference',
+           xaxis = list(title = 'dconc_H2O'), 
+           yaxis = list(title = 'FCO2 residual')
+    )
+  print(fig)
+  fig <- plot_ly(x=dConc, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
+    layout(title = 'FCO2 residual vs CO2 (target) concentation difference',
+           xaxis = list(title = 'dconc_CO2'), 
+           yaxis = list(title = 'FCO2 residual')
+    )
+  print(fig)
+}
 
 
 # Compute Diel Patterns
@@ -201,9 +219,11 @@ flux_meas <- MBRflux_align$FH2O_interp_CO2
 dConc <- MBRflux_align$dConc_H2O
 dConc_mean <- MBRflux_align$dConc_H2O_mean
 dConc_sd <- MBRflux_align$dConc_H2O_sd
+dConc_pvalue <- MBRflux_align$dConc_pvalue_H2O
 dConc_tracer <- MBRflux_align$dConc_CO2
 dConc_tracer_mean <- MBRflux_align$dConc_CO2_mean
 dConc_tracer_sd <- MBRflux_align$dConc_CO2_sd
+dConc_pvalue_tracer <- MBRflux_align$dConc_pvalue_CO2
 
 # Plot the 1:1
 fig <- plot_ly(x = flux_meas, y = flux_pred, color=tower_pair, type = 'scatter', mode = 'markers') %>%
@@ -253,38 +273,59 @@ fig <- plot_ly(x = flux_meas, y = flux_pred, color=tower_pair, type = 'scatter',
 print(fig)
 
 # Plot the residuals against some likely culprits
-fig <- plot_ly(x=flux_meas, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
-  layout(title = 'FH2O residual vs flux magnitude',
-         xaxis = list(title = 'Measured flux magnitude'), 
-         yaxis = list(title = 'FH2O residual')
-  )
-print(fig)
-fig <- plot_ly(x=flux_pred, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
-  layout(title = 'FH2O residual vs flux magnitude',
-         xaxis = list(title = 'Predicted flux magnitude'), 
-         yaxis = list(title = 'FH2O residual')
-  )
-print(fig)
+if(FALSE){
+  fig <- plot_ly(x=flux_meas, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
+    layout(title = 'FH2O residual vs flux magnitude',
+           xaxis = list(title = 'Measured flux magnitude'), 
+           yaxis = list(title = 'FH2O residual')
+    )
+  print(fig)
+  fig <- plot_ly(x=flux_pred, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
+    layout(title = 'FH2O residual vs flux magnitude',
+           xaxis = list(title = 'Predicted flux magnitude'), 
+           yaxis = list(title = 'FH2O residual')
+    )
+  print(fig)
+}
 fig <- plot_ly(x=MBRflux_align$zoL, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
   layout(title = 'FH2O residual vs stability',
          xaxis = list(title = 'z/L'), 
          yaxis = list(title = 'FH2O residual')
   )
 print(fig)
-fig <- plot_ly(x=dConc_tracer, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
-  layout(title = 'FH2O residual vs CO2 (tracer) concentation difference',
-         xaxis = list(title = 'Tracer concentration difference'), 
-         yaxis = list(title = 'FH2O residual')
-  )
-print(fig)
-fig <- plot_ly(x=dConc, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
-  layout(title = 'FH2O residual vs H2O (target) concentation difference',
-         xaxis = list(title = 'Target concentration difference'), 
-         yaxis = list(title = 'FH2O residual')
-  )
-print(fig)
+if(FALSE){
+  fig <- plot_ly(x=dConc_pvalue, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
+    layout(title = 'FH2O residual vs stat. significance of target gradient',
+           xaxis = list(title = 'p-value of conc. diff for target'), 
+           yaxis = list(title = 'FH2O residual')
+    )
+  print(fig)
+  fig <- plot_ly(x=dConc_pvalue_tracer, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
+    layout(title = 'FH2O residual vs stat. significance of tracer gradient',
+           xaxis = list(title = 'p-value of conc. diff for tracer'), 
+           yaxis = list(title = 'FH2O residual')
+    )
+  print(fig)
+}
+
+if(FALSE){
+  fig <- plot_ly(x=dConc_tracer, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
+    layout(title = 'FH2O residual vs CO2 (tracer) concentation difference',
+           xaxis = list(title = 'Tracer concentration difference'), 
+           yaxis = list(title = 'FH2O residual')
+    )
+  print(fig)
+  fig <- plot_ly(x=dConc, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
+    layout(title = 'FH2O residual vs H2O (target) concentation difference',
+           xaxis = list(title = 'Target concentration difference'), 
+           yaxis = list(title = 'FH2O residual')
+    )
+  print(fig)
+}
 
 # Compute Diel Patterns
+# First filter the data according to the statistical significance threshold
+setSig <- sdQf
 flux_meas_diel <- calculate.diel.ptrn(time=time,data=flux_meas,Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=TRUE,NumSampMin=NumSampMin,TitlPlot=paste0(site,' FH2O Diel Pattern (EC measured flux)'))
 flux_pred_diel <- calculate.diel.ptrn(time=time,data=flux_pred,Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=TRUE,NumSampMin=NumSampMin,TitlPlot=paste0(site,' FH2O Diel Pattern (MBR predicted flux)'))
 if (Stat == 'mean'){
@@ -298,6 +339,8 @@ if (Stat == 'mean'){
 
 
 # CH4 flux computed with H2O tracer
+plotCH4 <- FALSE # Produce plots?
+
 flux_pred <- MBRflux_align$FCH4_MBR_H2Otrace_mean
 dConc <- MBRflux_align$dConc_CH4
 dConc_mean <- MBRflux_align$dConc_CH4_mean
@@ -316,7 +359,7 @@ qf[((dConc-dConc_sd*sdQf) < 0 &
 flux_pred[qf==1] <- NA
 
 # Compute Diel Patterns
-flux_pred_diel <- calculate.diel.ptrn(time=time,data=flux_pred,Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=TRUE,NumSampMin=NumSampMin,TitlPlot=paste0(site,' FCH4 Diel Pattern (MBR predicted flux with H2O tracer)'))
+flux_pred_diel <- calculate.diel.ptrn(time=time,data=flux_pred,Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=plotCH4,NumSampMin=NumSampMin,TitlPlot=paste0(site,' FCH4 Diel Pattern (MBR predicted flux with H2O tracer)'))
 
 
 
@@ -339,4 +382,4 @@ qf[((dConc-dConc_sd*sdQf) < 0 &
 flux_pred[qf==1] <- NA
 
 # Compute Diel Patterns
-flux_pred_diel <- calculate.diel.ptrn(time=time,data=flux_pred,Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=TRUE,NumSampMin=NumSampMin,TitlPlot=paste0(site,' FCH4 Diel Pattern (MBR predicted flux with CO2 tracer)'))
+flux_pred_diel <- calculate.diel.ptrn(time=time,data=flux_pred,Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=plotCH4,NumSampMin=NumSampMin,TitlPlot=paste0(site,' FCH4 Diel Pattern (MBR predicted flux with CO2 tracer)'))
