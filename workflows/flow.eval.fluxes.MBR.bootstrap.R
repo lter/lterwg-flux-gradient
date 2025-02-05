@@ -57,11 +57,11 @@ for(focal_file in fileDnld){
   
 }
 
-  # Load the data 
-  fileIn <- fs::path(dirTmp,paste0(site,'_MBRflux_bootstrap.Rdata'))
-  load(fileIn)
-  fileIn <- fs::path(dirTmp,'data',site,paste0(site,'_attr.Rdata'))
-  load(fileIn)
+# Load the data 
+fileIn <- fs::path(dirTmp,paste0(site,'_MBRflux_bootstrap.RData'))
+load(fileIn)
+fileIn <- fs::path(dirTmp,'data',site,paste0(site,'_attr.Rdata'))
+load(fileIn)
   
 
 # Add Obukhov length
