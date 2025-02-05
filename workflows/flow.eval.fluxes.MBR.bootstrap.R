@@ -7,14 +7,17 @@ rm(list=ls())
 email <- 'csturtevant@battelleecology.org'
 #email <- 'jaclyn_matthes@g.harvard.edu'
 #email <- 'kyle.delwiche@gmail.com'
-site <- 'BONA' #'KONZ' BONA CPER GUAN HARV JORN NIWO TOOL
+site <- 'KONZ' #'KONZ' BONA CPER GUAN HARV JORN NIWO TOOL
 PairLvl <- c('6_5','6_4','6_3','6_2','6_1','5_4','5_3','5_2','5_1','4_3','4_2','4_1','3_2','3_1','2_1')
+# PairLvl <- c('6_5','6_4','6_3','5_4','5_3','4_3')
+# PairLvl <- c('5_4','5_3','5_2','4_3','4_2','3_2')
 # PairLvl <- c('4_3','5_3','5_4','6_3','6_4','6_5')
 
 Stat <- c('mean','median')[2] # Which statistic for the diel bin
 Ucrt <- c('sd','var','mad','se')[4] # Which uncertainty measure for each diel bin
 NumSampMin <- 3 # min number of samples to compute statistics for each diel bin
-sdQf <- 2 # how many standard deviations form the mean should be used to determine if the tracer flux difference is not significantly different than zero (1 ~ 66% confidence interval, 2 ~ 95% confidence, 3 ~ 99% confidence)
+sdQf <- 0 # how many standard deviations form the mean should be used to determine if the tracer flux difference is not substantially different than zero (1 ~ 66% confidence interval, 2 ~ 95% confidence, 3 ~ 99% confidence)
+pQf <- 1 # Maximum p-value of concentration difference (testing statistical difference from zero). This is in addition to the sdQf filter. (A value of 1 includes all values)
 
 # Choose a period over which to compute the diel averages
 TimeBgn <- as.POSIXct('2022-04-01',tz='GMT')
@@ -120,14 +123,20 @@ fig <- plot_ly(x = flux_meas, y = flux_pred, color=tower_pair, type = 'scatter',
          )))
 print(fig)
 
-# Filter for tracer concentration is not significantly different from zero
+# Filter for tracer concentration difference not greater than sdQf standard deviations
 qf <- rep(0,length(time))
 qf[((dConc_tracer-dConc_tracer_sd*sdQf) < 0 & 
   (dConc_tracer+dConc_tracer_sd*sdQf) > 0) ] <- 1
 
-# Filter for target concentration not significantly different from zero
+# Filter for target concentration difference not greater than sdQf standard deviations
 qf[((dConc-dConc_sd*sdQf) < 0 & 
     (dConc+dConc_sd*sdQf) > 0) ] <- 1
+
+# Filter for tracer concentration difference not statistically different from zero
+qf[dConc_pvalue_tracer > pQf] <- 1
+
+# Filter for target concentration difference not statistically different from zero
+qf[dConc_pvalue > pQf] <- 1
 
 flux_meas[qf==1 | is.na(flux_pred)] <- NA
 flux_pred[qf==1 | is.na(flux_meas)] <- NA
@@ -171,6 +180,13 @@ fig <- plot_ly(x=MBRflux_align$zoL, y=flux_resid, color=tower_pair, type = 'scat
          yaxis = list(title = 'FCO2 residual')
   )
 print(fig)
+fig <- plot_ly(x=dConc_tracer/dConc_tracer_sd, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
+  layout(title = 'FCO2 residual vs normalized tracer concentration',
+         xaxis = list(title = 'dConc_tracer/dConc_tracer_sd'), 
+         yaxis = list(title = 'FCO2 residual')
+  )
+print(fig)
+
 if(FALSE){
   fig <- plot_ly(x=dConc_pvalue, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
     layout(title = 'FCO2 residual vs stat. significance of target gradient',
@@ -242,14 +258,20 @@ fig <- plot_ly(x = flux_meas, y = flux_pred, color=tower_pair, type = 'scatter',
          )))
 print(fig)
 
-# Filter for tracer concentration is not significantly different from zero
+# Filter for tracer concentration difference not greater than sdQf standard deviations
 qf <- rep(0,length(time))
 qf[((dConc_tracer-dConc_tracer_sd*sdQf) < 0 & 
-    (dConc_tracer+dConc_tracer_sd*sdQf) > 0) ] <- 1
-#| (sign(dConc_mean_CO2) != sign(flux_meas_CO2))
-# Filter for target concentration not significantly different from zero
+      (dConc_tracer+dConc_tracer_sd*sdQf) > 0) ] <- 1
+
+# Filter for target concentration difference not greater than sdQf standard deviations
 qf[((dConc-dConc_sd*sdQf) < 0 & 
-    (dConc+dConc_sd*sdQf) > 0) ] <- 1
+      (dConc+dConc_sd*sdQf) > 0) ] <- 1
+
+# Filter for tracer concentration difference not statistically different from zero
+qf[dConc_pvalue_tracer > pQf] <- 1
+
+# Filter for target concentration difference not statistically different from zero
+qf[dConc_pvalue > pQf] <- 1
 
 
 flux_meas[qf==1 | is.na(flux_pred)] <- NA
@@ -293,6 +315,13 @@ fig <- plot_ly(x=MBRflux_align$zoL, y=flux_resid, color=tower_pair, type = 'scat
          yaxis = list(title = 'FH2O residual')
   )
 print(fig)
+fig <- plot_ly(x=dConc_tracer/dConc_tracer_sd, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
+  layout(title = 'FH2O residual vs normalized tracer concentration',
+         xaxis = list(title = 'dConc_tracer/dConc_tracer_sd'), 
+         yaxis = list(title = 'FH2O residual')
+  )
+print(fig)
+
 if(FALSE){
   fig <- plot_ly(x=dConc_pvalue, y=flux_resid, color=tower_pair, type = 'scatter', mode = 'markers') %>%
     layout(title = 'FH2O residual vs stat. significance of target gradient',
@@ -324,8 +353,6 @@ if(FALSE){
 }
 
 # Compute Diel Patterns
-# First filter the data according to the statistical significance threshold
-setSig <- sdQf
 flux_meas_diel <- calculate.diel.ptrn(time=time,data=flux_meas,Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=TRUE,NumSampMin=NumSampMin,TitlPlot=paste0(site,' FH2O Diel Pattern (EC measured flux)'))
 flux_pred_diel <- calculate.diel.ptrn(time=time,data=flux_pred,Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=TRUE,NumSampMin=NumSampMin,TitlPlot=paste0(site,' FH2O Diel Pattern (MBR predicted flux)'))
 if (Stat == 'mean'){
@@ -345,17 +372,29 @@ flux_pred <- MBRflux_align$FCH4_MBR_H2Otrace_mean
 dConc <- MBRflux_align$dConc_CH4
 dConc_mean <- MBRflux_align$dConc_CH4_mean
 dConc_sd <- MBRflux_align$dConc_CH4_sd
+dConc_pvalue <- MBRflux_align$dConc_pvalue_CH4
 dConc_tracer <- MBRflux_align$dConc_H2O
 dConc_tracer_mean <- MBRflux_align$dConc_H2O_mean
 dConc_tracer_sd <- MBRflux_align$dConc_H2O_sd
+dConc_pvalue_tracer <- MBRflux_align$dConc_pvalue_H2O
 
-# Filter for tracer concentration is not significantly different from zero
+
+# Filter for tracer concentration difference not greater than sdQf standard deviations
 qf <- rep(0,length(time))
 qf[((dConc_tracer-dConc_tracer_sd*sdQf) < 0 & 
-    (dConc_tracer+dConc_tracer_sd*sdQf) > 0) ] <- 1
-# Filter for target concentration not significantly different from zero
+      (dConc_tracer+dConc_tracer_sd*sdQf) > 0) ] <- 1
+
+# Filter for target concentration difference not greater than sdQf standard deviations
 qf[((dConc-dConc_sd*sdQf) < 0 & 
-    (dConc+dConc_sd*sdQf) > 0) ] <- 1
+      (dConc+dConc_sd*sdQf) > 0) ] <- 1
+
+# Filter for tracer concentration difference not statistically different from zero
+qf[dConc_pvalue_tracer > pQf] <- 1
+
+# Filter for target concentration difference not statistically different from zero
+qf[dConc_pvalue > pQf] <- 1
+
+
 flux_pred[qf==1] <- NA
 
 # Compute Diel Patterns
@@ -368,17 +407,27 @@ flux_pred <- MBRflux_align$FCH4_MBR_CO2trace_mean
 dConc <- MBRflux_align$dConc_CH4
 dConc_mean <- MBRflux_align$dConc_CH4_mean
 dConc_sd <- MBRflux_align$dConc_CH4_sd
+dConc_pvalue <- MBRflux_align$dConc_pvalue_CH4
 dConc_tracer <- MBRflux_align$dConc_CO2
 dConc_tracer_mean <- MBRflux_align$dConc_CO2_mean
 dConc_tracer_sd <- MBRflux_align$dConc_CO2_sd
+dConc_pvalue_tracer <- MBRflux_align$dConc_pvalue_CO2
 
-# Filter for tracer concentration is not significantly different from zero
+# Filter for tracer concentration difference not greater than sdQf standard deviations
 qf <- rep(0,length(time))
 qf[((dConc_tracer-dConc_tracer_sd*sdQf) < 0 & 
-    (dConc_tracer+dConc_tracer_sd*sdQf) > 0) ] <- 1
-# Filter for target concentration not significantly different from zero
+      (dConc_tracer+dConc_tracer_sd*sdQf) > 0) ] <- 1
+
+# Filter for target concentration difference not greater than sdQf standard deviations
 qf[((dConc-dConc_sd*sdQf) < 0 & 
-    (dConc+dConc_sd*sdQf) > 0) ] <- 1
+      (dConc+dConc_sd*sdQf) > 0) ] <- 1
+
+# Filter for tracer concentration difference not statistically different from zero
+qf[dConc_pvalue_tracer > pQf] <- 1
+
+# Filter for target concentration difference not statistically different from zero
+qf[dConc_pvalue > pQf] <- 1
+
 flux_pred[qf==1] <- NA
 
 # Compute Diel Patterns
