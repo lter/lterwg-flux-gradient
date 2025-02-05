@@ -155,7 +155,7 @@ for (site in sites){
     setPos <- !is.na(t+df) & t > 0
     p[setNeg] <- stats::pt(t[setNeg],df[setNeg])
     p[setPos] <- stats::pt(t[setPos],df[setPos],lower.tail=FALSE)
-    OUT$dConc_pvalue <- p # p-value (probability) to achieve a value greater/less than this difference if they were from the same population
+    OUT$dConc_pvalue <- p*2 # p-value (probability) that the mean concentration difference is zero
     
     OUT$timeMid <- OUT$timeEnd_A+(0.5*difftime(OUT$timeBgn_B, OUT$timeEnd_A, units = "secs"))
     
