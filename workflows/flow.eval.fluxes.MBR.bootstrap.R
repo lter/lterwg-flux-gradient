@@ -16,8 +16,8 @@ PairLvl <- c('6_5','6_4','6_3','6_2','6_1','5_4','5_3','5_2','5_1','4_3','4_2','
 Stat <- c('mean','median')[2] # Which statistic for the diel bin
 Ucrt <- c('sd','var','mad','se')[4] # Which uncertainty measure for each diel bin
 NumSampMin <- 3 # min number of samples to compute statistics for each diel bin
-sdQf <- 0 # how many standard deviations form the mean should be used to determine if the tracer flux difference is not substantially different than zero (1 ~ 66% confidence interval, 2 ~ 95% confidence, 3 ~ 99% confidence)
-pQf <- 1 # Maximum p-value of concentration difference (testing statistical difference from zero). This is in addition to the sdQf filter. (A value of 1 includes all values)
+zScoreQf <- 0 # how many standard deviations from the mean should be used to determine if the concentration difference is not substantially different than zero 
+pValueQf <- 1 # Maximum p-value of concentration difference (testing statistical difference from zero). This is in addition to the zScoreQf filter. (A value of 1 includes all values)
 
 # Choose a period over which to compute the diel averages
 TimeBgn <- as.POSIXct('2022-04-01',tz='GMT')
@@ -123,20 +123,20 @@ fig <- plot_ly(x = flux_meas, y = flux_pred, color=tower_pair, type = 'scatter',
          )))
 print(fig)
 
-# Filter for tracer concentration difference not greater than sdQf standard deviations
+# Filter for tracer concentration difference not greater than zScoreQf standard deviations
 qf <- rep(0,length(time))
-qf[((dConc_tracer-dConc_tracer_sd*sdQf) < 0 & 
-  (dConc_tracer+dConc_tracer_sd*sdQf) > 0) ] <- 1
+qf[((dConc_tracer-dConc_tracer_sd*zScoreQf) < 0 & 
+  (dConc_tracer+dConc_tracer_sd*zScoreQf) > 0) ] <- 1
 
-# Filter for target concentration difference not greater than sdQf standard deviations
-qf[((dConc-dConc_sd*sdQf) < 0 & 
-    (dConc+dConc_sd*sdQf) > 0) ] <- 1
+# Filter for target concentration difference not greater than zScoreQf standard deviations
+qf[((dConc-dConc_sd*zScoreQf) < 0 & 
+    (dConc+dConc_sd*zScoreQf) > 0) ] <- 1
 
 # Filter for tracer concentration difference not statistically different from zero
-qf[dConc_pvalue_tracer > pQf] <- 1
+qf[dConc_pvalue_tracer > pValueQf] <- 1
 
 # Filter for target concentration difference not statistically different from zero
-qf[dConc_pvalue > pQf] <- 1
+qf[dConc_pvalue > pValueQf] <- 1
 
 flux_meas[qf==1 | is.na(flux_pred)] <- NA
 flux_pred[qf==1 | is.na(flux_meas)] <- NA
@@ -258,20 +258,20 @@ fig <- plot_ly(x = flux_meas, y = flux_pred, color=tower_pair, type = 'scatter',
          )))
 print(fig)
 
-# Filter for tracer concentration difference not greater than sdQf standard deviations
+# Filter for tracer concentration difference not greater than zScoreQf standard deviations
 qf <- rep(0,length(time))
-qf[((dConc_tracer-dConc_tracer_sd*sdQf) < 0 & 
-      (dConc_tracer+dConc_tracer_sd*sdQf) > 0) ] <- 1
+qf[((dConc_tracer-dConc_tracer_sd*zScoreQf) < 0 & 
+      (dConc_tracer+dConc_tracer_sd*zScoreQf) > 0) ] <- 1
 
-# Filter for target concentration difference not greater than sdQf standard deviations
-qf[((dConc-dConc_sd*sdQf) < 0 & 
-      (dConc+dConc_sd*sdQf) > 0) ] <- 1
+# Filter for target concentration difference not greater than zScoreQf standard deviations
+qf[((dConc-dConc_sd*zScoreQf) < 0 & 
+      (dConc+dConc_sd*zScoreQf) > 0) ] <- 1
 
 # Filter for tracer concentration difference not statistically different from zero
-qf[dConc_pvalue_tracer > pQf] <- 1
+qf[dConc_pvalue_tracer > pValueQf] <- 1
 
 # Filter for target concentration difference not statistically different from zero
-qf[dConc_pvalue > pQf] <- 1
+qf[dConc_pvalue > pValueQf] <- 1
 
 
 flux_meas[qf==1 | is.na(flux_pred)] <- NA
@@ -379,20 +379,20 @@ dConc_tracer_sd <- MBRflux_align$dConc_H2O_sd
 dConc_pvalue_tracer <- MBRflux_align$dConc_pvalue_H2O
 
 
-# Filter for tracer concentration difference not greater than sdQf standard deviations
+# Filter for tracer concentration difference not greater than zScoreQf standard deviations
 qf <- rep(0,length(time))
-qf[((dConc_tracer-dConc_tracer_sd*sdQf) < 0 & 
-      (dConc_tracer+dConc_tracer_sd*sdQf) > 0) ] <- 1
+qf[((dConc_tracer-dConc_tracer_sd*zScoreQf) < 0 & 
+      (dConc_tracer+dConc_tracer_sd*zScoreQf) > 0) ] <- 1
 
-# Filter for target concentration difference not greater than sdQf standard deviations
-qf[((dConc-dConc_sd*sdQf) < 0 & 
-      (dConc+dConc_sd*sdQf) > 0) ] <- 1
+# Filter for target concentration difference not greater than zScoreQf standard deviations
+qf[((dConc-dConc_sd*zScoreQf) < 0 & 
+      (dConc+dConc_sd*zScoreQf) > 0) ] <- 1
 
 # Filter for tracer concentration difference not statistically different from zero
-qf[dConc_pvalue_tracer > pQf] <- 1
+qf[dConc_pvalue_tracer > pValueQf] <- 1
 
 # Filter for target concentration difference not statistically different from zero
-qf[dConc_pvalue > pQf] <- 1
+qf[dConc_pvalue > pValueQf] <- 1
 
 
 flux_pred[qf==1] <- NA
@@ -413,20 +413,20 @@ dConc_tracer_mean <- MBRflux_align$dConc_CO2_mean
 dConc_tracer_sd <- MBRflux_align$dConc_CO2_sd
 dConc_pvalue_tracer <- MBRflux_align$dConc_pvalue_CO2
 
-# Filter for tracer concentration difference not greater than sdQf standard deviations
+# Filter for tracer concentration difference not greater than zScoreQf standard deviations
 qf <- rep(0,length(time))
-qf[((dConc_tracer-dConc_tracer_sd*sdQf) < 0 & 
-      (dConc_tracer+dConc_tracer_sd*sdQf) > 0) ] <- 1
+qf[((dConc_tracer-dConc_tracer_sd*zScoreQf) < 0 & 
+      (dConc_tracer+dConc_tracer_sd*zScoreQf) > 0) ] <- 1
 
-# Filter for target concentration difference not greater than sdQf standard deviations
-qf[((dConc-dConc_sd*sdQf) < 0 & 
-      (dConc+dConc_sd*sdQf) > 0) ] <- 1
+# Filter for target concentration difference not greater than zScoreQf standard deviations
+qf[((dConc-dConc_sd*zScoreQf) < 0 & 
+      (dConc+dConc_sd*zScoreQf) > 0) ] <- 1
 
 # Filter for tracer concentration difference not statistically different from zero
-qf[dConc_pvalue_tracer > pQf] <- 1
+qf[dConc_pvalue_tracer > pValueQf] <- 1
 
 # Filter for target concentration difference not statistically different from zero
-qf[dConc_pvalue > pQf] <- 1
+qf[dConc_pvalue > pValueQf] <- 1
 
 flux_pred[qf==1] <- NA
 
