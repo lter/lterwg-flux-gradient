@@ -48,13 +48,13 @@ grab.neon.gas.9min.6min <- function(hd.file, sitecode){
     
     #set the gas concentration dataset name to be used by h5read
     ch4.dir <- paste0("/", sitecode, '/dp01/data/ch4Conc/000_0',heights[i],'0_09m/rtioMoleDryCh4', sep="")
-    co2.dir <- paste0("/", sitecode, '/dp01/data/isoCo2/000_0',heights[i], '0_09m/rtioMoleDryCo2', sep="")
-    h2o.dir <- paste0( "/", sitecode, '/dp01/data/isoCo2/000_0',heights[i], '0_09m/rtioMoleDryH2o', sep="")
+    co2.dir <- paste0("/", sitecode, '/dp01/data/isoCo2/000_0',heights[i], '0_06m/rtioMoleDryCo2', sep="")
+    h2o.dir <- paste0( "/", sitecode, '/dp01/data/isoCo2/000_0',heights[i], '0_06m/rtioMoleDryH2o', sep="")
 
     #set the qfqm dataset name to be used by h5read
     ch4.qfqm <- paste0("/", sitecode, '/dp01/qfqm/ch4Conc/000_0',heights[i],'0_09m/rtioMoleDryCh4', sep="")
-    co2.qfqm <- paste0("/", sitecode, '/dp01/qfqm/isoCo2/000_0',heights[i], '0_09m/rtioMoleDryCo2', sep="")
-    h2o.qfqm <- paste0( "/", sitecode, '/dp01/qfqm/isoCo2/000_0',heights[i], '0_09m/rtioMoleDryH2o', sep="")
+    co2.qfqm <- paste0("/", sitecode, '/dp01/qfqm/isoCo2/000_0',heights[i], '0_06m/rtioMoleDryCo2', sep="")
+    h2o.qfqm <- paste0( "/", sitecode, '/dp01/qfqm/isoCo2/000_0',heights[i], '0_06m/rtioMoleDryH2o', sep="")
 
     #h5read fcn reads a dataset in h5 file and returns an array containing data read, select for desired columns
       CH4 <- h5read(hd.file, ch4.dir) %>%
