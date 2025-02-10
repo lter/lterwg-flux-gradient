@@ -51,7 +51,7 @@ h5files <- list.files(path = file.path("data", sitecode, "filesToStack00200"), p
 #grab attribute data
 attr.df <- compile.neon.site.attr(hd.files = h5files, sitecode = sitecode)
 #grab gas concentration and met data at desired frequency (1min, 9min, 30min)
-#min9.list <- compile.neon.data(h5files = h5files, sitecode = sitecode, frequency = "9min")
+min9.list <- compile.neon.data(h5files = h5files, sitecode = sitecode, frequency = "9min")
 min1.list <- compile.neon.data(h5files = h5files, sitecode = sitecode, frequency = "1min")
 min30.list <- compile.neon.data(h5files = h5files, sitecode = sitecode, frequency = "30min")
 
@@ -71,7 +71,7 @@ min30.list$WS2D <- WS2D30min
 min30.list$PAR <- PAR30min
 #save as R.data objects
 save(min1.list, file = file.path("data", sitecode, paste0(sitecode,"_1min.Rdata")))
-#save(min9.list, file = file.path("data", sitecode, paste0(sitecode,"_9min.Rdata")))
+save(min9.list, file = file.path("data", sitecode, paste0(sitecode,"_9min.Rdata")))
 save(min30.list, file = file.path("data", sitecode, paste0(sitecode,"_30min.Rdata")))
 save(attr.df, file = file.path("data", sitecode, paste0(sitecode,"_attr.Rdata")))
 save(WS2D2min, file = file.path("data", sitecode, paste0(sitecode,"_WS2D2min.Rdata")))
