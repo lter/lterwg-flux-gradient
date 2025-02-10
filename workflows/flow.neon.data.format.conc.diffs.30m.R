@@ -30,6 +30,8 @@ library(foreach)
 library(doParallel)
 library(dplyr)
 
+setwd('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient')
+
 # Load functions in this repo
 source(file.path("functions/interp.flux.R"))
 source(file.path("functions/aggregate_averages.R"))
