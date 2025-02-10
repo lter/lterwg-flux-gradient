@@ -20,8 +20,8 @@ localdir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/Data
 
 # Gradient Flux Calculations: ####
 for( site in site.list ){
-  site <- site
-  print(site)
+  sitecode <- site
+  print(sitecode)
   
   # Load Data:
   load(fs::path(paste(localdir, site,sep="/"), paste0(site,'_aligned_conc_flux_30min.RData')))
@@ -31,13 +31,13 @@ for( site in site.list ){
     
   print('Data Loaded')
   
-  print( 'Running MBR')
-  source(file.path("exploratory/flow.calc.flag.mbr.batch.R"))
-  print('MBR Done')
+ # print( 'Running MBR')
+  #source(file.path("exploratory/flow.calc.flag.mbr.batch.R"))
+  #print('MBR Done')
   
-  #print( 'Running AE')
-  #source(file.path("exploratory/flow.calc.flag.aero.batch.R"))
-  #print('AE Done')
+  print( 'Running AE')
+  source(file.path("exploratory/flow.calc.flag.aero.batch.R"))
+  print('AE Done')
   
   print( 'Running WP')
   source(file.path("exploratory/flow.calc.flag.windprof.batch.R"))

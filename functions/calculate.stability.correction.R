@@ -5,24 +5,46 @@
 #' @return dataframe with stability parameter cols
 #' 
 #'
-#' @author Alexis Helgeson, Samuel Jurado, Roisin Commane, and Camilo Rey-Sanchez
+#' @author Alexis Helgeson, Samuel Jurado, Roisin Commane, and Camilo Rey-Sanchez, Sparkle L. Malone
+
 calculate.stability.correction <- function(gas){
   #remove NAs from data columns used in calculation for AE this includes: P_kPa, Tair1, H_turb_interp, LE_turb_interp, ustar_interp, z_displ_calc
+  
   #select for data columns -> remember there are as many ubar cols as there are TowerPositions for a given site
   data.cols <- c("P_kPa", "Tair1", "H_turb_interp", "LE_turb_interp", "ustar_interp")
-  #remove NAs
-  gas <- gas[complete.cases(gas[,data.cols]),]
   
+  # pull out the max level for Tair
+  
+  #remove NAs
+  #gas <- gas[, data.cols]
+ 
   # Define top level where fluxes are measured
   maxL=max(min9Diff.list$H2O$TowerPosition_A)
   if (maxL==6){ TopLevel="6_5"}
   if (maxL==5) { TopLevel="5_4"}
   if (maxL==4) { TopLevel="4_3"}
   if (maxL==3) { TopLevel="3_2"}
+
+  #calculate obukov length (Obukhov lenght)
   
-  #calculate obukov length (Obukhov lenght calculations under the canopy are not ideal but will leave it like this for now)
-  MO.vars <- MOlength(press = gas$P_kPa, temp = gas$Tair1, H = gas$H_turb_interp, LE = gas$LE_turb_interp, velofric = gas$ustar_interp)
-  #add OB params to data frame for eddy diffusivty calculation
+  # Detect the highest Tair
+  Tair_at_TowerTop <- function(gas){
+    #df <- data.frame(gas)
+    #names(df) <- substring( names(df), 5)
+    df <- gas
+    levels <- df %>% select( starts_with( 'Tair')) %>% names %>% str_split_fixed( 'Tair',2) 
+    max.levels <- levels[,2] %>% max 
+    Tair <- paste('Tair',max.levels, sep="")
+    return( Tair)
+  }
+  
+  Tair <- Tair_at_TowerTop(gas)
+  
+  gas <- gas[complete.cases(gas[,c(data.cols, Tair)]),]
+  
+  MO.vars <- MOlength(press = gas$P_kPa, temp = gas[,Tair], H = gas$H_turb_interp, LE = gas$LE_turb_interp, velofric = gas$ustar_interp)
+  
+  # add OB params to data frame for eddy diffusivty calculation
   #gas <- cbind(gas, MO.vars$rho, MO.vars$vpotflux, MO.vars$L)
   gas <- data.frame(gas, rho = MO.vars$rho, vpotflux = MO.vars$vpotflux, L = MO.vars$L)
   
@@ -30,6 +52,7 @@ calculate.stability.correction <- function(gas){
   
   daysAVG=20
   plotYN=1
+  
   Mdate=gas$timeEnd_A[gas$dLevelsAminusB == TopLevel]
   ustar=gas$ustar_interp[gas$dLevelsAminusB == TopLevel]
   gas$mean_TowerH <- rowMeans((cbind(as.numeric(gas$TowerHeight_A), as.numeric(gas$TowerHeight_B))), na.rm = TRUE)
@@ -74,8 +97,8 @@ calculate.stability.correction <- function(gas){
     #Set d
     d= as.numeric(row.loop$z_displ_calc)
     #calculate obukhov parameter
-    effect_h=z - d
-    effect_h[effect_h<0.1]<-0.1
+    effect_h= z - d
+    effect_h[effect_h<0.1] <- 0.1
     gas[k,"effective_h"]<-effect_h
     gas[k,"MO.param"] <- as.numeric((effect_h)/as.numeric(row.loop$L))
     mo.param <- as.numeric(gas[k,"MO.param"])

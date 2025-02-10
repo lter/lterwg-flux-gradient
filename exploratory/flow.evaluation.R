@@ -203,6 +203,7 @@ dev.off()
 # Carbon Exchange PARMS: ####
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_LRC_Parms.R' )
 
+# Need to add a new Tair using the is a coloase of the hightest temperature filled with the lowest temperature when it is not present...
 
 SITES_MBR_30min_CPARMS_EC <- PARMS_Sites( sites.tibble = SITES_MBR_30min_FILTER, 
                              iterations = 4000, 
@@ -250,14 +251,14 @@ SITES_WP_30min_CPARMS_EC <- PARMS_Sites( sites.tibble = SITES_WP_30min_FILTER,
                                          TA='Tair1',
                                          nee = 'FG_mean' )
 
-
+SITES_WP_30min_FILTER$GUAN$Tair5
 SITES_WP_30min_CPARMS_FG <- PARMS_Sites( sites.tibble = SITES_WP_30min_FILTER, 
                                          iterations = 4000, 
                                          priors.lrc= priors.lrc, 
                                          priors.trc= priors.trc,
                                          idx = 'YearMon',
                                          PAR = 'PAR',
-                                         TA='Tair1',
+                                         TA='Tair',
                                          nee = 'FG_mean' )
 save( SITES_MBR_30min_CPARMS_FG ,
       SITES_MBR_30min_CPARMS_EC ,
@@ -372,3 +373,6 @@ ggarrange(
   ggplot() + geom_violin(data = WP.CPARMS$JORN , aes( x= TYP, y = r.mean, col= TowerH)) + ylab("Amax")+ ylim(1.75,2.25) , ncol=4, nrow=3, labels= c("a.", "b." ,"c.", "d", "e.", "f." ,"g.", "h.","i.", "j." ,"k.", "l"))
 
 dev.off()
+
+
+SITES_MBR_30min_FILTER$GUAN$Tair5_CO2

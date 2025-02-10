@@ -8,7 +8,7 @@
 #' 
 #'
 #' @author Alexis Helgeson, Sam Jurado, David Reed, and Sparkle Malone
-compile.neon.data <- function(h5files, sitecode, frequency = "30min"){
+compile.neon.data <- function(h5files, sitecode, frequency){
   
   #pulls 30m concentration, flux, and met data
   if(frequency == "30min"){

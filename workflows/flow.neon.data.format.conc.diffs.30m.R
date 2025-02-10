@@ -18,11 +18,11 @@
 # Zips and uploads to Google Drive.
 
 # Pull data from google drive
-#email <- 'alexisrose0525@gmail.com'
-email <- 'csturtevant@battelleecology.org'
+#email <- 'csturtevant@battelleecology.org'
 # email <- 'jaclyn_matthes@g.harvard.edu'
+#email <- 'sparkle.malone@yale.edu'
 
-sites <- c("BONA","CPER","GUAN","HARV","JORN","KONZ","NIWO","TOOL")
+site.list <- c("BONA","CPER","GUAN","HARV","JORN","KONZ","NIWO","TOOL")
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: fs, googledrive
@@ -37,18 +37,20 @@ source('./functions/MO_Length_CRS.R')
 
 # Final note: This script takes approx 45 min to run per site. 
 # -------------------------------------------------------
-for(site in sites){
+for(sitecode in site.list){
+  
+  site <-  sitecode 
   rm('min9.list','min30.list','attr.df','min1.list','min9Diff.list')
   
   # Authenticate with Google Drive and get site data
   googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
   drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
   data_folder <- googledrive::drive_ls(path = drive_url)
-  site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==site])
+  site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name== sitecode])
   
-  focal_files = paste0(site,c('_9min.zip','_30min.zip','_1min.zip','_WS2D2min.zip','_attr.zip'))
+  focal_files = paste0(sitecode,c('_9min.zip','_30min.zip','_1min.zip','_WS2D2min.zip','_attr.zip'))
   
-  dirTmp <- fs::path(tempdir(),site)
+  dirTmp <- fs::path(tempdir(), sitecode)
   dir.create(dirTmp)
   
   for(focal_file in focal_files){
@@ -69,19 +71,19 @@ for(site in sites){
   }
   
   # Extract data in 1, 2, 9, and 30 min & attribute files
-  fileIn <- fs::path(dirTmp,'data',site,paste0(site,'_9min.Rdata'))
+  fileIn <- fs::path(dirTmp,'data', sitecode,paste0( sitecode,'_9min.Rdata'))
   load(fileIn)
   
-  fileIn <- fs::path(dirTmp,'data',site,paste0(site,'_30min.Rdata'))
+  fileIn <- fs::path(dirTmp,'data', sitecode,paste0( sitecode,'_30min.Rdata'))
   load(fileIn)
   
-  fileIn <- fs::path(dirTmp,'data',site,paste0(site,'_1min.Rdata'))
+  fileIn <- fs::path(dirTmp,'data', sitecode,paste0( sitecode,'_1min.Rdata'))
   load(fileIn)
   
-  fileIn <- fs::path(dirTmp,'data',site,paste0(site,'_WS2D2min.Rdata'))
+  fileIn <- fs::path(dirTmp,'data', sitecode ,paste0(site,'_WS2D2min.Rdata'))
   load(fileIn)
   
-  fileIn <- fs::path(dirTmp,'data',site,paste0(site,'_attr.Rdata'))
+  fileIn <- fs::path(dirTmp,'data', sitecode ,paste0( sitecode ,'_attr.Rdata'))
   load(fileIn)
   
   # ------------------- Get concentration diffs for subsequent tower levels --------------
@@ -483,12 +485,12 @@ for(site in sites){
   min30Diff.list$H2O = as.data.frame(min30Diff.list$H2O)
   
   # -------- Save and zip the file to the temp directory. Upload to google drive. -------
-  fileSave <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_30min.RData'))
-  fileZip <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_30min.zip'))
+  fileSave <- fs::path(dirTmp,paste0( sitecode ,'_aligned_conc_flux_30min.RData'))
+  fileZip <- fs::path(dirTmp,paste0(  sitecode ,'_aligned_conc_flux_30min.zip'))
   save(min30Diff.list,file=fileSave)
   wdPrev <- getwd()
   setwd(dirTmp)
-  utils::zip(zipfile=fileZip,files=paste0(site,'_aligned_conc_flux_30min.RData'))
+  utils::zip(zipfile=fileZip,files=paste0( sitecode ,'_aligned_conc_flux_30min.RData'))
   setwd(wdPrev)
-  googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folder$id[data_folder$name==site]) # path might need work
+  googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folder$id[data_folder$name==  sitecode ]) # path might need work
 }

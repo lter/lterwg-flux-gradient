@@ -24,7 +24,7 @@ calc.eqn.aero.windprof.flux <- function(min9, eddy.diff.name, bootstrap, nsamp){
                    "rhoa_kgm3", "dHeight")
     
     # Remove missing data
-    min9 <- min9[complete.cases(min9[,data.cols]),]
+    # min9 <- min9[complete.cases(min9[,data.cols]),]
     nsamp = nsamp # number of bootstrap samples
     
     # Storage for flux & concentration diff mean & variance 

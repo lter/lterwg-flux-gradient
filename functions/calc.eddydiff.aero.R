@@ -16,7 +16,7 @@ calc.eddydiff.aero <- function(sitecode, min9){
   #remove NAs from data columns used in calculation for AE this includes: z_displ_calc
   #select for data columns -> remember there are as many ubar cols as there are TowerPositions for a given site
   data.cols <- c("z_displ_calc")
-  H2O <- H2O[complete.cases(H2O[,data.cols]),]
+  #H2O <- H2O[complete.cases(H2O[,data.cols]),]
   #calculate Obukhov length and stability parameters
   H2O <- calculate.stability.correction(gas = H2O)
   #calculate eddy diffusivity
@@ -27,7 +27,7 @@ calc.eddydiff.aero <- function(sitecode, min9){
   # EDDY DIFF AERO: 
   H2O$EddyDiff = (k*as.numeric(H2O$ustar_interp)*as.numeric(H2O$effective_h))/as.numeric(H2O$phih)
 
-  # EDDY DIFF WP: create column for store wind profile eddy diffusivity with Wind Profiler Method
+  # EDDY DIFF WP: create column to store wind profile eddy diffusivity with Wind Profiler Method
   H2O$EddyDiff_WP <- "hold"
   #TO DO: REFORMAT ubar COLUMNS SO THAT WE CAN SELECT FOR CORRECT ubar USING TowerPosition
   for(j in 1:dim(H2O)[1]){
@@ -47,7 +47,7 @@ calc.eddydiff.aero <- function(sitecode, min9){
   #grab CO2 gas concentration
   CO2 <- min9[[which(names(min9) == "CO2")]]
   #remove NAs
-  CO2 <- CO2[complete.cases(CO2[,data.cols]),]
+  #CO2 <- CO2[complete.cases(CO2[,data.cols]),]
   #calculate obukhov length and stability parameters
   CO2 <- calculate.stability.correction(gas = CO2)
   #calculate eddy diffusivity
@@ -78,7 +78,7 @@ calc.eddydiff.aero <- function(sitecode, min9){
   #grab CH4 gas concentration
   CH4 <- min9[[which(names(min9) == "CH4")]]
   #remove NAs
-  CH4 <- CH4[complete.cases(CH4[,data.cols]),]
+  #CH4 <- CH4[complete.cases(CH4[,data.cols]),]
   #calculate obukhov length and stability parameters
   CH4 <- calculate.stability.correction(gas = CH4)
   #calculate eddy diffusivity
@@ -102,6 +102,7 @@ calc.eddydiff.aero <- function(sitecode, min9){
     
    CH4[j,"EddyDiff_WP"] <- ((k^2)*ubar*zd)/(log(zd/zo)*phih)
   }
+ 
   #set EddyDiff as numeric
  CH4$EddyDiff_WP <- as.numeric(CH4$EddyDiff_WP)
   

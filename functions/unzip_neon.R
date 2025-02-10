@@ -9,7 +9,7 @@
 #'
 #' @return print message identifying where unzipped files can be found
 #'
-#' @author Alexis Helgeson, Nick Lyon
+#' @author Alexis Helgeson, Nick Lyon, Sparkle Malone
 #' 
 #' 
 unzip_neon <- function(in_path = NULL, out_path = NULL, quiet = FALSE){
@@ -36,18 +36,26 @@ unzip_neon <- function(in_path = NULL, out_path = NULL, quiet = FALSE){
   
   # Error out if no .gz files are found
   if(length(gz.files) == 0)
-    stop("No .gz files found in specified ZIP files")
+    message("No .gz files found in specified ZIP files")
   
   # Message ZIP success if `quiet` argument doesn't specify the opposite
-  if(quiet != TRUE){
+  if(quiet != TRUE & length(gz.files) > 0){
     message("Found ", length(gz.files), " .gz files")
+    
+    # Process those as well!
+    for(k in 1:length(gz.files)){
+      
+      R.utils::gunzip(file.path(in_path, gz.files[k]), 
+                      destname = file.path(out_path,
+                                           gsub(pattern = ".gz", replacement = "", 
+                                                x = gz.files[k])), 
+                      remove = F, overwrite = T) }
   }
   
-  # Process those as well!
-  for(k in 1:length(gz.files)){
-    R.utils::gunzip(file.path(in_path, gz.files[k]), 
-                    destname = file.path(out_path,
-                                         gsub(pattern = ".gz", replacement = "", 
-                                              x = gz.files[k])), 
-                    remove = F, overwrite = T) }
+  
 }
+
+
+  
+  # Process those as well!
+  
