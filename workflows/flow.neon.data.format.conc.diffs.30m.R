@@ -30,12 +30,17 @@ library(foreach)
 library(doParallel)
 library(dplyr)
 
+# Authenticate with Google Drive and get site data
+googledrive::drive_auth() # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
+
 setwd('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient')
 
 # Load functions in this repo
 source(file.path("functions/interp.flux.R"))
 source(file.path("functions/aggregate_averages.R"))
 source('./functions/MO_Length_CRS.R')
+
+
 
 # Final note: This script takes approx 45 min to run per site. 
 # -------------------------------------------------------
@@ -44,8 +49,6 @@ for(sitecode in site.list){
   site <-  sitecode 
   rm('min9.list','min30.list','attr.df','min1.list','min9Diff.list')
   
-  # Authenticate with Google Drive and get site data
-  googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
   drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
   data_folder <- googledrive::drive_ls(path = drive_url)
   site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name== sitecode])

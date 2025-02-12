@@ -12,7 +12,7 @@ library(googledrive)
 googledrive::drive_auth(email = TRUE) 
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
 data_folder <- googledrive::drive_ls(path = drive_url)
-localdir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/Data'
+localdir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/data'
 site.list <- c('HARV', 'KONZ', 'JORN', 'GUAN')
 
 download.googledrive <- function( drive_url,data_folder, localdir, site  ) {

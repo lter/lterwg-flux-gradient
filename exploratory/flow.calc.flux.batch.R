@@ -3,6 +3,7 @@
 library(fs)
 library(googledrive)
 library(dplyr)
+library(stringr)
 
 email <- 'sparklelmalone@gmail.com'
 googledrive::drive_auth(email = TRUE) 
@@ -16,7 +17,7 @@ setwd("/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flu
 site.list <- c('HARV' ,'KONZ', 'GUAN', 'JORN')
 
 # Add local directory for downloaded data here:
-localdir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/Data'
+localdir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/data'
 
 # Gradient Flux Calculations: ####
 for( site in site.list ){
@@ -63,7 +64,7 @@ setwd("/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flu
 site.list <- c('HARV' ,'KONZ', 'GUAN', 'JORN')
 
 # Add local directory for downloaded data here:
-localdir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/Data'
+localdir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/data'
 
 for( site in site.list){
   print(site)
