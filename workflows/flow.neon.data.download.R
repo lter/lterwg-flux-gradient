@@ -6,14 +6,25 @@ library(dplyr)
 
 #set start and end dates for data, REMEMBER CH4 is only available (august 2021 - present)
 startdate <- "2021-08"
-enddate <- "2023-09"
+enddate <- "2024-06"
 
 # Add all sites here:
-site.list <- c("BONA","CPER","GUAN","HARV","JORN","KONZ","NIWO","TOOL")
+# site.list <- c("BONA","CPER","GUAN","HARV")
+# site.list <- c("JORN","KONZ","NIWO","TOOL")
+# site.list <- c("ABBY","BARR","BART","BLAN")
+# site.list <- c("CLBJ","DCFS","DEJU","DELA")
+# site.list <- c("DSNY","GRSM","HEAL","JERC")
+# site.list <- c("KONA","LAJA","LENO","MLBS")
+# site.list <- c("MOAB","NOGP","OAES","ONAQ")
+# site.list <- c("ORNL","OSBS","PUUM","RMNP")
+# site.list <- c("SCBI","SERC","SJER","SOAP")
+# site.list <- c("SRER","STEI","STER","TALL")
+# site.list <- c("TEAK","TREE","UKFS","UNDE")
+site.list <- c("WOOD","WREF","YELL")
 
 # Add local directory for downloaded data here:
-localdir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient'
-setwd(localdir)
+#localdir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient'
+#setwd(localdir)
 
 #set include.provisional = T to get full time series of data up to present, currently provisional covers (2022-07:2023-09) 
 #grab relative humidity at 1 min resolution
