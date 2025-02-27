@@ -12,7 +12,7 @@ library(googledrive)
 #Real Eddy Diff. converter - Sam J.
 
 "This code is intended to take the EC fluxes and concetration observations from NEON
-towers and convert them into an eddy diffusivity for comparison between H2O and CO2 K's
+towers and convert them into an eddy diffusivity for comparison between EC H2O and CO2 K's
 and cross-gradient analysis"
 
 ###EC Eddy Diffusivity###
@@ -159,6 +159,7 @@ percent_cross_grad <- function(cross_grad_flag) {
 
 ###TO MODIFY CHANGE SITE AND fileDnld zip files###
 
+
 # Pull data from google drive
 email <- 'saj82@cornell.edu'
 #email <- 'jaclyn_matthes@g.harvard.edu'
@@ -182,6 +183,7 @@ site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name=="NE
 dirTmp <- fs::path(tempdir(),"NEONSITES_Validation")
 dir.create(dirTmp)
 
+
 fileDnld <- "NEONSITES_Validation" #insert zip file to pull here
 
 # Find the file identifier for that file
@@ -196,6 +198,112 @@ googledrive::drive_download(file = file_id$id,
 # Load the data 
 fileIn <- pathDnld
 load(fileIn)
+
+
+
+
+# Download data
+dirTmp <- fs::path(tempdir(),"NEONSITES_Validation")
+dir.create(dirTmp)
+
+fileDnld <- "NEONSITES_Validation" #insert zip file to pull here
+
+# Find the file identifier for that file
+file_id <- subset(site_folder, name == "SITES_AE_30min.Rdata" )
+
+# Download that file
+pathDnld <- fs::path(dirTmp, "SITES_AE_30min.Rdata" )
+googledrive::drive_download(file = file_id$id, 
+                            path = pathDnld,
+                            overwrite = T)
+
+# Load the data 
+fileIn <- pathDnld
+load(fileIn)
+
+
+# Download data
+dirTmp <- fs::path(tempdir(),"NEONSITES_Validation")
+dir.create(dirTmp)
+
+fileDnld <- "NEONSITES_Validation" #insert zip file to pull here
+
+# Find the file identifier for that file
+file_id <- subset(site_folder, name == "SITES_WP_30min.Rdata" )
+
+# Download that file
+pathDnld <- fs::path(dirTmp, "SITES_WP_30min.Rdata" )
+googledrive::drive_download(file = file_id$id, 
+                            path = pathDnld,
+                            overwrite = T)
+
+# Load the data 
+fileIn <- pathDnld
+load(fileIn)
+
+
+# Download data
+dirTmp <- fs::path(tempdir(),"NEONSITES_Validation")
+dir.create(dirTmp)
+
+fileDnld <- "NEONSITES_Validation" #insert zip file to pull here
+
+# Find the file identifier for that file
+file_id <- subset(site_folder, name == "SITES_WP_9min.Rdata" )
+
+# Download that file
+pathDnld <- fs::path(dirTmp, "SITES_WP_9min.Rdata" )
+googledrive::drive_download(file = file_id$id, 
+                            path = pathDnld,
+                            overwrite = T)
+
+# Load the data 
+fileIn <- pathDnld
+load(fileIn)
+
+
+# Download data
+dirTmp <- fs::path(tempdir(),"NEONSITES_Validation")
+dir.create(dirTmp)
+
+fileDnld <- "NEONSITES_Validation" #insert zip file to pull here
+
+# Find the file identifier for that file
+file_id <- subset(site_folder, name == "SITES_MBR_30min.Rdata" )
+
+# Download that file
+pathDnld <- fs::path(dirTmp, "SITES_MBR_30min.Rdata" )
+googledrive::drive_download(file = file_id$id, 
+                            path = pathDnld,
+                            overwrite = T)
+
+# Load the data 
+fileIn <- pathDnld
+load(fileIn)
+
+# Download data
+dirTmp <- fs::path(tempdir(),"NEONSITES_Validation")
+dir.create(dirTmp)
+
+fileDnld <- "NEONSITES_Validation" #insert zip file to pull here
+
+# Find the file identifier for that file
+file_id <- subset(site_folder, name == "SITES_MBR_9min.Rdata" )
+
+# Download that file
+pathDnld <- fs::path(dirTmp, "SITES_MBR_9min.Rdata" )
+googledrive::drive_download(file = file_id$id, 
+                            path = pathDnld,
+                            overwrite = T)
+
+# Load the data 
+fileIn <- pathDnld
+load(fileIn)
+
+
+
+
+
 
 
 #Convert New Data format into old data format
@@ -228,8 +336,6 @@ for (site in site_names) {
   # Assign the filtered data frames to the site-specific list
   assign(site, site_filtered)
 }
-
-
 
 
 for (site in site_list){
