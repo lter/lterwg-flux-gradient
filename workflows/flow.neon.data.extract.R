@@ -42,10 +42,10 @@ data_folder <- googledrive::drive_ls(path = drive_url)
 # site.list <- c("MOAB","NOGP","OAES","ONAQ","ORNL","OSBS","PUUM","RMNP")
 # site.list <- c("SCBI","SERC","SJER","SOAP","SRER","STEI","STER","TALL")
 # site.list <- c("TEAK","TREE")
-# ERROR UKFS
 # site.list <- c("UNDE","WOOD")
-# ERROR WREF
-site.list <- c("YELL")
+# site.list <- c("YELL")
+# site.list <- c("WREF")
+site.list <- c("UKFS")
 
 #set include.provisional = T to get full time series of data up to present, currently provisional covers (2022-07:2023-09) 
 #grab relative humidity at 1 min resolution

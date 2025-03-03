@@ -179,6 +179,11 @@ grab.neon.met.flux.30min <- function(hd.file, sitecode, startdate, enddate){
   #grab NEON level 1 air pressure at 2nd tower position 30min resolution for a given site
   heights.press <- unique(test.df[which(test.df$group == paste( "/", sitecode,"/dp01/data/presBaro", sep="")),]$name)
   heights.press <- as.numeric(substr(stringr::str_subset(unique(stringr::str_subset(heights.press, '000')),'30m'),6,7))
+  #the as.numeric() call in the previous line will mistakenly turn string "00" into numeric 0
+  #we will need "00" for site WREF
+  if (heights.press == 0){
+    heights.press <- "00"
+  }
   P  <- h5read(hd.file, paste("/", sitecode, "/dp01/data/presBaro/000_0", heights.press,"_30m/presAtm", sep=""))
   #grab NEON level 1 qfqm for air pressure
   P.qfqm <- h5read(hd.file, paste("/", sitecode, "/dp01/qfqm/presBaro/000_0", heights.press,"_30m/presAtm", sep=""))

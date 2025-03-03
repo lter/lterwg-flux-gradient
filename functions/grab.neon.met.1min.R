@@ -22,6 +22,11 @@ grab.neon.met.1min <- function(hd.file, sitecode, startdate, enddate){
   heights.press <- unique(test.df[which(test.df$group == paste( "/", sitecode,"/dp01/data/presBaro", sep="")),]$name)
   #subsets heights list grabbing only those at 1m
   heights.press <- as.numeric(substr(stringr::str_subset(unique(stringr::str_subset(heights.press, '000')),'1m'),6,7))
+  #the as.numeric() call in the previous line will mistakenly turn string "00" into numeric 0
+  #we will need "00" for site WREF
+  if (heights.press == 0){
+    heights.press <- "00"
+  }
   #grabs the all unique heights of air temp (name column in test.df = heights)
   heights.temp <- unique(test.df[which(test.df$group == paste( "/", sitecode,"/dp01/data/tempAirLvl", sep="")),]$name)
   #subsets heights list grabbing only those at 1m
