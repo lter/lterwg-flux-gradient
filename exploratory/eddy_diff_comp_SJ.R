@@ -304,3 +304,21 @@ final_result_stability <- bind_rows(results)
 print(final_result_stability)
 
 
+#####PLOT for height and level#####
+# Load required libraries
+library(ggplot2)
+
+# Assuming your dataframe is called 'df'
+ggplot(final_result_height, aes(x = dHeight, y = relative_rmse_median, label = dLevelsAminusB, color = site)) +
+  geom_text(fontface = "bold") +                             # Make text bold
+  scale_color_manual(values = c("HARV" = "#018571", "GUAN" = "#80cdc1", "KONZ" = "#dfc27d", "JORN"="#a6611a")) +  # Customize colors for the site variable
+  labs(
+    x = "dHeight [m]", 
+    y = "Relative RMSE Median [%]", 
+    title = "Plot of Relative RMSE Median vs dHeight by Site"
+  ) +                                         # Title and axis labels
+  theme_minimal() +                           # Minimal theme for a clean look
+  theme(legend.position = "right")            # Position the legend on the right
+
+
+
