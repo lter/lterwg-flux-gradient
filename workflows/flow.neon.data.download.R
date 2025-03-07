@@ -20,7 +20,8 @@ enddate <- "2024-06"
 # site.list <- c("SCBI","SERC","SJER","SOAP")
 # site.list <- c("SRER","STEI","STER","TALL")
 # site.list <- c("TEAK","TREE","UKFS","UNDE")
-site.list <- c("WOOD","WREF","YELL")
+# site.list <- c("WOOD","WREF","YELL")
+site.list <- c("HARV")
 
 # Add local directory for downloaded data here:
 #localdir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient'
@@ -91,7 +92,7 @@ for ( sitecode in site.list){
   dir.create(path = file.path("data", sitecode), showWarnings = F)
   save(DATA, file = paste0("data/", sitecode, "/", sitecode,"_NonEddyMetVars.Rdata"))
   #grab bundled eddy-covariance data
-  zipsByProduct(dpID="DP4.00200.001", sitecode,startdate, enddate,package="basic", check.size=F, savepath = file.path("data", sitecode), include.provisional = T)
+  zipsByProduct(dpID="DP4.00200.001", sitecode,startdate, enddate,package="expanded", check.size=F, savepath = file.path("data", sitecode), include.provisional = T)
   
 }
 
