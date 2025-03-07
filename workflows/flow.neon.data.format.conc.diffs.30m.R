@@ -22,7 +22,8 @@
 # email <- 'jaclyn_matthes@g.harvard.edu'
 #email <- 'sparkle.malone@yale.edu'
 
-site.list <- c("BONA","CPER","GUAN","HARV","JORN","KONZ","NIWO","TOOL")
+#site.list <- c("BONA","CPER","GUAN","HARV","JORN","KONZ","NIWO","TOOL")
+site.list <- c("HARV")
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: fs, googledrive
@@ -33,7 +34,7 @@ library(dplyr)
 # Authenticate with Google Drive and get site data
 googledrive::drive_auth() # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
 
-setwd('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient')
+#setwd('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient')
 
 # Load functions in this repo
 source(file.path("functions/interp.flux.R"))
@@ -97,7 +98,9 @@ for(sitecode in site.list){
   # For each concentration, compute difference in concentration among tower levels
   list.idx = seq_len(length(min9.list))
   min30Diff.list <- lapply(list.idx,FUN=function(idx){
-    var = min9.list[[idx]]
+    var <- min9.list[[idx]] %>%
+      # Remove the rows where mean, qfFinl, min, max, vari, and numSamp are missing 
+      dplyr::filter(!(is.na(mean) & is.na(qfFinl) & is.na(min) & is.na(max) & is.na(vari) & is.na(numSamp)))
     scalar = names(min9.list)[idx]
     var$timeBgn <- as.POSIXct(strptime(var$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
     var$timeEnd <- as.POSIXct(strptime(var$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
@@ -136,7 +139,7 @@ for(sitecode in site.list){
     timeChk <- difftime(OUT$timeBgn_B, OUT$timeEnd_A, units = "secs") # looking for short positive lag (flush time is 1 min for CH4 but 3 min for CO2 and H2O)
     bad <- timeChk < 45 | timeChk > 3600 | OUT$qfFinl_A == 1 | OUT$qfFinl_B == 1
     OUT <- OUT[!bad,]
-    
+
     # Compute tower level diff A-B
     # Swap any in which the diff is negative bc we always want higher level minus lower level
     #Using A as "top" and B as "bottom"
