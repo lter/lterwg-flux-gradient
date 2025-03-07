@@ -1,47 +1,32 @@
-# Diurnal:
 
-TIME.MBR <- function(df.list){
-  
-  for( i in 1:length(df.list)){
-    print(i)
-    df.list[[i]] <- df.list[[i]] %>%  as.data.frame %>% mutate( Hour = match_time %>% format( '%H') %>% as.numeric,
-                                                                YearMon = match_time %>% format( '%Y-%m'),
-                                                                TowerH = dLevelsAminusB_CO2)
-    
-  }
-  
-  return(df.list)
-}
 
-TIME.AEWP <- function(df.list){
-  
-  for( i in 1:length(df.list)){
-    print(i)
-    df.list[[i]] <- df.list[[i]] %>%  as.data.frame %>% mutate( Hour =  timeEnd_A %>% format( '%H')%>% as.numeric(),
-                                                                YearMon = timeEnd_A %>% format( '%Y-%m'),
-                                                                TowerH = dLevelsAminusB)
-    
-  }
-  
-  return(df.list)
-}
-
-DIURNAL <- function( dataframe, flux){
+# 'These are a series of functions used in the diurnal analysis:'
+DIURNAL <- function( dataframe, flux, flux.other , gas){
   
   dataframe <- dataframe %>% as.data.frame
   names(dataframe) <- substring( names( dataframe), 6)
   
-  yearmon <- unique(dataframe$YearMon)
+  dataframe$flux.other <- dataframe[, flux.other]
+  dataframe$flux <- dataframe[, flux]
+  dataframe.GrowS <- dataframe %>% mutate( Month = Month %>% as.numeric) %>% filter( Month >= 4,
+                                                                                     Month < 11, 
+                                                                                    !is.na(flux.other ),
+                                                                                     !is.na(flux),
+                                                                                    gas == gas)
+  
+  dataframe.GrowS$flux <- dataframe.GrowS$flux.other <- NULL
+  
+  yearmon <- unique(dataframe.GrowS$YearMon)
   
   new.data <- data.frame()
   Final.data <- data.frame()
   
-  for ( a in unique(dataframe$TowerH)) {
+  for ( a in unique(dataframe.GrowS$TowerH)) {
     print(a)
     for( i in yearmon){
       print(i)
       
-      try(subset <- dataframe %>% filter(YearMon == i, TowerH == a), silent = T)
+      try(subset <- dataframe.GrowS %>% filter(YearMon == i, TowerH == a), silent = T)
       
       subset$flux <-subset[,flux]
       
@@ -50,7 +35,7 @@ DIURNAL <- function( dataframe, flux){
       try(pred <- predict(model, newdata = subset, se=TRUE), silent = T)
       
       
-      try(new.data  <- dataframe %>% filter(YearMon == i, TowerH == a) %>% mutate(DIURNAL = pred$fit,
+      try(new.data  <- dataframe.GrowS %>% filter(YearMon == i, TowerH == a) %>% mutate(DIURNAL = pred$fit,
                                                                       DIURNAL.SE =pred$fit* qt(0.95 / 2 + 0.5, pred$df) ), silent = T)
       Final.data <- rbind(  Final.data, new.data)
     }
@@ -59,13 +44,14 @@ DIURNAL <- function( dataframe, flux){
   return( Final.data)
 }
 
-DIURNAL.COMPILE <- function( dataframe, FG_flux, EC_flux){
+DIURNAL.COMPILE <- function( dataframe, FG_flux, EC_flux, gas){
   
-  FG.DIURNAL <- try(DIURNAL( dataframe = dataframe,
-                               flux = FG_flux), silent = T)
+  FG.DIURNAL <- DIURNAL( dataframe = dataframe,
+                               flux = FG_flux,
+                             flux.other = EC_flux, gas)
   
   EC.DIURNAL <- try(DIURNAL( dataframe = dataframe,
-                          flux = EC_flux), silent = T)
+                          flux = EC_flux,flux.other = FG_flux, gas), silent = T)
   
   
   FG.DIURNAL.1 <- try( FG.DIURNAL %>% select(YearMon, Hour, DIURNAL, DIURNAL.SE, TowerH) %>%  mutate( FG= DIURNAL,
@@ -83,7 +69,7 @@ DIURNAL.COMPILE <- function( dataframe, FG_flux, EC_flux){
   
 }
 
-DIURNAL.COMPILE.Sites <- function( FG.tibble, FG_flux, EC_flux ) {
+DIURNAL.COMPILE.Sites <- function( FG.tibble, FG_flux, EC_flux, gas ) {
   
   sites <- names(FG.tibble)
   
@@ -95,7 +81,7 @@ DIURNAL.COMPILE.Sites <- function( FG.tibble, FG_flux, EC_flux ) {
     
     df = DIURNAL.COMPILE( dataframe= FG.tibble[i],
                                         FG_flux = FG_flux , 
-                                        EC_flux = EC_flux)
+                                        EC_flux = EC_flux, gas)
      
     Diurnal.list[i] <- list( df %>% mutate( DIFF = FG-EC) )
     print("Done")
@@ -141,7 +127,10 @@ Diurnal.Summary <- function(diurnal.tibble, TYP ) {
     summary.diurnal <- rbind( summary.diurnal, sub)
     
   }
-  summary.diurnal.final <- summary.diurnal %>% mutate(Type= TYP)
+  summary.diurnal.final <- summary.diurnal %>% mutate(Type= TYP, 
+                              Flux.deviation = (DIFF.mean/EC.mean)*100)
+  
+  
   return(summary.diurnal.final)
   
 }

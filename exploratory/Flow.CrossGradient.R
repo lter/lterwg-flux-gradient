@@ -44,6 +44,7 @@ eddy_diff_real <- function(site) {
 #' df is the dataframe of interest
 
 cross_grad_flag <- function(df,K){
+  
   df <- cbind(df, cross_grad_flag = NA)
   df$cross_grad_flag <- ifelse(df$K < 0,1,0 )
   return(df)

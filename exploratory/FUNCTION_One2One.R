@@ -1,51 +1,118 @@
 # Function to produce 1 to 1 plot by height:
 
 # One to One PLOT: ####
-one2one.plots.co2 <- function ( MBR.DF, AE.DF, WP.DF){ 
+
+one2one.plots <- function ( MBR.DF, AE.DF, WP.DF, gas){ 
   
   MBR.DF <- MBR.DF %>% as.data.frame
   names(MBR.DF) <- substring( names( MBR.DF), 6)
   
   AE.DF <- AE.DF %>% as.data.frame
-  names(AE.DF) <- substring( names( AE.DF), 6)
-  
+  names(AE.DF) <- substring( names( AE.DF), 6) 
+
   WP.DF <- WP.DF %>% as.data.frame
   names(WP.DF) <- substring( names( WP.DF), 6)
   
+  if( gas == 'CO2'){
+ 
+    AE.DF <- AE.DF %>% filter(gas == "CO2")
+    WP.DF <- WP.DF %>% filter(gas == "CO2")
+    MBR.DF <- MBR.DF %>% filter(gas == "CO2")
+    
+    p.1 <- ggplot(data = MBR.DF , aes(x = FC_turb_interp, y = FG_mean ))  + 
+  stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
+  geom_point(alpha=0.1) +
+      stat_cor(aes(label = paste(after_stat(rr.label), after_stat(..p.label..), sep = "~`,`~")), # adds R^2 and p-value
+               r.accuracy = 0.01,
+               p.accuracy = 0.001,
+               label.x = -30, label.y = 30, size = 3) +
+      stat_regline_equation(aes(label = ..eq.label..), # adds equation to linear regression
+                            label.x = -30, label.y = 20, size =3) +
+      geom_abline(intercept = 0, slope = 1, col = 'grey50',linetype="dashed") + 
+      facet_wrap(~dLevelsAminusB, ncol = length(unique(MBR.DF$dLevelsAminusB)) ) + 
+  ylab("MBR") + xlim(-30, 30)+ ylim(-30, 30) + xlab("EC") +theme_bw()
+    
+    
+    p.2 <- ggplot(data = WP.DF  , aes(x = FC_turb_interp, y = FG_mean ))  + 
+      stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
+      geom_point(alpha=0.1) +
+      stat_cor(aes(label =paste(after_stat(rr.label), after_stat(..p.label..), sep = "~`,`~")), # adds R^2 and p-value
+               r.accuracy = 0.01,
+               p.accuracy = 0.001,
+               label.x = -30, label.y = 30, size = 3) +
+      stat_regline_equation(aes(label = ..eq.label..), # adds equation to linear regression
+                            label.x = -30, label.y = 20, size =3) +
+      geom_abline(intercept = 0, slope = 1, col = 'grey50',linetype="dashed") + 
+      facet_wrap(~ dLevelsAminusB, ncol = length(unique(WP.DF$dLevelsAminusB ))) + 
+      ylab("WP")+ xlim(-30, 30)+ ylim(-30, 30) + xlab("EC")+theme_bw()
+    
+    p.3 <- ggplot(data = AE.DF  ,aes(x = FC_turb_interp, y = FG_mean ))  + 
+      stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
+      geom_point(alpha=0.1) +
+      stat_cor(aes(label = paste(after_stat(rr.label), after_stat(..p.label..), sep = "~`,`~")), # adds R^2 and p-value
+               r.accuracy = 0.01,
+               p.accuracy = 0.001,
+               label.x = -30, label.y = 30, size = 3) +
+      stat_regline_equation(aes(label = ..eq.label..), # adds equation to linear regression
+                            label.x = -30, label.y = 20, size =3) +
+      geom_abline(intercept = 0, slope = 1, col = 'grey50',linetype="dashed") + 
+      facet_wrap(~ dLevelsAminusB, ncol = length(unique(AE.DF$dLevelsAminusB ))) +
+      ylab("AE")+ xlim(-30, 30)+ ylim(-30, 30) + xlab("EC")+theme_bw()
+      
+      final.plot <- ggpubr::ggarrange(p.1, p.3, p.2,
+                                    ncol=1, nrow=3)
+  }
   
-p.1 <- ggplot(data = MBR.DF ,aes(x = FC_turb_interp_CO2, y = FCO2_MBR_H2Otrace_mean ))  + stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + geom_point(alpha=0.1) +
-  stat_cor(aes(label = paste(..rr.label.., ..p.label.., sep = "~`,`~")), # adds R^2 and p-value
-           r.accuracy = 0.01,
-           p.accuracy = 0.001,
-           label.x = -30, label.y = 30, size = 3) +
-  stat_regline_equation(aes(label = ..eq.label..), # adds equation to linear regression
-                        label.x = -30, label.y = 20, size =3) +
-  geom_abline(intercept = 0, slope = 1, col = 'grey50',linetype="dashed") + 
-  facet_wrap(~dLevelsAminusB_CO2, ncol = length(unique(MBR.DF$dLevelsAminusB_CO2)) ) + ylab("MBR") + xlim(-30, 30)+ ylim(-30, 30) + xlab("EC") +theme_bw()
-
-
-p.2 <- ggplot(data = WP.DF  ,aes(x = FC_nee_interp, y = FG_mean ))  + stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + geom_point(alpha=0.1) +
-  stat_cor(aes(label = paste(..rr.label.., ..p.label.., sep = "~`,`~")), # adds R^2 and p-value
-           r.accuracy = 0.01,
-           p.accuracy = 0.001,
-           label.x = -30, label.y = 30, size = 3) +
-  stat_regline_equation(aes(label = ..eq.label..), # adds equation to linear regression
-                        label.x = -30, label.y = 20, size =3) +
-  geom_abline(intercept = 0, slope = 1, col = 'grey50',linetype="dashed") + 
-  facet_wrap(~ dLevelsAminusB, ncol = length(unique(WP.DF$dLevelsAminusB ))) + ylab("WP")+ xlim(-30, 30)+ ylim(-30, 30) + xlab("EC")+theme_bw()
-
-p.3 <- ggplot(data = AE.DF  ,aes(x = FC_nee_interp, y = FG_mean ))  + stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + geom_point(alpha=0.1) +
-  stat_cor(aes(label = paste(..rr.label.., ..p.label.., sep = "~`,`~")), # adds R^2 and p-value
-           r.accuracy = 0.01,
-           p.accuracy = 0.001,
-           label.x = -30, label.y = 30, size = 3) +
-  stat_regline_equation(aes(label = ..eq.label..), # adds equation to linear regression
-                        label.x = -30, label.y = 20, size =3) +
-  geom_abline(intercept = 0, slope = 1, col = 'grey50',linetype="dashed") + 
-  facet_wrap(~ dLevelsAminusB, ncol = length(unique(AE.DF$dLevelsAminusB ))) + ylab("AE")+ xlim(-30, 30)+ ylim(-30, 30) + xlab("EC")+theme_bw()
-
-final.plot <- ggpubr::ggarrange(p.1, p.3, p.2,
-                  ncol=1, nrow=3)
+  if( gas == 'H2O'){  
+    
+    AE.DF <- AE.DF %>% filter(gas == "H2O")
+    WP.DF <- WP.DF %>% filter(gas == "H2O")
+    MBR.DF <- MBR.DF %>% filter(gas == "H2O")
+    
+    p.1 <- ggplot(data = MBR.DF , aes(x = FC_turb_interp, y = FG_mean ))  + 
+      stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
+      geom_point(alpha=0.1) +
+      stat_cor(aes(label = paste(..rr.label.., ..p.label.., sep = "~`,`~")), # adds R^2 and p-value
+               r.accuracy = 0.01,
+               p.accuracy = 0.001,
+               label.x = -30, label.y = 30, size = 3) +
+      stat_regline_equation(aes(label = ..eq.label..), # adds equation to linear regression
+                            label.x = -30, label.y = 20, size =3) +
+      geom_abline(intercept = 0, slope = 1, col = 'grey50',linetype="dashed") + 
+      facet_wrap(~dLevelsAminusB, ncol = length(unique(MBR.DF$dLevelsAminusB)) ) + 
+      ylab("MBR") + xlim(-30, 30)+ ylim(-30, 30) + xlab("EC") +theme_bw()
+    
+    
+    p.2 <- ggplot(data = WP.DF  , aes(x = FC_turb_interp, y = FG_mean ))  + 
+      stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
+      geom_point(alpha=0.1) +
+      stat_cor(aes(label = paste(..rr.label.., ..p.label.., sep = "~`,`~")), # adds R^2 and p-value
+               r.accuracy = 0.01,
+               p.accuracy = 0.001,
+               label.x = -30, label.y = 30, size = 3) +
+      stat_regline_equation(aes(label = ..eq.label..), # adds equation to linear regression
+                            label.x = -30, label.y = 20, size =3) +
+      geom_abline(intercept = 0, slope = 1, col = 'grey50',linetype="dashed") + 
+      facet_wrap(~ dLevelsAminusB, ncol = length(unique(WP.DF$dLevelsAminusB ))) + 
+      ylab("WP")+ xlim(-30, 30)+ ylim(-30, 30) + xlab("EC")+theme_bw()
+    
+    p.3 <- ggplot(data = AE.DF  ,aes(x = FC_turb_interp, y = FG_mean ))  + 
+      stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
+      geom_point(alpha=0.1) +
+      stat_cor(aes(label = paste(..rr.label.., ..p.label.., sep = "~`,`~")), # adds R^2 and p-value
+               r.accuracy = 0.01,
+               p.accuracy = 0.001,
+               label.x = -30, label.y = 30, size = 3) +
+      stat_regline_equation(aes(label = ..eq.label..), # adds equation to linear regression
+                            label.x = -30, label.y = 20, size =3) +
+      geom_abline(intercept = 0, slope = 1, col = 'grey50',linetype="dashed") + 
+      facet_wrap(~ dLevelsAminusB, ncol = length(unique(AE.DF$dLevelsAminusB ))) + 
+      ylab("AE")+ xlim(-30, 30)+ ylim(-30, 30) + xlab("EC")+theme_bw()
+      
+      final.plot <- ggpubr::ggarrange(p.1, p.3, p.2,
+                                      ncol=1, nrow=3)
+    }
+ 
 
 return(final.plot )
 }
@@ -59,10 +126,10 @@ linear.parms <- function ( Y, X, DF, TYPE){
   
   linear.parms <- data.frame( Intercept =model$coefficients[1] , Slope = model$coefficients[2],
                               R2= summary(model)$r.squared, RMSE= rmse) %>% 
-    mutate(Apprach = TYPE)
+    mutate( Approach = TYPE)
 }
 
-one2one.parms.co2 <- function ( MBR.DF, AE.DF, WP.DF){
+one2one.parms <- function ( MBR.DF, AE.DF, WP.DF, gas){
   
   MBR.DF <- MBR.DF %>% as.data.frame
   names(MBR.DF) <- substring( names( MBR.DF), 6)
@@ -78,41 +145,87 @@ one2one.parms.co2 <- function ( MBR.DF, AE.DF, WP.DF){
                                     Slope = as.numeric() ,
                                     R2 = as.numeric() ,
                                     RMSE = as.numeric() , 
-                                    Apprach = as.character() , 
+                                    Approach = as.character() , 
                                     dLevelsAminusB = as.character() )
   
-  for ( a in unique(MBR.DF$dLevelsAminusB_CO2)){
+  if(gas == 'CO2'){ 
+    
+    AE.DF <- AE.DF %>% filter(gas == "CO2")
+    WP.DF <- WP.DF %>% filter(gas == "CO2")
+    MBR.DF <- MBR.DF %>% filter(gas == "CO2")
+  
+  for ( a in unique( AE.DF$dLevelsAminusB)){
     print(a)
     
-    linear.parms.mbr <- try(linear.parms( Y= 'FCO2_MBR_H2Otrace_mean', 
-                                     X='FC_turb_interp_CO2', 
-                                     DF = MBR.DF %>% 
-                                       filter(dLevelsAminusB_CO2 == a), TYPE= 'MBR'), silent = T)
-    linear.parms.AE <- try(linear.parms( Y= 'FG_mean', 
-                                   X='FC_nee_interp', 
+    linear.parms.mbr <- linear.parms( Y= 'FG_mean', 
+                                          X='FC_turb_interp', 
+                                          DF = MBR.DF %>% 
+                                            filter(dLevelsAminusB == a),
+                                          TYPE= 'MBR')
+    
+    linear.parms.AE <- linear.parms( Y= 'FG_mean', 
+                                   X='FC_turb_interp', 
                                    DF = AE.DF %>% 
                                     filter(dLevelsAminusB == a),
-                                  TYPE= 'AE'), silent = T)
+                                  TYPE= 'AE')
   
-  linear.parms.WP <- try(linear.parms( Y= 'FG_mean', 
-                                  X='FC_nee_interp', 
+    linear.parms.WP <-linear.parms( Y= 'FG_mean', 
+                                  X='FC_turb_interp', 
                                   DF = WP.DF %>% 
                                     filter(dLevelsAminusB == a),
-                                  TYPE= 'WP'), silent = T)
+                                  TYPE= 'WP')
   
   
-  linear.parms <- rbind(linear.parms.mbr, linear.parms.AE, linear.parms.WP) %>% mutate( dLevelsAminusB = a) 
+  linear.parms.data <- rbind(linear.parms.mbr, linear.parms.AE, linear.parms.WP) %>% as.data.frame %>% mutate( dLevelsAminusB = a) 
 
-  linear.parms.final <- rbind( linear.parms.final , linear.parms )
+  linear.parms.final <- rbind( linear.parms.final , linear.parms.data )
     
   }
   
   row.names(linear.parms.final) <- NULL
+  }
+  
+  if(gas == 'H2O'){ 
+    
+    AE.DF <- AE.DF %>% filter(gas == "H2O")
+    WP.DF <- WP.DF %>% filter(gas == "H2O")
+    MBR.DF <- MBR.DF %>% filter(gas == "H2O")
+    
+    for ( a in unique(AE.DF$dLevelsAminusB)){
+      print(a)
+      
+      linear.parms.mbr <- linear.parms( Y= 'FG_mean', 
+                                            X='FC_turb_interp', 
+                                            DF = MBR.DF %>% 
+                                              filter(dLevelsAminusB == a),
+                                            TYPE= 'MBR')
+      linear.parms.AE <- linear.parms( Y= 'FG_mean', 
+                                           X='FC_turb_interp', 
+                                           DF = AE.DF %>% 
+                                             filter(dLevelsAminusB == a),
+                                           TYPE= 'AE')
+      
+      linear.parms.WP <- linear.parms( Y= 'FG_mean', 
+                                           X='FC_turb_interp', 
+                                           DF = WP.DF %>% 
+                                             filter(dLevelsAminusB == a),
+                                           TYPE= 'WP')
+      
+      
+      linear.parms.data <- rbind(linear.parms.mbr, linear.parms.AE, linear.parms.WP) %>% as.data.frame %>% mutate( dLevelsAminusB = a) 
+      
+      linear.parms.final <- rbind( linear.parms.final , linear.parms.data )
+      
+    }
+    
+    row.names(linear.parms.final) <- NULL
+  }
+  
   
   return(linear.parms.final)
 }
 
-one2one.parms.site <- function ( MBR.tibble, AE.tibble, WP.tibble){
+one2one.parms.site <- function ( MBR.tibble, AE.tibble, WP.tibble, gas){
   
   sites <- names( MBR.tibble)
   
@@ -120,21 +233,20 @@ one2one.parms.site <- function ( MBR.tibble, AE.tibble, WP.tibble){
                                    Slope = as.numeric() ,
                                    R2 = as.numeric() ,
                                    RMSE = as.numeric() , 
-                                   Apprach = as.character() ,
+                                   Approach = as.character() ,
                                    dLevelsAminusB = as.character(), 
                                    Site= as.character())
   
   for ( i in sites){
     print(i)
     
-    df.parms <- one2one.parms.co2( MBR.DF= MBR.tibble[i] , 
+    df.parms <- one2one.parms( MBR.DF= MBR.tibble[i] , 
                       AE.DF = AE.tibble[i], 
-                      WP.DF= WP.tibble[i]) %>%
+                      WP.DF= WP.tibble[i], gas) %>%
       mutate( Site = i)
     
     site.tibble_parms  <- rbind( site.tibble_parms ,  df.parms)
   }
   
-  site.tibble_parms <- site.tibble_parms %>% filter( Intercept > -100 )
  return(site.tibble_parms ) 
 }

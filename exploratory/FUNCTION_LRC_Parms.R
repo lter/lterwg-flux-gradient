@@ -8,13 +8,13 @@ library(ggpubr)
 
 # Example of priors: 
 
-priors.lrc <-  prior(normal(-0.01, 0.1), nlpar = "a1", lb=-0.2, ub= 0) +
-  prior(normal( -7.65 ,  0.33), nlpar = "ax", lb=-30, ub= -0.01) +
-  prior(normal(2.10, 0.11), nlpar = "r", lb=1.9, ub= 2.2)
+priors.lrc <-  prior(normal(-0.01, 0.02), nlpar = "a1", lb=-1, ub= 0) +
+prior(normal( -1 ,  2), nlpar = "ax", lb=-30, ub= -0.01) +
+prior(normal(1, 2), nlpar = "r", lb=0, ub= 30)
 
 
 LRC_PARMS <- function( df, iterations, priors.lrc, idx, PAR, nee){
-  
+ 
   data.frame <- df %>% as.data.frame
   names(data.frame) <- substring( names(  data.frame), 6)
 
@@ -22,8 +22,8 @@ LRC_PARMS <- function( df, iterations, priors.lrc, idx, PAR, nee){
   data.frame$PAR <- data.frame[,PAR] %>% as.numeric
   data.frame$idx <- data.frame[,idx] %>% as.character
   data.frame$nee <-data.frame[,nee] %>% as.numeric
-
-  data.frame.f <- data.frame %>% select(idx, PAR, nee, TowerH) %>% filter( PAR > 0)
+ 
+  data.frame.f <- data.frame %>% select(idx, PAR, nee, TowerH, gas) %>% filter( PAR > 0 & gas =="CO2")
   
   equation <- nee ~ (a1 * PAR * ax)/(a1 * PAR + ax) - r
   
@@ -52,6 +52,7 @@ LRC_PARMS <- function( df, iterations, priors.lrc, idx, PAR, nee){
   for ( a in unique(data.frame.f$TowerH)) {
    
      print(a)
+    
     df <- data.frame.f %>% filter(TowerH == a) %>% na.omit()
   
     for ( i in unique(df$idx) ){
@@ -59,6 +60,9 @@ LRC_PARMS <- function( df, iterations, priors.lrc, idx, PAR, nee){
       
       # Subset the file:
       df.n <- df %>% filter(idx == i) %>% na.omit()
+      
+      #priors.lrc <- get_prior(bf(equation, a1+ax+r ~ 1, nl=TRUE),
+                             # data = df.n, family = poisson())
       
       try(model.brms <- brm( bf( equation, a1+ax+r ~ 1, nl=TRUE),
                              prior = priors.lrc , data = df.n, iter = iterations, cores =3, chains = 1, backend = "cmdstanr"), silent= T)
@@ -105,7 +109,8 @@ LRC_PARMS <- function( df, iterations, priors.lrc, idx, PAR, nee){
 }
 
 
-priors.trc <- prior(normal( 0.5 ,  0.03), nlpar = "b", lb=0.001, ub= 0.09)
+priors.trc <-  prior(normal(0.2 , 1), nlpar = "a", lb=0.1, ub= 1) +
+  prior(normal( 0.5 ,  0.03), nlpar = "b", lb=0.001, ub= 0.09)
 
 
 TRC_PARMS <- function( df, iterations, priors.trc, idx, nee, TA, PAR){
@@ -114,12 +119,12 @@ TRC_PARMS <- function( df, iterations, priors.trc, idx, nee, TA, PAR){
   names(data.frame) <- substring( names(  data.frame), 6)
   
   
-  data.frame$TA <- data.frame[,TA] %>% as.numeric
+  data.frame$TA <- data.frame[, TA] %>% as.numeric
   data.frame$idx <- data.frame[,idx] %>% as.character
   data.frame$nee <-data.frame[,nee] %>% as.numeric
   data.frame$PAR <-data.frame[,PAR] %>% as.numeric
   
-  data.frame.f <- data.frame %>% select(idx, PAR, nee, TA, TowerH) %>% filter( PAR < 50)
+  data.frame.f <- data.frame %>% select(idx, PAR, nee, TA, TowerH, gas) %>% filter( PAR < 50, gas == "CO2")
   
   equation = nee ~ a * exp(b*TA)
   
@@ -140,6 +145,7 @@ TRC_PARMS <- function( df, iterations, priors.trc, idx, nee, TA, PAR){
                           TowerH = as.character()), silent = T)
   for ( a in unique(data.frame.f$TowerH)) {
     print(a) 
+    
     df <- data.frame.f %>% filter(TowerH == a) %>% na.omit()
     
     for ( i in unique(df$idx)){
@@ -149,7 +155,10 @@ TRC_PARMS <- function( df, iterations, priors.trc, idx, nee, TA, PAR){
       try( df.trc <- df %>% filter(idx == i), silent= T)
       # get priors:
       
-      try(model.brms <-  brm( bf(nee ~ a * exp(b*TA),a+b ~ 1, nl=TRUE),
+     #priors.trc <- get_prior(bf(equation, a+b ~ 1, nl=TRUE), 
+                              #data = df.trc, family = poisson())
+                          
+      try(model.brms <-  brm( bf(nee ~ a * exp(b*TA), a+b ~ 1, nl=TRUE),
                               prior = priors.trc , data = df.trc, 
                               backend = "cmdstanr", iter = iterations, cores =4, seed=101), silent= T)
       
@@ -198,27 +207,29 @@ PARMS_Sites <- function(sites.tibble,
   
   site.tibble.parms <- list()
   
-  for( site in names(sites.tibble)){
+  for( site in df){
     
-    parms.lrc <- LRC_PARMS( df = sites.tibble[site], 
-                                    iterations = iterations, 
-                                    priors= priors.lrc, 
-                                    idx = idx , 
-                                    PAR = PAR,
-                                    nee = nee )
+    message(paste("Working with",site))
     
-    parms.trc <- TRC_PARMS( df = sites.tibble[site], 
+    try( parms.lrc <- LRC_PARMS( df = sites.tibble[site], iterations = iterations,priors= priors.lrc, idx = idx , PAR = PAR, nee = nee ), silent =T)
+    
+    message("Done with LRC")
+    
+    try(parms.trc <- TRC_PARMS( df = sites.tibble[site], 
                         iterations = iterations, 
                         priors= priors.trc, 
                         idx = idx , 
                         TA = TA,
                         PAR = PAR,
-                        nee = nee )
+                        nee = nee ), silent =T)
     
     parameters <- parms.lrc %>% full_join( parms.trc, by= c('idx', 'TowerH'))
     
+    message("Done with TRC")
     
     site.tibble.parms[site] <-  list(parameters)
+    message(paste("Done with",site))
+    
   }
   
   
