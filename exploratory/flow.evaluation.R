@@ -6,7 +6,7 @@ library(ggplot2)
 library(ggpubr)
 
 # Import data from a  site:
-localdir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/Data'
+localdir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/data'
 
 setwd(localdir)
 
@@ -17,18 +17,21 @@ load( "SITES_WP_9min.Rdata")
 load( "SITES_AE_9min.Rdata")
 load( "SITES_MBR_9min.Rdata")
 
+source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/Function.Format_MBR.R' )
+SITES_MBR_30min.r <- apply_format_MBR(SITES_MBR_30min)
+
 # Add flags to dataframe:
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/functions/flag.all.gas.stability.R' )
 
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/Flow.CrossGradient.R' )
 
 for ( i in 1:length(SITES_AE_30min )){
-  SITES_WP_9min[[i]] <- flag.all.gas.stability(flux.df = SITES_WP_9min[[i]], L='L_obukhov')
-  SITES_WP_30min[[i]] <- flag.all.gas.stability(flux.df = SITES_WP_30min[[i]], L='L_obukhov')
-  SITES_AE_9min[[i]] <- flag.all.gas.stability(flux.df = SITES_AE_9min[[i]], L='L_obukhov')
-  SITES_AE_30min[[i]] <- flag.all.gas.stability(flux.df = SITES_AE_30min[[i]], L='L_obukhov')
-  SITES_MBR_9min[[i]] <- flag.all.gas.stability(flux.df = SITES_MBR_9min[[i]], L='L_obukhov_CO2')
-  SITES_MBR_30min[[i]] <- flag.all.gas.stability(flux.df = SITES_MBR_30min[[i]], L='L_obukhov_CO2')
+  SITES_WP_9min[[i]] <- flag.all.gas.stability(flux.df = SITES_WP_9min[[i]], L='L_obukhov', z='z_veg_aero', d='z_displ_calc')
+  SITES_WP_30min[[i]] <- flag.all.gas.stability(flux.df = SITES_WP_30min[[i]], L='L_obukhov', z='z_veg_aero', d='z_displ_calc')
+  SITES_AE_9min[[i]] <- flag.all.gas.stability(flux.df = SITES_AE_9min[[i]], L='L_obukhov', z='z_veg_aero', d='z_displ_calc')
+  SITES_AE_30min[[i]] <- flag.all.gas.stability(flux.df = SITES_AE_30min[[i]], L='L_obukhov', z='z_veg_aero', d='z_displ_calc')
+  SITES_MBR_9min[[i]] <- flag.all.gas.stability(flux.df = SITES_MBR_9min[[i]], L='L_obukhov_CO2', z='z_veg_aero_CO2', d='z_displ_calc_CO2')
+  SITES_MBR_30min[[i]] <- flag.all.gas.stability(flux.df = SITES_MBR_30min[[i]], L='L_obukhov_CO2', z='z_veg_aero_CO2', d='z_displ_calc_CO2')
   # Calculate the difference between EC and gradient FLux:
   SITES_AE_30min[[i]] <- SITES_AE_30min[[i]] %>% mutate(Diff_EC_GF= FC_turb_interp - FG_mean )
   SITES_WP_30min[[i]] <- SITES_WP_30min[[i]] %>% mutate(Diff_EC_GF= FC_turb_interp - FG_mean )
@@ -41,7 +44,7 @@ SITES_AE_30min <- crossGradientDF(SITES_AE_30min )
 SITES_WP_30min <- crossGradientDF(SITES_WP_30min)
 
 # Canopy grouping:
-setwd('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/Data')
+setwd('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/data')
 
 dir <- c('HARV/data/HARV/HARV_attr.Rdata',
          'GUAN/data/GUAN/GUAN_attr.Rdata',
@@ -57,77 +60,129 @@ for( i in 1:length(dir)){
   rm(attr.df)
 }
 
-# Application of Flitering Functions: ####
+# Application of Filter Functions: ####
 
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_Filter_FG.R' )
+source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_SITELIST_FORMATTING.R' )
 
-# Need to add in filter function by EC and add the SD of the gradient flux. 
+message('The current filtering is not gas dependent')
 
-SITES_MBR_30min_FILTER <- EC.filter.MBR ( site.tibble = SITES_MBR_30min,
-                flux.limit = 50, 
-                ustar.filter= 0.3, 
-                FG_sd.limit = 3,
-                diff.limit = 10, 
-                AE.tibble = SITES_AE_30min)
+SITES_MBR_30min_FILTER <- Apply.filter ( site.tibble = SITES_MBR_30min.r,
+                                         flux.limit = 50, 
+                                         ustar.filter= 0.3, 
+                                         FG_sd.limit = 3,
+                                         diff.limit = 1000,
+                                         dConc.limit = 3)  %>% TIME_TOWER_LEVEL_FORMAT( time='match_time', dLevelsAminusB.colname= 'dLevelsAminusB')
 
-SITES_AE_30min_FILTER <- EC.filter.AEWP ( site.tibble = SITES_AE_30min,
+SITES_AE_30min_FILTER <- Apply.filter( site.tibble = SITES_AE_30min,
                  flux.limit = 50, 
                  ustar.filter= 0.3, 
                  FG_sd.limit = 3,
-                 diff.limit = 10)
+                 diff.limit = 1000,
+                 dConc.limit = 3)  %>% TIME_TOWER_LEVEL_FORMAT( time='match_time', dLevelsAminusB.colname= 'dLevelsAminusB')
 
-SITES_WP_30min_FILTER <- EC.filter.AEWP ( site.tibble = SITES_WP_30min,
+SITES_WP_30min_FILTER <- Apply.filter ( site.tibble = SITES_WP_30min,
                                           flux.limit = 50, 
                                           ustar.filter= 0.3, 
-                                          FG_sd.limit = 3,
-                                          diff.limit = 10)
-# I need to perform filtering for AE:
+                                          FG_sd.limit = 4,
+                                          diff.limit = 1000,
+                                          dConc.limit = 3)  %>% TIME_TOWER_LEVEL_FORMAT( time='match_time', dLevelsAminusB.colname= 'dLevelsAminusB')
+
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_One2One.R' )
 
-sites <- names( SITES_MBR_30min_FILTER)
-
 dir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/FIGURES'
+
+sites <- names(SITES_WP_30min_FILTER  )
 
 for ( i in sites){
   print(i)
   
-  try(plot.it <- one2one.plots.co2( MBR.DF = SITES_MBR_30min_FILTER[i] , 
+  plot.it.CO2 <- one2one.plots ( MBR.DF = SITES_MBR_30min_FILTER[i] , 
                                 AE.DF = SITES_AE_30min_FILTER[i], 
-                                WP.DF = SITES_WP_30min_FILTER[i]) , silent = T)
+                                WP.DF = SITES_WP_30min_FILTER[i] , gas = 'CO2')
   print("Ready to plot") 
  
-  print(plot.it)
+  print(plot.it.CO2)
   
   setwd(dir)
-  png(paste("One2One_", i,".png", sep=""), width=6, 
+  
+  png(paste("One2One_CO2", i,".png", sep=""), width=6, 
               height=5, units="in", res=1200)
-          print(plot.it)
+          print(plot.it.CO2)
           dev.off()
           
    print("done")       
+   
+   try(plot.it.H2O <- one2one.plots ( MBR.DF = SITES_MBR_30min_FILTER[i] , 
+                                      AE.DF = SITES_AE_30min_FILTER[i], 
+                                      WP.DF = SITES_WP_30min_FILTER[i] , gas = 'H2O'), silent = T)
+   print("Ready to plot") 
+   
+   print(plot.it.H2O)
+   
+   setwd(dir)
+   
+   png(paste("One2One_H2O", i,".png", sep=""), width=6, 
+       height=5, units="in", res=1200)
+   print(plot.it.H2O)
+   dev.off()
+   
+   print("done")       
 }
+
+SITES_One2One_CO2 <- one2one.parms.site(MBR.tibble = SITES_MBR_30min_FILTER,
+                                    AE.tibble = SITES_AE_30min_FILTER,
+                                    WP.tibble = SITES_WP_30min_FILTER, 
+                                    gas="CO2")
+
+SITES_One2One_H2O <- one2one.parms.site(MBR.tibble = SITES_MBR_30min_FILTER,
+                                        AE.tibble = SITES_AE_30min_FILTER,
+                                        WP.tibble = SITES_WP_30min_FILTER, 
+                                        gas="H2O")
+
+SITES_One2One_Best_Level <- SITES_One2One %>% 
+  reframe(.by =c(Site, Approach ), maxR2 = max(R2)) %>%
+  left_join(SITES_One2One, by=c('Site', 'Approach'))%>% 
+  filter(maxR2 ==  R2)
+
+SITES_MBR_30min_FILTER_BH <- list()
+SITES_AE_30min_FILTER_BH <- list()
+SITES_WP_30min_FILTER_BH <- list()
+
+for( site in unique(SITES_One2One_Best_Level$Site) ){
+  print(site)
+  
+  BH.MBR <- SITES_One2One_Best_Level %>% filter(Site == site, Approach=='MBR' )  %>% select(dLevelsAminusB)
+  SITES_MBR_30min_FILTER_BH[[site]] <-  SITES_MBR_30min_FILTER[[site]] %>% 
+    filter(dLevelsAminusB ==   BH.MBR$dLevelsAminusB)
+  
+  BH.AE <- SITES_One2One_Best_Level %>% filter(Site == site, Approach=='AE' )  %>% select(dLevelsAminusB)
+  SITES_AE_30min_FILTER_BH[[site]] <-  SITES_AE_30min_FILTER[[site]] %>% 
+    filter(dLevelsAminusB ==   BH.AE$dLevelsAminusB)
+  
+  BH.WP <- SITES_One2One_Best_Level %>% filter(Site == site, Approach=='WP' )  %>% select(dLevelsAminusB)
+  SITES_WP_30min_FILTER_BH[[site]] <-  SITES_WP_30min_FILTER[[site]] %>% 
+    filter(dLevelsAminusB ==   BH.WP$dLevelsAminusB)
+}
+
 
 # Fit Diurnal for that month:
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_DIURNAL.R' )
 
-
-SITES_MBR_30min_FILTER <- TIME.MBR(df.list= SITES_MBR_30min_FILTER) 
-SITES_WP_30min_FILTER  <- TIME.AEWP(df.list= SITES_WP_30min_FILTER)
-SITES_AE_30min_FILTER  <- TIME.AEWP(df.list= SITES_AE_30min_FILTER)
-
-
 # Calculate Diurnal Patterns by Year-month:
+ 
+# add gas to the function!!!!
 Diurnal.MBR <- DIURNAL.COMPILE.Sites( FG.tibble =  SITES_MBR_30min_FILTER, 
-                               FG_flux = 'FCO2_MBR_H2Otrace_mean', 
-                               EC_flux = 'FC_turb_interp_CO2')
+                               FG_flux = 'FG_mean', 
+                               EC_flux = 'FC_turb_interp', gas = "CO2")
 
 Diurnal.WP <- DIURNAL.COMPILE.Sites( FG.tibble =  SITES_WP_30min_FILTER, 
                                FG_flux = 'FG_mean', 
-                               EC_flux = 'FC_turb_interp')
+                               EC_flux = 'FC_turb_interp', gas = "CO2")
 
 Diurnal.AE <- DIURNAL.COMPILE.Sites( FG.tibble =  SITES_AE_30min_FILTER, 
                                      FG_flux = 'FG_mean', 
-                                     EC_flux = 'FC_turb_interp')
+                                     EC_flux = 'FC_turb_interp', gas = "CO2")
 
 # DIURNAL PLOTS:
 for ( i in sites){
@@ -166,11 +221,13 @@ diurnal.summary <- Diurnal.Summary(diurnal.tibble = Diurnal.MBR, TYP='MBR' ) %>%
 
 # Adjust the order of type:
 
+#standardize across sites:
+
 diurnal.summary$Type <- factor( diurnal.summary$Type, levels= c('MBR', 'AE', 'WP'))
 
 for ( i in sites){
   
-p1 <- diurnal.summary %>% filter( Site == i) %>%  ggplot( ) + geom_col( aes( y =DIFF.mean, x = TowerH)) + ylab('Diurnal Difference') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )
+p1 <- diurnal.summary %>% filter( Site == i) %>%  ggplot( ) + geom_col( aes( y =Flux.deviation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )
   
  
   print(ggarrange( p1, nrow=1))
@@ -186,14 +243,13 @@ p1 <- diurnal.summary %>% filter( Site == i) %>%  ggplot( ) + geom_col( aes( y =
 }
 
 
-p1 <- diurnal.summary %>% filter( Site == 'HARV' ) %>%  ggplot( ) + geom_col( aes( y =DIFF.mean, x = TowerH)) + ylab('Diurnal Difference') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )
+p1 <- diurnal.summary %>% filter( Site == 'HARV' ) %>%  ggplot( ) + geom_col( aes( y =Flux.deviation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) ) + ylim(0, 300)
 
-p2 <- diurnal.summary %>% filter( Site == 'KONZ' ) %>%  ggplot( ) + geom_col( aes( y =DIFF.mean, x = TowerH)) + ylab('Diurnal Difference') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )
+p2 <- diurnal.summary %>% filter( Site == 'KONZ' ) %>%  ggplot( ) + geom_col( aes( y =Flux.deviation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )  + ylim(0, 300)
 
-p3 <- diurnal.summary %>% filter( Site == 'GUAN' ) %>%  ggplot( ) + geom_col( aes( y =DIFF.mean, x = TowerH)) + ylab('Diurnal Difference') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )
+p3 <- diurnal.summary %>% filter( Site == 'GUAN' ) %>%  ggplot( ) + geom_col( aes( y =Flux.deviation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )  + ylim(0, 300)
 
-p4 <- diurnal.summary %>% filter( Site == 'JORN' ) %>%  ggplot( ) + geom_col( aes( y =DIFF.mean, x = TowerH)) + ylab('Diurnal Difference') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )
-
+p4 <- diurnal.summary %>% filter( Site == 'JORN' ) %>%  ggplot( ) + geom_col( aes( y =Flux.deviation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )  + ylim(0, 300)
 
 png("Diurnal_Diff_sites.png", width=8, 
     height=8, units="in", res=1200)
@@ -203,57 +259,57 @@ dev.off()
 # Carbon Exchange PARMS: ####
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_LRC_Parms.R' )
 
-# Need to add a new Tair using the is a coloase of the hightest temperature filled with the lowest temperature when it is not present...
-
-SITES_MBR_30min_CPARMS_EC <- PARMS_Sites( sites.tibble = SITES_MBR_30min_FILTER, 
-                             iterations = 4000, 
+SITES_MBR_30min_CPARMS_EC <- PARMS_Sites( sites.tibble = SITES_MBR_30min_FILTER_BH, 
+                             iterations = 10000, 
                              priors.lrc= priors.lrc, 
                              priors.trc= priors.trc, 
                              idx = 'YearMon',
-                             PAR = 'PAR_CO2',
-                             nee = 'FC_nee_interp_CO2',
-                             TA = 'Tair1_CO2')
+                             PAR = 'PAR',
+                             nee = 'FC_turb_interp',
+                             TA = 'Tair')
 
-SITES_MBR_30min_CPARMS_FG <- PARMS_Sites( sites.tibble = SITES_MBR_30min_FILTER, 
-                                          iterations = 4000, 
+# Check that all the sites are in this thing!
+
+SITES_MBR_30min_CPARMS_FG <- PARMS_Sites( sites.tibble = SITES_MBR_30min_FILTER_BH, 
+                                          iterations = 10000, 
                                           priors.lrc= priors.lrc, 
                                           priors.trc= priors.trc, 
                                           idx = 'YearMon',
                                           PAR = 'PAR_CO2',
                                           nee = 'FCH4_MBR_CO2trace_mean' ,
-                                          TA = 'Tair1_CO2')
+                                          TA = 'Tair')
 
-SITES_AE_30min_CPARMS_EC <- PARMS_Sites( sites.tibble = SITES_AE_30min_FILTER, 
-                                         iterations = 4000, 
+SITES_AE_30min_CPARMS_EC <- PARMS_Sites( sites.tibble = SITES_AE_30min_FILTER_BH, 
+                                         iterations = 10000, 
                                          priors.lrc= priors.lrc, 
                                          priors.trc= priors.trc,
                                          idx = 'YearMon',
                                          PAR = 'PAR',
-                                         TA='Tair1',
+                                         TA='Tair',
                                          nee = 'FG_mean' )
 
 
-SITES_AE_30min_CPARMS_FG <- PARMS_Sites( sites.tibble = SITES_AE_30min_FILTER, 
-                                         iterations = 4000, 
+SITES_AE_30min_CPARMS_FG <- PARMS_Sites( sites.tibble = SITES_AE_30min_FILTER_BH, 
+                                         iterations = 10000, 
                                          priors.lrc= priors.lrc, 
                                          priors.trc= priors.trc,
                                          idx = 'YearMon',
                                          PAR = 'PAR',
-                                         TA='Tair1',
+                                         TA='Tair',
                                          nee = 'FG_mean' )
 
-SITES_WP_30min_CPARMS_EC <- PARMS_Sites( sites.tibble = SITES_WP_30min_FILTER, 
-                                         iterations = 4000, 
+SITES_WP_30min_CPARMS_EC <- PARMS_Sites( sites.tibble = SITES_WP_30min_FILTER_BH, 
+                                         iterations = 10000, 
                                          priors.lrc= priors.lrc, 
                                          priors.trc= priors.trc,
                                          idx = 'YearMon',
                                          PAR = 'PAR',
-                                         TA='Tair1',
+                                         TA='Tair',
                                          nee = 'FG_mean' )
 
-SITES_WP_30min_FILTER$GUAN$Tair5
-SITES_WP_30min_CPARMS_FG <- PARMS_Sites( sites.tibble = SITES_WP_30min_FILTER, 
-                                         iterations = 4000, 
+
+SITES_WP_30min_CPARMS_FG <- PARMS_Sites( sites.tibble = SITES_WP_30min_FILTER_BH, 
+                                         iterations = 10000, 
                                          priors.lrc= priors.lrc, 
                                          priors.trc= priors.trc,
                                          idx = 'YearMon',
@@ -265,9 +321,10 @@ save( SITES_MBR_30min_CPARMS_FG ,
       SITES_AE_30min_CPARMS_FG,
       SITES_AE_30min_CPARMS_EC,
       SITES_WP_30min_CPARMS_EC, 
-      SITES_WP_30min_CPARMS_FG , file= '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/Data/Evaluation/CarbonParms.Rdata')
+      SITES_WP_30min_CPARMS_FG , file= '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/data/CarbonParms.Rdata')
 
 # Calculate parms and compare the distribution of year_mon parms for the different approaches. 
+load('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/data/CarbonParms.Rdata')
 
 merge.CParms <- function( tibble1, tibble2,  TYP1, TYP2){
   
@@ -314,20 +371,20 @@ png("CarbonExchange_LRC_MBR.png", width=10,
     height=8, units="in", res=1200)
 
 ggarrange( 
-ggplot() + geom_violin(data = MBR.CPARMS$HARV , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield")+ ylim(-0.15,0) ,
-ggplot() + geom_violin(data = MBR.CPARMS$KONZ , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield")+ ylim(-0.15,0),
-ggplot() + geom_violin(data = MBR.CPARMS$GUAN , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield") + ylim(-0.15,0),
-ggplot() + geom_violin(data = MBR.CPARMS$JORN , aes( x= TYP, y = a1.mean, col= TowerH)) + ylab("Quantum Yield") + ylim(-0.15,0), 
+ggplot() + geom_violin(data = MBR.CPARMS$HARV , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield") ,
+ggplot() + geom_violin(data = MBR.CPARMS$KONZ , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield"),
+ggplot() + geom_violin(data = MBR.CPARMS$GUAN , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield") ,
+ggplot() + geom_violin(data = MBR.CPARMS$JORN , aes( x= TYP, y = a1.mean, col= TowerH)) + ylab("Quantum Yield") , 
 
-  ggplot() + geom_violin(data = MBR.CPARMS$HARV , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax")+ ylim(-10,-6) ,
-  ggplot() + geom_violin(data = MBR.CPARMS$KONZ , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax")+ ylim(-10,-6),
-  ggplot() + geom_violin(data = MBR.CPARMS$GUAN , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax") + ylim(-10,-6),
-  ggplot() + geom_violin(data = MBR.CPARMS$JORN , aes( x= TYP, y = ax.mean, col= TowerH)) + ylab("Amax") + ylim(-10,-6), 
+  ggplot() + geom_violin(data = MBR.CPARMS$HARV , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax") ,
+  ggplot() + geom_violin(data = MBR.CPARMS$KONZ , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax"),
+  ggplot() + geom_violin(data = MBR.CPARMS$GUAN , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax") ,
+  ggplot() + geom_violin(data = MBR.CPARMS$JORN , aes( x= TYP, y = ax.mean, col= TowerH)) + ylab("Amax"), 
 
-  ggplot() + geom_violin(data = MBR.CPARMS$HARV , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco")+ ylim(1.75,2.25) ,
-  ggplot() + geom_violin(data = MBR.CPARMS$KONZ , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco") + ylim(1.75,2.25) ,
-  ggplot() + geom_violin(data = MBR.CPARMS$GUAN , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco") + ylim(1.75,2.25) ,
-  ggplot() + geom_violin(data = MBR.CPARMS$JORN , aes( x= TYP, y = r.mean, col= TowerH)) + ylab("Amax")+ ylim(1.75,2.25) , ncol=4, nrow=3, labels= c("a.", "b." ,"c.", "d", "e.", "f." ,"g.", "h.","i.", "j." ,"k.", "l"))
+  ggplot() + geom_violin(data = MBR.CPARMS$HARV , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco") ,
+  ggplot() + geom_violin(data = MBR.CPARMS$KONZ , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco") ,
+  ggplot() + geom_violin(data = MBR.CPARMS$GUAN , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco")  ,
+  ggplot() + geom_violin(data = MBR.CPARMS$JORN , aes( x= TYP, y = r.mean, col= TowerH)) + ylab("Amax"), ncol=4, nrow=3, labels= c("a.", "b." ,"c.", "d", "e.", "f." ,"g.", "h.","i.", "j." ,"k.", "l"))
 
 dev.off()
 
@@ -337,19 +394,19 @@ png("CarbonExchange_LRC_AE.png", width=10,
 
 ggarrange( 
   ggplot() + geom_violin(data = AE.CPARMS$HARV , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield") ,
-  ggplot() + geom_violin(data = AE.CPARMS$KONZ , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield")+ ylim(-0.15,0),
-  ggplot() + geom_violin(data = AE.CPARMS$GUAN , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield") + ylim(-0.15,0),
-  ggplot() + geom_violin(data = AE.CPARMS$JORN , aes( x= TYP, y = a1.mean, col= TowerH)) + ylab("Quantum Yield") + ylim(-0.15,0), 
+  ggplot() + geom_violin(data = AE.CPARMS$KONZ , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield"),
+  ggplot() + geom_violin(data = AE.CPARMS$GUAN , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield") ,
+  ggplot() + geom_violin(data = AE.CPARMS$JORN , aes( x= TYP, y = a1.mean, col= TowerH)) + ylab("Quantum Yield") , 
   
   ggplot() + geom_violin(data = AE.CPARMS$HARV , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax") ,
-  ggplot() + geom_violin(data = AE.CPARMS$KONZ , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax")+ ylim(-10,-6),
-  ggplot() + geom_violin(data = AE.CPARMS$GUAN , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax") + ylim(-10,-6),
-  ggplot() + geom_violin(data = AE.CPARMS$JORN , aes( x= TYP, y = ax.mean, col= TowerH)) + ylab("Amax") + ylim(-10,-6), 
+  ggplot() + geom_violin(data = AE.CPARMS$KONZ , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax"),
+  ggplot() + geom_violin(data = AE.CPARMS$GUAN , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax") ,
+  ggplot() + geom_violin(data = AE.CPARMS$JORN , aes( x= TYP, y = ax.mean, col= TowerH)) + ylab("Amax") , 
   
   ggplot() + geom_violin(data = AE.CPARMS$HARV , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco") ,
-  ggplot() + geom_violin(data = AE.CPARMS$KONZ , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco") + ylim(1.75,2.25) ,
-  ggplot() + geom_violin(data = AE.CPARMS$GUAN , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco") + ylim(1.75,2.25) ,
-  ggplot() + geom_violin(data = AE.CPARMS$JORN , aes( x= TYP, y = r.mean, col= TowerH)) + ylab("Amax")+ ylim(1.75,2.25) , ncol=4, nrow=3, labels= c("a.", "b." ,"c.", "d", "e.", "f." ,"g.", "h.","i.", "j." ,"k.", "l"))
+  ggplot() + geom_violin(data = AE.CPARMS$KONZ , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco")  ,
+  ggplot() + geom_violin(data = AE.CPARMS$GUAN , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco") ,
+  ggplot() + geom_violin(data = AE.CPARMS$JORN , aes( x= TYP, y = r.mean, col= TowerH)) + ylab("Amax"), ncol=4, nrow=3, labels= c("a.", "b." ,"c.", "d", "e.", "f." ,"g.", "h.","i.", "j." ,"k.", "l"))
 
 dev.off()
 
@@ -358,21 +415,18 @@ png("CarbonExchange_LRC_WP.png", width=10,
 
 ggarrange( 
   ggplot() + geom_violin(data = WP.CPARMS$HARV , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield") ,
-  ggplot() + geom_violin(data = WP.CPARMS$KONZ , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield")+ ylim(-0.15,0),
-  ggplot() + geom_violin(data = WP.CPARMS$GUAN , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield") + ylim(-0.15,0),
-  ggplot() + geom_violin(data = WP.CPARMS$JORN , aes( x= TYP, y = a1.mean, col= TowerH)) + ylab("Quantum Yield") + ylim(-0.15,0), 
+  ggplot() + geom_violin(data = WP.CPARMS$KONZ , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield"),
+  ggplot() + geom_violin(data = WP.CPARMS$GUAN , aes( x= TYP, y = a1.mean, col= TowerH))  + ylab("Quantum Yield") ,
+  ggplot() + geom_violin(data = WP.CPARMS$JORN , aes( x= TYP, y = a1.mean, col= TowerH)) + ylab("Quantum Yield") , 
   
   ggplot() + geom_violin(data = WP.CPARMS$HARV , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax") ,
-  ggplot() + geom_violin(data = WP.CPARMS$KONZ , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax")+ ylim(-10,-6),
-  ggplot() + geom_violin(data = WP.CPARMS$GUAN , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax") + ylim(-10,-6),
-  ggplot() + geom_violin(data = WP.CPARMS$JORN , aes( x= TYP, y = ax.mean, col= TowerH)) + ylab("Amax") + ylim(-10,-6), 
+  ggplot() + geom_violin(data = WP.CPARMS$KONZ , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax"),
+  ggplot() + geom_violin(data = WP.CPARMS$GUAN , aes( x= TYP, y = ax.mean, col= TowerH))  + ylab("Amax") ,
+  ggplot() + geom_violin(data = WP.CPARMS$JORN , aes( x= TYP, y = ax.mean, col= TowerH)) + ylab("Amax"), 
   
   ggplot() + geom_violin(data = WP.CPARMS$HARV , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco") ,
-  ggplot() + geom_violin(data = WP.CPARMS$KONZ , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco") + ylim(1.75,2.25) ,
-  ggplot() + geom_violin(data = WP.CPARMS$GUAN , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco") + ylim(1.75,2.25) ,
-  ggplot() + geom_violin(data = WP.CPARMS$JORN , aes( x= TYP, y = r.mean, col= TowerH)) + ylab("Amax")+ ylim(1.75,2.25) , ncol=4, nrow=3, labels= c("a.", "b." ,"c.", "d", "e.", "f." ,"g.", "h.","i.", "j." ,"k.", "l"))
+  ggplot() + geom_violin(data = WP.CPARMS$KONZ , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco")  ,
+  ggplot() + geom_violin(data = WP.CPARMS$GUAN , aes( x= TYP, y = r.mean, col= TowerH))  + ylab("Reco")  ,
+  ggplot() + geom_violin(data = WP.CPARMS$JORN , aes( x= TYP, y = r.mean, col= TowerH)) + ylab("Amax") , ncol=4, nrow=3, labels= c("a.", "b." ,"c.", "d", "e.", "f." ,"g.", "h.","i.", "j." ,"k.", "l"))
 
 dev.off()
-
-
-SITES_MBR_30min_FILTER$GUAN$Tair5_CO2

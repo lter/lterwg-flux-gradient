@@ -8,78 +8,80 @@ library('data.table')
 library('docstring')
 library('gdalUtilities')
 
-setwd("/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic")
+source("~/Dropbox (YSE)/Research/FluxGradient/lterwg-flux-gradient/functions/compile_DataAvailability_AOP.R")
 
-source("aop_merge_raster_functions.R")
+VegetationIndice <- 'DP3.30026.001'
+LAI <- 'DP3.30012.001'
+Canopy_Height <- 'DP3.30015.001' 
+#'DP3.30024.001' - give the componenets to get chm?
+
+VI.availabilityDf <- Site.Data.Availability.AOP(VegetationIndice)
+LAI.availabilityDf <- Site.Data.Availability.AOP(LAI)
+CH.availabilityDf <- Site.Data.Availability.AOP(Canopy_Height)
+
+source("~/Dropbox (YSE)/Research/FluxGradient/lterwg-flux-gradient/exploratory/aop_merge_raster_functions.R")
 
 NEON_TOKEN <-'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2RhdGEubmVvbnNjaWVuY2Uub3JnL2FwaS92MC8iLCJzdWIiOiJzcGFya2xlbG1hbG9uZUBnbWFpbC5jb20iLCJzY29wZSI6InJhdGU6cHVibGljIiwiaXNzIjoiaHR0cHM6Ly9kYXRhLm5lb25zY2llbmNlLm9yZy8iLCJleHAiOjE4NjgxNTUzODQsImlhdCI6MTcxMDQ3NTM4NCwiZW1haWwiOiJzcGFya2xlbG1hbG9uZUBnbWFpbC5jb20ifQ.A9PxSOT-3FxbAbxV7xqkM1Ps3OqMnzZcTe14PK3Vi16BaCdz_ClmPGqzLRxD8K61Mv-6XouIf8ToaqnP-NXxnQ'
 
-wd <- "/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic"
+setwd('/Volumes/MaloneLab/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic')
 
-download_folder <-getwd()
+# Where to download data to:
+download_folder <-'/Volumes/MaloneLab/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic'
 
-chm_output_folder <- "Output/KONZ"
-makeFullSiteMosaics('DP3.30026.001','2020','KONZ',download_folder,chm_output_folder,NEON_TOKEN)
+# LAI Data
 
-setwd("/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic")
-chm_output_folder <- "Output/BONA"
-makeFullSiteMosaics('DP3.30026.001','2021','BONA',download_folder,chm_output_folder,NEON_TOKEN)
+for( i in 1:length(LAI.availabilityDf$site )){
+  print(i)
+  site <- LAI.availabilityDf$site[i]
+  year <- LAI.availabilityDf$year[i]
+  
+  message(paste('Working on', site, "-", year))
+  
+  chm_output_folder <- paste("Output/",site, sep="")
+  
+  try(dir.create(file.path(download_folder, chm_output_folder)), silent=T)
+  
+  makeDownload('DP3.30012.001',year,site,download_folder,chm_output_folder,NEON_TOKEN)
+  
+  message(paste('Done with', site, "-", year))
+}
 
-setwd("/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic")
-chm_output_folder <- "Output/CPER"
-makeFullSiteMosaics('DP3.30026.001','2021','CPER',download_folder,chm_output_folder,NEON_TOKEN)
 
-# Try the DP2.30026.001 since DP3.30026.001 is bogus.
-setwd("/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic")
-chm_output_folder <- "Output/GUAN"
-makeFullSiteMosaics('DP3.30026.001','2018','GUAN',download_folder,chm_output_folder,NEON_TOKEN)
+for( i in 1:length(CH.availabilityDf$site )){
+  print(i)
+  site <- CH.availabilityDf$site[i]
+  year <- CH.availabilityDf$year[i]
+  
+  message(paste('Working on', site, "-", year))
+  
+  chm_output_folder <- paste("Output/",site, sep="")
+  
+  try(dir.create(file.path(download_folder, chm_output_folder)), silent=T)
+  
+  makeDownload(Canopy_Height,year,site,download_folder,chm_output_folder,NEON_TOKEN)
+  
+  message(paste('Done with', site, "-", year))
+}
 
-setwd("/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic")
-chm_output_folder <- "Output/HARV"
-makeFullSiteMosaics('DP3.30026.001','2019','HARV',download_folder,chm_output_folder,NEON_TOKEN)
+for( i in 1:length(VI.availabilityDf$site )){
+  print(i)
+  site <- VI.availabilityDf$site[i]
+  year <- VI.availabilityDf$year[i]
+  
+  message(paste('Working on', site, "-", year))
+  
+  chm_output_folder <- paste("Output/",site, sep="")
+  
+  try(dir.create(file.path(download_folder, chm_output_folder)), silent=T)
+  
+  makeDownload(VegetationIndice,year,site,download_folder,chm_output_folder,NEON_TOKEN)
+  
+  message(paste('Done with', site, "-", year))
+}
 
-setwd("/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic")
-chm_output_folder <- "Output/NIWO"
-makeFullSiteMosaics('DP3.30026.001','2020','NIWO',download_folder,chm_output_folder,NEON_TOKEN)
+chm_output_folder
+makeFullSiteMosaics('DP3.30012.001',year,site,download_folder,chm_output_folder,NEON_TOKEN)
 
-setwd("/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic")
-chm_output_folder <- "Output/TOOL"
-makeFullSiteMosaics('DP3.30026.001','2019','TOOL',download_folder,chm_output_folder,NEON_TOKEN)
+siteCode=site
 
-setwd("/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic")
-chm_output_folder <- "Output/JORN"
-makeFullSiteMosaics('DP3.30026.001','2021','JORN',download_folder,chm_output_folder,NEON_TOKEN)
 
-# Need to download a different date for GUAN. the data doesnt 
-# Load EVI tiffs for NEON sites:
-BONA.evi <- rast("/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic/Output/BONA/neon-aop-products_EVI.tif")
-CPER.evi <- rast("/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic/Output/CPER/neon-aop-products_EVI.tif")
-GUAN.evi <- rast("/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic/Output/GUAN/neon-aop-products_EVI.tif")
-HARV.evi <- rast("/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic/Output/HARV/neon-aop-products_EVI.tif")
-JORN.evi <- rast("/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic/Output/JORN/neon-aop-products_EVI.tif")
-KONZ.evi <- rast("/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic/Output/KONZ/neon-aop-products_EVI.tif")
-NIWO.evi <- rast("/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic/Output/NIWO/neon-aop-products_EVI.tif")
-TOOL.evi <- rast("/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic/Output/TOOL/neon-aop-products_EVI.tif")
-
-# Transform the raster layers to the same CRS as the shapefile:
-BONA.evi.proj <- terra::project( BONA.evi, "epsg:4087")
-CPER.evi.proj <- terra::project( CPER.evi, "epsg:4087")
-GUAN.evi.proj <- terra::project( GUAN.evi, "epsg:4087")
-HARV.evi.proj <- terra::project( HARV.evi, "epsg:4087")
-JORN.evi.proj <- terra::project( JORN.evi, "epsg:4087")
-KONZ.evi.proj <- terra::project( KONZ.evi, "epsg:4087")
-NIWO.evi.proj <- terra::project( NIWO.evi, "epsg:4087")
-TOOL.evi.proj <- terra::project( TOOL.evi, "epsg:4087")
-
-setwd('/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic/SiteEVI')
-
-writeRaster(BONA.evi.proj, "BONA_evi_2021.tif" , overwrite=T)
-writeRaster(CPER.evi.proj, "CPER_evi_2021.tif", overwrite=T )
-writeRaster(GUAN.evi.proj, "GUAN_evi_2018.tif" , overwrite=T)
-writeRaster(HARV.evi.proj, "HARV_evi_2019.tif" , overwrite=T)
-writeRaster(JORN.evi.proj, "JORN_evi_2021.tif" , overwrite=T)
-writeRaster(KONZ.evi.proj, "KONZ_evi_2020.tif" , overwrite=T)
-writeRaster(NIWO.evi.proj, "NIWO_evi_2019.tif" , overwrite=T)
-writeRaster(TOOL.evi.proj, "TOOL_evi_2020.tif" , overwrite=T)
-
-# Final Mosaic files for each site where uploaded to googledrive here: https://drive.google.com/drive/folders/1jDgnK12z6c18G9d6oUszzA_7z4GUtvPW?usp=drive_link

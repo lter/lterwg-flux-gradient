@@ -26,7 +26,7 @@ for( site in site.list ){
   
   # Load Data:
   load(fs::path(paste(localdir, site,sep="/"), paste0(site,'_aligned_conc_flux_30min.RData')))
-  load(fs::path(paste(localdir, site,sep="/"), paste0(site,'_aligned_conc_flux_9min.RData')))
+  #load(fs::path(paste(localdir, site,sep="/"), paste0(site,'_aligned_conc_flux_9min.RData')))
 
   dirTmp <- paste(localdir, site,sep="/")
     

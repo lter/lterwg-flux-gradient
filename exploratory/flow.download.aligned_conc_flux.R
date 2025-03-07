@@ -1,7 +1,7 @@
 # flow.download.aligned_conc_flux 
 
 # -------------------------------------------------------
-
+site <- "HARV"
 # Authenticate with Google Drive
 #googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
@@ -14,8 +14,9 @@ dir.create(dirTmp)
 
 # Uncomment the next line and comment the following line if you want all the files
 #fileDnld <- site_folder$name 
-fileDnld <- c(paste0(site,'_aligned_conc_flux_9min.zip'), 
-              paste0(site,'_aligned_conc_flux_30min.zip'))
+#fileDnld <- c(paste0(site,'_aligned_conc_flux_9min.zip'), 
+#              paste0(site,'_aligned_conc_flux_30min.zip'))
+fileDnld <- c( paste0(site,'_aligned_conc_flux_30min.zip'))
 
 message(paste0('Downloading aligned concentration & flux data for ',site))
 for(focal_file in fileDnld){
@@ -36,7 +37,7 @@ for(focal_file in fileDnld){
 }
 
 # Load the data 
-fileIn <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min.RData'))
-load(fileIn)
+#fileIn <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min.RData'))
+#load(fileIn)
 fileIn <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_30min.RData'))
 load(fileIn)

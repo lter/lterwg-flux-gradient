@@ -54,7 +54,7 @@ for(sitecode in site.list){
   site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name== sitecode])
   
   focal_files = paste0(sitecode,c('_9min.zip','_30min.zip','_1min.zip','_WS2D2min.zip','_attr.zip'))
-  
+
   dirTmp <- fs::path(tempdir(), sitecode)
   dir.create(dirTmp)
   
@@ -191,6 +191,8 @@ for(sitecode in site.list){
   
   # Reassign names from original list
   names(min30Diff.list) = names(min9.list)
+  
+  
   
   # ----- Align the 9-min conc diff data to 30 min eddy flux values ------
   message(paste0(Sys.time(),': Interpolating fluxes to midpoint of each paired profile window...'))
