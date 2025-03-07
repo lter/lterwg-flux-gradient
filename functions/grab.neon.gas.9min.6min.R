@@ -93,9 +93,9 @@ grab.neon.gas.9min.6min <- function(hd.file, sitecode){
                     # value_paste = paste(mean, collapse= "; "),
                     # sd_val = sd(mean, na.rm = T),
                     duplicate_ct = n(),
-                    min = mean(min, na.rm = T),
-                    max = mean(max, na.rm = T),
-                    vari = mean(vari, na.rm = T),
+                    min = mean(minRaw, na.rm = T),
+                    max = mean(maxRaw, na.rm = T),
+                    vari = mean(variRaw, na.rm = T),
                     numSamp = mean(numSamp, na.rm = T)) %>%
           ungroup()
         #grad qfqm identifier
