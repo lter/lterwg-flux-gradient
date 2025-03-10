@@ -5,6 +5,9 @@ library(tidyr)
 library(broom)
 
 
+###Must run first 40 lines of flow.evaluation.R first
+
+
 percent_difference <- function(A, B) {
   abs_diff <- abs(A - B)                # Absolute difference
   avg <- (A + B) / 2                    # Average of the two values
@@ -319,6 +322,75 @@ ggplot(final_result_height, aes(x = dHeight, y = relative_rmse_median, label = d
   ) +                                         # Title and axis labels
   theme_minimal() +                           # Minimal theme for a clean look
   theme(legend.position = "right")            # Position the legend on the right
+
+
+summary(final_result_height)
+
+median(SITES_AE_9min$KONZ$EddyDiff)
+
+
+#'function - I need to now use Kcomp back calculation as a filter to compare against the range
+#'of "real" WP and AE values. If it is an outlier of the data range, then it is filtered out
+#'If it is negative, it is also filtered out. 
+#'
+#'Separately, what are the conditions that got filtered out? Stability? Time?
+#'1. Take the AE and WP Kgas and find their spread (IQR), outside of 1.5 or 3 IQR
+#'2. Add a flag for nonphysical back calculated kgas outside of that spread
+#'Negates the need for a cross gradient flag
+# Function to identify outliers and calculate the percentage of data lost
+
+
+Bad_Eddy <- function(site, method) {
+  # Access the data based on the site and method
+  site_data <- SITES_AE_9min[[site]]
+  
+  # Check if the specified method is valid
+  if (!(method %in% c("EddyDiff", "EddyDiff_WP"))) {
+    stop("Invalid method. Please choose either 'EddyDiff' or 'EddyDiff_WP'.")
+  }
+  
+  # Select the column based on the method
+  method_column <- site_data[[method]]
+  kgas <- site_data$Kgas
+  
+  # Calculate Q1, Q3, and IQR
+  Q1 <- quantile(method_column, 0.25, na.rm=TRUE)
+  Q3 <- quantile(method_column, 0.75, na.rm=TRUE)
+  IQR_value <- IQR(method_column, na.rm=TRUE)
+  
+  # Calculate the lower and upper bounds for outliers
+  lower_bound <- 0  # Since you're checking for values >= 0 (for EddyDiff)
+  upper_bound <- Q3 + 1.5 * IQR_value
+  
+  # Create the Eddy_outlier column based on the outlier condition
+  site_data$Eddy_outlier <- ifelse(kgas < lower_bound | kgas > upper_bound, 1, 0)
+  
+  # Calculate the percentage of data flagged as outliers
+  percent_flagged <- mean(site_data$Eddy_outlier, na.rm=TRUE) * 100
+  
+  # Print the message on how much data was lost
+  cat("Percentage of data flagged as outliers:", percent_flagged, "%\n")
+  
+  # Return the updated dataframe with the new 'Eddy_outlier' column
+  return(site_data)
+}
+
+updated_data <- Bad_Eddy("HARV", "EddyDiff_WP")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
