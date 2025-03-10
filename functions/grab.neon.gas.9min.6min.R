@@ -19,6 +19,11 @@ grab.neon.gas.9min.6min <- function(hd.file, sitecode){
                   s3credentials = NULL,
                   native = FALSE)
   
+  #stop if 9 min resolution data is found in isoCo2 (it's supposed to be 6 min)
+  if(paste0("/", sitecode,"/dp01/data/isoCo2/000_010_09m") %in% test.df$group){
+    return()
+  }
+  
   #grabs the all unique heights of ch4Conc (name column in test.df = heights)
   heights.list <- unique(test.df[which(test.df$group == paste( "/", sitecode,"/dp01/data/ch4Conc", sep="")),]$name)
   #grabs unique heights for co2/h2o concentrations
