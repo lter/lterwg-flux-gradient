@@ -18,9 +18,10 @@ rm(list=ls())
 # Pull data from google drive
 # email <- 'alexisrose0525@gmail.com'
 #email <- 'jaclyn_matthes@g.harvard.edu'
-email <- 'csturtevant@battelleecology.org'
-
-sites <- c("CPER","GUAN","HARV","JORN","NIWO","TOOL","BONA","KONZ")
+#email <- 'csturtevant@battelleecology.org'
+email <- "angel777chen@gmail.com"
+#sites <- c("CPER","GUAN","HARV","JORN","NIWO","TOOL","BONA","KONZ")
+sites <- c("HARV")
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: fs, googledrive
@@ -89,7 +90,9 @@ for (site in sites){
   # For each concentration, compute difference in concentration among tower levels
   list.idx = seq_len(length(min9.list))
   min9Diff.list <- lapply(list.idx,FUN=function(idx){
-    var = min9.list[[idx]]
+    var <- min9.list[[idx]] %>%
+      # Remove the rows where mean, qfFinl, min, max, vari, and numSamp are missing 
+      dplyr::filter(!(is.na(mean) & is.na(qfFinl) & is.na(min) & is.na(max) & is.na(vari) & is.na(numSamp)))
     scalar = names(min9.list)[idx]
     var$timeBgn <- as.POSIXct(strptime(var$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
     var$timeEnd <- as.POSIXct(strptime(var$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))

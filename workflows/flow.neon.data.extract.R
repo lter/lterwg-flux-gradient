@@ -45,7 +45,9 @@ data_folder <- googledrive::drive_ls(path = drive_url)
 # site.list <- c("UNDE","WOOD")
 # site.list <- c("YELL")
 # site.list <- c("WREF")
-site.list <- c("UKFS")
+# site.list <- c("UKFS")
+# site.list <- c("HARV")
+site.list <- c("GUAN")
 
 #set include.provisional = T to get full time series of data up to present, currently provisional covers (2022-07:2023-09) 
 #grab relative humidity at 1 min resolution
@@ -57,7 +59,7 @@ for ( sitecode in site.list){
   print(sitecode)
 
 #grab h5 files to be passed to SiteAttributes and SiteDF
-h5files <- list.files(path = file.path("data", sitecode, "filesToStack00200"), pattern = ".h5", full.names = T)
+h5files <- list.files(path = file.path("data", sitecode, "filesToStack00200"), pattern = ".h5$", full.names = T)
 #grab attribute data
 attr.df <- compile.neon.site.attr(hd.files = h5files, sitecode = sitecode)
 #grab gas concentration and met data at desired frequency (1min, 9min, 30min)

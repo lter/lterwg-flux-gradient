@@ -8,7 +8,6 @@ Tair_at_TowerTop <- function(df){
   return( Tair)
 }
 
-
 TIME_TOWER_LEVEL_FORMAT <- function(df.list, time.col, dLevelsAminusB.colname ){
   
   for( i in 1:length( df.list )){

@@ -1,8 +1,9 @@
 
+
 Bad_Eddy <- function(df, method) {
   # Access the data based on the site and method
   site_data <- df
-  
+
   # Check if the specified method is valid
   if (!(method %in% c("EddyDiff", "EddyDiff_WP"))) {
     stop("Invalid method. Please choose either 'EddyDiff' or 'EddyDiff_WP'.")
@@ -35,5 +36,6 @@ Bad_Eddy <- function(df, method) {
 }
 
 #updated_data <- Bad_Eddy(AE_9min.df, "EddyDiff")
+
 
 
