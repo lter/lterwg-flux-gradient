@@ -1,4 +1,5 @@
 library(tidyverse)
+ 
 
 Tair_at_TowerTop <- function(df){
   levels <- df %>% select( starts_with( 'Tair')) %>% names %>% str_split_fixed( 'Tair',2) 
