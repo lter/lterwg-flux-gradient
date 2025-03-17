@@ -10,9 +10,9 @@
 calc.mbr <- function(min9, bootstrap, nsamp){
   
   # Calculate modified Bowen ratio (MBR) gradient fluxes:
-  CO2 = min30Diff.list[["CO2"]]
-  CH4 = min30Diff.list[["CH4"]]
-  H2O = min30Diff.list[["H2O"]]
+  CO2 = min9Diff.list[["CO2"]]
+  CH4 = min9Diff.list[["CH4"]]
+  H2O = min9Diff.list[["H2O"]]
   
   # Add gas suffix to all column names to track into combined table
   colnames(CO2) <- paste0(colnames(CO2), '_CO2')

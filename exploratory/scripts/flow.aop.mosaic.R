@@ -60,7 +60,7 @@ for( i in 47:length(CH.availabilityDf$site )){
 }
 
 #40
-for( i in 42:length(VI.availabilityDf$site )){
+for( i in 65:length(VI.availabilityDf$site )){
   print(i)
   site <- VI.availabilityDf$site[i]
   year <- VI.availabilityDf$year[i]
@@ -76,8 +76,8 @@ for( i in 42:length(VI.availabilityDf$site )){
 
 
 dpID =VegetationIndice
-year =  VI.availabilityDf$year[i]
-siteCode = VI.availabilityDf$site[i]
+year =  VI.availabilityDf$year[64]
+siteCode = VI.availabilityDf$site[64]
 dataRootDir = download_folder
 outFileDir = chm_output_folder
 apiToken=NEON_TOKEN

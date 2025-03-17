@@ -7,15 +7,22 @@ format_MBR <- function(df){
   names <- df %>% names
 
   dConc.names <- names %>% str_detect('dConc') %>% keep(names, .)
-  co2.names <- names %>% str_detect('_CO2$') %>% keep(names, .) %>% setdiff(  dConc.names ) %>% 
-    setdiff(  c(dConc.names,h2o.names, ch4.names,mbr.names ))
-  h2o.names <- names %>% str_detect('_H2O$') %>% keep(names, .) %>% 
-    setdiff(  c(dConc.names,co2.names, ch4.names,mbr.names ))
-  ch4.names <- names %>% str_detect('_CH4$') %>% keep(names, .) %>% 
-    setdiff(  c(dConc.names,h2o.names, co2.names,mbr.names ))
-  mbr.names <- names %>% str_detect('_MBR_') %>% keep(names, .) %>% 
-    setdiff(  c(dConc.names,h2o.names, ch4.names,co2.names ))
+  co2.names.1 <- names %>% str_detect('_CO2$') %>% keep(names, .) %>% setdiff(  dConc.names )
+  h2o.names.1 <- names %>% str_detect('_H2O$') %>% keep(names, .) 
+  ch4.names.1 <- names %>% str_detect('_CH4$') %>% keep(names, .) 
+  mbr.names.1 <- names %>% str_detect('_MBR_') %>% keep(names, .) 
 
+  
+  co2.names <- co2.names.1 %>% setdiff(  c(dConc.names,h2o.names.1, ch4.names.1,mbr.names.1 ))
+  
+  h2o.names <- h2o.names.1 %>% 
+    setdiff(  c(dConc.names,co2.names, ch4.names.1,mbr.names.1 ))
+  
+  ch4.names <-  ch4.names.1%>% 
+    setdiff(  c(dConc.names,h2o.names, co2.names,mbr.names.1 ))
+  
+  mbr.names  <-  mbr.names.1 %>% 
+    setdiff(  c(dConc.names,h2o.names, ch4.names,co2.names ))
   
   common.names <- df %>% select( !co2.names & !h2o.names & !ch4.names & !mbr.names & !dConc.names) %>% names
   
@@ -57,6 +64,7 @@ format_MBR <- function(df){
   dConc.CH4.pvalue.names <-   dConc.CH4.names  %>% str_detect('pvalue') %>% keep(dConc.CH4.names, .) 
   dConc.CH4.sd.names <-  dConc.CH4.names  %>% str_detect('sd') %>% keep(dConc.CH4.names, .) 
   dConc.CH4.bin.names <-  dConc.CH4.names  %>% str_detect('bin') %>% keep(dConc.CH4.names, .) 
+  
   # DataFrames:
   
   # EC Fluxes:
@@ -144,7 +152,7 @@ format_MBR <- function(df){
   
   # Combine these MBR and dConc:
 
-  mbr.co2.df.th2o.j <- full_join(mbr.co2.df.th2o, dConc.CO2.df, by = c("match_time", "site", "gas")) 
+  mbr.co2.df.th2o.j <- full_join(mbr.co2.df.th2o,   dConc.CO2.df, by = c("match_time", "site", "gas")) 
   mbr.h2o.df.tco2.j <- full_join(mbr.h2o.df.tco2,   dConc.H2O.df, by = c("match_time", "site", "gas"))
   mbr.ch4.df.th20.j <- full_join(mbr.ch4.df.th20,   dConc.CH4.df, by = c("match_time", "site", "gas"))
   mbr.ch4.df.tco2.j <- full_join(mbr.ch4.df.tco2,   dConc.CH4.df, by = c("match_time", "site", "gas"))
@@ -163,9 +171,9 @@ apply_format_MBR <- function(site.list){
   
   for ( i in sites){
     print(i)
-    site.list[ i]
+    site.list[i]
     
-    df <- site.list[ i] %>% as.data.frame
+    df <- site.list[i] %>% as.data.frame
     names(df) <- substring( names(df), 6)
     
     df.reformat <- format_MBR(df)

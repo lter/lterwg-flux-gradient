@@ -5,9 +5,6 @@ library(tidyverse)
 library(ggplot2)
 library(ggpubr)
 
-# Import data from a  site:
-localdir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/data'
-
 setwd(localdir)
 
 load( "SITES_WP_30min.Rdata")
@@ -17,76 +14,34 @@ load( "SITES_WP_9min.Rdata")
 load( "SITES_AE_9min.Rdata")
 load( "SITES_MBR_9min.Rdata")
 
-source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/Function.Format_MBR.R' )
-SITES_MBR_30min.r <- apply_format_MBR(SITES_MBR_30min)
-
-# Add flags to dataframe:
-source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/functions/flag.all.gas.stability.R' )
-
-source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/Flow.CrossGradient.R' )
-
-for ( i in 1:length(SITES_AE_30min )){
-  SITES_WP_9min[[i]] <- flag.all.gas.stability(flux.df = SITES_WP_9min[[i]], L='L_obukhov', z='z_veg_aero', d='z_displ_calc')
-  SITES_WP_30min[[i]] <- flag.all.gas.stability(flux.df = SITES_WP_30min[[i]], L='L_obukhov', z='z_veg_aero', d='z_displ_calc')
-  SITES_AE_9min[[i]] <- flag.all.gas.stability(flux.df = SITES_AE_9min[[i]], L='L_obukhov', z='z_veg_aero', d='z_displ_calc')
-  SITES_AE_30min[[i]] <- flag.all.gas.stability(flux.df = SITES_AE_30min[[i]], L='L_obukhov', z='z_veg_aero', d='z_displ_calc')
-  SITES_MBR_9min[[i]] <- flag.all.gas.stability(flux.df = SITES_MBR_9min[[i]], L='L_obukhov_CO2', z='z_veg_aero_CO2', d='z_displ_calc_CO2')
-  SITES_MBR_30min[[i]] <- flag.all.gas.stability(flux.df = SITES_MBR_30min[[i]], L='L_obukhov_CO2', z='z_veg_aero_CO2', d='z_displ_calc_CO2')
-  # Calculate the difference between EC and gradient FLux:
-  SITES_AE_30min[[i]] <- SITES_AE_30min[[i]] %>% mutate(Diff_EC_GF= FC_turb_interp - FG_mean )
-  SITES_WP_30min[[i]] <- SITES_WP_30min[[i]] %>% mutate(Diff_EC_GF= FC_turb_interp - FG_mean )
-  
-}
-
-SITES_AE_9min <- crossGradientDF(SITES_AE_9min )
-SITES_WP_9min <- crossGradientDF(SITES_WP_9min )
-SITES_AE_30min <- crossGradientDF(SITES_AE_30min )
-SITES_WP_30min <- crossGradientDF(SITES_WP_30min)
-
-# Canopy grouping:
-setwd('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/data')
-
-dir <- c('HARV/data/HARV/HARV_attr.Rdata',
-         'GUAN/data/GUAN/GUAN_attr.Rdata',
-         'JORN/data/JORN/JORN_attr.Rdata',
-         'KONZ/data/KONZ/KONZ_attr.Rdata')
-
-site.att <- data.frame()
-
-for( i in 1:length(dir)){
-  print(i)
-  load(dir[i])
-  site.att <- site.att %>% rbind(attr.df )
-  rm(attr.df)
-}
-
 # Application of Filter Functions: ####
 
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_Filter_FG.R' )
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_SITELIST_FORMATTING.R' )
 
+SITES_MBR_30min.r$HARV$match_time
 message('The current filtering is not gas dependent')
 
-SITES_MBR_30min_FILTER <- Apply.filter ( site.tibble = SITES_MBR_30min.r,
+SITES_MBR_30min_FILTER <- Apply.filter( site.tibble = SITES_MBR_30min.r,
                                          flux.limit = 50, 
                                          ustar.filter= 0.3, 
                                          FG_sd.limit = 3,
                                          diff.limit = 1000,
-                                         dConc.limit = 3)  %>% TIME_TOWER_LEVEL_FORMAT( time='match_time', dLevelsAminusB.colname= 'dLevelsAminusB')
+                                         dConc.limit = 3)  %>% TIME_TOWER_LEVEL_FORMAT( time.col='match_time', dLevelsAminusB.colname= 'dLevelsAminusB')
 
 SITES_AE_30min_FILTER <- Apply.filter( site.tibble = SITES_AE_30min,
                  flux.limit = 50, 
                  ustar.filter= 0.3, 
                  FG_sd.limit = 3,
                  diff.limit = 1000,
-                 dConc.limit = 3)  %>% TIME_TOWER_LEVEL_FORMAT( time='match_time', dLevelsAminusB.colname= 'dLevelsAminusB')
+                 dConc.limit = 3)  %>% TIME_TOWER_LEVEL_FORMAT( time.col='match_time', dLevelsAminusB.colname= 'dLevelsAminusB')
 
 SITES_WP_30min_FILTER <- Apply.filter ( site.tibble = SITES_WP_30min,
                                           flux.limit = 50, 
                                           ustar.filter= 0.3, 
                                           FG_sd.limit = 4,
                                           diff.limit = 1000,
-                                          dConc.limit = 3)  %>% TIME_TOWER_LEVEL_FORMAT( time='match_time', dLevelsAminusB.colname= 'dLevelsAminusB')
+                                          dConc.limit = 3)  %>% TIME_TOWER_LEVEL_FORMAT( time.col='match_time', dLevelsAminusB.colname= 'dLevelsAminusB')
 
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_One2One.R' )
 
@@ -140,10 +95,13 @@ SITES_One2One_H2O <- one2one.parms.site(MBR.tibble = SITES_MBR_30min_FILTER,
                                         WP.tibble = SITES_WP_30min_FILTER, 
                                         gas="H2O")
 
-SITES_One2One_Best_Level <- SITES_One2One %>% 
-  reframe(.by =c(Site, Approach ), maxR2 = max(R2)) %>%
-  left_join(SITES_One2One, by=c('Site', 'Approach'))%>% 
-  filter(maxR2 ==  R2)
+# Need to add the gas to this table. The point is to get the r2 associated with the max level
+SITES_One2One_Best_Level_CO2 <- SITES_One2One_CO2  %>% 
+  reframe(.by =c(Site, Approach ), maxR2.CO2 = max(R2)) 
+
+%>%
+  left_join(SITES_One2One_H2O %>% reframe(.by =c(Site, Approach ), maxR2.H20 = max(R2)) , by=c('Site', 'Approach'))%>% 
+  filter(maxR2.H20 ==  R2)
 
 SITES_MBR_30min_FILTER_BH <- list()
 SITES_AE_30min_FILTER_BH <- list()
@@ -258,6 +216,8 @@ dev.off()
 
 # Carbon Exchange PARMS: ####
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_LRC_Parms.R' )
+
+
 
 SITES_MBR_30min_CPARMS_EC <- PARMS_Sites( sites.tibble = SITES_MBR_30min_FILTER_BH, 
                              iterations = 10000, 

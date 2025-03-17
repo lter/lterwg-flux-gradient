@@ -6,11 +6,11 @@ library( sf)
 library(ggplot2)
 
 # Import the csv of sites and their locations. 
-Sites <- read.csv('/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/FG_Site_Locations - Sheet1.csv')
+Sites <- read.csv('/Volumes/MaloneLab/Research/FluxGradient/Ameriflux_NEON field-sites.csv')
 
 # Make dataframe a shapfile:
 Sites.shp <- st_as_sf(x = Sites,                         
-                      coords = c("Longitude",  "Latitude"),
+                      coords = c("Longitude..degrees.",  "Latitude..degrees."),
                       crs = "epsg:4326")
 
 # Create a USA AOI:
@@ -37,6 +37,8 @@ Sites.shp.1800$dist_m <- 1800
 # merge all buffer sizes into a single shapefile:
 Site.Buffers <- rbind( Sites.shp.30, Sites.shp.90, Sites.shp.450, Sites.shp.900, Sites.shp.1800)
 
+Site.Buffers$site <- Site.Buffers$Site_Id.NEON
+
 # Write shapefiles for use in Site.Spatial.Homo
-save(Site.Buffers, file='/Users/sm3466/Dropbox (YSE)/Research/FluxGradient/data/NEONLTERsiteBuffers.Rdata')
+save(Site.Buffers, file='/Volumes/MaloneLab/Research/FluxGradient/NEONLTERsiteBuffers.Rdata')
 

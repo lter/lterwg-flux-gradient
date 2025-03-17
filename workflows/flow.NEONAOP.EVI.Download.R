@@ -28,7 +28,7 @@ setwd('/Volumes/MaloneLab/Research/FluxGradient/NEON_indices-veg-spectrometer-mo
 # Where to download data to:
 download_folder <-'/Volumes/MaloneLab/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic'
 
-# LAI Data
+# Download the Data
 
 for( i in 1:length(LAI.availabilityDf$site )){
   print(i)
@@ -45,7 +45,6 @@ for( i in 1:length(LAI.availabilityDf$site )){
   
   message(paste('Done with', site, "-", year))
 }
-
 
 for( i in 1:length(CH.availabilityDf$site )){
   print(i)
@@ -79,9 +78,52 @@ for( i in 1:length(VI.availabilityDf$site )){
   message(paste('Done with', site, "-", year))
 }
 
-chm_output_folder
-makeFullSiteMosaics('DP3.30012.001',year,site,download_folder,chm_output_folder,NEON_TOKEN)
 
-siteCode=site
+# Mosaic the data:
+
+
+for( i in 1:length(LAI.availabilityDf$site )){
+  print(i)
+  site <- LAI.availabilityDf$site[i]
+  year <- LAI.availabilityDf$year[i]
+  
+  message(paste('Working on', site, "-", year))
+  
+  chm_output_folder <- paste("Output/",site, sep="")
+  
+  makeFullSiteMosaics('DP3.30012.001',year,site,download_folder,chm_output_folder,NEON_TOKEN)
+  
+  message(paste('Done with', site, "-", year))
+}
+
+for( i in 1:length(CH.availabilityDf$site )){
+  print(i)
+  site <- CH.availabilityDf$site[i]
+  year <- CH.availabilityDf$year[i]
+  
+  message(paste('Working on', site, "-", year))
+  
+  chm_output_folder <- paste("Output/",site, sep="")
+  
+  makeFullSiteMosaics(Canopy_Height,year,site,download_folder,chm_output_folder,NEON_TOKEN)
+  
+  message(paste('Done with', site, "-", year))
+}
+
+VI.availabilityDf$site[63]
+for( i in 64:length(VI.availabilityDf$site )){
+  print(i)
+  site <- VI.availabilityDf$site[i]
+  year <- VI.availabilityDf$year[i]
+  
+  message(paste('Working on', site, "-", year))
+  
+  chm_output_folder <- paste("Output/",site, sep="")
+  
+  makeFullSiteMosaics(VegetationIndice,year,site,download_folder,chm_output_folder,NEON_TOKEN)
+  
+  message(paste('Done with', site, "-", year))
+}
+
 
 

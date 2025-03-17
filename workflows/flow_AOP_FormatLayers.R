@@ -1,3 +1,61 @@
+
+library(terra)
+library(sf)
+library(tidyverse)
+
+load(file='/Volumes/MaloneLab/Research/FluxGradient/FG_Site_Wdges.RDATA')
+filterOutofBounds <- function(raster, min, max){
+  raster[raster > max]<- NA
+  raster[raster < min]<- NA
+  return(raster)
+}
+
+# Make a list of folders of interest:
+setwd('/Volumes/MaloneLab/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic/Output')
+folders <- list.files(path='/Volumes/MaloneLab/Research/FluxGradient/NEON_indices-veg-spectrometer-mosaic/Output')
+
+for(s in folders){
+  print(paste("Calculateing EVI summary for",s))
+  path <- paste("./",s, sep="" )
+  site.id <- s
+  
+  # Import specific files
+  evi.files <- list.files(path=path, pattern="*EVI.tif$")
+  print(paste("The following files are available",evi.files))
+  
+for(raster in evi.files){
+  
+  print(paste("Working on ",raster))
+  # Subset the simple feature:
+  Sites.wedges.sub <- site.buffers.wedges %>% filter( site == site.id)
+
+  r1 <- rast( paste(path,raster, sep="/")) %>% project( Sites.wedges.sub)
+  r2 <- r1 %>% filterOutofBounds(min=0, max=1 )
+  
+  year <- substr(raster, start = 1, stop = 4)
+  
+for( w in 1:length(Sites.wedges.sub$geometry )){
+  print(w)
+  
+  test.mean <- crop( r2, Sites.wedges.sub$geometry[w]) %>% global('mean', na.rm=T)
+  test.sd <- crop( r2, Sites.wedges.sub$geometry[w]) %>% global('sd', na.rm=T)
+  
+  Sites.wedges.sub$EVI.mean[w] <-  test.mean$mean
+  Sites.wedges.sub$EVI.sd[w] <-  test.sd$sd
+  Sites.wedges.sub$EVI.year[w] <-  year
+}
+
+  if(exists('Sites.EVI') == TRUE ){
+    Sites.EVI <- rbind(Sites.EVI , Sites.wedges.sub)
+  } else{Sites.EVI <- Sites.wedges.sub }
+  
+  print(paste("Done with",raster))
+}
+}
+
+
+
+
  # Import the AOP mosaics, lable them ...
 
 # Need to download a different date for GUAN. the data doesnt 

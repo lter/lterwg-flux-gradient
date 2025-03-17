@@ -1,8 +1,8 @@
 source(file.path("functions/calc.mbr.R"))
 
 # Calculate MBR flux combos 9 min (CO2 with H2O trace, CH4 with H2O trace, etc)
-#MBRflux_align = calc.mbr(min9=min9Diff.list, bootstrap=1,
-#                         nsamp=1000)
+MBRflux_align = calc.mbr(min9=min9Diff.list, bootstrap=1,
+                         nsamp=1000)
 
 # Calculate MBR flux combos 30 min (e.g. CO2 with H2O tracer ...)
 MBRflux_align_30min = calc.mbr(min9=min30Diff.list, bootstrap=1, 
@@ -53,15 +53,15 @@ MBRflux_align_30min = calc.mbr(min9=min30Diff.list, bootstrap=1,
 #   theme_minimal()
 
 # -------- Save and zip the file to the temp directory. Upload to google drive. -------
-#fileSave <- fs::path(dirTmp,paste0(site,'_MBR_9min.RData'))
-#fileZip <- fs::path(dirTmp,paste0(site,'_MBR_9min.zip'))
-#save(MBRflux_align,file=fileSave)
-#wdPrev <- getwd()
-#setwd(dirTmp)
-#utils::zip(zipfile=fileZip,files=paste0(site,'_MBR_9min.RData'))
-#setwd(wdPrev)
-#googledrive::drive_upload(media = fileZip, overwrite = T, 
-#                          path = data_folder$id[data_folder$name==site]) # path might need work
+fileSave <- fs::path(dirTmp,paste0(site,'_MBR_9min.RData'))
+fileZip <- fs::path(dirTmp,paste0(site,'_MBR_9min.zip'))
+save(MBRflux_align,file=fileSave)
+wdPrev <- getwd()
+setwd(dirTmp)
+utils::zip(zipfile=fileZip,files=paste0(site,'_MBR_9min.RData'))
+setwd(wdPrev)
+googledrive::drive_upload(media = fileZip, overwrite = T, 
+                          path = data_folder$id[data_folder$name==site]) # path might need work
 
 fileSave <- fs::path(dirTmp,paste0(site,'_MBR_30min.RData'))
 fileZip <- fs::path(dirTmp,paste0(site,'_MBR_30min.zip'))
