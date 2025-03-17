@@ -1,5 +1,3 @@
-
-
 Bad_Eddy <- function(df, method) {
   # Access the data based on the site and method
   site_data <- df
