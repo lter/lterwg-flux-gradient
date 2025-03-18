@@ -20,6 +20,8 @@ calculate.stability.correction <- function(gas){
  
   # Define top level where fluxes are measured
   maxL=max(min9Diff.list$H2O$TowerPosition_A)
+  if (maxL==8){ TopLevel="8_7"}
+  if (maxL==7){ TopLevel="7_6"}
   if (maxL==6){ TopLevel="6_5"}
   if (maxL==5) { TopLevel="5_4"}
   if (maxL==4) { TopLevel="4_3"}
@@ -58,6 +60,8 @@ calculate.stability.correction <- function(gas){
   gas$mean_TowerH <- rowMeans((cbind(as.numeric(gas$TowerHeight_A), as.numeric(gas$TowerHeight_B))), na.rm = TRUE)
   z=mean(as.numeric((gas$mean_TowerH[gas$dLevelsAminusB == TopLevel])))
   L=gas$L[gas$dLevelsAminusB == TopLevel]
+  if (maxL==8) {ubar=gas$ubar8}
+  if (maxL==7) {ubar=gas$ubar7}
   if (maxL==6) {ubar=gas$ubar6}
   if (maxL==5) {ubar=gas$ubar5}
   if (maxL==4) {ubar=gas$ubar4}
