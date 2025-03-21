@@ -1,47 +1,81 @@
 # flow.evaluation:
+
 rm(list=ls())
 
 library(tidyverse)
 library(ggplot2)
 library(ggpubr)
 
+localdir <- '/Volumes/MaloneLab/Research/FluxGradient/FluxData'
+
 setwd(localdir)
 
 load( "SITES_WP_30min.Rdata")
 load( "SITES_AE_30min.Rdata")
 load( "SITES_MBR_30min.Rdata")
-load( "SITES_WP_9min.Rdata")
-load( "SITES_AE_9min.Rdata")
-load( "SITES_MBR_9min.Rdata")
+
 
 # Application of Filter Functions: ####
 
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_Filter_FG.R' )
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_SITELIST_FORMATTING.R' )
 
-SITES_MBR_30min.r$HARV$match_time
-message('The current filtering is not gas dependent')
+# Add Bad Eddy to the filter and generate a report:
 
-SITES_MBR_30min_FILTER <- Apply.filter( site.tibble = SITES_MBR_30min.r,
+SITES_WP_30min.report <-  Generate.filter.report( site.tibble = SITES_AE_30min,
+                                                  flux.limit = 50, 
+                                                  ustar.filter= 0.3, 
+                                                  FG_sd.limit = 3,
+                                                  diff.limit = 1000,
+                                                  dConc.limit = 3,
+                                                  approach = "WP")
+
+SITES_AE_30min.report <-  Generate.filter.report( site.tibble = SITES_AE_30min,
+                                        flux.limit = 50, 
+                                        ustar.filter= 0.3, 
+                                        FG_sd.limit = 3,
+                                        diff.limit = 1000,
+                                        dConc.limit = 3,
+                                        approach = "AE")
+
+SITES_MBR_30min.report <-  Generate.filter.report( site.tibble = SITES_MBR_30min,
+                                        flux.limit = 50, 
+                                        ustar.filter= 0.3, 
+                                        FG_sd.limit = 3,
+                                        diff.limit = 1000,
+                                        dConc.limit = 3,
+                                        approach = "MBR")
+
+
+# Bad eddy 
+SITES_MBR_30min_FILTER <- Apply.filter( site.tibble = SITES_MBR_30min,
                                          flux.limit = 50, 
                                          ustar.filter= 0.3, 
                                          FG_sd.limit = 3,
                                          diff.limit = 1000,
-                                         dConc.limit = 3)  %>% TIME_TOWER_LEVEL_FORMAT( time.col='match_time', dLevelsAminusB.colname= 'dLevelsAminusB')
+                                         dConc.limit = 3,
+                                        approach = "MBR")  %>% TIME_TOWER_LEVEL_FORMAT( time.col='match_time', dLevelsAminusB.colname= 'dLevelsAminusB')
 
 SITES_AE_30min_FILTER <- Apply.filter( site.tibble = SITES_AE_30min,
                  flux.limit = 50, 
                  ustar.filter= 0.3, 
                  FG_sd.limit = 3,
                  diff.limit = 1000,
-                 dConc.limit = 3)  %>% TIME_TOWER_LEVEL_FORMAT( time.col='match_time', dLevelsAminusB.colname= 'dLevelsAminusB')
+                 dConc.limit = 3,
+                 approach = "AE")  %>% TIME_TOWER_LEVEL_FORMAT( time.col='match_time', dLevelsAminusB.colname= 'dLevelsAminusB')
 
 SITES_WP_30min_FILTER <- Apply.filter ( site.tibble = SITES_WP_30min,
                                           flux.limit = 50, 
                                           ustar.filter= 0.3, 
                                           FG_sd.limit = 4,
                                           diff.limit = 1000,
-                                          dConc.limit = 3)  %>% TIME_TOWER_LEVEL_FORMAT( time.col='match_time', dLevelsAminusB.colname= 'dLevelsAminusB')
+                                          dConc.limit = 3,
+                                        approach = "WP")  %>% TIME_TOWER_LEVEL_FORMAT( time.col='match_time', dLevelsAminusB.colname= 'dLevelsAminusB')
+
+# Save the filtered data:
+
+
+
 
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_One2One.R' )
 

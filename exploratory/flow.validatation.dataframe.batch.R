@@ -212,26 +212,34 @@ googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
 fileSave <- file.path(paste(localdir, "SITES_WP_30min.Rdata", sep="/"))
 googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
 
-# Canopy grouping:
+
+# Attribute file
+
+# There were issues with a few sites: Until addressed remove them:
+site.list <- metadata$Site_Id.NEON %>% unique
+
 setwd('/Volumes/MaloneLab/Research/FluxGradient/Attributes')
 
 # Import and compile the attribute data!!
-# Need to generate this another way!!!!
-dir <- c('HARV/data/HARV/HARV_attr.Rdata',
-         'GUAN/data/GUAN/GUAN_attr.Rdata',
-         'JORN/data/JORN/JORN_attr.Rdata',
-         'KONZ/data/KONZ/KONZ_attr.Rdata')
+site.att <-data.frame()
 
-site.att <- data.frame()
+for(site in site.list){
+  print(site)
+  
+dir <- paste('data/',site,"/",site,"_attr.Rdata", sep="" )
 
-for( i in 1:length(dir)){
-  print(i)
-  load(dir[i])
-  site.att <- site.att %>% rbind(attr.df )
-  rm(attr.df)
+load(dir)
+
+site.att <- site.att %>% rbind(attr.df )
 }
 
+write.csv(site.att, '/Volumes/MaloneLab/Research/FluxGradient/Site_Attributes.csv' )
 
+fileSave <- file.path('/Volumes/MaloneLab/Research/FluxGradient/Site_Attributes.csv')
+googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
+
+
+message("Next run flow.evaluation.batch")
 
 
 

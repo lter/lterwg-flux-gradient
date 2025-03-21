@@ -16,7 +16,7 @@ prior(normal(1, 2), nlpar = "r", lb=0, ub= 30)
 LRC_PARMS <- function( df, iterations, priors.lrc, idx, PAR, nee){
  
   data.frame <- df %>% as.data.frame
-  names(data.frame) <- substring( names(  data.frame), 6)
+  #names(data.frame) <- substring( names(  data.frame), 6)
 
   
   data.frame$PAR <- data.frame[,PAR] %>% as.numeric
@@ -116,7 +116,7 @@ priors.trc <-  prior(normal(0.2 , 1), nlpar = "a", lb=0.1, ub= 1) +
 TRC_PARMS <- function( df, iterations, priors.trc, idx, nee, TA, PAR){
   
   data.frame <- df %>% as.data.frame
-  names(data.frame) <- substring( names(  data.frame), 6)
+  #names(data.frame) <- substring( names(  data.frame), 6)
   
   
   data.frame$TA <- data.frame[, TA] %>% as.numeric
@@ -201,21 +201,24 @@ PARMS_Sites <- function(sites.tibble,
                         priors.lrc, 
                         priors.trc, 
                         idx,
-                        PAR,
-                        TA, 
-                        nee ) {
+                        PAR, 
+                        nee,
+                        TA) {
   
   site.tibble.parms <- list()
   
-  for( site in df){
+  sites <- sites.tibble %>% names
+  
+  for( site in  sites){
     
-    message(paste("Working with",site))
+    message(paste("Working with", site))
     
-    try( parms.lrc <- LRC_PARMS( df = sites.tibble[site], iterations = iterations,priors= priors.lrc, idx = idx , PAR = PAR, nee = nee ), silent =T)
+   
+    try( parms.lrc <- LRC_PARMS( df = sites.tibble[[site]], iterations = iterations, priors= priors.lrc, idx = idx , PAR = PAR, nee = nee ), silent =T)
     
     message("Done with LRC")
     
-    try(parms.trc <- TRC_PARMS( df = sites.tibble[site], 
+    try(parms.trc <- TRC_PARMS( df = sites.tibble[[site]], 
                         iterations = iterations, 
                         priors= priors.trc, 
                         idx = idx , 
@@ -227,7 +230,7 @@ PARMS_Sites <- function(sites.tibble,
     
     message("Done with TRC")
     
-    site.tibble.parms[site] <-  list(parameters)
+    site.tibble.parms[[site]] <-  list(parameters)
     message(paste("Done with",site))
     
   }
