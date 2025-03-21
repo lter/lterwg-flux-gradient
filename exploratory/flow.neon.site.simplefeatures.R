@@ -79,4 +79,6 @@ site.buffers.wedges <- site.Buffers %>% st_intersection(sites.wedges)
 save(site.Buffers,site.buffers.wedges,
      file='/Volumes/MaloneLab/Research/FluxGradient/FG_Site_Wdges.RDATA')
 
+message("Next run flow_AOP_FormatLayers")
+
 message('After you prepare the AOP layers now you can use the products of this script to summarize information at the site level')

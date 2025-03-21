@@ -1,5 +1,6 @@
 # flow.evaluation:
 
+# flow.attr.map - makes a map of the sites for manuscript...
 rm(list=ls())
 
 library(tidyverse)

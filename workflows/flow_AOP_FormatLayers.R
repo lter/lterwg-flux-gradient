@@ -291,3 +291,61 @@ for(s in folders){
 
 write.csv( Sites.SAVI , '/Volumes/MaloneLab/Research/FluxGradient/Sites_SAVI.csv')
 
+# Import and integrate all data files into one:
+
+
+Sites.EVI <- read_csv('/Volumes/MaloneLab/Research/FluxGradient/Sites_EVI.csv')
+Sites.NDVI <- read_csv('/Volumes/MaloneLab/Research/FluxGradient/Sites_NDVI.csv')
+Sites.LAI <- read_csv('/Volumes/MaloneLab/Research/FluxGradient/Sites_LAI.csv')
+Sites.PRI <- read_csv('/Volumes/MaloneLab/Research/FluxGradient/Sites_PRI.csv')
+Sites.CHM <- read_csv('/Volumes/MaloneLab/Research/FluxGradient/Sites_CHM.csv')
+Sites.SAVI <- read_csv('/Volumes/MaloneLab/Research/FluxGradient/Sites_SAVI.csv')
+
+Sites.EVI.summary <- Sites.EVI %>% select(site, EVI.mean, EVI.sd, EVI.year) %>% 
+  reframe( .by= site,
+           EVI.mean = mean(EVI.mean, na.rm=T) , 
+           EVI.sd = mean(EVI.sd, na.rm=T) , 
+           EVI.years = length(EVI.year %>% unique))
+
+Sites.NDVI.summary <- Sites.NDVI %>% select(site, NDVI.mean, NDVI.sd, NDVI.year) %>% 
+  reframe( .by= site,
+           NDVI.mean = mean(NDVI.mean, na.rm=T) , 
+           NDVI.sd = mean(NDVI.sd, na.rm=T) , 
+           NDVI.years = length(NDVI.year %>% unique))
+
+Sites.LAI.summary <- Sites.LAI %>% select(site, LAI.mean, LAI.sd, LAI.year) %>% 
+  reframe( .by= site,
+           LAI.mean = mean(LAI.mean, na.rm=T) , 
+           LAI.sd = mean(LAI.sd, na.rm=T) , 
+           LAI.years = length(LAI.year %>% unique))
+
+Sites.PRI.summary <- Sites.PRI %>% select(site, PRI.mean, PRI.sd, PRI.year) %>% 
+  reframe( .by= site,
+           PRI.mean = mean(PRI.mean, na.rm=T) , 
+           PRI.sd = mean(PRI.sd, na.rm=T) , 
+           PRI.years = length(PRI.year %>% unique))
+
+Sites.CHM.summary <- Sites.CHM %>% select(site, CHM.mean, CHM.sd, CHM.year) %>% 
+  reframe( .by= site,
+           CHM.mean = mean(CHM.mean, na.rm=T) , 
+           CHM.sd = mean(CHM.sd, na.rm=T) , 
+           CHM.years = length(CHM.year %>% unique))
+
+Sites.SAVI.summary <- Sites.SAVI %>% select(site, SAVI.mean, SAVI.sd, SAVI.year) %>% 
+  reframe( .by= site,
+           SAVI.mean = mean(SAVI.mean, na.rm=T) , 
+           SAVI.sd = mean(SAVI.sd, na.rm=T) , 
+           SAVI.years = length(SAVI.year %>% unique))
+
+
+Sites.Summary <- Sites.EVI.summary %>% full_join( Sites.NDVI.summary,by = 'site') %>% 
+  full_join( Sites.LAI.summary,by = 'site') %>%
+  full_join( Sites.PRI.summary,by = 'site') %>%
+  full_join( Sites.CHM.summary,by = 'site') %>%
+  full_join( Sites.SAVI.summary,by = 'site')
+
+save(Sites.Summary, file='/Volumes/MaloneLab/Research/FluxGradient/Sites_AOP_Summary.Rdata')
+
+fileSave <- file.path('/Volumes/MaloneLab/Research/FluxGradient/Sites_AOP_Summary.Rdata')
+drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
+googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)

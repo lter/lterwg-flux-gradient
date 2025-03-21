@@ -42,3 +42,5 @@ Site.Buffers$site <- Site.Buffers$Site_Id.NEON
 # Write shapefiles for use in Site.Spatial.Homo
 save(Site.Buffers, file='/Volumes/MaloneLab/Research/FluxGradient/NEONLTERsiteBuffers.Rdata')
 
+
+message("Next run flow.neon.site.simplefeatures.R")

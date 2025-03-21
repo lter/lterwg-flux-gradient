@@ -1,4 +1,4 @@
-# Import and Prcess NEON AOP Data t Produce EVI tifs.
+# Downloads and mosaics NEON AOP Data:
 
 #https://www.neonscience.org/resources/learning-hub/tutorials/merge-aop-raster-data
 
@@ -81,7 +81,6 @@ for( i in 1:length(VI.availabilityDf$site )){
 
 # Mosaic the data:
 
-
 for( i in 1:length(LAI.availabilityDf$site )){
   print(i)
   site <- LAI.availabilityDf$site[i]
@@ -110,8 +109,7 @@ for( i in 1:length(CH.availabilityDf$site )){
   message(paste('Done with', site, "-", year))
 }
 
-VI.availabilityDf$site[63]
-for( i in 64:length(VI.availabilityDf$site )){
+for( i in 1:length(VI.availabilityDf$site )){
   print(i)
   site <- VI.availabilityDf$site[i]
   year <- VI.availabilityDf$year[i]
@@ -126,4 +124,4 @@ for( i in 64:length(VI.availabilityDf$site )){
 }
 
 
-
+message("Next run flow.neon.site.squarebuffers.R")
