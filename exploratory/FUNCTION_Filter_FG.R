@@ -52,7 +52,8 @@ Apply.filter <- function( site.tibble,
                                     ustar.filter = ustar.filter, 
                                     FG_sd.limit = FG_sd.limit,
                                     diff.limit = diff.limit,
-                                    dConc.limit =  dConc.limit) 
+                                    dConc.limit =  dConc.limit,
+                                    approach = approach) 
     
     filtered.data.new <- filtered.data %>% mutate(time='timeEnd_A', dLevelsAminusB.colname = 'dLevelsAminusB' )
     site.tibble_FILTER[i] <- list(filtered.data.new )
