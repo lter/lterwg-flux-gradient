@@ -6,7 +6,6 @@
 - Sparkle L. Malone, Assistant Professor, Yale University
 - Jackie H. Matthes, Senior Scientist, Harvard University
 
-
 ## Project Summary
 
 - https://lternet.edu/working-groups/the-flux-gradient-project/
