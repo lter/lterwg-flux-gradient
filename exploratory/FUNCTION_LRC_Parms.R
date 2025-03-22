@@ -234,8 +234,6 @@ PARMS_Sites <- function(sites.tibble,
     message(paste("Done with",site))
     
   }
-  
-  
   return( site.tibble.parms)
 }
 
