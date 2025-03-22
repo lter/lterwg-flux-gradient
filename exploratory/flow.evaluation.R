@@ -15,81 +15,51 @@ load( "SITES_WP_30min.Rdata")
 load( "SITES_AE_30min.Rdata")
 load( "SITES_MBR_30min.Rdata")
 
+# Subset list to only include sites of interest:
+ sites <- c("KONZ", "HARV", "JORN", "GUAN")
+ 
+ SITES_MBR_30min <- SITES_MBR_30min[ sites]
+ SITES_AE_30min <- SITES_AE_30min[ sites]
+ SITES_WP_30min <- SITES_WP_30min[ sites]
 
-# Application of Filter Functions: ####
+ # Application of Filter Functions: ####
+ source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/flow.evaluation.filter.R')
+ 
+ save( SITES_WP_30min_FILTER,SITES_AE_30min_FILTER, SITES_MBR_30min_FILTER ,
+       file="/Volumes/MaloneLab/Research/FluxGradient/FilteredData_MS1Sites.Rdata")
+ 
+ fileSave <- file.path("/Volumes/MaloneLab/Research/FluxGradient/FilteredData_MS1Sites.Rdata")
+ googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
+ 
 
-source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_Filter_FG.R' )
-source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_SITELIST_FORMATTING.R' )
+ # Application of the One2One Analysis ####
+ 
+ source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/flow.evaluation.One2One.R')
+ 
+ save( SITES_One2One,
+       file="/Volumes/MaloneLab/Research/FluxGradient/One2One_MS1Sites.Rdata")
+ 
+ fileSave <- file.path("/Volumes/MaloneLab/Research/FluxGradient/One2One_MS1Sites.Rdata")
+ googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
+ 
+ save( SITES_WP_30min_FILTER_BH,SITES_AE_30min_FILTER_BH, SITES_MBR_30min_FILTER_BH ,
+       file="/Volumes/MaloneLab/Research/FluxGradient/FilteredData_MS1Sites_BH.Rdata")
+ 
+ fileSave <- file.path("/Volumes/MaloneLab/Research/FluxGradient/FilteredData_MS1Sites_BH.Rdata")
+ googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
+ 
 
-# Add Bad Eddy to the filter and generate a report:
-
-SITES_WP_30min.report <-  Generate.filter.report( site.tibble = SITES_AE_30min,
-                                                  flux.limit = 50, 
-                                                  ustar.filter= 0.3, 
-                                                  FG_sd.limit = 3,
-                                                  diff.limit = 1000,
-                                                  dConc.limit = 3,
-                                                  approach = "WP")
-
-SITES_AE_30min.report <-  Generate.filter.report( site.tibble = SITES_AE_30min,
-                                        flux.limit = 50, 
-                                        ustar.filter= 0.3, 
-                                        FG_sd.limit = 3,
-                                        diff.limit = 1000,
-                                        dConc.limit = 3,
-                                        approach = "AE")
-
-SITES_MBR_30min.report <-  Generate.filter.report( site.tibble = SITES_MBR_30min,
-                                        flux.limit = 50, 
-                                        ustar.filter= 0.3, 
-                                        FG_sd.limit = 3,
-                                        diff.limit = 1000,
-                                        dConc.limit = 3,
-                                        approach = "MBR")
-
-
-# Bad eddy 
-SITES_MBR_30min_FILTER <- Apply.filter( site.tibble = SITES_MBR_30min,
-                                         flux.limit = 50, 
-                                         ustar.filter= 0.3, 
-                                         FG_sd.limit = 3,
-                                         diff.limit = 1000,
-                                         dConc.limit = 3,
-                                        approach = "MBR")  %>% TIME_TOWER_LEVEL_FORMAT( time.col='match_time', dLevelsAminusB.colname= 'dLevelsAminusB')
-
-SITES_AE_30min_FILTER <- Apply.filter( site.tibble = SITES_AE_30min,
-                 flux.limit = 50, 
-                 ustar.filter= 0.3, 
-                 FG_sd.limit = 3,
-                 diff.limit = 1000,
-                 dConc.limit = 3,
-                 approach = "AE")  %>% TIME_TOWER_LEVEL_FORMAT( time.col='match_time', dLevelsAminusB.colname= 'dLevelsAminusB')
-
-SITES_WP_30min_FILTER <- Apply.filter ( site.tibble = SITES_WP_30min,
-                                          flux.limit = 50, 
-                                          ustar.filter= 0.3, 
-                                          FG_sd.limit = 4,
-                                          diff.limit = 1000,
-                                          dConc.limit = 3,
-                                        approach = "WP")  %>% TIME_TOWER_LEVEL_FORMAT( time.col='match_time', dLevelsAminusB.colname= 'dLevelsAminusB')
-
-# Save the filtered data:
-
-
-
-
-source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_One2One.R' )
-
+# Plots fr MS1
 dir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/FIGURES'
 
-sites <- names(SITES_WP_30min_FILTER  )
+sites <- names(SITES_WP_30min_FILTER_BH  )
 
 for ( i in sites){
   print(i)
   
-  plot.it.CO2 <- one2one.plots ( MBR.DF = SITES_MBR_30min_FILTER[i] , 
-                                AE.DF = SITES_AE_30min_FILTER[i], 
-                                WP.DF = SITES_WP_30min_FILTER[i] , gas = 'CO2')
+  plot.it.CO2 <- one2one.plots ( MBR.DF = SITES_MBR_30min_FILTER_BH[i] , 
+                                AE.DF = SITES_AE_30min_FILTER_BH[i], 
+                                WP.DF = SITES_WP_30min_FILTER_BH[i] , gas = 'CO2')
   print("Ready to plot") 
  
   print(plot.it.CO2)
@@ -103,9 +73,9 @@ for ( i in sites){
           
    print("done")       
    
-   try(plot.it.H2O <- one2one.plots ( MBR.DF = SITES_MBR_30min_FILTER[i] , 
-                                      AE.DF = SITES_AE_30min_FILTER[i], 
-                                      WP.DF = SITES_WP_30min_FILTER[i] , gas = 'H2O'), silent = T)
+   try(plot.it.H2O <- one2one.plots ( MBR.DF = SITES_MBR_30min_FILTER_BH[i] , 
+                                      AE.DF = SITES_AE_30min_FILTER_BH[i], 
+                                      WP.DF = SITES_WP_30min_FILTER_BH[i] , gas = 'H2O'), silent = T)
    print("Ready to plot") 
    
    print(plot.it.H2O)
@@ -120,73 +90,28 @@ for ( i in sites){
    print("done")       
 }
 
-SITES_One2One_CO2 <- one2one.parms.site(MBR.tibble = SITES_MBR_30min_FILTER,
-                                    AE.tibble = SITES_AE_30min_FILTER,
-                                    WP.tibble = SITES_WP_30min_FILTER, 
-                                    gas="CO2")
-
-SITES_One2One_H2O <- one2one.parms.site(MBR.tibble = SITES_MBR_30min_FILTER,
-                                        AE.tibble = SITES_AE_30min_FILTER,
-                                        WP.tibble = SITES_WP_30min_FILTER, 
-                                        gas="H2O")
-
-# Need to add the gas to this table. The point is to get the r2 associated with the max level
-SITES_One2One_Best_Level_CO2 <- SITES_One2One_CO2  %>% 
-  reframe(.by =c(Site, Approach ), maxR2.CO2 = max(R2)) 
-
-%>%
-  left_join(SITES_One2One_H2O %>% reframe(.by =c(Site, Approach ), maxR2.H20 = max(R2)) , by=c('Site', 'Approach'))%>% 
-  filter(maxR2.H20 ==  R2)
-
-SITES_MBR_30min_FILTER_BH <- list()
-SITES_AE_30min_FILTER_BH <- list()
-SITES_WP_30min_FILTER_BH <- list()
-
-for( site in unique(SITES_One2One_Best_Level$Site) ){
-  print(site)
-  
-  BH.MBR <- SITES_One2One_Best_Level %>% filter(Site == site, Approach=='MBR' )  %>% select(dLevelsAminusB)
-  SITES_MBR_30min_FILTER_BH[[site]] <-  SITES_MBR_30min_FILTER[[site]] %>% 
-    filter(dLevelsAminusB ==   BH.MBR$dLevelsAminusB)
-  
-  BH.AE <- SITES_One2One_Best_Level %>% filter(Site == site, Approach=='AE' )  %>% select(dLevelsAminusB)
-  SITES_AE_30min_FILTER_BH[[site]] <-  SITES_AE_30min_FILTER[[site]] %>% 
-    filter(dLevelsAminusB ==   BH.AE$dLevelsAminusB)
-  
-  BH.WP <- SITES_One2One_Best_Level %>% filter(Site == site, Approach=='WP' )  %>% select(dLevelsAminusB)
-  SITES_WP_30min_FILTER_BH[[site]] <-  SITES_WP_30min_FILTER[[site]] %>% 
-    filter(dLevelsAminusB ==   BH.WP$dLevelsAminusB)
-}
-
 
 # Fit Diurnal for that month:
-source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_DIURNAL.R' )
 
-# Calculate Diurnal Patterns by Year-month:
- 
-# add gas to the function!!!!
-Diurnal.MBR <- DIURNAL.COMPILE.Sites( FG.tibble =  SITES_MBR_30min_FILTER, 
-                               FG_flux = 'FG_mean', 
-                               EC_flux = 'FC_turb_interp', gas = "CO2")
+source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/flow.evaluation.diurnal.R')
 
-Diurnal.WP <- DIURNAL.COMPILE.Sites( FG.tibble =  SITES_WP_30min_FILTER, 
-                               FG_flux = 'FG_mean', 
-                               EC_flux = 'FC_turb_interp', gas = "CO2")
+save( diurnal.summary.H2O ,diurnal.summary.CO2, 
+      file="/Volumes/MaloneLab/Research/FluxGradient/DiurnalSummary_MS1Sites_BH.Rdata")
 
-Diurnal.AE <- DIURNAL.COMPILE.Sites( FG.tibble =  SITES_AE_30min_FILTER, 
-                                     FG_flux = 'FG_mean', 
-                                     EC_flux = 'FC_turb_interp', gas = "CO2")
+fileSave <- file.path("/Volumes/MaloneLab/Research/FluxGradient/DiurnalSummary_MS1Sites_BH.Rdata")
+googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
+
 
 # DIURNAL PLOTS:
 for ( i in sites){
  
-  df.MBR <-  Diurnal.MBR[i] %>% as.data.frame
+  df.MBR <-  Diurnal.MBR.CO2[i] %>% as.data.frame
   names( df.MBR ) <- substring( names(df.MBR ), 6)
   
-  df.AE <-  Diurnal.AE[i] %>% as.data.frame
+  df.AE <-  Diurnal.AE.CO2[i] %>% as.data.frame
   names( df.AE ) <- substring( names(df.AE ), 6)
   
-  df.WP <-  Diurnal.WP[i] %>% as.data.frame
+  df.WP <-  Diurnal.WP.CO2[i] %>% as.data.frame
   names( df.WP ) <- substring( names(df.WP ), 6)
   
   
@@ -210,7 +135,7 @@ for ( i in sites){
 
 # DIURNAL DIFF PLOTS:
 
-diurnal.summary <- Diurnal.Summary(diurnal.tibble = Diurnal.MBR, TYP='MBR' ) %>% rbind(Diurnal.Summary(diurnal.tibble = Diurnal.AE, TYP='AE' ) ) %>% rbind(Diurnal.Summary(diurnal.tibble = Diurnal.WP, TYP='WP' ) )  
+diurnal.summary <- Diurnal.Summary(diurnal.tibble = Diurnal.MBR.CO2, TYP='MBR' ) %>% rbind(Diurnal.Summary(diurnal.tibble = Diurnal.AE.CO2, TYP='AE' ) ) %>% rbind(Diurnal.Summary(diurnal.tibble = Diurnal.WP.CO2, TYP='WP' ) )  
 
 # Adjust the order of type:
 
@@ -250,76 +175,25 @@ print(ggarrange( p1,p2, p3, p4, nrow=2,ncol=2, labels=c("a.", "b.", "c.", "d")))
 dev.off()
 
 # Carbon Exchange PARMS: ####
-source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_LRC_Parms.R' )
 
+source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/flow.evaluation.cparms.R')
 
-
-SITES_MBR_30min_CPARMS_EC <- PARMS_Sites( sites.tibble = SITES_MBR_30min_FILTER_BH, 
-                             iterations = 10000, 
-                             priors.lrc= priors.lrc, 
-                             priors.trc= priors.trc, 
-                             idx = 'YearMon',
-                             PAR = 'PAR',
-                             nee = 'FC_turb_interp',
-                             TA = 'Tair')
-
-# Check that all the sites are in this thing!
-
-SITES_MBR_30min_CPARMS_FG <- PARMS_Sites( sites.tibble = SITES_MBR_30min_FILTER_BH, 
-                                          iterations = 10000, 
-                                          priors.lrc= priors.lrc, 
-                                          priors.trc= priors.trc, 
-                                          idx = 'YearMon',
-                                          PAR = 'PAR_CO2',
-                                          nee = 'FCH4_MBR_CO2trace_mean' ,
-                                          TA = 'Tair')
-
-SITES_AE_30min_CPARMS_EC <- PARMS_Sites( sites.tibble = SITES_AE_30min_FILTER_BH, 
-                                         iterations = 10000, 
-                                         priors.lrc= priors.lrc, 
-                                         priors.trc= priors.trc,
-                                         idx = 'YearMon',
-                                         PAR = 'PAR',
-                                         TA='Tair',
-                                         nee = 'FG_mean' )
-
-
-SITES_AE_30min_CPARMS_FG <- PARMS_Sites( sites.tibble = SITES_AE_30min_FILTER_BH, 
-                                         iterations = 10000, 
-                                         priors.lrc= priors.lrc, 
-                                         priors.trc= priors.trc,
-                                         idx = 'YearMon',
-                                         PAR = 'PAR',
-                                         TA='Tair',
-                                         nee = 'FG_mean' )
-
-SITES_WP_30min_CPARMS_EC <- PARMS_Sites( sites.tibble = SITES_WP_30min_FILTER_BH, 
-                                         iterations = 10000, 
-                                         priors.lrc= priors.lrc, 
-                                         priors.trc= priors.trc,
-                                         idx = 'YearMon',
-                                         PAR = 'PAR',
-                                         TA='Tair',
-                                         nee = 'FG_mean' )
-
-
-SITES_WP_30min_CPARMS_FG <- PARMS_Sites( sites.tibble = SITES_WP_30min_FILTER_BH, 
-                                         iterations = 10000, 
-                                         priors.lrc= priors.lrc, 
-                                         priors.trc= priors.trc,
-                                         idx = 'YearMon',
-                                         PAR = 'PAR',
-                                         TA='Tair',
-                                         nee = 'FG_mean' )
 save( SITES_MBR_30min_CPARMS_FG ,
       SITES_MBR_30min_CPARMS_EC ,
       SITES_AE_30min_CPARMS_FG,
       SITES_AE_30min_CPARMS_EC,
       SITES_WP_30min_CPARMS_EC, 
-      SITES_WP_30min_CPARMS_FG , file= '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/data/CarbonParms.Rdata')
+      SITES_WP_30min_CPARMS_FG ,
+      MBR.CPARMS,
+      AE.CPARMS ,
+      WP.CPARMS,
+      file= '/Volumes/MaloneLab/Research/FluxGradient/CarbonParms_MS1Sites.Rdata')
 
-# Calculate parms and compare the distribution of year_mon parms for the different approaches. 
-load('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/data/CarbonParms.Rdata')
+fileSave <- file.path('/Volumes/MaloneLab/Research/FluxGradient/CarbonParms_MS1Sites.Rdata')
+googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
+
+
+
 
 merge.CParms <- function( tibble1, tibble2,  TYP1, TYP2){
   
