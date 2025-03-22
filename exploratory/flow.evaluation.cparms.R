@@ -16,8 +16,8 @@ SITES_MBR_30min_CPARMS_FG <- PARMS_Sites( sites.tibble = SITES_MBR_30min_FILTER_
                                           priors.lrc= priors.lrc, 
                                           priors.trc= priors.trc, 
                                           idx = 'YearMon',
-                                          PAR = 'PAR_CO2',
-                                          nee = 'FCH4_MBR_CO2trace_mean' ,
+                                          PAR = 'PAR',
+                                          nee = 'FG_mean' ,
                                           TA = 'Tair')
 
 SITES_AE_30min_CPARMS_EC <- PARMS_Sites( sites.tibble = SITES_AE_30min_FILTER_BH, 
