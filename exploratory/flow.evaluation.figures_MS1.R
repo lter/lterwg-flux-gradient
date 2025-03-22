@@ -1,5 +1,8 @@
 # Creates tables and figures for MS1
 
+library(tidyverse)
+library(ggpubr)
+# Import the datafiles: #### 
 # Filter Data:
 # SITES_WP_30min_FILTER,SITES_AE_30min_FILTER, SITES_MBR_30min_FILTER ,
 
@@ -15,28 +18,42 @@ load("/Volumes/MaloneLab/Research/FluxGradient/One2One_MS1Sites.Rdata")
 # SITES_WP_30min_FILTER_BH,SITES_AE_30min_FILTER_BH, SITES_MBR_30min_FILTER_BH
 load("/Volumes/MaloneLab/Research/FluxGradient/FilteredData_MS1Sites_BH.Rdata")
 
+# Diurnals:
+load(file="/Volumes/MaloneLab/Research/FluxGradient/Diurnal_ALLSites_BH.Rdata")
+#diurnal.summary.H2O ,diurnal.summary.CO2, 
+load(file="/Volumes/MaloneLab/Research/FluxGradient/DiurnalSummary_ALLSites_BH.Rdata")
+sites <- c("KONZ" ,"HARV" ,"JORN", "GUAN")
+
+Diurnal.AE.H2O <- Diurnal.AE.H2O[sites] 
+Diurnal.MBR.H2O <- Diurnal.MBR.H2O[sites] 
+Diurnal.WP.H2O <- Diurnal.WP.H2O[sites] 
+
+Diurnal.AE.CO2 <- Diurnal.AE.CO2[sites] 
+Diurnal.MBR.CO2 <- Diurnal.MBR.CO2[sites] 
+Diurnal.WP.CO2 <- Diurnal.WP.CO2[sites] 
 
 # CPARMS:
 # SITES_MBR_30min_CPARMS_FG , SITES_MBR_30min_CPARMS_EC , SITES_AE_30min_CPARMS_FG, SITES_AE_30min_CPARMS_EC,
 # SITES_WP_30min_CPARMS_EC, SITES_WP_30min_CPARMS_FG , MBR.CPARMS, AE.CPARMS , WP.CPARMS,
 load('/Volumes/MaloneLab/Research/FluxGradient/CarbonParms_MS1Sites.Rdata')
 
-# flow.attr.map - makes a map of the sites for manuscript...
-
-
 ## One2One_Plots: ####
 source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_One2One.R' )
 
 dir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/FIGURES'
 
-sites <- names(SITES_WP_30min_FILTER_BH  )
-
 for ( i in sites){
   print(i)
   
-  plot.it.CO2 <- one2one.plots ( MBR.DF = SITES_MBR_30min_FILTER_BH[i] , 
-                                 AE.DF = SITES_AE_30min_FILTER_BH[i], 
-                                 WP.DF = SITES_WP_30min_FILTER_BH[i] , gas = 'CO2')
+  # Subset the MBR Heights
+  
+  th.filter <- SITES_AE_30min_FILTER[[i]]$TowerH %>% unique()
+  SITES_MBR <- list()
+  SITES_MBR[[i]] <- SITES_MBR_30min_FILTER[[i]] %>% filter(TowerH %in% th.filter)
+  
+  plot.it.CO2 <- one2one.plots ( MBR.DF = SITES_MBR[i] , 
+                                 AE.DF = SITES_AE_30min_FILTER[i], 
+                                 WP.DF = SITES_WP_30min_FILTER[i] , gas = 'CO2')
   print("Ready to plot") 
   
   print(plot.it.CO2)
@@ -50,9 +67,9 @@ for ( i in sites){
   
   print("done")       
   
-  try(plot.it.H2O <- one2one.plots ( MBR.DF = SITES_MBR_30min_FILTER_BH[i] , 
-                                     AE.DF = SITES_AE_30min_FILTER_BH[i], 
-                                     WP.DF = SITES_WP_30min_FILTER_BH[i] , gas = 'H2O'), silent = T)
+  try(plot.it.H2O <- one2one.plots ( MBR.DF = SITES_MBR[i] , 
+                                     AE.DF = SITES_AE_30min_FILTER[i], 
+                                     WP.DF = SITES_WP_30min_FILTER[i] , gas = 'H2O'), silent = T)
   print("Ready to plot") 
   
   print(plot.it.H2O)
@@ -67,8 +84,8 @@ for ( i in sites){
   print("done")       
 }
 
-
 # DIURNAL PLOTS:
+
 for ( i in sites){
   
   df.MBR <-  Diurnal.MBR.CO2[i] %>% as.data.frame
@@ -111,7 +128,7 @@ diurnal.summary$Type <- factor( diurnal.summary$Type, levels= c('MBR', 'AE', 'WP
 
 for ( i in sites){
   
-  p1 <- diurnal.summary %>% filter( Site == i) %>%  ggplot( ) + geom_col( aes( y =Flux.deviation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )
+  p1 <- diurnal.summary %>% filter( Site == i) %>%  ggplot( ) + geom_col( aes( y =Flux.dCHMation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )
   
   
   print(ggarrange( p1, nrow=1))
@@ -127,13 +144,13 @@ for ( i in sites){
 }
 
 
-p1 <- diurnal.summary %>% filter( Site == 'HARV' ) %>%  ggplot( ) + geom_col( aes( y =Flux.deviation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) ) + ylim(0, 300)
+p1 <- diurnal.summary %>% filter( Site == 'HARV' ) %>%  ggplot( ) + geom_col( aes( y =Flux.dCHMation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) ) + ylim(0, 300)
 
-p2 <- diurnal.summary %>% filter( Site == 'KONZ' ) %>%  ggplot( ) + geom_col( aes( y =Flux.deviation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )  + ylim(0, 300)
+p2 <- diurnal.summary %>% filter( Site == 'KONZ' ) %>%  ggplot( ) + geom_col( aes( y =Flux.dCHMation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )  + ylim(0, 300)
 
-p3 <- diurnal.summary %>% filter( Site == 'GUAN' ) %>%  ggplot( ) + geom_col( aes( y =Flux.deviation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )  + ylim(0, 300)
+p3 <- diurnal.summary %>% filter( Site == 'GUAN' ) %>%  ggplot( ) + geom_col( aes( y =Flux.dCHMation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )  + ylim(0, 300)
 
-p4 <- diurnal.summary %>% filter( Site == 'JORN' ) %>%  ggplot( ) + geom_col( aes( y =Flux.deviation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )  + ylim(0, 300)
+p4 <- diurnal.summary %>% filter( Site == 'JORN' ) %>%  ggplot( ) + geom_col( aes( y =Flux.dCHMation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )  + ylim(0, 300)
 
 png("Diurnal_Diff_sites.png", width=8, 
     height=8, units="in", res=1200)
@@ -209,3 +226,35 @@ ggarrange(
 
 dev.off()
 
+# Create a file to compile the AOP and the flux data
+#Sites.Summary
+load('/Volumes/MaloneLab/Research/FluxGradient/Sites_AOP_Summary.Rdata')
+
+Sites.Summary.sub <- Sites.Summary %>% filter(site %in% sites)
+
+plot.EVI <- Sites.Summary.sub %>% ggplot(aes(x= EVI.mean, y = site, xmin = EVI.mean - EVI.sd , 
+                                 xmax = EVI.mean + EVI.sd)) + geom_point( aes( )) +
+  geom_errorbar(  aes(),width=0.3) + theme_bw() + ylab("") + xlab("EVI")
+
+plot.NDVI <- Sites.Summary.sub %>% ggplot(aes(x= NDVI.mean, y = site, xmin = NDVI.mean - NDVI.sd , 
+                                             xmax = NDVI.mean + NDVI.sd)) + geom_point( aes( )) +
+  geom_errorbar(  aes(),width=0.3) + theme_bw() + ylab("") + xlab("NDVI")
+
+
+plot.LAI <- Sites.Summary.sub %>% ggplot(aes(x= LAI.mean, y = site, xmin = LAI.mean - LAI.sd , 
+                                             xmax = LAI.mean + LAI.sd)) + geom_point( aes( )) +
+  geom_errorbar(  aes(),width=0.3) + theme_bw() + ylab("") + xlab("LAI")
+
+plot.CHM <- Sites.Summary.sub %>% ggplot(aes(x= CHM.mean, y = site, xmin = CHM.mean - CHM.sd , 
+                                             xmax = CHM.mean + CHM.sd)) + geom_point( aes( )) +
+  geom_errorbar(  aes(),width=0.3) + theme_bw() + ylab("") + xlab("CHM")
+
+png("Structure_Summary_MS1.png", width=6, 
+    height=6, units="in", res=1200)
+
+ggarrange(plot.LAI, plot.EVI, plot.NDVI, plot.CHM, labels=c("a", "b", "c", "d") )
+
+dev.off()
+
+
+# flow.attr.map - makes a map of the sites for manuscript...
