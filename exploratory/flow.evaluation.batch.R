@@ -54,6 +54,13 @@ save( diurnal.summary.H2O ,diurnal.summary.CO2,
 fileSave <- file.path("/Volumes/MaloneLab/Research/FluxGradient/DiurnalSummary_ALLSites_BH.Rdata")
 googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
 
+save( Diurnal.AE.H2O , Diurnal.MBR.H2O,  Diurnal.WP.H2O,
+      Diurnal.AE.CO2 , Diurnal.MBR.CO2,  Diurnal.WP.CO2,
+      file="/Volumes/MaloneLab/Research/FluxGradient/Diurnal_ALLSites_BH.Rdata")
+
+fileSave <- file.path("/Volumes/MaloneLab/Research/FluxGradient/Diurnal_ALLSites_BH.Rdata")
+googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
+
 # Carbon Exchange PARMS: ####
 
 load("/Volumes/MaloneLab/Research/FluxGradient/FilteredData_ALLSites_BH.Rdata")
