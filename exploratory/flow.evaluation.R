@@ -7,7 +7,7 @@ library(ggplot2)
 library(ggpubr)
 
 localdir <- '/Volumes/MaloneLab/Research/FluxGradient/FluxData'
-
+drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3") 
 setwd(localdir)
 
 load( "SITES_WP_30min.Rdata")
