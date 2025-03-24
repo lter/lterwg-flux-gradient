@@ -1,4 +1,4 @@
-source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_LRC_Parms.R' )
+source(fs::path(DirRepo,'exploratory/FUNCTION_LRC_Parms.R' ))
 
 SITES_MBR_30min_CPARMS_EC <- PARMS_Sites( sites.tibble = SITES_MBR_30min_FILTER_BH, 
                                           iterations = 10000, 

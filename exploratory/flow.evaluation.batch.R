@@ -8,7 +8,7 @@ library(ggpubr)
 
 email <- 'csturtevant@battelleecology.org'
 DirRepo <- "." # Relative or absolute path to lterwg-flux-gradient git repo on your local machine. Make sure you've pulled the latest from main!
-localdir <- 'C:\Users\csturtevant\OneDrive - Battelle Ecology\FluxGradient' # We'll deposit output files here prior to uploading to Google Drive
+localdir <- 'C:/Users/csturtevant/OneDrive - Battelle Ecology/FluxGradient' # We'll deposit output files here prior to uploading to Google Drive
 DnldFromGoogleDrive <- FALSE # Enter TRUE if you don't have the files listed in dnld_files below locally in the localdir directory
 
 # Download necessary files from Google Drive
@@ -48,7 +48,7 @@ googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
 
 
 # Application of the One2One Analysis ####
-load(fileSave)
+# load(fileSave)
 
 source(fs::path(DirRepo,'exploratory/flow.evaluation.One2One.R'))
 
