@@ -13,6 +13,7 @@
 
 # Load needed libraries
 # install.packages("librarian")
+library(data.table)
 librarian::shelf(tidyverse, googledrive, lter/ltertools)
 
 # Clear environment
@@ -28,9 +29,9 @@ dir.create(path = file.path("methane", "raw_methane"), showWarnings = F)
 
 # Identify desired files
 ch4_files <- dplyr::bind_rows(
-  # googledrive::drive_ls(path = googledrive::as_id("https://drive.google.com/drive/u/0/folders/1MzyDvXudL-A3ZGlzukbhil19fsx3s7Mk")),
-  googledrive::drive_ls(path = googledrive::as_id("https://drive.google.com/drive/u/0/folders/1qPrBaZxX7XBBKq77eEmVXALSoDmUB2_I")),
-  googledrive::drive_ls(path = googledrive::as_id("https://drive.google.com/drive/u/0/folders/1AOct-UbwpzkuLMT9EnEspRX_QnX07T4G")) ) %>% 
+  # googledrive::drive_ls(path = googledrive::as_id("https://drive.google.com/drive/u/0/folders/1MzyDvXudL-A3ZGlzukbhil19fsx3s7Mk")), #SE-Deg
+  googledrive::drive_ls(path = googledrive::as_id("https://drive.google.com/drive/u/0/folders/1qPrBaZxX7XBBKq77eEmVXALSoDmUB2_I")),  #SE-Svb
+  googledrive::drive_ls(path = googledrive::as_id("https://drive.google.com/drive/u/0/folders/1AOct-UbwpzkuLMT9EnEspRX_QnX07T4G")) ) %>%   #US-Uaf
   # Keep only CSVs / Excel files
   dplyr::filter(stringr::str_detect(string = name, pattern = ".csv") == T |
                   stringr::str_detect(string = name, pattern = ".xls") == T) %>% 
@@ -41,9 +42,20 @@ ch4_files <- dplyr::bind_rows(
 # Check structure
 ch4_files
 
+
+
 # Download desired files
 purrr::walk2(.x = ch4_files$id, .y = ch4_files$name,
              .f = ~ googledrive::drive_download(file = .x, overwrite = T, path = file.path("methane", "raw_methane", .y)))
+
+# Some of the datafiles have initial rows of text that mess up future manipulations, so manually delete these
+# Identify the file with the problematic first row
+file_path <- "methane/raw_methane/AMF_US-Uaf_BASE_HH_12-5.csv"
+# Using data.table (fastest for large files)
+
+data <- fread(file_path, skip = 1)
+fwrite(data, file_path)   #re-save US-Uaf BASE file 
+
 
 ## ----------------------------- ##
           # Key Prep ----
@@ -72,7 +84,7 @@ if(remake_key == TRUE){
 }
 
 ## ----------------------------- ##
-# Harmonization ----
+# Harmonization ---- this step can be done after you manually enter the appropriate "tidy_name" variable name in the methane_key 
 ## ----------------------------- ##
 
 # Clear environment (again)
