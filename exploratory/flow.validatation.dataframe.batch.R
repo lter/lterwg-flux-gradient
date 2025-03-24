@@ -196,9 +196,14 @@ for ( site in site.list){
 # Save files locally and push to google drive:
 # Save .Rdata locally:
 
+
 save(SITES_WP_30min, file = file.path(paste(localdir, "SITES_WP_30min.Rdata", sep="/")))
 save(SITES_AE_30min, file = file.path(paste(localdir, "SITES_AE_30min.Rdata", sep="/")))
 save(SITES_MBR_30min, file = file.path(paste(localdir, "SITES_MBR_30min.Rdata", sep="/")))
+
+load("/Volumes/MaloneLab/Research/FluxGradient/FluxData/SITES_MBR_30min.Rdata")
+load("/Volumes/MaloneLab/Research/FluxGradient/FluxData/SITES_AE_30min.Rdata")
+load("/Volumes/MaloneLab/Research/FluxGradient/FluxData/SITES_WP_30min.Rdata")
 
 # Save Files on google drive: 
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/14Ga9sLRMlQVvorZdHBiYxCbUybiGwPNp")
