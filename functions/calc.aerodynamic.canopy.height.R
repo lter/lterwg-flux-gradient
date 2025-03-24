@@ -21,9 +21,15 @@ calc.AeroCanopyH <- function(Mdate, ustar, z, L, u, daysAVG, plotYN) {
   # Calculate daily mean height using smoothing and despike one last time
   Days <- as.numeric(format(Mdate, "%j"))
   h_despike <- h[ind]# You might need to implement or find a despike function in R. Not implemented for now.
+  navg <- daysAVG # number of windows to use for average
   
-  if (length(unique(Days)) > 30) { # higher than 30 days of data
-    navg <- daysAVG # number of windows to use for average
+ if( length(h_despike) < length(navg) ){ # Added this for TEAK????
+   cat("Too little data, z_veg will be equal to the average\n")
+   zh_final <- rep(mean(h_despike, na.rm=TRUE), length(h))
+   h_dsk <- rep(NA, length(ustar)) # Is this ok?
+
+   } else if (length(unique(Days)) > 30) { # higher than 30 days of data
+    #navg <- daysAVG # number of windows to use for average
     hsmooth_dsk <- stats::filter(h_despike, rep(1/navg, navg), sides=2) # smoothing
     h_dsk <- rep(NA, length(ustar))
     h_dsk[ind] <- hsmooth_dsk
@@ -35,6 +41,7 @@ calc.AeroCanopyH <- function(Mdate, ustar, z, L, u, daysAVG, plotYN) {
     zh_final[fff[length(fff)]:length(zh_final)] <- zh_final[fff[length(fff)]]
   } else {
     cat("Too little data, z_veg will be equal to the average\n")
+    h_dsk <- rep(NA, length(ustar)) # Is this ok? TOOL
     zh_final <- rep(mean(h_despike, na.rm=TRUE), length(h))
   }
   
