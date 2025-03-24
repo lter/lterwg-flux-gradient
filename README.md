@@ -31,7 +31,7 @@ First data is filtered (**flow.evaluation.filter.R**) to produce: FilteredData_A
 1.**flow.NEONAOP.Download.R** Downloads and mosaics NEON AOP Data. Data is stored locally on the Malone Lab server.
 2. **flow.neon.site.squarebuffers.R** Creates square buffers for LTER-NEON co-located sites using this file: Ameriflux_NEON field-sites.csv to produce: NEONLTERsiteBuffers.Rdata.
 3. **flow.neon.site.simplefeatures.R** This script uses the NEONLTERsiteBuffers.Rdata and breaks each buffer into wedges to produce: FG_Site_Wdges.RDATA.
-4. **flow_AOP_FormatLayers** Extracts AOP information for each wedge to produce ...
+4. **flow_AOP_FormatLayers** Extracts AOP information for each wedge to produce a summary file.
 
 ## Function Folder
 - Use hierarchical naming with the active verb first, i.e. "flag.iqr.R"
