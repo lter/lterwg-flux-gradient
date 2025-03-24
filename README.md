@@ -90,14 +90,14 @@ lterwg-flux-gradient/
 
 ### Exploratory Workflows
 
-6. `flow.calc.flux.batch.R` → Grab aligned concentration & flux data and calculates the fluxes using MBR (`flow.calc.flag.mbr.batch.R`), AE (`flow.calc.flag.aero.batch.R`), and WP (`flow.calc.flag.windprof.batch.R`) methods and adds quality flag columns, month, hour, residual, rmse for calculated fluxes. Save output as SITE_METHOD.RData, where SITE is NEON site code, METHOD is the computation method (e.g. MBR=modified bowen ratio, aero = aerodynamic, windprof=wind profile). **Exploratory**
+6. `flow.calc.flux.batch.R` → Grab aligned concentration & flux data and calculates the fluxes using MBR (`flow.calc.flag.mbr.batch.R`), AE (`flow.calc.flag.aero.batch.R`), and WP (`flow.calc.flag.windprof.batch.R`) methods and adds quality flag columns, month, hour, residual, rmse for calculated fluxes. Save output as SITE_METHOD.RData, where SITE is NEON site code, METHOD is the computation method (e.g. MBR=modified bowen ratio, aero = aerodynamic, windprof=wind profile). 
 
-7. `flow.validation.dataframe.batch.R` → standardizes the data fromat from the MBR, AE, and WP. This files uses the product of `flow.calc.flux.batch.R`. This file produces a list of dataframes in an .rdata objected named SITES_METHOD_30min. **Exploratory**
+7. `flow.validation.dataframe.batch.R` → standardizes the data fromat from the MBR, AE, and WP. This files uses the product of `flow.calc.flux.batch.R`. This file produces a list of dataframes in an .rdata objected named SITES_METHOD_30min. 
 
 8. `flow.evaluation.batch` → Creates the data needed to evaluate gradient fluxes using the products of `flow.validation.dataframe.batch.R`.
-First data is filtered (`flow.evaluation.filter.R`) to produce: FilteredData_ALLSites.Rdata and FilterReport_ALLSites.Rdata. Next, the One2One analysis (`flow.evaluation.One2One.R`) is done on filtered data to produce: One2One_ALLSites.Rdata and FilteredData_ALLSites_BH.Rdata. BH stands for the best height, which is determined by the height levels with the highest R2. Next the diurnal analysis (`flow.evaluation.diurnal.R`) produces: DiurnalSummary_ALLSites_BH.Rdata. Finally, we fit carbon exchange parameters (`flow.evaluation.cparms.R`) to produce: CarbonParms.Rdata. **Exploratory**
+First data is filtered (`flow.evaluation.filter.R`) to produce: FilteredData_ALLSites.Rdata and FilterReport_ALLSites.Rdata. Next, the One2One analysis (`flow.evaluation.One2One.R`) is done on filtered data to produce: One2One_ALLSites.Rdata and FilteredData_ALLSites_BH.Rdata. BH stands for the best height, which is determined by the height levels with the highest R2. Next the diurnal analysis (`flow.evaluation.diurnal.R`) produces: DiurnalSummary_ALLSites_BH.Rdata. Finally, we fit carbon exchange parameters (`flow.evaluation.cparms.R`) to produce: CarbonParms.Rdata. 
 
-9. `flow.evaluation.figures` → produces the figures and tables that evaluate the gradient flux. The products of `flow.evaluation.batch` are used. **Exploratory**
+9. `flow.evaluation.figures` → produces the figures and tables that evaluate the gradient flux. The products of `flow.evaluation.batch` are used. 
 
    ```
    SITE_aligned_conc_flux_9min.RData → flow.calc.flux.batch.R 
