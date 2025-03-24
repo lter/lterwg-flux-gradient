@@ -6,9 +6,10 @@ library(tidyverse)
 library(ggplot2)
 library(ggpubr)
 
-DirRepo <- "." # Relative or absolute path to lterwg-flux-gradient git repo on your local machine. Make sure you've pulled the latest from main!
-localdir <- tempdir() # We'll deposit output files here prior to uploading to Google Drive
 email <- 'csturtevant@battelleecology.org'
+DirRepo <- "." # Relative or absolute path to lterwg-flux-gradient git repo on your local machine. Make sure you've pulled the latest from main!
+localdir <- 'C:\Users\csturtevant\OneDrive - Battelle Ecology\FluxGradient' # We'll deposit output files here prior to uploading to Google Drive
+DnldFromGoogleDrive <- FALSE # Enter TRUE if you don't have the files listed in dnld_files below locally in the localdir directory
 
 # Download necessary files from Google Drive
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
@@ -16,16 +17,25 @@ googledrive::drive_auth(email = email) # Likely will not work on RStudio Server.
 data_folder <- googledrive::drive_ls(path = drive_url)
 
 dnld_files=c("SITES_WP_30min.Rdata","SITES_AE_30min.Rdata","SITES_MBR_30min.Rdata")
-for (focal_file in dnld_files){
+if(DnldFromGoogleDrive == TRUE){
+  for (focal_file in dnld_files){
+  message('Downloading ',focal_file, ' to ',localdir)
   file_id <- subset(data_folder, name == focal_file)
-  pathDnld <- fs::path(dirTmp,focal_file)
+  pathDnld <- fs::path(localdir,focal_file)
   googledrive::drive_download(file = file_id$id, 
                               path = fs::path(localdir,focal_file),
                               overwrite = T)
-  load(fs::path(localdir,focal_file))
   
+  }
 }
 
+# Load the files
+for (focal_file in dnld_files){
+  message('Loading ',focal_file, ' from ',localdir)
+  load(fs::path(localdir,focal_file))
+}
+
+message('Running script...')
 
 # Application of Filter Functions: ####
 source(fs::path(DirRepo,'exploratory/flow.evaluation.filter.R'))
