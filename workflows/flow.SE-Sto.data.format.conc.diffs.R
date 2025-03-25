@@ -99,6 +99,17 @@ dataMet <- dataMet %>% rename(P_kPa = Pa_1_1_1)
 dataMet <- dataMet %>% rename(Tair1 = Ta_1_1_1)
 dataMet <- dataMet %>% rename(RH = RH_1_1_1)
 
+## Create timeBgn_A variable from date and time
+dataFlux$date <- as.Date(dataFlux$date, format = "%Y-%m-%d")
+dataFlux$timeEnd_A <- as.POSIXct(paste(dataFlux$date, dataFlux$time), format="%Y-%m-%d %H:%M:%S")
+
+dataMet$date <- as.Date(dataMet$date, format = "%Y-%m-%d")
+dataMet$timeEnd_A <- as.POSIXct(paste(dataMet$date, dataMet$time), format="%Y-%m-%d %H:%M:%S")
+
+dataConc$date <- as.Date(dataConc$date, format = "%Y-%m-%d")
+dataConc$timeEnd_A <- as.POSIXct(paste(dataConc$date, dataConc$time), format="%Y-%m-%d %H:%M:%S")
+
+
 
 # Transform the attr.df data frame into same format as NEON sites
 attr.df.transpose <- as.data.frame(t(attr.df0))
