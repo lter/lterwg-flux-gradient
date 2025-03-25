@@ -35,7 +35,7 @@ calc.AeroCanopyH <- function(Mdate, ustar, z, L, u, daysAVG, plotYN) {
     h_dsk[ind] <- hsmooth_dsk
     if (length(h_dsk[!is.na(h_dsk)]) < 2){ # Added this case for WREF
       cat("Too little data, z_veg will be equal to the average\n")
-      h_dsk <- rep(NA, length(ustar)) # Is this ok? TOOL
+      h_dsk <- rep(NA, length(ustar)) 
       zh_final <- rep(mean(h_despike, na.rm=TRUE), length(h))
     } else {
       # Interpolate daily measurements back to 30 (9) min values
