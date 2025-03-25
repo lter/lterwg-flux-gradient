@@ -23,12 +23,16 @@ librarian::shelf(tidyverse, googledrive, lter/ltertools)
 rm(list = ls())
 
 #Site to work on
-siteID <- 'SE-Sto'
+siteID <- 'SE-Deg'
 
 if (siteID == 'US-Uaf'){
   gdrive_path <- "https://drive.google.com/drive/u/0/folders/1AOct-UbwpzkuLMT9EnEspRX_QnX07T4G"
 } else if (siteID == 'SE-Sto'){
   gdrive_path <- "https://drive.google.com/drive/u/1/folders/1F1qZkAZywNUq_fyS1OmlG3C9AkGo6fdc"
+} else if (siteID == 'SE-Deg'){
+  gdrive_path <- "https://drive.google.com/drive/u/1/folders/1MzyDvXudL-A3ZGlzukbhil19fsx3s7Mk"
+} else if (siteID == 'SE-Svb'){
+  gdrive_path <- "https://drive.google.com/drive/u/1/folders/1qPrBaZxX7XBBKq77eEmVXALSoDmUB2_I"
 }
 
 # Create a local folder for data storage
@@ -48,7 +52,13 @@ if (siteID == 'US-Uaf'){
   ch4_files_to_keep <- c('SE-Sto_met_30min.csv',
                   'SE-Sto_gas_fluxes_30min.csv',
                   'SE-Sto_concentration_profile_30min.csv')
- }
+} else if (siteID == 'SE-Deg'){
+  ch4_files_to_keep <- c('SE-Deg_gasflux_biomet_30min',
+                         'SE-Deg_concentration_profile_30min')
+}else if (siteID == 'SE-Svb'){
+  ch4_files_to_keep <- c('CH4_SE_SVB_FLUX+PROFILE_2019')
+}
+
 
 ## ----------------------------- ##
 # Data Download ----
@@ -98,7 +108,7 @@ if (siteID == 'US-Uaf'){
 }
 
 ## ----------------------------- ##
-          # Key Prep -- at this poitn the methane/raw_methane folder contains only data that needs columns renamed
+          # Key Prep -- at this point the methane/raw_methane folder contains only data that needs columns renamed
 ## ----------------------------- ##
 # NOTE: This code is only run once to make the 'column key' skeleton
 ## Which will be subsequently updated by hand
@@ -130,10 +140,11 @@ if(remake_key == TRUE){
 ## ----------------------------- ##
 
 # Clear environment (again)
-rm(list = ls())
+rm(list = setdiff(ls(), "gdrive_path", "SE-Sto"))
+
 
 # Identify key
-(key_id <- googledrive::drive_ls(path = googledrive::as_id("https://drive.google.com/drive/u/0/folders/1jrOJIu5WfdzmlbL9vMkUNfzBpRC-W0Wd")) %>% 
+(key_id <- googledrive::drive_ls(path = googledrive::as_id(gdrive_path)) %>% 
   dplyr::filter(name == "Methane-Key") )
 
 # Download key
