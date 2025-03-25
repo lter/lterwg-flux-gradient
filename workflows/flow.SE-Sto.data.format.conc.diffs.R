@@ -122,11 +122,6 @@ for (i in 1:nrow(dataFlux)) {
   previous_integer_doy <- doy
 }
 
-# dataFlux$date <- as.Date(dataFlux$date, format = "%Y-%m-%d")
-# dataFlux$timeEnd_A <- as.POSIXct(paste(dataFlux$date, dataFlux$time), format="%Y-%m-%d %H:%M:%S")
-library(lubridate)
-# data format for dataFlux changes half-way through, so create a year column from DOY, then year use, DOY, and time to create timeEnd_A
-
 dataFlux$doy <- floor(dataFlux$doy)
 dataFlux$timeEnd_A  <- make_datetime(
   year = dataFlux$year,
@@ -153,6 +148,7 @@ for (i in 1:nrow(dataMet)) {
   previous_integer_doy <- doy
 }
 
+#now do concentration data
 dataMet$doy <- floor(dataMet$doy)
 dataMet$timeEnd_A  <- make_datetime(
   year = dataMet$year,
@@ -164,11 +160,35 @@ dataMet$timeEnd_A  <- make_datetime(
 ) + days(dataMet$doy - 1)
 
 
-# dataMet$date <- as.Date(dataMet$date, format = "%Y-%m-%d")
-# dataMet$timeEnd_A <- as.POSIXct(paste(dataMet$date, dataMet$time), format="%Y-%m-%d %H:%M:%S")
+current_year <- 2014
+previous_integer_doy <- 0  # Track the integer day of year
 
-dataConc$date <- as.Date(dataConc$date, format = "%Y-%m-%d")
-dataConc$timeEnd_A <- as.POSIXct(paste(dataConc$date, dataConc$time), format="%Y-%m-%d %H:%M:%S")
+# Initialize Year column
+dataConc$year <- NA
+
+for (i in 1:nrow(dataConc)) {
+  doy <- dataConc$doy[i]# Check for year transition (e.g., 365 -> 1)
+  if (doy < previous_integer_doy) {
+    current_year <- current_year + 1
+  }
+  
+  dataConc$year[i] <- current_year
+  previous_integer_doy <- doy
+}
+
+
+# data format for dataFlux changes half-way through, so create a year column from DOY, then year use, DOY, and time to create timeEnd_A
+
+dataConc$doy <- floor(dataConc$doy)
+dataConc$timeEnd_A  <- make_datetime(
+  year = dataFlux$year,
+  month = 1,
+  day = 1,
+  hour = hour(hms(dataConc$time)),
+  min = minute(hms(dataConc$time)),
+  sec = second(hms(dataConc$time))
+) + days(dataConc$doy - 1)
+
 
 
 
@@ -198,8 +218,15 @@ if(any(diff(tower.heights$TowerPosition) < 0)){
 # merge the tables based on measurement time
  
 
-data <- left_join(dataFlux, dataConc, by='timeEnd_A')
-rm('dataAmf','dataConc')
+data <- left_join(dataFlux, dataConc,  by='timeEnd_A')
+data <- left_join(data, dataMet,  by='timeEnd_A')
+
+#remove some duplicate columns
+data <- data %>%
+  select(timeEnd_A, year = year.x, doy = doy.x, date = date.x, time = time.x,
+         everything(), 
+         -ends_with(".y"), -ends_with(".x"))
+rm('dataFlux','dataConc', 'dataMet')
 
 # CONCENTRATIONS ARE IN WET MOLE FRACTION. Convert to dry mole fraction (same as NEON data)
 # Sadly there are no water vapor concentrations in the AmeriFlux output
