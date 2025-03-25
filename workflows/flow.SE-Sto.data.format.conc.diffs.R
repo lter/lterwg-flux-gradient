@@ -228,48 +228,58 @@ data <- data %>%
          -ends_with(".y"), -ends_with(".x"))
 rm('dataFlux','dataConc', 'dataMet')
 
+
+#update time zones for data
+data$timeEnd_A <- as.POSIXct(data$timeEnd_A, format="%d-%b-%Y %H:%M:%S", tz="CET")
+data$timeEnd_A <- with_tz(data$timeEnd, tzone = "UTC")
+data$timeBgn_A <- data$timeEnd_A - minutes(30)
+
+
 # CONCENTRATIONS ARE IN WET MOLE FRACTION. Convert to dry mole fraction (same as NEON data)
 # Sadly there are no water vapor concentrations in the AmeriFlux output
 # Use the RH profile at the same height (RH-capac sensor per the Instrument heights spreadsheet)
 # Convert RH at each level to compute dry air mole fraction of water vapor
-R = 8.314          #Universal gas constant dry air [J/(K mol)]
-for (i in 1:4){
-  Tair <- data[[paste0('TA_1_',i,'_1')]]
-  RH <- data[[paste0('RH_1_',i,'_1')]]
-  Tair_K <- Tair + 273.16 # K
-  P_pa <- data$PA*1000  #Atmospheric pressure [Pa]
-  esat_Pa <- 611.2*exp(17.67*(Tair_K-273.16)/(Tair_K-29.65)) #[Pa] saturated water vapor pressure
-  e_Pa <- RH*esat_Pa/100 #[Pa] vapor water pressure
-  rhoa <- (P_pa - e_Pa)/(R*Tair_K) # dry air molar density  [mol/m3]
-  rhov <- e_Pa/(R*Tair_K) # water vapor molar density  [Kg/m3]
-  Xwa <- rhov/rhoa # dry air mole fraction of water vapor [mol mol-1]
-  
-  # Now convert each gas constituent at this tower level to dry air mole fraction
-  varCH4 <- paste0('CH4_1_',i,'_1')
-  Xcw <- data[[varCH4]] # moist air mole fraction
-  Xca <- Xcw*(1+Xwa) # dry air mole fraction
-  data[[paste0(varCH4,'_MIXING_RATIO')]] <- Xca
-  
-  varCO2 <- paste0('CO2_1_',i,'_1')
-  Xcw <- data[[varCO2]] # moist air mole fraction
-  Xca <- Xcw*(1+Xwa) # dry air mole fraction
-  data[[paste0(varCO2,'_MIXING_RATIO')]] <- Xca
-  
-  if (i == 1){
-    varH2O <- "H2O.concentration..8m"
-    Xcw <- data[[varH2O]] # moist air mole fraction
-    Xca <- Xcw*(1+Xwa) # dry air mole fraction
-    data[[paste0(varH2O,'_MIXING_RATIO')]] <- Xca
-    
-  } else if (i == 2){
-    varH2O <- "H2O.concentration..4m"
-    Xcw <- data[[varH2O]] # moist air mole fraction
-    Xca <- Xcw*(1+Xwa) # dry air mole fraction
-    data[[paste0(varH2O,'_MIXING_RATIO')]] <- Xca
-    
-  } 
-  
-}
+
+# 
+
+# R = 8.314          #Universal gas constant dry air [J/(K mol)]
+# for (i in 1:4){
+#   Tair <- data[[paste0('TA_1_',i,'_1')]]
+#   RH <- data[[paste0('RH_1_',i,'_1')]]
+#   Tair_K <- Tair + 273.16 # K
+#   P_pa <- data$PA*1000  #Atmospheric pressure [Pa]
+#   esat_Pa <- 611.2*exp(17.67*(Tair_K-273.16)/(Tair_K-29.65)) #[Pa] saturated water vapor pressure
+#   e_Pa <- RH*esat_Pa/100 #[Pa] vapor water pressure
+#   rhoa <- (P_pa - e_Pa)/(R*Tair_K) # dry air molar density  [mol/m3]
+#   rhov <- e_Pa/(R*Tair_K) # water vapor molar density  [Kg/m3]
+#   Xwa <- rhov/rhoa # dry air mole fraction of water vapor [mol mol-1]
+#   
+#   # Now convert each gas constituent at this tower level to dry air mole fraction
+#   varCH4 <- paste0('CH4_1_',i,'_1')
+#   Xcw <- data[[varCH4]] # moist air mole fraction
+#   Xca <- Xcw*(1+Xwa) # dry air mole fraction
+#   data[[paste0(varCH4,'_MIXING_RATIO')]] <- Xca
+#   
+#   varCO2 <- paste0('CO2_1_',i,'_1')
+#   Xcw <- data[[varCO2]] # moist air mole fraction
+#   Xca <- Xcw*(1+Xwa) # dry air mole fraction
+#   data[[paste0(varCO2,'_MIXING_RATIO')]] <- Xca
+#   
+#   if (i == 1){
+#     varH2O <- "H2O.concentration..8m"
+#     Xcw <- data[[varH2O]] # moist air mole fraction
+#     Xca <- Xcw*(1+Xwa) # dry air mole fraction
+#     data[[paste0(varH2O,'_MIXING_RATIO')]] <- Xca
+#     
+#   } else if (i == 2){
+#     varH2O <- "H2O.concentration..4m"
+#     Xcw <- data[[varH2O]] # moist air mole fraction
+#     Xca <- Xcw*(1+Xwa) # dry air mole fraction
+#     data[[paste0(varH2O,'_MIXING_RATIO')]] <- Xca
+#     
+#   } 
+#   
+# }
 
 # Filter down to where we have CH4 flux
 data <- data %>% dplyr::filter(!is.na(CH4.flux))
@@ -351,41 +361,43 @@ dmmyOut <- data.frame(timeEnd_A=data$timeEnd,
 # concentrations and fluxes have already been aggregated to 30-min intervals 
 
 # CH4 concentrations
-# Tower levels 4-3
-CH4_43 <- dmmyOut
-CH4_43$TowerPosition_A=tower.heights$TowerPosition[4]
-CH4_43$TowerHeight_A=tower.heights$TowerHeight[4]
-CH4_43$mean_A=data$CH4_1_1_1_MIXING_RATIO # AMF convention increments from top down
-CH4_43$TowerPosition_B=tower.heights$TowerPosition[3]
-CH4_43$TowerHeight_B=tower.heights$TowerHeight[3]
-CH4_43$mean_B=data$CH4_1_2_1_MIXING_RATIO # AMF convention increments from top down
+# Tower levels 5-1
+CH4_51 <- dmmyOut
+CH4_51$TowerPosition_A=tower.heights$TowerPosition[5]
+CH4_51$TowerHeight_A=tower.heights$TowerHeight[5]
+CH4_51$mean_A=data$CH4_1_1_1_MIXING_RATIO # I believe ICOS convention is starting from top down
+CH4_51$TowerPosition_B=tower.heights$TowerPosition[1]
+CH4_51$TowerHeight_B=tower.heights$TowerHeight[1]
+CH4_51$mean_B=data$CH4_1_5_1_MIXING_RATIO #  I believe ICOS convention is starting from top down
 
-# Tower levels 3-2
-CH4_32 <- dmmyOut
-CH4_32$TowerPosition_A=tower.heights$TowerPosition[3]
-CH4_32$TowerHeight_A=tower.heights$TowerHeight[3]
-CH4_32$mean_A=data$CH4_1_2_1_MIXING_RATIO # AMF convention increments from top down
-CH4_32$TowerPosition_B=tower.heights$TowerPosition[2]
-CH4_32$TowerHeight_B=tower.heights$TowerHeight[2]
-CH4_32$mean_B=data$CH4_1_3_1_MIXING_RATIO # AMF convention increments from top down
+# Tower levels 5-2
+CH4_52 <- dmmyOut
+CH4_52$TowerPosition_A=tower.heights$TowerPosition[5]
+CH4_52$TowerHeight_A=tower.heights$TowerHeight[5]
+CH4_52$mean_A=data$CH4_1_1_1_MIXING_RATIO # I believe ICOS convention is starting from top down
+CH4_52$TowerPosition_B=tower.heights$TowerPosition[2]
+CH4_52$TowerHeight_B=tower.heights$TowerHeight[2]
+CH4_52$mean_B=data$CH4_1_4_1_MIXING_RATIO #  I believe ICOS convention is starting from top down
 
-# Tower levels 2-1
-CH4_21 <- dmmyOut
-CH4_21$TowerPosition_A=tower.heights$TowerPosition[2]
-CH4_21$TowerHeight_A=tower.heights$TowerHeight[2]
-CH4_21$mean_A=data$CH4_1_3_1_MIXING_RATIO # AMF convention increments from top down
-CH4_21$TowerPosition_B=tower.heights$TowerPosition[1]
-CH4_21$TowerHeight_B=tower.heights$TowerHeight[1]
-CH4_21$mean_B=data$CH4_1_4_1_MIXING_RATIO # AMF convention increments from top down
+# Tower levels 5-3
+CH4_53 <- dmmyOut
+CH4_53$TowerPosition_A=tower.heights$TowerPosition[5]
+CH4_53$TowerHeight_A=tower.heights$TowerHeight[5]
+CH4_53$mean_A=data$CH4_1_1_1_MIXING_RATIO # I believe ICOS convention is starting from top down
+CH4_53$TowerPosition_B=tower.heights$TowerPosition[3]
+CH4_53$TowerHeight_B=tower.heights$TowerHeight[3]
+CH4_53$mean_B=data$CH4_1_3_1_MIXING_RATIO #  I believe ICOS convention is starting from top down
 
-# Tower levels 4-1
-CH4_41 <- dmmyOut
-CH4_41$TowerPosition_A=tower.heights$TowerPosition[4]
-CH4_41$TowerHeight_A=tower.heights$TowerHeight[4]
-CH4_41$mean_A=data$CH4_1_1_1_MIXING_RATIO # AMF convention increments from top down
-CH4_41$TowerPosition_B=tower.heights$TowerPosition[1]
-CH4_41$TowerHeight_B=tower.heights$TowerHeight[1]
-CH4_41$mean_B=data$CH4_1_4_1_MIXING_RATIO # AMF convention increments from top down
+# Tower levels 5-3
+CH4_54 <- dmmyOut
+CH4_54$TowerPosition_A=tower.heights$TowerPosition[5]
+CH4_54$TowerHeight_A=tower.heights$TowerHeight[5]
+CH4_54$mean_A=data$CH4_1_1_1_MIXING_RATIO # I believe ICOS convention is starting from top down
+CH4_54$TowerPosition_B=tower.heights$TowerPosition[2]
+CH4_54$TowerHeight_B=tower.heights$TowerHeight[2]
+CH4_54$mean_B=data$CH4_1_2_1_MIXING_RATIO #  I believe ICOS convention is starting from top down
+
+
 
 # Combine all combos of CH4 paired levels
 CH4out <- rbind(CH4_43,CH4_32,CH4_21,CH4_41)
