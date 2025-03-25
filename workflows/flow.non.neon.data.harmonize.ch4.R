@@ -182,7 +182,7 @@ for (file in all_files) {
       data <- data %>% rename(!!file_key$tidy_name[i] := file_key$raw_name[i])
     }
   }
-} 
+ 
   # Save the modified file
   write_csv(data, file.path(raw_folder, paste0(filename, "_harmonized.csv")))
 }
