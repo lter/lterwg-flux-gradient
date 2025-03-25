@@ -1,5 +1,5 @@
 
-source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_DIURNAL.R' )
+source(fs::path(DirRepo,'exploratory/FUNCTION_DIURNAL.R' ))
 
 # Calculate Diurnal Patterns by Year-month:
 Diurnal.MBR.CO2 <- DIURNAL.COMPILE.Sites( FG.tibble =  SITES_MBR_30min_FILTER_BH, 

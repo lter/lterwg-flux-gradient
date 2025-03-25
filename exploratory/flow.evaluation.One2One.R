@@ -1,6 +1,9 @@
-source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_One2One.R' )
 
-dir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/FIGURES'
+DirRepo <- "." # Relative or absolute path to lterwg-flux-gradient git repo on your local machine. Make sure you've pulled the latest from main!localdir <- tempdir()
+source(fs::path(DirRepo,'exploratory/FUNCTION_One2One.R' ))
+
+dir=fs::path(localdir,'FIGURES')
+# dir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/FIGURES'
 
 sites <- names(SITES_WP_30min_FILTER  )
 
