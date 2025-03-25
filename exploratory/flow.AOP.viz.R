@@ -55,6 +55,9 @@ plot.range.savi <- Sites.Summary %>% ggplot() +
   ylab( "") + xlab("SAVI") + theme(text = element_text(size = 10),
                                   panel.background = element_rect(fill='transparent') ) 
 
+setwd("~/Desktop")
+png("Structure_Summary_Allsites.png", width=10, 
+    height=10, units="in", res=1200)
 
 ggarrange( plot.range.evi, 
            plot.range.ndvi,
@@ -62,6 +65,7 @@ ggarrange( plot.range.evi,
            plot.range.lai,
            plot.range.savi,
            labels=c('a', 'b', 'c', 'd', 'e'), nrow=1)
+dev.off()
 
 # Scale data:
 
@@ -90,6 +94,10 @@ longData <- melt(matrix)
 longData<-longData[longData$value!=0,] %>% na.omit
 
 
+setwd("~/Desktop")
+png("Structure_Summary_Allsites_Matrix.png", width=7, 
+    height=10, units="in", res=1200)
+
 ggplot(longData, aes(x = Var2, y = Var1)) + 
   geom_raster(aes(fill=value)) + 
   scale_fill_gradient("" ,low="goldenrod", high="darkgreen") +
@@ -98,13 +106,51 @@ ggplot(longData, aes(x = Var2, y = Var1)) +
                      axis.text.y=element_text(size=9),
                      plot.title=element_text(size=11))
 
-Sites.Summary.scaled %>% ggplot(aes(x= LAI.mean.scaled, y = CHM.mean.scaled)) +  
-  geom_point( alpha=0.3) +
-  geom_text(aes(label = site), check_overlap = TRUE) + theme_bw()
+dev.off()
 
+png("Structure_Summary_Allsites_CHM.png", width=6, 
+    height=3, units="in", res=1200)
+Sites.Summary.scaled %>% ggplot(aes(x= LAI.mean.scaled, y = CHM.mean.scaled, col=NDVI.mean.scaled)) +  
+  geom_point( alpha=0.3) +
+  geom_text(aes(label = site), check_overlap = TRUE) + theme_bw() + 
+  labs(x="LAI", y="CHM") 
+dev.off()
 # Use MDS on the scaled data: - cluster analysis:
 
+distance <- dist(Sites.Summary.scaled ) # euclidean 
+library(usedist)
+distance <- dist_setNames(distance, Sites.Summary.scaled$site)
+fit <- cmdscale(distance ,eig=TRUE, k=2)
+
+Sites.Summary.scaled$MDS1 <- fit$points[,1]
+Sites.Summary.scaled$MDS2 <- fit$points[,2]
+
+# Cluster analysis and Explanation of clusters:
+library(caret)
+
+fviz_nbclust(matrix %>% na.omit , kmeans, method = "wss") +
+  geom_vline(xintercept = 4, linetype = 2)+
+  labs(subtitle = "Elbow method")
+
+cluster <- distance %>% kmeans( centers = 4, nstart = 30)
+
+Sites.Summary.scaled$cluster <- cluster$cluster %>% as.factor
+
+Sites.Summary.scaled %>% ggplot( aes(x= MDS1 , y = MDS2, col = cluster, label=site )) + 
+  geom_point( alpha=0.2) + geom_text(nudge_y = 0.15, nudge_x =- 0.15, size = 2) 
+
+png("Structure_Summary_Allsites_Cluster-Matrix.png", width=8, 
+    height=7, units="in", res=1200)
+
+fviz_dist(distance, gradient = list(low = "#00AFBB", mid = "white", high = "#FC4E07"))
+dev.off()
 
 
+png("Structure_Summary_Allsites_Cluster.png", width=8, 
+    height=7, units="in", res=1200)
+fviz_cluster(cluster, data=distance, pointsize = 0.5, labelsize=8) + theme_bw()
+dev.off()
+
+library(factoextra)
 
 
