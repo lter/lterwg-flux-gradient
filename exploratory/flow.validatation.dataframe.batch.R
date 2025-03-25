@@ -28,8 +28,6 @@ site.list <- all.site.list[ all.site.list != 'TEAK'&
 localdir <- '/Volumes/MaloneLab/Research/FluxGradient/FluxData'
 
 # Compile fluxes downloaded with flow.Download.GoogleDriveData
-
-
 for( site in site.list){
   print(site)
   
@@ -214,7 +212,7 @@ googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
 fileSave <- file.path(paste(localdir, "SITES_AE_30min.Rdata", sep="/"))
 googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
 
-fileSave <- file.path(paste(localdir, "SITES_WP_30min.Rdata", sep="/"))
+fileSave <- file.path(paste(localdir, "SITES_MBR_30min.Rdata", sep="/"))
 googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
 
 

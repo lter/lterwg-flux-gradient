@@ -23,29 +23,36 @@ calc.AeroCanopyH <- function(Mdate, ustar, z, L, u, daysAVG, plotYN) {
   h_despike <- h[ind]# You might need to implement or find a despike function in R. Not implemented for now.
   navg <- daysAVG # number of windows to use for average
   
- if( length(h_despike) < length(navg) ){ # Added this for TEAK????
+ if( length(h_despike) < length(rep(1/navg, navg)) ){ # Added this case for TEAK
    cat("Too little data, z_veg will be equal to the average\n")
-   zh_final <- rep(mean(h_despike, na.rm=TRUE), length(h))
    h_dsk <- rep(NA, length(ustar)) # Is this ok?
+   zh_final <- rep(mean(h_despike, na.rm=TRUE), length(h))
 
-   } else if (length(unique(Days)) > 30) { # higher than 30 days of data
+ } else if ((length(h_despike) >= length(navg)) & (length(unique(Days)) > 30)) { # higher than 30 days of data
     #navg <- daysAVG # number of windows to use for average
     hsmooth_dsk <- stats::filter(h_despike, rep(1/navg, navg), sides=2) # smoothing
     h_dsk <- rep(NA, length(ustar))
     h_dsk[ind] <- hsmooth_dsk
-    # Interpolate daily measurements back to 30 (9) min values
-    zh_final <- approx(Mdate[!is.na(h_dsk)], h_dsk[!is.na(h_dsk)], Mdate, method="linear", rule=2)$y
-    # Fix the interpolation at the end
-    fff <- which(!is.na(h_dsk))
-    zh_final[1:fff[1]] <- zh_final[fff[1]]
-    zh_final[fff[length(fff)]:length(zh_final)] <- zh_final[fff[length(fff)]]
-  } else {
+    if (length(h_dsk[!is.na(h_dsk)]) < 2){ # Added this case for WREF
+      cat("Too little data, z_veg will be equal to the average\n")
+      h_dsk <- rep(NA, length(ustar)) 
+      zh_final <- rep(mean(h_despike, na.rm=TRUE), length(h))
+    } else {
+      # Interpolate daily measurements back to 30 (9) min values
+      zh_final <- approx(Mdate[!is.na(h_dsk)], h_dsk[!is.na(h_dsk)], Mdate, method="linear", rule=2)$y
+      # Fix the interpolation at the end
+      fff <- which(!is.na(h_dsk))
+      zh_final[1:fff[1]] <- zh_final[fff[1]]
+      zh_final[fff[length(fff)]:length(zh_final)] <- zh_final[fff[length(fff)]]
+    }
+    
+ } else {
     cat("Too little data, z_veg will be equal to the average\n")
-    h_dsk <- rep(NA, length(ustar)) # Is this ok? TOOL
+    h_dsk <- rep(NA, length(ustar)) # Added this for TOOL
     zh_final <- rep(mean(h_despike, na.rm=TRUE), length(h))
   }
   
-  if (plotYN == 1 && length(unique(Days)) > 4) { # higher than 4 days of data
+ if (plotYN == 1 && length(unique(Days)) > 4) { # higher than 4 days of data
     plot(Mdate, h, pch=19, col="black", cex=1, main=paste("Smoothing based on a", daysAVG, "-day window average"),
          xlab="Date", ylab="Aerodynamic canopy height (m)")
     points(Mdate, h_dsk, pch=19, col="blue", cex=1)

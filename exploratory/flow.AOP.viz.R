@@ -8,6 +8,7 @@ Sites.Summary
 library(ggplot2)
 library(dplyr)
 library(hrbrthemes)
+library(ggpubr)
 
 Sites.Summary %>% names
 
@@ -16,19 +17,27 @@ plot.range.evi <- Sites.Summary %>% ggplot() +
   geom_segment( aes(x=EVI.mean - EVI.sd , 
                     xend= EVI.mean + EVI.sd, 
                     y=site), color="black") + 
-  theme_bw() + ylab( "") + xlab("EVI")
+  ylab( "") + xlab("EVI") + theme(text = element_text(size = 10),
+                                               panel.background = element_rect(fill='transparent') ) 
 
 
 plot.range.ndvi <- Sites.Summary %>% ggplot() +
   geom_segment( aes(x=NDVI.mean - NDVI.sd , 
                     xend= NDVI.mean + NDVI.sd, 
                     y=site), color="black") + 
-  theme_bw() + ylab( "") + xlab("NDVI")
+  ylab( "") + xlab("NDVI")+ theme(text = element_text(size = 10),
+                                  panel.background = element_rect(fill='transparent') ) 
 
 plot.range.pri <- Sites.Summary %>% ggplot() +
-  geom_segment( aes(x= PRI.mean - PRI.sd , 
-                    xend= PRI.mean + PRI.sd, 
+  geom_segment( aes(x= round(PRI.mean - PRI.sd,2) , 
+                    xend= round(PRI.mean + PRI.sd,2), 
                     y=site), color="black") + 
-  theme_bw() + ylab( "") + xlab("PRI")
+   ylab( "") + xlab("PRI") + theme(text = element_text(size = 10),
+                                   panel.background = element_rect(fill='transparent') ) 
 
 
+ggarrange( plot.range.evi, 
+           plot.range.ndvi,
+           plot.range.pri, labels=c('a', 'b', 'c'), nrow=1)
+
+# Multidimensional scaling:
