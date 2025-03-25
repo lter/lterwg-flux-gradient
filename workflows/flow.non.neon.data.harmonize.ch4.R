@@ -161,7 +161,10 @@ dplyr::glimpse(ch4_key)
 # Harmonize the raw data with that key
 # Get list of files in the raw_folder
 all_files <- list.files(path = "methane/raw_methane", full.names = TRUE)
+
+
 #rename column names in each file individually, save
+#This part doesn't work yet...
 for (file in all_files) {
   # Read the file
   if (tools::file_ext(file) == "csv") {
@@ -176,12 +179,13 @@ for (file in all_files) {
   # Filter the key for this file
   file_key <- ch4_key %>% filter(source == paste0(filename, ".", tools::file_ext(file)))
   
-  # Rename columns
+  # Rename columns only if they exist in the data
   for (i in 1:nrow(file_key)) {
-    if (!is.na(file_key$tidy_name[i])) {
+    if (file_key$raw_name[i] %in% colnames(data)) {
       data <- data %>% rename(!!file_key$tidy_name[i] := file_key$raw_name[i])
     }
   }
+  
 } 
   # Save the modified file
   write_csv(data, file.path(raw_folder, paste0(filename, "_harmonized.csv")))
