@@ -21,7 +21,7 @@
 #email <- 'alexisrose0525@gmail.com'
 #email <- 'jaclyn_matthes@g.harvard.edu'
 # email <- 'csturtevant@battelleecology.org'
-email <- 'kyle.delwiche@gmail.com'
+email <- 'kdelwiche@berkeley.edu'
 
 site <- 'US-Uaf'
 
