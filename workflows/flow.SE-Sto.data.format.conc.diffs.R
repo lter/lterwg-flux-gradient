@@ -103,11 +103,69 @@ dataMet <- dataMet %>% rename(Tair1 = Ta_1_1_1)
 dataMet <- dataMet %>% rename(RH = RH_1_1_1)
 
 ## Create timeBgn_A variable from date and time
-dataFlux$date <- as.Date(dataFlux$date, format = "%Y-%m-%d")
-dataFlux$timeEnd_A <- as.POSIXct(paste(dataFlux$date, dataFlux$time), format="%Y-%m-%d %H:%M:%S")
 
-dataMet$date <- as.Date(dataMet$date, format = "%Y-%m-%d")
-dataMet$timeEnd_A <- as.POSIXct(paste(dataMet$date, dataMet$time), format="%Y-%m-%d %H:%M:%S")
+# for dataFlux the date column changes formats half-way through, so will instead have to create a date from doy and time, knowing that years start in 2014
+# Initialize variables
+current_year <- 2014
+previous_integer_doy <- 0  # Track the integer day of year
+
+# Initialize Year column
+dataFlux$year <- NA
+
+for (i in 1:nrow(dataFlux)) {
+    doy <- dataFlux$doy[i]# Check for year transition (e.g., 365 -> 1)
+  if (doy < previous_integer_doy) {
+    current_year <- current_year + 1
+  }
+  
+  dataFlux$year[i] <- current_year
+  previous_integer_doy <- doy
+}
+
+# dataFlux$date <- as.Date(dataFlux$date, format = "%Y-%m-%d")
+# dataFlux$timeEnd_A <- as.POSIXct(paste(dataFlux$date, dataFlux$time), format="%Y-%m-%d %H:%M:%S")
+library(lubridate)
+# data format for dataFlux changes half-way through, so create a year column from DOY, then year use, DOY, and time to create timeEnd_A
+
+dataFlux$doy <- floor(dataFlux$doy)
+dataFlux$timeEnd_A  <- make_datetime(
+  year = dataFlux$year,
+  month = 1,
+  day = 1,
+  hour = hour(hms(dataFlux$time)),
+  min = minute(hms(dataFlux$time)),
+  sec = second(hms(dataFlux$time))
+) + days(dataFlux$doy - 1)
+
+# now do the same for met (code could be cleaned up, for now just repeat it)
+current_year <- 2014
+previous_integer_doy <- 0  # Track the integer day of year
+
+# Initialize Year column
+dataMet$year <- NA
+for (i in 1:nrow(dataMet)) {
+  doy <- dataMet$doy[i]# Check for year transition (e.g., 365 -> 1)
+  if (doy < previous_integer_doy) {
+    current_year <- current_year + 1
+  }
+  
+  dataMet$year[i] <- current_year
+  previous_integer_doy <- doy
+}
+
+dataMet$doy <- floor(dataMet$doy)
+dataMet$timeEnd_A  <- make_datetime(
+  year = dataMet$year,
+  month = 1,
+  day = 1,
+  hour = hour(hms(dataMet$time)),
+  min = minute(hms(dataMet$time)),
+  sec = second(hms(dataMet$time))
+) + days(dataMet$doy - 1)
+
+
+# dataMet$date <- as.Date(dataMet$date, format = "%Y-%m-%d")
+# dataMet$timeEnd_A <- as.POSIXct(paste(dataMet$date, dataMet$time), format="%Y-%m-%d %H:%M:%S")
 
 dataConc$date <- as.Date(dataConc$date, format = "%Y-%m-%d")
 dataConc$timeEnd_A <- as.POSIXct(paste(dataConc$date, dataConc$time), format="%Y-%m-%d %H:%M:%S")
