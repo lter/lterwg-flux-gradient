@@ -52,9 +52,10 @@ dir.create(dirTmp)
 
 gdrive_path <- "https://drive.google.com/drive/u/1/folders/1F1qZkAZywNUq_fyS1OmlG3C9AkGo6fdc"
 
-ch4_files_to_keep <- c('SE-Sto_met_30min.csv',
-                       'SE-Sto_gas_fluxes_30min.csv',
-                       'SE-Sto_concentration_profile_30min.csv')
+ch4_files_to_keep <- c(#'SE-Sto_met_30min.csv',
+                       #'SE-Sto_gas_fluxes_30min.csv',
+                       #'SE-Sto_concentration_profile_30min.csv',
+                       'sesto_attr.csv')
 
 # Identify desired files 
 ch4_files <- googledrive::drive_ls(
@@ -87,6 +88,8 @@ dataConc <- read.csv(fileIn,header=TRUE)
 fileIn <- file.path("methane", "raw_methane",'SE-Sto_met_30min.csv')
 dataMet <- read.csv(fileIn,header=TRUE)
 
+fileIn <- file.path("methane", "raw_methane",'sesto_attr.csv')
+attr.df <- read.csv(fileIn,header=TRUE)
 
 
 ## ***Manually update column names for necessary variables (tried making this fancy but it wasn't working, so just going to brute force it)
@@ -112,7 +115,7 @@ dataConc$timeEnd_A <- as.POSIXct(paste(dataConc$date, dataConc$time), format="%Y
 
 
 # Transform the attr.df data frame into same format as NEON sites
-attr.df.transpose <- as.data.frame(t(attr.df0))
+attr.df.transpose <- as.data.frame(t(attr.df))
 nameCol <- attr.df.transpose[1,]
 dtype <- attr.df.transpose[2,]
 attr.df <- attr.df.transpose[3:nrow(attr.df.transpose),]
@@ -135,10 +138,9 @@ if(any(diff(tower.heights$TowerPosition) < 0)){
 
 # ------------------- Populate output --------------------
 # merge the tables based on measurement time
-dataConc$timeEnd <- strptime(dataConc$Datetime,"%Y-%m-%d %H:%M:%S")
-dataAmf$timeEnd <- strptime(dataAmf$TIMESTAMP_END,"%Y%m%d%H%M")
-dataAmf[dataAmf == -9999] <- NA
-data <- merge(dataConc,dataAmf,by='timeEnd')
+ 
+
+data <- left_join(dataFlux, dataConc, by='timeEnd_A')
 rm('dataAmf','dataConc')
 
 # CONCENTRATIONS ARE IN WET MOLE FRACTION. Convert to dry mole fraction (same as NEON data)
