@@ -15,7 +15,8 @@ filter_fluxes <- function( df,
   if( approach =="MBR"){
     
     df$Eddy_outlier <- 0 
-    df$cross_grad_flag <- 0 } 
+    df$cross_grad_flag <- 0 
+  } 
   
   
   df.new <- df %>% mutate(diff.flux = abs(FG_mean - FC_turb_interp),
@@ -84,8 +85,9 @@ filter_report <- function( df,
   
   
   df.new <- df %>% mutate(diff.flux = abs(FG_mean - FC_turb_interp),
-                          dConcSNR.filter = abs(dConc)/dConc_sd ) %>%  filter(dLevelsAminusB  %in% H.filter.list,
-                                                                      TowerPosition_A != TowerPosition_B) %>% 
+                          dConcSNR.filter = abs(dConc)/dConc_sd ) %>%  
+    filter(dLevelsAminusB  %in% H.filter.list,
+           TowerPosition_A != TowerPosition_B) %>% 
     mutate(flag.dConc_pvalue = case_when( dConc_pvalue <= 0.1 ~ 0, dConc_pvalue > 0.1 ~ 1, is.na(dConc_pvalue ) ~ 0),
            flag.FG_mean = case_when(abs(FG_mean) <= flux.limit ~ 0 , abs(FG_mean) > flux.limit ~ 1, is.na(FG_mean) ~ 0),
            flag.ustar_interp = case_when( ustar_interp >=  ustar.filter~ 0, ustar_interp <  ustar.filter ~ 1, is.na(ustar_interp) ~ 0), 
