@@ -103,14 +103,92 @@ dataMet <- dataMet %>% rename(Tair1 = Ta_1_1_1)
 dataMet <- dataMet %>% rename(RH = RH_1_1_1)
 
 ## Create timeBgn_A variable from date and time
-dataFlux$date <- as.Date(dataFlux$date, format = "%Y-%m-%d")
-dataFlux$timeEnd_A <- as.POSIXct(paste(dataFlux$date, dataFlux$time), format="%Y-%m-%d %H:%M:%S")
 
-dataMet$date <- as.Date(dataMet$date, format = "%Y-%m-%d")
-dataMet$timeEnd_A <- as.POSIXct(paste(dataMet$date, dataMet$time), format="%Y-%m-%d %H:%M:%S")
+# for dataFlux the date column changes formats half-way through, so will instead have to create a date from doy and time, knowing that years start in 2014
+# Initialize variables
+current_year <- 2014
+previous_integer_doy <- 0  # Track the integer day of year
 
-dataConc$date <- as.Date(dataConc$date, format = "%Y-%m-%d")
-dataConc$timeEnd_A <- as.POSIXct(paste(dataConc$date, dataConc$time), format="%Y-%m-%d %H:%M:%S")
+# Initialize Year column
+dataFlux$year <- NA
+
+for (i in 1:nrow(dataFlux)) {
+    doy <- dataFlux$doy[i]# Check for year transition (e.g., 365 -> 1)
+  if (doy < previous_integer_doy) {
+    current_year <- current_year + 1
+  }
+  
+  dataFlux$year[i] <- current_year
+  previous_integer_doy <- doy
+}
+
+dataFlux$doy <- floor(dataFlux$doy)
+dataFlux$timeEnd_A  <- make_datetime(
+  year = dataFlux$year,
+  month = 1,
+  day = 1,
+  hour = hour(hms(dataFlux$time)),
+  min = minute(hms(dataFlux$time)),
+  sec = second(hms(dataFlux$time))
+) + days(dataFlux$doy - 1)
+
+# now do the same for met (code could be cleaned up, for now just repeat it)
+current_year <- 2014
+previous_integer_doy <- 0  # Track the integer day of year
+
+# Initialize Year column
+dataMet$year <- NA
+for (i in 1:nrow(dataMet)) {
+  doy <- dataMet$doy[i]# Check for year transition (e.g., 365 -> 1)
+  if (doy < previous_integer_doy) {
+    current_year <- current_year + 1
+  }
+  
+  dataMet$year[i] <- current_year
+  previous_integer_doy <- doy
+}
+
+#now do concentration data
+dataMet$doy <- floor(dataMet$doy)
+dataMet$timeEnd_A  <- make_datetime(
+  year = dataMet$year,
+  month = 1,
+  day = 1,
+  hour = hour(hms(dataMet$time)),
+  min = minute(hms(dataMet$time)),
+  sec = second(hms(dataMet$time))
+) + days(dataMet$doy - 1)
+
+
+current_year <- 2014
+previous_integer_doy <- 0  # Track the integer day of year
+
+# Initialize Year column
+dataConc$year <- NA
+
+for (i in 1:nrow(dataConc)) {
+  doy <- dataConc$doy[i]# Check for year transition (e.g., 365 -> 1)
+  if (doy < previous_integer_doy) {
+    current_year <- current_year + 1
+  }
+  
+  dataConc$year[i] <- current_year
+  previous_integer_doy <- doy
+}
+
+
+# data format for dataFlux changes half-way through, so create a year column from DOY, then year use, DOY, and time to create timeEnd_A
+
+dataConc$doy <- floor(dataConc$doy)
+dataConc$timeEnd_A  <- make_datetime(
+  year = dataFlux$year,
+  month = 1,
+  day = 1,
+  hour = hour(hms(dataConc$time)),
+  min = minute(hms(dataConc$time)),
+  sec = second(hms(dataConc$time))
+) + days(dataConc$doy - 1)
+
 
 
 
@@ -140,51 +218,68 @@ if(any(diff(tower.heights$TowerPosition) < 0)){
 # merge the tables based on measurement time
  
 
-data <- left_join(dataFlux, dataConc, by='timeEnd_A')
-rm('dataAmf','dataConc')
+data <- left_join(dataFlux, dataConc,  by='timeEnd_A')
+data <- left_join(data, dataMet,  by='timeEnd_A')
+
+#remove some duplicate columns
+data <- data %>%
+  select(timeEnd_A, year = year.x, doy = doy.x, date = date.x, time = time.x,
+         everything(), 
+         -ends_with(".y"), -ends_with(".x"))
+rm('dataFlux','dataConc', 'dataMet')
+
+
+#update time zones for data
+data$timeEnd_A <- as.POSIXct(data$timeEnd_A, format="%d-%b-%Y %H:%M:%S", tz="CET")
+data$timeEnd_A <- with_tz(data$timeEnd, tzone = "UTC")
+data$timeBgn_A <- data$timeEnd_A - minutes(30)
+
 
 # CONCENTRATIONS ARE IN WET MOLE FRACTION. Convert to dry mole fraction (same as NEON data)
 # Sadly there are no water vapor concentrations in the AmeriFlux output
 # Use the RH profile at the same height (RH-capac sensor per the Instrument heights spreadsheet)
 # Convert RH at each level to compute dry air mole fraction of water vapor
-R = 8.314          #Universal gas constant dry air [J/(K mol)]
-for (i in 1:4){
-  Tair <- data[[paste0('TA_1_',i,'_1')]]
-  RH <- data[[paste0('RH_1_',i,'_1')]]
-  Tair_K <- Tair + 273.16 # K
-  P_pa <- data$PA*1000  #Atmospheric pressure [Pa]
-  esat_Pa <- 611.2*exp(17.67*(Tair_K-273.16)/(Tair_K-29.65)) #[Pa] saturated water vapor pressure
-  e_Pa <- RH*esat_Pa/100 #[Pa] vapor water pressure
-  rhoa <- (P_pa - e_Pa)/(R*Tair_K) # dry air molar density  [mol/m3]
-  rhov <- e_Pa/(R*Tair_K) # water vapor molar density  [Kg/m3]
-  Xwa <- rhov/rhoa # dry air mole fraction of water vapor [mol mol-1]
-  
-  # Now convert each gas constituent at this tower level to dry air mole fraction
-  varCH4 <- paste0('CH4_1_',i,'_1')
-  Xcw <- data[[varCH4]] # moist air mole fraction
-  Xca <- Xcw*(1+Xwa) # dry air mole fraction
-  data[[paste0(varCH4,'_MIXING_RATIO')]] <- Xca
-  
-  varCO2 <- paste0('CO2_1_',i,'_1')
-  Xcw <- data[[varCO2]] # moist air mole fraction
-  Xca <- Xcw*(1+Xwa) # dry air mole fraction
-  data[[paste0(varCO2,'_MIXING_RATIO')]] <- Xca
-  
-  if (i == 1){
-    varH2O <- "H2O.concentration..8m"
-    Xcw <- data[[varH2O]] # moist air mole fraction
-    Xca <- Xcw*(1+Xwa) # dry air mole fraction
-    data[[paste0(varH2O,'_MIXING_RATIO')]] <- Xca
-    
-  } else if (i == 2){
-    varH2O <- "H2O.concentration..4m"
-    Xcw <- data[[varH2O]] # moist air mole fraction
-    Xca <- Xcw*(1+Xwa) # dry air mole fraction
-    data[[paste0(varH2O,'_MIXING_RATIO')]] <- Xca
-    
-  } 
-  
-}
+
+# 
+
+# R = 8.314          #Universal gas constant dry air [J/(K mol)]
+# for (i in 1:4){
+#   Tair <- data[[paste0('TA_1_',i,'_1')]]
+#   RH <- data[[paste0('RH_1_',i,'_1')]]
+#   Tair_K <- Tair + 273.16 # K
+#   P_pa <- data$PA*1000  #Atmospheric pressure [Pa]
+#   esat_Pa <- 611.2*exp(17.67*(Tair_K-273.16)/(Tair_K-29.65)) #[Pa] saturated water vapor pressure
+#   e_Pa <- RH*esat_Pa/100 #[Pa] vapor water pressure
+#   rhoa <- (P_pa - e_Pa)/(R*Tair_K) # dry air molar density  [mol/m3]
+#   rhov <- e_Pa/(R*Tair_K) # water vapor molar density  [Kg/m3]
+#   Xwa <- rhov/rhoa # dry air mole fraction of water vapor [mol mol-1]
+#   
+#   # Now convert each gas constituent at this tower level to dry air mole fraction
+#   varCH4 <- paste0('CH4_1_',i,'_1')
+#   Xcw <- data[[varCH4]] # moist air mole fraction
+#   Xca <- Xcw*(1+Xwa) # dry air mole fraction
+#   data[[paste0(varCH4,'_MIXING_RATIO')]] <- Xca
+#   
+#   varCO2 <- paste0('CO2_1_',i,'_1')
+#   Xcw <- data[[varCO2]] # moist air mole fraction
+#   Xca <- Xcw*(1+Xwa) # dry air mole fraction
+#   data[[paste0(varCO2,'_MIXING_RATIO')]] <- Xca
+#   
+#   if (i == 1){
+#     varH2O <- "H2O.concentration..8m"
+#     Xcw <- data[[varH2O]] # moist air mole fraction
+#     Xca <- Xcw*(1+Xwa) # dry air mole fraction
+#     data[[paste0(varH2O,'_MIXING_RATIO')]] <- Xca
+#     
+#   } else if (i == 2){
+#     varH2O <- "H2O.concentration..4m"
+#     Xcw <- data[[varH2O]] # moist air mole fraction
+#     Xca <- Xcw*(1+Xwa) # dry air mole fraction
+#     data[[paste0(varH2O,'_MIXING_RATIO')]] <- Xca
+#     
+#   } 
+#   
+# }
 
 # Filter down to where we have CH4 flux
 data <- data %>% dplyr::filter(!is.na(CH4.flux))
@@ -266,41 +361,43 @@ dmmyOut <- data.frame(timeEnd_A=data$timeEnd,
 # concentrations and fluxes have already been aggregated to 30-min intervals 
 
 # CH4 concentrations
-# Tower levels 4-3
-CH4_43 <- dmmyOut
-CH4_43$TowerPosition_A=tower.heights$TowerPosition[4]
-CH4_43$TowerHeight_A=tower.heights$TowerHeight[4]
-CH4_43$mean_A=data$CH4_1_1_1_MIXING_RATIO # AMF convention increments from top down
-CH4_43$TowerPosition_B=tower.heights$TowerPosition[3]
-CH4_43$TowerHeight_B=tower.heights$TowerHeight[3]
-CH4_43$mean_B=data$CH4_1_2_1_MIXING_RATIO # AMF convention increments from top down
+# Tower levels 5-1
+CH4_51 <- dmmyOut
+CH4_51$TowerPosition_A=tower.heights$TowerPosition[5]
+CH4_51$TowerHeight_A=tower.heights$TowerHeight[5]
+CH4_51$mean_A=data$CH4_1_1_1_MIXING_RATIO # I believe ICOS convention is starting from top down
+CH4_51$TowerPosition_B=tower.heights$TowerPosition[1]
+CH4_51$TowerHeight_B=tower.heights$TowerHeight[1]
+CH4_51$mean_B=data$CH4_1_5_1_MIXING_RATIO #  I believe ICOS convention is starting from top down
 
-# Tower levels 3-2
-CH4_32 <- dmmyOut
-CH4_32$TowerPosition_A=tower.heights$TowerPosition[3]
-CH4_32$TowerHeight_A=tower.heights$TowerHeight[3]
-CH4_32$mean_A=data$CH4_1_2_1_MIXING_RATIO # AMF convention increments from top down
-CH4_32$TowerPosition_B=tower.heights$TowerPosition[2]
-CH4_32$TowerHeight_B=tower.heights$TowerHeight[2]
-CH4_32$mean_B=data$CH4_1_3_1_MIXING_RATIO # AMF convention increments from top down
+# Tower levels 5-2
+CH4_52 <- dmmyOut
+CH4_52$TowerPosition_A=tower.heights$TowerPosition[5]
+CH4_52$TowerHeight_A=tower.heights$TowerHeight[5]
+CH4_52$mean_A=data$CH4_1_1_1_MIXING_RATIO # I believe ICOS convention is starting from top down
+CH4_52$TowerPosition_B=tower.heights$TowerPosition[2]
+CH4_52$TowerHeight_B=tower.heights$TowerHeight[2]
+CH4_52$mean_B=data$CH4_1_4_1_MIXING_RATIO #  I believe ICOS convention is starting from top down
 
-# Tower levels 2-1
-CH4_21 <- dmmyOut
-CH4_21$TowerPosition_A=tower.heights$TowerPosition[2]
-CH4_21$TowerHeight_A=tower.heights$TowerHeight[2]
-CH4_21$mean_A=data$CH4_1_3_1_MIXING_RATIO # AMF convention increments from top down
-CH4_21$TowerPosition_B=tower.heights$TowerPosition[1]
-CH4_21$TowerHeight_B=tower.heights$TowerHeight[1]
-CH4_21$mean_B=data$CH4_1_4_1_MIXING_RATIO # AMF convention increments from top down
+# Tower levels 5-3
+CH4_53 <- dmmyOut
+CH4_53$TowerPosition_A=tower.heights$TowerPosition[5]
+CH4_53$TowerHeight_A=tower.heights$TowerHeight[5]
+CH4_53$mean_A=data$CH4_1_1_1_MIXING_RATIO # I believe ICOS convention is starting from top down
+CH4_53$TowerPosition_B=tower.heights$TowerPosition[3]
+CH4_53$TowerHeight_B=tower.heights$TowerHeight[3]
+CH4_53$mean_B=data$CH4_1_3_1_MIXING_RATIO #  I believe ICOS convention is starting from top down
 
-# Tower levels 4-1
-CH4_41 <- dmmyOut
-CH4_41$TowerPosition_A=tower.heights$TowerPosition[4]
-CH4_41$TowerHeight_A=tower.heights$TowerHeight[4]
-CH4_41$mean_A=data$CH4_1_1_1_MIXING_RATIO # AMF convention increments from top down
-CH4_41$TowerPosition_B=tower.heights$TowerPosition[1]
-CH4_41$TowerHeight_B=tower.heights$TowerHeight[1]
-CH4_41$mean_B=data$CH4_1_4_1_MIXING_RATIO # AMF convention increments from top down
+# Tower levels 5-3
+CH4_54 <- dmmyOut
+CH4_54$TowerPosition_A=tower.heights$TowerPosition[5]
+CH4_54$TowerHeight_A=tower.heights$TowerHeight[5]
+CH4_54$mean_A=data$CH4_1_1_1_MIXING_RATIO # I believe ICOS convention is starting from top down
+CH4_54$TowerPosition_B=tower.heights$TowerPosition[2]
+CH4_54$TowerHeight_B=tower.heights$TowerHeight[2]
+CH4_54$mean_B=data$CH4_1_2_1_MIXING_RATIO #  I believe ICOS convention is starting from top down
+
+
 
 # Combine all combos of CH4 paired levels
 CH4out <- rbind(CH4_43,CH4_32,CH4_21,CH4_41)

@@ -107,8 +107,8 @@ calculate.stability.correction <- function(gas){
   gas$phim[gas$MO.param>0&!is.na(gas$MO.param>0)] = 1+5*gas$MO.param[gas$MO.param>0&!is.na(gas$MO.param>0)] 
   
   #Eq 4.35 Lee. Stability correction function for wind shear
-  gas$phim[gas$MO.param<=0&!is.na(gas$MO.param>0)]=(1-16*mo.param[gas$MO.param<=0&!is.na(gas$MO.param>0)])^(-0.25)  
-  gas$phih[gas$MO.param<=0&!is.na(gas$MO.param>0)]=(1-16*mo.param[gas$MO.param<=0&!is.na(gas$MO.param>0)])^(-0.5) 
+  gas$phim[gas$MO.param<=0&!is.na(gas$MO.param>0)]=(1-16*gas$MO.param[gas$MO.param<=0&!is.na(gas$MO.param>0)])^(-0.25)  
+  gas$phih[gas$MO.param<=0&!is.na(gas$MO.param>0)]=(1-16*gas$MO.param[gas$MO.param<=0&!is.na(gas$MO.param>0)])^(-0.5) 
   
   
   # #grab canopy height

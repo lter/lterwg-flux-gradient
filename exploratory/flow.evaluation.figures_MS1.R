@@ -349,6 +349,7 @@ plot.CHM <- Sites.Summary.sub %>% ggplot(aes(x= CHM.mean, y = site, xmin = CHM.m
                                              xmax = CHM.mean + CHM.sd)) + geom_point( aes( )) +
   geom_errorbar(  aes(),width=0.3) + theme_bw() + ylab("") + xlab("CHM")
 
+setwd("~/Desktop")
 png("Structure_Summary_MS1.png", width=6, 
     height=6, units="in", res=1200)
 
