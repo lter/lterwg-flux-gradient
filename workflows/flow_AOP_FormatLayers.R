@@ -293,8 +293,6 @@ Sites.PRI <- read_csv('/Volumes/MaloneLab/Research/FluxGradient/Sites_PRI.csv')
 Sites.CHM <- read_csv('/Volumes/MaloneLab/Research/FluxGradient/Sites_CHM.csv')
 Sites.SAVI <- read_csv('/Volumes/MaloneLab/Research/FluxGradient/Sites_SAVI.csv')
 
-Sites.EVI$wedge
-
 Sites.EVI.summary <- Sites.EVI %>% select(site, EVI.mean, EVI.sd, EVI.year) %>% 
   reframe(.by= site,
           EVI.mean = mean(EVI.mean, na.rm=T), 
