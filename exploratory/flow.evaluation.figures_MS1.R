@@ -46,6 +46,8 @@ for (focal_file in dnld_files){
   load(fs::path(localdir,focal_file))
 }
 
+setwd(DirRepo)
+
 # Filter for MS1 Sites
 sites <- c("KONZ" ,"HARV" ,"JORN", "GUAN")
 # load( file="/Volumes/MaloneLab/Research/FluxGradient/FilteredData_MS1Sites.Rdata")
@@ -116,7 +118,7 @@ for ( i in sites){
   
   # Subset the MBR Heights
   
-  th.filter <- SITES_AE_30min_FILTER[[i]]$TowerH %>% unique()
+  th.filter <- SITES_MBR_30min_FILTER[[i]]$TowerH %>% unique()
   SITES_MBR <- list()
   SITES_MBR[[i]] <- SITES_MBR_30min_FILTER[[i]] %>% filter(TowerH %in% th.filter)
   
@@ -147,8 +149,7 @@ for ( i in sites){
       height=5, units="in", res=1200)
   print(plot.it.H2O)
   dev.off()
-  setwd(oldDir)
-  
+
   print("done")       
 }
 
@@ -195,7 +196,7 @@ diurnal.summary$Type <- factor( diurnal.summary$Type, levels= c('MBR', 'AE', 'WP
 
 for ( i in sites){
   
-  p1 <- diurnal.summary %>% filter( Site == i) %>%  ggplot( ) + geom_col( aes( y =Flux.dCHMation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )
+  p1 <- diurnal.summary %>% filter( Site == i) %>%  ggplot( ) + geom_col( aes( y =Flux.deviation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )
   
   
   print(ggarrange( p1, nrow=1))
@@ -210,13 +211,13 @@ for ( i in sites){
 }
 
 
-p1 <- diurnal.summary %>% filter( Site == 'HARV' ) %>%  ggplot( ) + geom_col( aes( y =Flux.dCHMation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) ) + ylim(0, 300)
+p1 <- diurnal.summary %>% filter( Site == 'HARV' ) %>%  ggplot( ) + geom_col( aes( y =Flux.deviation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) ) + ylim(0, 300)
 
-p2 <- diurnal.summary %>% filter( Site == 'KONZ' ) %>%  ggplot( ) + geom_col( aes( y =Flux.dCHMation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )  + ylim(0, 300)
+p2 <- diurnal.summary %>% filter( Site == 'KONZ' ) %>%  ggplot( ) + geom_col( aes( y =Flux.deviation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )  + ylim(0, 300)
 
-p3 <- diurnal.summary %>% filter( Site == 'GUAN' ) %>%  ggplot( ) + geom_col( aes( y =Flux.dCHMation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )  + ylim(0, 300)
+p3 <- diurnal.summary %>% filter( Site == 'GUAN' ) %>%  ggplot( ) + geom_col( aes( y =Flux.deviation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )  + ylim(0, 300)
 
-p4 <- diurnal.summary %>% filter( Site == 'JORN' ) %>%  ggplot( ) + geom_col( aes( y =Flux.dCHMation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )  + ylim(0, 300)
+p4 <- diurnal.summary %>% filter( Site == 'JORN' ) %>%  ggplot( ) + geom_col( aes( y =Flux.deviation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )  + ylim(0, 300)
 
 png("Diurnal_Diff_sites.png", width=8, 
     height=8, units="in", res=1200)
