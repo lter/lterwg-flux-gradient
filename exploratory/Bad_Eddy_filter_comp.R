@@ -60,6 +60,10 @@ for (file_name in names(file_ids)) {
 
 message("All files processed successfully.")
 
+
+source('~/flux_group_git/lterwg-flux-gradient/exploratory/Bad_Eddy.R')
+source('~/flux_group_git/lterwg-flux-gradient/exploratory/filtered_data_plots.R')
+
 rmse <- function(actual, predicted) {
   sqrt(mean((actual - predicted)^2, na.rm=TRUE))
 }

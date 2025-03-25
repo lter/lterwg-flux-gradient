@@ -17,7 +17,7 @@
 # For loading data to/from google drive
 #email <- 'alexisrose0525@gmail.com'
 #email <- 'jaclyn_matthes@g.harvard.edu'
-email <- 'csturtevant@battelleecology.org'
+email <- 'sam.jurado@yale.edu'
 
 site <- 'US-Uaf'
 
