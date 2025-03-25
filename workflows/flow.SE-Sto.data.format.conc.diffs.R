@@ -50,18 +50,11 @@ site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==sit
 dirTmp <- fs::path(tempdir(),site)
 dir.create(dirTmp)
 
-#Step 1.: Rename variables.  Upload data files, create data variable key, use it to rename columns
 gdrive_path <- "https://drive.google.com/drive/u/1/folders/1F1qZkAZywNUq_fyS1OmlG3C9AkGo6fdc"
 
-# Create a local folder for data storage
-dir.create(path = file.path("methane"), showWarnings = F)
-dir.create(path = file.path("methane", "raw_methane"), showWarnings = F)
-
-# Specific file names for SE-Sto data
 ch4_files_to_keep <- c('SE-Sto_met_30min.csv',
                        'SE-Sto_gas_fluxes_30min.csv',
                        'SE-Sto_concentration_profile_30min.csv')
-
 
 # Identify desired files 
 ch4_files <- googledrive::drive_ls(
@@ -84,37 +77,28 @@ purrr::walk2(
 )
 
 
+# Load in data files
+fileIn <- file.path("methane", "raw_methane",'SE-Sto_gas_fluxes_30min.csv')
+dataFlux <- read.table(fileIn,header=TRUE,sep=",")
 
-
-focal_files <- site_folder$name # Default - downloads all files to the temp folder
-focal_files <- c("AMF_US-Uaf_BASE_HH_12-5.csv","US-Uaf CH4_concentration.csv","usuaf_attr.csv")
-
-for(focal_file in focal_files){
-  
-  # Find the file identifier for that file
-  file_id <- subset(site_folder, name == focal_file)
-  
-  # Download that file
-  pathDnld <- fs::path(dirTmp,focal_file)
-  googledrive::drive_download(file = file_id$id, 
-                              path = pathDnld,
-                              overwrite = T)
-  # Unzip
-  if(grepl(pattern='.zip',focal_file)){
-    utils::unzip(pathDnld,exdir=dirTmp)
-  }
-  
-}
-
-# Extract 30 minute AmeriFlux data
-fileIn <- fs::path(dirTmp,'AMF_US-Uaf_BASE_HH_12-5.csv')
-dataAmf <- read.table(fileIn,header=TRUE,sep=",",skip=2)
-
-fileIn <- fs::path(dirTmp,'US-Uaf CH4_concentration.csv')
+fileIn <- file.path("methane", "raw_methane",'SE-Sto_concentration_profile_30min.csv')
 dataConc <- read.csv(fileIn,header=TRUE)
 
-fileIn <- fs::path(dirTmp,"usuaf_attr.csv")
-attr.df0 <- read.csv(fileIn)
+fileIn <- file.path("methane", "raw_methane",'SE-Sto_met_30min.csv')
+dataMet <- read.csv(fileIn,header=TRUE)
+
+
+
+## ***Manually update column names for necessary variables (tried making this fancy but it wasn't working, so just going to brute force it)
+dataFlux <- dataFlux %>% rename(LE_turb_interp = LEraw_1_1_1)
+dataFlux <- dataFlux %>% rename(H_turb_interp = H_1_1_1)
+dataFlux <- dataFlux %>% rename(FC_turb_interp = Fc_1_1_1)
+dataFlux <- dataFlux %>% rename(ustar_interp = Ustar_1_1_1)
+
+dataMet <- dataMet %>% rename(P_kPa = Pa_1_1_1)
+dataMet <- dataMet %>% rename(Tair1 = Ta_1_1_1)
+dataMet <- dataMet %>% rename(RH = RH_1_1_1)
+
 
 # Transform the attr.df data frame into same format as NEON sites
 attr.df.transpose <- as.data.frame(t(attr.df0))
