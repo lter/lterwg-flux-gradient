@@ -11,8 +11,8 @@ googledrive::drive_auth(email = email)
 
 # Define Google Drive file IDs for required data files
 file_ids <- list(
-  "SITES_AE_30min.Rdata" = "1GNKLKRZHIR-aFgaECKhsy7e70bwTbKBV",
-  "SITES_WP_30min.Rdata"= "1B3NKyCk4nA7JGojsyF_C-v7eps7cqsAr",
+  "SITES_AE_9min.Rdata" = "12nE75Zh-tQ8oXOXARj2_3J2HjA6Lf1wl",
+  "SITES_WP_9min.Rdata"= "17Y-QYKSof3nMOAz6L8QsCxtLSoqObvn-",
   "FilteredData_MS1Sites.Rdata" = "1fJ_7lG5WO6lyuYVkhaAhyv1uZCPn4EXw",
   "FilteredData_MS1Sites_BH.Rdata" = "1ziIgm1VpSIrwtiuXmhPHMgse1pebi28L"
 )
@@ -34,10 +34,11 @@ download_googledrive_file <- function(file_name, file_id, localdir) {
   
   # Download the file
   googledrive::drive_download(
-    as_id(file_id),
+    googledrive::as_id(file_id),  # Explicitly call as_id from googledrive
     path = local_path,
     overwrite = TRUE
   )
+  
   
   message(paste0(file_name, " downloaded successfully to ", local_path))
 }
@@ -64,21 +65,25 @@ rmse <- function(actual, predicted) {
   sqrt(mean((actual - predicted)^2, na.rm=TRUE))
 }
 
-KONZ_df <- SITES_AE_30min$KONZ
+KONZ_df <- SITES_AE_9min$KONZ
 
-KONZ_df <- KONZ_df %>% filter(gas =="CO2")
+
+KONZ_df <- KONZ_df %>% dplyr::filter(gas == "H2O")
 
 filt_KONZ_df <- SITES_AE_30min_FILTER_BH$KONZ
 best_heights <- unique(filt_KONZ_df$dLevelsAminusB)
 
+
 ##Needs to be an if statement 
+KONZ_df <- KONZ_df %>% dplyr::filter(dLevelsAminusB  == "4_1")
+
 KONZ_df <- KONZ_df %>% filter(dLevelsAminusB == best_heights[1] | dLevelsAminusB == best_heights[2])
 unique(KONZ_df$dLevelsAminusB)
 
 
-KONZ_df <- Bad_Eddy(KONZ_df, "EddyDiff")
+#KONZ_df <- Bad_Eddy(KONZ_df, "EddyDiff")
 
-Bad_KONZ_df <- KONZ_df %>% filter(Eddy_outlier == 0)
+#Bad_KONZ_df <- KONZ_df %>% filter(Eddy_outlier == 0)
 
 KONZ_df <- Super_Bad_Eddy(KONZ_df,"EddyDiff",.2)
 
@@ -99,8 +104,8 @@ print(rmse(KONZ_df$FC_turb_interp,KONZ_df$FG_mean))
 plot(filt_KONZ_df$FC_turb_interp,filt_KONZ_df$FG_mean)
 print(rmse(filt_KONZ_df$FC_turb_interp,filt_KONZ_df$FG_mean))
 
-#plot(Bad_filt_KONZ_df$FC_turb_interp,Bad_filt_KONZ_df$FG_mean)
-#print(rmse(Bad_filt_KONZ_df$FC_turb_interp,Bad_filt_KONZ_df$FG_mean))
+plot(Super_Bad_KONZ_df$FH2O_interp,Super_Bad_KONZ_df$FG_mean)
+print(rmse(Super_Bad_KONZ_df$FC_turb_interp,Super_Bad_KONZ_df$FG_mean))
 
 
 #How to compare what percents of data were taken by each and if they overlap
@@ -115,8 +120,8 @@ plot_binned_data(KONZ_df,filt_KONZ_df,"FC_turb_interp","FG_mean", bins = 20)
 #plot_filtered_scatter(KONZ_df,Bad_KONZ_df,"FC_turb_interp","FG_mean")
 #plot_binned_data(KONZ_df,Bad_KONZ_df,"FC_turb_interp","FG_mean", bins = 20)
 
-plot_filtered_scatter(KONZ_df,Super_Bad_KONZ_df,"FC_turb_interp","FG_mean")
-plot_binned_data(KONZ_df,Super_Bad_KONZ_df,"FC_turb_interp","FG_mean", bins = 20)
+plot_filtered_scatter(KONZ_df,Super_Bad_KONZ_df,"FH2O_interp","FG_mean")
+plot_binned_data(KONZ_df,Super_Bad_KONZ_df,"FH2O_interp","FG_mean", bins = 20)
 
 
 
@@ -190,7 +195,7 @@ evaluate_x_rmse <- function(df, method, x_values) {
 }
 
 # Define range of x values
-x_values <- seq(0, 8, by = 0.05)  # Adjust range as needed
+x_values <- seq(0, 2, by = 0.05)  # Adjust range as needed
 
 # Run evaluation
 rmse_results <- evaluate_x_rmse(KONZ_df, "EddyDiff", x_values)
