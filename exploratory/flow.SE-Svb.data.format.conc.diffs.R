@@ -76,9 +76,7 @@ for (idxCol in 1:ncol(attr.df)){
 # Parse tower heights
 tower.heights <- data.frame(TowerHeight=as.numeric(attr.df$DistZaxsLvlMeasTow),
                             TowerPosition=as.numeric(attr.df$TowerPosition))
-if(any(diff(tower.heights$TowerPosition) <= 0)){
-  stop("Tower Position must be increasing in the attr.df file")
-}
+
 #Datetime and UTC
 #Assuming the time is representative of the end of the averaging period
 dataSESVB$timeEnd <- as.POSIXct(dataSESVB$timestamp, format="%d-%b-%Y %H:%M:%S", tz="CET")
@@ -90,8 +88,8 @@ dataSESVB$timeBgn <- dataSESVB$timeEnd - minutes(30)
 ########PLACE HOLDER FOR WET TO DRY MOL CONVERSION IF IT IS NEEDED##############
 ###########################NEED TO ASK PI OF SITE###############################
 ###Relative Humidity is necessary
-dataSESVB$esat_Pa = 611.2*exp(17.67*(dataSESVB$Ta_degC_150m)/(dataSESVB$Ta_degC_150m-29.65)) #[Pa] saturated water vapor pressure
-dataSESVB$e_Pa = dataSESVB$h2o_mmolmol_150 #[g water /m^3 of air]
+dataSESVB$esat_Pa = 611.2*exp(17.67*(dataSESVB$Ta_degC_150m)/(dataSESVB$Ta_degC_150m+243.51)) #[Pa] saturated water vapor pressure
+dataSESVB$e_Pa = (dataSESVB$h2o_mmolmol_150m/1000) *(dataSESVB$AirPress_hPa_85m*100) 
 dataSESVB$RH = (dataSESVB$e_Pa/dataSESVB$esat_Pa)*100
 # Initialize output. Prepopulate things that won't change with different tower pairs
 # Make sure to check metadata for consistent sensor heights among the WS, TA, and concentration profiles
@@ -133,7 +131,7 @@ dmmyOut <- data.frame(timeEnd_A=dataSESVB$timeEnd,
                       H_nsae_interp=dmmyNum,
                       ustar_interp=dataSESVB$ustar_ms_85m,     
                       roughLength_interp=dmmyNum,
-                      RH=dmmyNum,  # at 85m.
+                      RH=dataSESVB$RH,  # at 85m.
                       P_kPa=dataSESVB$AirPress_hPa_85m/10,
                       PAR=dmmyNum, # No PAR from this site ###################
                       Tair8=dataSESVB$Ta_degC_35m, # Increasing number with height, start at level 11, 1st methane height
@@ -144,8 +142,8 @@ dmmyOut <- data.frame(timeEnd_A=dataSESVB$timeEnd,
                       z_displ_calc=dmmyNum,
                       roughLength_calc=dmmyNum,
                       Tair_K=dmmyNum,
-                      esat_Pa=dmmyNum,
-                      e_Pa=dmmyNum,
+                      esat_Pa=dataSESVB$esat_Pa,
+                      e_Pa=dataSESVB$e_Pa,
                       VPD=dmmyNum,
                       rhoa_kgm3=dmmyNum,
                       rhov_kgm3=dmmyNum,
@@ -262,7 +260,7 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
 # Compute vegetation height based on turbulence measurements
 # These equations stem from Eqn. 9.7.1b in Stull
 ####Not enough ubar measurments to deduce this
-lvlTow <- 13 #this is the height at which the wind measurment was obtained
+lvlTow <- 13 #this is the height at which the wind measurement was obtained
 hgtMax <- tower.heights$TowerHeight[tower.heights$TowerPosition == 16]
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   var$z_veg_aero <- 10*as.numeric(hgtMax)/(exp(0.4*var[[paste0('ubar',lvlTow)]]/var$ustar_interp)+6.6) # m - aerodynamic vegetation height
@@ -271,7 +269,7 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   var$roughLength_interp <- var$roughLength_calc # set them the same, since not provided by PI
   return(var)
 })
-var = min9Diff.list$CO2
+
 # -------------- Compute water flux from LE --------------------
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   
@@ -287,10 +285,10 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   
   # Save these variables for aerodynamic method later on
   var$Tair_K = Tair_C + 273.16
-  var$esat_Pa = 611.2*exp(17.67*(var$Tair_K-273.16)/(var$Tair_K-29.65)) #[Pa] saturated water vapor pressure
+  #var$esat_Pa = var$esat_Pa  #[Pa] saturated water vapor pressure
   
-  var$e_Pa = var$RH*var$esat_Pa/100 #[Pa] vapor water pressure
-  var$VPD = (var$esat_Pa-var$e_Pa)/1000
+  #var$e_Pa = var$e_Pa #[Pa] vapor water pressure
+  #var$VPD = var$VPD 
   var$rhoa_kgm3 = ma*(P_pa - var$e_Pa)/(R*var$Tair_K) # dry air density  [Kg/m3]
   var$rhov_kgm3 = mv*var$e_Pa/(R*var$Tair_K) # water vapor density  [Kg/m3]
   var$rho_kgm3 = var$rhoa_kgm3 + var$rhov_kgm3 # moist air density  [Kg/m3]
@@ -306,3 +304,33 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   
   return(var)
 })
+
+
+# -------- Save and zip the files to the temp directory. Upload to google drive. -------
+fileSave <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min.RData'))
+fileZip <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min.zip'))
+save(min9Diff.list,file=fileSave)
+wdPrev <- getwd()
+setwd(dirTmp)
+utils::zip(zipfile=fileZip,files=paste0(site,'_aligned_conc_flux_9min.RData'))
+setwd(wdPrev)
+
+# Save in same folder as NEON site data
+drive_url_NEONSiteData <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
+data_folderUpld <- googledrive::drive_ls(path = drive_url_NEONSiteData)
+site_folderUpld <- googledrive::drive_ls(path = data_folderUpld$id[data_folderUpld$name==site])
+googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folderUpld$id[data_folderUpld$name==site]) 
+
+# Do the same for attr.df (attribute file). 
+# Zip the file with the same folder structure as those created for NEON files 
+pathSaveAttr <- fs::path(dirTmp,"data", site)
+dir.create(pathSaveAttr,recursive = TRUE)
+fileSaveAttr <- fs::path("data", site, paste0(site,'_attr.RData'))
+fileZipAttr <- fs::path("data", site, paste0(site,'_attr.zip'))
+wdPrev <- getwd()
+setwd(dirTmp)
+save(attr.df,file=fileSaveAttr)
+utils::zip(zipfile=fileZipAttr,files=fileSaveAttr)
+googledrive::drive_upload(media = fileZipAttr, overwrite = T, path = data_folderUpld$id[data_folderUpld$name==site])
+setwd(wdPrev)
+
