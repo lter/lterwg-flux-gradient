@@ -1,8 +1,10 @@
 
-# DirRepo <- "." # Relative or absolute path to lterwg-flux-gradient git repo on your local machine. Make sure you've pulled the latest from main!localdir <- tempdir()
+DirRepo <- "." # Relative or absolute path to lterwg-flux-gradient git repo on your local machine. Make sure you've pulled the latest from main!localdir <- tempdir()
 source(fs::path(DirRepo,'exploratory/FUNCTION_One2One.R' ))
 
+
 sites <- names(SITES_WP_9min_FILTER  )
+
 
 SITES_One2One_CO2 <- one2one.parms.site(MBR.tibble = SITES_MBR_9min_FILTER,
                                         AE.tibble = SITES_AE_9min_FILTER,
