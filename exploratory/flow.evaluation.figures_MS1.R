@@ -218,7 +218,7 @@ for ( i in sites){
 setwd(oldDir)
 
 # DIURNAL DIFF PLOTS:
-stop()
+
 diurnal.summary <- Diurnal.Summary(diurnal.tibble = Diurnal.MBR.CO2, TYP='MBR' ) %>% rbind(Diurnal.Summary(diurnal.tibble = Diurnal.AE.CO2, TYP='AE' ) ) %>% rbind(Diurnal.Summary(diurnal.tibble = Diurnal.WP.CO2, TYP='WP' ) )  
 
 # Adjust the order of type:
