@@ -10,9 +10,9 @@
 calc.mbr <- function(min9, bootstrap, nsamp){
   
   # Calculate modified Bowen ratio (MBR) gradient fluxes:
-  CO2 = min9Diff.list[["CO2"]]
-  CH4 = min9Diff.list[["CH4"]]
-  H2O = min9Diff.list[["H2O"]]
+  CO2 = min9[["CO2"]]
+  CH4 = min9[["CH4"]]
+  H2O = min9[["H2O"]]
   
   # Add gas suffix to all column names to track into combined table
   colnames(CO2) <- paste0(colnames(CO2), '_CO2')
@@ -23,23 +23,6 @@ calc.mbr <- function(min9, bootstrap, nsamp){
   CO2$match_time = CO2$match_time_CO2
   H2O$match_time = H2O$match_time_H2O
   CH4$match_time = CH4$match_time_CH4
-  
-  # CHECKING TIMES
-  CO2$timeEnd_A_CO2[1:10]
-  CH4$timeEnd_A_CH4[1:10]
-  CH4$tdiff = CH4$timeEnd_A_CH4 - CH4$timeBgn_A_CH4
-  test = CH4[CH4$tdiff<500,]
-  testco2 = CO2[CH4$tdiff<500,]
-  test$timeEnd_A_CH4[1:10]
-  testco2$timeEnd_A_CO2[1:10]
-  
-  H2O$match_time[1:10]
-  MBRflux_align$lvl_test=ifelse(MBRflux_align$dLevelsAminusB_CO2==MBRflux_align$dLevelsAminusB_CH4,1,0)
-  tmp = MBRflux_align[MBRflux_align$lvl_test==0,]
-  tmp$match_time_CH4[1:10]
-  tmp$match_time_CO2[1:10]
-  tmp$timeEnd_A_CO2[1:10]
-  tmp$timeEnd_A_CH4[1:10]
   
   # Align CO2, H2O, CH4 conc diffs and fluxes by match_time
   CO2$timeEndA = CO2$timeEnd_A_CO2
