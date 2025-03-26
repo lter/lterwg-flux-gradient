@@ -34,6 +34,7 @@ options(digits=12)
 library(foreach)
 library(doParallel)
 library(dplyr)
+library(lubridate)
 
 # Load functions in this repo
 source(file.path("functions/interp.flux.R"))
@@ -43,12 +44,12 @@ source(file.path("functions/aggregate_averages.R"))
 # -------------------------------------------------------
 
 # Authenticate with Google Drive and get site data
-googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
-drive_url_extSiteData <- googledrive::as_id("https://drive.google.com/drive/folders/1jrOJIu5WfdzmlbL9vMkUNfzBpRC-W0Wd")
-data_folder <- googledrive::drive_ls(path = drive_url_extSiteData)
-site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==site])
-dirTmp <- fs::path(tempdir(),site)
-dir.create(dirTmp)
+# googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
+# drive_url_extSiteData <- googledrive::as_id("https://drive.google.com/drive/folders/1jrOJIu5WfdzmlbL9vMkUNfzBpRC-W0Wd")
+# data_folder <- googledrive::drive_ls(path = drive_url_extSiteData)
+# site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==site])
+# dirTmp <- fs::path(tempdir(),site)
+# dir.create(dirTmp)
 
 gdrive_path <- "https://drive.google.com/drive/u/1/folders/1F1qZkAZywNUq_fyS1OmlG3C9AkGo6fdc"
 
@@ -58,25 +59,25 @@ ch4_files_to_keep <- c(#'SE-Sto_met_30min.csv',
                        'sesto_attr.csv')
 
 # Identify desired files 
-ch4_files <- googledrive::drive_ls(
-  path = googledrive::as_id(gdrive_path),
-) %>%  
-  # Filter to keep only specified files
-  dplyr::filter(name %in% ch4_files_to_keep) %>% 
-  # Add explicit path column for safety
-  dplyr::mutate(target_path = file.path("methane", "raw_methane", name))
-
-# Download files with explicit path specification
-purrr::walk2(
-  .x = ch4_files$id,
-  .y = ch4_files$target_path,
-  .f = ~ googledrive::drive_download(
-    file = googledrive::as_id(.x),
-    path = .y,
-    overwrite = TRUE
-  )
-)
-
+# ch4_files <- googledrive::drive_ls(
+#   path = googledrive::as_id(gdrive_path),
+# ) %>%  
+#   # Filter to keep only specified files
+#   dplyr::filter(name %in% ch4_files_to_keep) %>% 
+#   # Add explicit path column for safety
+#   dplyr::mutate(target_path = file.path("methane", "raw_methane", name))
+# 
+# # Download files with explicit path specification
+# purrr::walk2(
+#   .x = ch4_files$id,
+#   .y = ch4_files$target_path,
+#   .f = ~ googledrive::drive_download(
+#     file = googledrive::as_id(.x),
+#     path = .y,
+#     overwrite = TRUE
+#   )
+# )
+# 
 
 # Load in data files
 fileIn <- file.path("methane", "raw_methane",'SE-Sto_gas_fluxes_30min.csv')
@@ -93,14 +94,14 @@ attr.df <- read.csv(fileIn,header=TRUE)
 
 
 ## ***Manually update column names for necessary variables (tried making this fancy but it wasn't working, so just going to brute force it)
-dataFlux <- dataFlux %>% rename(LE_turb_interp = LEraw_1_1_1)
-dataFlux <- dataFlux %>% rename(H_turb_interp = H_1_1_1)
-dataFlux <- dataFlux %>% rename(FC_turb_interp = Fc_1_1_1)
-dataFlux <- dataFlux %>% rename(ustar_interp = Ustar_1_1_1)
-
-dataMet <- dataMet %>% rename(P_kPa = Pa_1_1_1)
-dataMet <- dataMet %>% rename(Tair1 = Ta_1_1_1)
-dataMet <- dataMet %>% rename(RH = RH_1_1_1)
+# dataFlux <- dataFlux %>% rename(LE_turb_interp = LEraw_1_1_1)
+# dataFlux <- dataFlux %>% rename(H_turb_interp = H_1_1_1)
+# dataFlux <- dataFlux %>% rename(FC_turb_interp = Fc_1_1_1)
+# dataFlux <- dataFlux %>% rename(ustar_interp = Ustar_1_1_1)
+# 
+# dataMet <- dataMet %>% rename(P_kPa = Pa_1_1_1)
+# dataMet <- dataMet %>% rename(Tair1 = Ta_1_1_1)
+# dataMet <- dataMet %>% rename(RH = RH_1_1_1)
 
 ## Create timeBgn_A variable from date and time
 
@@ -231,7 +232,7 @@ rm('dataFlux','dataConc', 'dataMet')
 
 #update time zones for data
 data$timeEnd_A <- as.POSIXct(data$timeEnd_A, format="%d-%b-%Y %H:%M:%S", tz="CET")
-data$timeEnd_A <- with_tz(data$timeEnd, tzone = "UTC")
+data$timeEnd_A <- with_tz(data$timeEnd_A, tzone = "UTC")
 data$timeBgn_A <- data$timeEnd_A - minutes(30)
 
 
@@ -282,61 +283,66 @@ data$timeBgn_A <- data$timeEnd_A - minutes(30)
 # }
 
 # Filter down to where we have CH4 flux
-data <- data %>% dplyr::filter(!is.na(CH4.flux))
-data$timeBgn <- strptime(data$TIMESTAMP_START,"%Y%m%d%H%M")
+# data <- data %>% dplyr::filter(!is.na(CH4.flux))
+# data$timeBgn <- strptime(data$TIMESTAMP_START,"%Y%m%d%H%M")
 
 # Initialize output. Prepopulate things that won't change with different tower pairs
 # Make sure to check metadata for consistent sensor heights among the WS, TA, and concentration profiles
 numData <- nrow(data)
-dmmyNum <- as.numeric(NA)
-dmmyChr <- as.character(NA)
-dmmyOut <- data.frame(timeEnd_A=data$timeEnd,
-                      timeBgn_A=data$timeBgn,
+# dmmyNum <- as.numeric(NA)
+# dmmyChr <- as.character(NA)
+dmmyNum <- rep(NA_real_, numData)
+dmmyChr <- rep(NA_character_, numData)
+
+dmmyOut <- data.frame(timeEnd_A=data$timeEnd_A,
+                      timeBgn_A=data$timeBgn_A,
                       TowerPosition_A=dmmyNum,
                       mean_A=dmmyNum,
                       qfFinl_A=dmmyNum,
                       min_A=dmmyNum,
                       max_A=dmmyNum,
-                      vari_A=0,
+                      vari_A=dmmyNum,
                       numSamp_A=dmmyNum,
-                      timeEnd_B=data$timeEnd,
-                      timeBgn_B=data$timeBgn,
+                      timeEnd_B=data$timeEnd_A,
+                      timeBgn_B=data$timeBgn_A,
                       TowerPosition_B=dmmyNum,
                       mean_B=dmmyNum,
                       qfFinl_B=dmmyNum,
                       min_B=dmmyNum,
                       max_B=dmmyNum,
-                      vari_B=0,
+                      vari_B=dmmyNum,
                       numSamp_B=dmmyNum,
                       diffTowerPosition=dmmyChr,
                       dLevelsAminusB=dmmyChr,
                       dConc=dmmyNum,
-                      timeMid=data$timeBgn+(data$timeEnd-data$timeBgn)/2,
-                      match_time=data$timeBgn+(data$timeEnd-data$timeBgn)/2,
+                      timeMid=data$timeBgn_A+(data$timeEnd_A-data$timeBgn_A)/2,
+                      match_time=data$timeBgn_A+(data$timeEnd_A-data$timeBgn_A)/2,
                       TowerHeight_A=dmmyNum,
                       TowerHeight_B=dmmyNum,
-                      FC_turb_interp=data$FC,
+                      FC_turb_interp=data$Fc_1_1_1,
                       FC_stor_interp=dmmyNum,
                       FC_nee_interp=dmmyNum,
-                      LE_turb_interp=data$LE,
+                      LE_turb_interp=data$LE_1_1_1,
                       LE_stor_interp=dmmyNum,
                       LE_nsae_interp=dmmyNum,
-                      H_turb_interp=data$H,
+                      H_turb_interp=data$H_1_1_1,
                       H_stor_interp=dmmyNum,
                       H_nsae_interp=dmmyNum,
-                      ustar_interp=data$USTAR,
+                      ustar_interp=data$Ustar_1_1_1,
                       roughLength_interp=dmmyNum,
                       RH=data$RH_1_1_1,  # Tower top
-                      P_kPa=data$PA,
-                      PAR=data$PPFD_IN_PI_F, # Only gap-filled variable available
-                      Tair1=data$TA_1_4_1, # Increasing number with height
-                      Tair2=data$TA_1_3_1,
-                      Tair3=data$TA_1_2_1,
-                      Tair4=data$TA_1_1_1, # Tower top
+                      P_kPa=data$Pa_1_1_1,
+                      PAR=data$PPFD_IN_1_2_1, # Only gap-filled variable available
+                      Tair1=dmmyNum, # Tower top, only one temp variable available
+                      Tair2=dmmyNum, # Tower top, only one temp variable available
+                      Tair3=dmmyNum, # Tower top, only one temp variable available
+                      Tair4=dmmyNum, # Tower top, only one temp variable available
+                      Tair5=data$Ta_1_1_1, # Tower top, only one temp variable available
                       ubar1=dmmyNum, # Increasing number with height
-                      ubar2=data$WS_1_3_1,
-                      ubar3=data$WS_1_2_1,
-                      ubar4=data$WS_1_1_1, # Tower top
+                      ubar2=dmmyNum, # Increasing number with height
+                      ubar3=dmmyNum, # Increasing number with height
+                      ubar4=dmmyNum, # Increasing number with height
+                      ubar5=data$WS_1_1_1, # Tower top, only one ws variable available
                       z_veg_aero=dmmyNum,
                       z_displ_calc=dmmyNum,
                       roughLength_calc=dmmyNum,
@@ -352,13 +358,31 @@ dmmyOut <- data.frame(timeEnd_A=data$timeEnd,
                       Ftemp=dmmyNum,
                       lambda=dmmyNum,
                       FH2O_interp=dmmyNum,
-                      FCH4_turb_interp=data$FCH4, # New variable, since we have measured CH4 fluxes
-                      FCH4_stor_interp=data$SCH4, # New variable, since we have measured CH4 fluxes
-                      FCH4_nsae_interp=data$FCH4+data$SCH4, # New variable, since we have measured CH4 fluxes
+                      FCH4_turb_interp=data$Fch4_1_1_1, # New variable, since we have measured CH4 fluxes
+                      FCH4_stor_interp=dmmyNum, # New variable, since we have measured CH4 fluxes
+                      FCH4_nsae_interp=dmmyNum, # New variable, since we have measured CH4 fluxes
                       stringsAsFactors=FALSE)
 
 # Put concentrations into the output. This task is simple for this site since
 # concentrations and fluxes have already been aggregated to 30-min intervals 
+
+# temporarily add _MIXING_RATIO to concentration variable names (I need to figure out if these are dry or wet 
+# mole fractions.  If wet, go through the calculations above to convert to dry, and that code adds _MIXING_RATIO to variable names)
+data$CH4_1_1_1_MIXING_RATIO <- data$CH4_1_1_1
+data$CH4_1_2_1_MIXING_RATIO <- data$CH4_1_2_1
+data$CH4_1_3_1_MIXING_RATIO <- data$CH4_1_3_1
+data$CH4_1_4_1_MIXING_RATIO <- data$CH4_1_4_1
+data$CH4_1_5_1_MIXING_RATIO <- data$CH4_1_5_1
+data$CO2_1_1_1_MIXING_RATIO <- data$CO2_1_1_1
+data$CO2_1_2_1_MIXING_RATIO <- data$CO2_1_2_1
+data$CO2_1_3_1_MIXING_RATIO <- data$CO2_1_3_1
+data$CO2_1_4_1_MIXING_RATIO <- data$CO2_1_4_1
+data$CO2_1_5_1_MIXING_RATIO <- data$CO2_1_5_1
+data$H2O_1_1_1_MIXING_RATIO <- data$H2O_1_1_1
+data$H2O_1_2_1_MIXING_RATIO <- data$H2O_1_2_1
+data$H2O_1_3_1_MIXING_RATIO <- data$H2O_1_3_1
+data$H2O_1_4_1_MIXING_RATIO <- data$H2O_1_4_1
+data$H2O_1_5_1_MIXING_RATIO <- data$H2O_1_5_1
 
 # CH4 concentrations
 # Tower levels 5-1
@@ -452,8 +476,8 @@ CH4_21$TowerHeight_B=tower.heights$TowerHeight[1]
 CH4_21$mean_B=data$CH4_1_5_1_MIXING_RATIO #  I believe ICOS convention is starting from top down
 
 # Combine all combos of CH4 paired levels
-CH4out <- rbind(CH4_51, CH4_52, CH4_53, CH4_54, CH4_41,CH4_42,CH4_43, CH4_31, CH4_32, CH4_12)
-rm(CH4_51, CH4_52, CH4_53, CH4_54, CH4_41,CH4_42,CH4_43, CH4_31, CH4_32, CH4_12)
+CH4out <- rbind(CH4_51, CH4_52, CH4_53, CH4_54, CH4_41,CH4_42,CH4_43, CH4_31, CH4_32, CH4_21)
+rm(CH4_51, CH4_52, CH4_53, CH4_54, CH4_41,CH4_42,CH4_43, CH4_31, CH4_32, CH4_21)
 
 
 # CO2 concentrations
@@ -546,9 +570,105 @@ CO2_21$TowerPosition_B=tower.heights$TowerPosition[1]
 CO2_21$TowerHeight_B=tower.heights$TowerHeight[1]
 CO2_21$mean_B=data$CO2_1_5_1_MIXING_RATIO #  I believe ICOS convention is starting from top down
 
+
+CO2out <- rbind(CO2_51, CO2_52, CO2_53, CO2_54, CO2_41,CO2_42,CO2_43, CO2_31, CO2_32, CO2_21)
+rm(CO2_51, CO2_52, CO2_53, CO2_54, CO2_41,CO2_42,CO2_43, CO2_31, CO2_32, CO2_21)
+
 # Combine all combos of H2O paired levels
-CO2out <- rbind(CO2_51, CO2_52, CO2_53, CO2_54, CO2_41,CO2_42,CO2_43, CO2_31, CO2_32, CO2_12)
-rm(CO2_51, CO2_52, CO2_53, CO2_54, CO2_41,CO2_42,CO2_43, CO2_31, CO2_32, CO2_12)
+# H2O concentrations
+H2O_51 <- dmmyOut
+H2O_51$TowerPosition_A=tower.heights$TowerPosition[5]
+H2O_51$TowerHeight_A=tower.heights$TowerHeight[5]
+H2O_51$mean_A=data$H2O_1_1_1_MIXING_RATIO # I believe ICOS convention is starting from top down
+H2O_51$TowerPosition_B=tower.heights$TowerPosition[1]
+H2O_51$TowerHeight_B=tower.heights$TowerHeight[1]
+H2O_51$mean_B=data$H2O_1_5_1_MIXING_RATIO #  I believe ICOS convention is starting from top down
+
+# Tower levels 5-2
+H2O_52 <- dmmyOut
+H2O_52$TowerPosition_A=tower.heights$TowerPosition[5]
+H2O_52$TowerHeight_A=tower.heights$TowerHeight[5]
+H2O_52$mean_A=data$H2O_1_1_1_MIXING_RATIO # I believe ICOS convention is starting from top down
+H2O_52$TowerPosition_B=tower.heights$TowerPosition[2]
+H2O_52$TowerHeight_B=tower.heights$TowerHeight[2]
+H2O_52$mean_B=data$H2O_1_4_1_MIXING_RATIO #  I believe ICOS convention is starting from top down
+
+# Tower levels 5-3
+H2O_53 <- dmmyOut
+H2O_53$TowerPosition_A=tower.heights$TowerPosition[5]
+H2O_53$TowerHeight_A=tower.heights$TowerHeight[5]
+H2O_53$mean_A=data$H2O_1_1_1_MIXING_RATIO # I believe ICOS convention is starting from top down
+H2O_53$TowerPosition_B=tower.heights$TowerPosition[3]
+H2O_53$TowerHeight_B=tower.heights$TowerHeight[3]
+H2O_53$mean_B=data$H2O_1_3_1_MIXING_RATIO #  I believe ICOS convention is starting from top down
+
+# Tower levels 5-4
+H2O_54 <- dmmyOut
+H2O_54$TowerPosition_A=tower.heights$TowerPosition[5]
+H2O_54$TowerHeight_A=tower.heights$TowerHeight[5]
+H2O_54$mean_A=data$H2O_1_1_1_MIXING_RATIO # I believe ICOS convention is starting from top down
+H2O_54$TowerPosition_B=tower.heights$TowerPosition[4]
+H2O_54$TowerHeight_B=tower.heights$TowerHeight[4]
+H2O_54$mean_B=data$H2O_1_2_1_MIXING_RATIO #  I believe ICOS convention is starting from top down
+
+# Tower levels 4-1
+H2O_41 <- dmmyOut
+H2O_41$TowerPosition_A=tower.heights$TowerPosition[4]
+H2O_41$TowerHeight_A=tower.heights$TowerHeight[4]
+H2O_41$mean_A=data$H2O_1_2_1_MIXING_RATIO # I believe ICOS convention is starting from top down
+H2O_41$TowerPosition_B=tower.heights$TowerPosition[1]
+H2O_41$TowerHeight_B=tower.heights$TowerHeight[1]
+H2O_41$mean_B=data$H2O_1_5_1_MIXING_RATIO #  I believe ICOS convention is starting from top down
+
+# Tower levels 4-2
+H2O_42 <- dmmyOut
+H2O_42$TowerPosition_A=tower.heights$TowerPosition[4]
+H2O_42$TowerHeight_A=tower.heights$TowerHeight[4]
+H2O_42$mean_A=data$H2O_1_2_1_MIXING_RATIO # I believe ICOS convention is starting from top down
+H2O_42$TowerPosition_B=tower.heights$TowerPosition[2]
+H2O_42$TowerHeight_B=tower.heights$TowerHeight[2]
+H2O_42$mean_B=data$H2O_1_4_1_MIXING_RATIO #  I believe ICOS convention is starting from top down
+
+# Tower levels 4-3
+H2O_43 <- dmmyOut
+H2O_43$TowerPosition_A=tower.heights$TowerPosition[4]
+H2O_43$TowerHeight_A=tower.heights$TowerHeight[4]
+H2O_43$mean_A=data$H2O_1_2_1_MIXING_RATIO # I believe ICOS convention is starting from top down
+H2O_43$TowerPosition_B=tower.heights$TowerPosition[3]
+H2O_43$TowerHeight_B=tower.heights$TowerHeight[3]
+H2O_43$mean_B=data$H2O_1_3_1_MIXING_RATIO #  I believe ICOS convention is starting from top down
+
+# Tower levels 3-1
+H2O_31 <- dmmyOut
+H2O_31$TowerPosition_A=tower.heights$TowerPosition[3]
+H2O_31$TowerHeight_A=tower.heights$TowerHeight[3]
+H2O_31$mean_A=data$H2O_1_3_1_MIXING_RATIO # I believe ICOS convention is starting from top down
+H2O_31$TowerPosition_B=tower.heights$TowerPosition[1]
+H2O_31$TowerHeight_B=tower.heights$TowerHeight[1]
+H2O_31$mean_B=data$H2O_1_5_1_MIXING_RATIO #  I believe ICOS convention is starting from top down
+
+# Tower levels 3-2
+H2O_32 <- dmmyOut
+H2O_32$TowerPosition_A=tower.heights$TowerPosition[3]
+H2O_32$TowerHeight_A=tower.heights$TowerHeight[3]
+H2O_32$mean_A=data$H2O_1_3_1_MIXING_RATIO # I believe ICOS convention is starting from top down
+H2O_32$TowerPosition_B=tower.heights$TowerPosition[2]
+H2O_32$TowerHeight_B=tower.heights$TowerHeight[2]
+H2O_32$mean_B=data$H2O_1_4_1_MIXING_RATIO #  I believe ICOS convention is starting from top down
+
+# Tower levels 2-1
+H2O_21 <- dmmyOut
+H2O_21$TowerPosition_A=tower.heights$TowerPosition[2]
+H2O_21$TowerHeight_A=tower.heights$TowerHeight[2]
+H2O_21$mean_A=data$H2O_1_4_1_MIXING_RATIO # I believe ICOS convention is starting from top down
+H2O_21$TowerPosition_B=tower.heights$TowerPosition[1]
+H2O_21$TowerHeight_B=tower.heights$TowerHeight[1]
+H2O_21$mean_B=data$H2O_1_5_1_MIXING_RATIO #  I believe ICOS convention is starting from top down
+
+# Combine all combos of H2O paired levels
+H2Oout <- rbind(H2O_51, H2O_52, H2O_53, H2O_54, H2O_41,H2O_42,H2O_43, H2O_31, H2O_32, H2O_21)
+rm(H2O_51, H2O_52, H2O_53, H2O_54, H2O_41,H2O_42,H2O_43, H2O_31, H2O_32, H2O_21)
+
 
 # Combine all gases into a single data frame
 min9Diff.list <- list(CH4=CH4out,CO2=CO2out,H2O=H2Oout)
