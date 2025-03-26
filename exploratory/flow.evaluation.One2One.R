@@ -1,5 +1,4 @@
 
-DirRepo <- "." # Relative or absolute path to lterwg-flux-gradient git repo on your local machine. Make sure you've pulled the latest from main!localdir <- tempdir()
 source(fs::path(DirRepo,'exploratory/FUNCTION_One2One.R' ))
 
 
