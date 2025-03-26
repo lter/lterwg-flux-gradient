@@ -1,5 +1,8 @@
 # Formats external site (validation data) into the same format as NEON paired concentration difference data.
 #
+
+
+# This file has to be run after the column names have been standardized using flow.non.neon.data.harmonize.ch4.R
 # Merges together flux, met, and profile concentration data for site US-Uaf . Aligns the profile 
 # concentration data (CH4, CO2, and H2O) among adjacent tower levels (and also the bottom-top 
 # levels) and computes the difference in mean concentration. Aligns non-concentration data 
@@ -17,7 +20,8 @@
 # For loading data to/from google drive
 #email <- 'alexisrose0525@gmail.com'
 #email <- 'jaclyn_matthes@g.harvard.edu'
-email <- 'sam.jurado@yale.edu'
+# email <- 'csturtevant@battelleecology.org'
+email <- 'kdelwiche@berkeley.edu'
 
 site <- 'US-Uaf'
 

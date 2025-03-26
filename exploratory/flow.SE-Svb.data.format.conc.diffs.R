@@ -13,15 +13,11 @@
 #
 # Saves output as SITE_aligned_conc_flux_9min.RData, where SITE is the site code. 
 # Zips and uploads to Google Drive.
-
 # For loading data to/from google drive
 #email <- 'alexisrose0525@gmail.com'
 #email <- 'jaclyn_matthes@g.harvard.edu'
 email <- 'sam.jurado@yale.edu'
-
 site <- 'SE-Svb'
-
-
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: fs, googledrive
 options(digits=12)
@@ -29,17 +25,11 @@ library(foreach)
 library(doParallel)
 library(dplyr)
 library(lubridate)
-
-
 # Load functions in this repo
 source(file.path("functions/interp.flux.R"))
 source(file.path("functions/aggregate_averages.R"))
-
 # Final note: This script takes approx 45 min to run per site. 
-
-
 # -------------------------------------------------------
-
 # Authenticate with Google Drive and get site data
 googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
 drive_url_extSiteData <- googledrive::as_id("https://drive.google.com/drive/folders/1jrOJIu5WfdzmlbL9vMkUNfzBpRC-W0Wd")
@@ -47,11 +37,8 @@ data_folder <- googledrive::drive_ls(path = drive_url_extSiteData)
 site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==site])
 dirTmp <- fs::path(tempdir(),site)
 dir.create(dirTmp)
-
 focal_files <- site_folder$name # Default - downloads all files to the temp folder
 focal_files <- c("CH4_SE_SVB_FLUX+PROFILE_2019.csv","sesvb_attr.csv")
-
-
 for(focal_file in focal_files){
   
   # Find the file identifier for that file
@@ -68,16 +55,12 @@ for(focal_file in focal_files){
   }
   
 }
-
 fileIn <- fs::path(dirTmp,"CH4_SE_SVB_FLUX+PROFILE_2019.csv")
 dataSESVB <- read.table(fileIn,header=TRUE,sep=",",skip=0)
-
 fileIn <- fs::path(dirTmp,"sesvb_attr.csv")
 attr.df1 <- read.csv(fileIn)
-
 # Transform the attr.df data frame into same format as NEON sites
 attr.df.transpose <- as.data.frame(t(attr.df1))
-
 nameCol <- attr.df.transpose[1,]
 dtype <- attr.df.transpose[2,]
 attr.df <- attr.df.transpose[3:nrow(attr.df.transpose),]
@@ -90,41 +73,28 @@ for (idxCol in 1:ncol(attr.df)){
               int=as.integer(attr.df[,idxCol]))
   attr.df[[idxCol]] <- x
 }
-
 # Parse tower heights
 tower.heights <- data.frame(TowerHeight=as.numeric(attr.df$DistZaxsLvlMeasTow),
                             TowerPosition=as.numeric(attr.df$TowerPosition))
 if(any(diff(tower.heights$TowerPosition) <= 0)){
   stop("Tower Position must be increasing in the attr.df file")
 }
-
-
 #Datetime and UTC
 #Assuming the time is representative of the end of the averaging period
-
 dataSESVB$timeEnd <- as.POSIXct(dataSESVB$timestamp, format="%d-%b-%Y %H:%M:%S", tz="CET")
 dataSESVB$timeEnd <- with_tz(dataSESVB$timeEnd, tzone = "UTC")
 dataSESVB$timeBgn <- dataSESVB$timeEnd - minutes(30)
-
 #Variable Reassignment
 ###NOTE: We will only consider levels up to 85m (13th) level, as this is where
 #' the highest sonic anemometer is, and is the top ch4 conc level.
-
-
 ########PLACE HOLDER FOR WET TO DRY MOL CONVERSION IF IT IS NEEDED##############
 ###########################NEED TO ASK PI OF SITE###############################
-
 ###Relative Humidity is necessary
-
 dataSESVB$esat_Pa = 611.2*exp(17.67*(dataSESVB$Ta_degC_150m)/(dataSESVB$Ta_degC_150m-29.65)) #[Pa] saturated water vapor pressure
 dataSESVB$e_Pa = dataSESVB$h2o_mmolmol_150 #[g water /m^3 of air]
 dataSESVB$RH = (dataSESVB$e_Pa/dataSESVB$esat_Pa)*100
-
-
-
 # Initialize output. Prepopulate things that won't change with different tower pairs
 # Make sure to check metadata for consistent sensor heights among the WS, TA, and concentration profiles
-
 dmmyNum <- as.numeric(NA)
 dmmyChr <- as.character(NA)
 dmmyOut <- data.frame(timeEnd_A=dataSESVB$timeEnd,
@@ -189,8 +159,6 @@ dmmyOut <- data.frame(timeEnd_A=dataSESVB$timeEnd,
                       FCH4_stor_interp=dmmyNum, # New variable, since we have measured CH4 fluxes
                       FCH4_nsae_interp=dmmyNum, # New variable, since we have measured CH4 fluxes
                       stringsAsFactors=FALSE)
-
-
 # CH4 concentrations
 # Tower levels 16-13
 CH4_1613 <- dmmyOut
@@ -200,7 +168,6 @@ CH4_1613$mean_A=dataSESVB$ch4_nmolmol_150m
 CH4_1613$TowerPosition_B=tower.heights$TowerPosition[13]
 CH4_1613$TowerHeight_B=tower.heights$TowerHeight[13]
 CH4_1613$mean_B=dataSESVB$ch4_nmolmol_85m 
-
 # Tower levels 13-8
 CH4_138 <- dmmyOut
 CH4_138$TowerPosition_A=tower.heights$TowerPosition[13]
@@ -209,8 +176,6 @@ CH4_138$mean_A=dataSESVB$ch4_nmolmol_85m
 CH4_138$TowerPosition_B=tower.heights$TowerPosition[8]
 CH4_138$TowerHeight_B=tower.heights$TowerHeight[8]
 CH4_138$mean_B=dataSESVB$ch4_nmolmol_35m 
-
-
 # Tower levels 16-8
 CH4_168 <- dmmyOut
 CH4_168$TowerPosition_A=tower.heights$TowerPosition[16]
@@ -219,11 +184,9 @@ CH4_168$mean_A=dataSESVB$ch4_nmolmol_150m
 CH4_168$TowerPosition_B=tower.heights$TowerPosition[8]
 CH4_168$TowerHeight_B=tower.heights$TowerHeight[8]
 CH4_168$mean_B=dataSESVB$ch4_nmolmol_35m 
-
 # Combine all combos of CH4 paired levels
 CH4out <- rbind(CH4_1613,CH4_138,CH4_168)
 rm(CH4_1613,CH4_138,CH4_168)
-
 # CO2 concentrations
 # Tower levels 16-13
 CO2_1613 <- dmmyOut
@@ -233,7 +196,6 @@ CO2_1613$mean_A=dataSESVB$co2_umolmol_150m
 CO2_1613$TowerPosition_B=tower.heights$TowerPosition[13]
 CO2_1613$TowerHeight_B=tower.heights$TowerHeight[13]
 CO2_1613$mean_B=dataSESVB$co2_umolmol_85m 
-
 # Tower levels 13-8
 CO2_138 <- dmmyOut
 CO2_138$TowerPosition_A=tower.heights$TowerPosition[13]
@@ -242,7 +204,6 @@ CO2_138$mean_A=dataSESVB$co2_umolmol_85m
 CO2_138$TowerPosition_B=tower.heights$TowerPosition[8]
 CO2_138$TowerHeight_B=tower.heights$TowerHeight[8]
 CO2_138$mean_B=dataSESVB$co2_umolmol_35m 
-
 # Tower levels 16-8
 CO2_168 <- dmmyOut
 CO2_168$TowerPosition_A=tower.heights$TowerPosition[16]
@@ -251,11 +212,9 @@ CO2_168$mean_A=dataSESVB$co2_umolmol_150m
 CO2_168$TowerPosition_B=tower.heights$TowerPosition[8]
 CO2_168$TowerHeight_B=tower.heights$TowerHeight[8]
 CO2_168$mean_B=dataSESVB$co2_umolmol_35m 
-
 # Combine all combos of CH4 paired levels
 CO2out <- rbind(CO2_1613,CO2_138,CO2_168)
 rm(CO2_1613,CO2_138,CO2_168)
-
 # H2O concentrations
 # Tower levels 16-13
 H2O_1613 <- dmmyOut
@@ -265,7 +224,6 @@ H2O_1613$mean_A=dataSESVB$h2o_mmolmol_150m
 H2O_1613$TowerPosition_B=tower.heights$TowerPosition[13]
 H2O_1613$TowerHeight_B=tower.heights$TowerHeight[13]
 H2O_1613$mean_B=dataSESVB$h2o_mmolmol_85m
-
 # Tower levels 13-8
 H2O_138 <- dmmyOut
 H2O_138$TowerPosition_A=tower.heights$TowerPosition[13]
@@ -274,7 +232,6 @@ H2O_138$mean_A=dataSESVB$h2o_mmolmol_85m
 H2O_138$TowerPosition_B=tower.heights$TowerPosition[8]
 H2O_138$TowerHeight_B=tower.heights$TowerHeight[8]
 H2O_138$mean_B=dataSESVB$h2o_mmolmol_35m 
-
 # Tower levels 16-8
 H2O_168 <- dmmyOut
 H2O_168$TowerPosition_A=tower.heights$TowerPosition[16]
@@ -283,17 +240,12 @@ H2O_168$mean_A=dataSESVB$h2o_mmolmol_150m
 H2O_168$TowerPosition_B=tower.heights$TowerPosition[8]
 H2O_168$TowerHeight_B=tower.heights$TowerHeight[8]
 H2O_168$mean_B=dataSESVB$h2o_mmolmol_35m 
-
 # Combine all combos of H2O paired levels
 H2Oout <- rbind(H2O_1613,H2O_138,H2O_168)
 rm(H2O_1613,H2O_138,H2O_168)
-
-
 # Combine all gases into a single data frame
 min9Diff.list <- list(CH4=CH4out,CO2=CO2out,H2O=H2Oout)
 rm(CH4out,CO2out,H2Oout)
-
-
 # ------------------- Get concentration diffs for subsequent tower levels --------------
 # For each concentration, compute difference in concentration among tower levels
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
@@ -307,13 +259,9 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   
   return(var)
 })
-
-
 # Compute vegetation height based on turbulence measurements
 # These equations stem from Eqn. 9.7.1b in Stull
-
 ####Not enough ubar measurments to deduce this
-
 lvlTow <- 13 #this is the height at which the wind measurment was obtained
 hgtMax <- tower.heights$TowerHeight[tower.heights$TowerPosition == 16]
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
@@ -323,10 +271,7 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   var$roughLength_interp <- var$roughLength_calc # set them the same, since not provided by PI
   return(var)
 })
-
-
 var = min9Diff.list$CO2
-
 # -------------- Compute water flux from LE --------------------
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   
@@ -361,11 +306,3 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   
   return(var)
 })
-
-
-
-
-
-
-
-
