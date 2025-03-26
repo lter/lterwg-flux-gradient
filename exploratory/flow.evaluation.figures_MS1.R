@@ -4,7 +4,7 @@ library(tidyverse)
 library(ggpubr)
 # Import the datafiles: #### 
 # Filter Data:
-# SITES_WP_30min_FILTER,SITES_AE_30min_FILTER, SITES_MBR_30min_FILTER ,
+# SITES_WP_9min_FILTER,SITES_AE_9min_FILTER, SITES_MBR_9min_FILTER ,
 
 #------ CHANGE THIS STUFF ------
 
@@ -51,32 +51,33 @@ setwd(DirRepo)
 # Filter for MS1 Sites
 sites <- c("KONZ" ,"HARV" ,"JORN", "GUAN")
 # load( file="/Volumes/MaloneLab/Research/FluxGradient/FilteredData_MS1Sites.Rdata")
-SITES_WP_30min_FILTER <- SITES_WP_30min_FILTER[sites]
-SITES_AE_30min_FILTER <- SITES_AE_30min_FILTER[sites]
-SITES_MBR_30min_FILTER <- SITES_MBR_30min_FILTER[sites]
+SITES_WP_9min_FILTER <- SITES_WP_9min_FILTER[sites]
+SITES_AE_9min_FILTER <- SITES_AE_9min_FILTER[sites]
+SITES_MBR_9min_FILTER <- SITES_MBR_9min_FILTER[sites]
 
  
-# SITES_WP_30min.report,SITES_AE_30min.report, SITES_MBR_30min.report ,
+# SITES_WP_9min.report,SITES_AE_9min.report, SITES_MBR_9min.report ,
 # load("/Volumes/MaloneLab/Research/FluxGradient/FilterReport_MS1Sites.Rdata")
-SITES_WP_30min.report <- SITES_WP_30min.report[SITES_One2One$site %in% sites,]
-SITES_AE_30min.report <- SITES_AE_30min.report[SITES_One2One$site %in% sites,]
-SITES_MBR_30min.report <- SITES_MBR_30min.report[SITES_One2One$site %in% sites,]
+SITES_WP_9min.report <- SITES_WP_9min.report[SITES_One2One$site %in% sites,]
+SITES_AE_9min.report <- SITES_AE_9min.report[SITES_One2One$site %in% sites,]
+SITES_MBR_9min.report <- SITES_MBR_9min.report[SITES_One2One$site %in% sites,]
 
 # One2One: 
 # SITES_One2One
-# load("/Volumes/MaloneLab/Research/FluxGradient/One2One_MS1Sites.Rdata")
-SITES_One2One <- SITES_One2One[SITES_One2One$Site %in% sites,]
+load("/Volumes/MaloneLab/Research/FluxGradient/One2One_MS1Sites.Rdata")
 
-# SITES_WP_30min_FILTER_BH,SITES_AE_30min_FILTER_BH, SITES_MBR_30min_FILTER_BH
+
+# SITES_WP_9min_FILTER_BH,SITES_AE_9min_FILTER_BH, SITES_MBR_9min_FILTER_BH
 # load("/Volumes/MaloneLab/Research/FluxGradient/FilteredData_MS1Sites_BH.Rdata")
-SITES_WP_30min_FILTER_BH <- SITES_WP_30min_FILTER_BH[sites]
-SITES_AE_30min_FILTER_BH <- SITES_AE_30min_FILTER_BH[sites]
-SITES_MBR_30min_FILTER_BH <- SITES_MBR_30min_FILTER_BH[sites]
+SITES_WP_9min_FILTER_BH <- SITES_WP_9min_FILTER_BH[sites]
+SITES_AE_9min_FILTER_BH <- SITES_AE_9min_FILTER_BH[sites]
+SITES_MBR_9min_FILTER_BH <- SITES_MBR_9min_FILTER_BH[sites]
 
 # Diurnals:
-# load(file="/Volumes/MaloneLab/Research/FluxGradient/Diurnal_ALLSites_BH.Rdata")
+load(file="/Volumes/MaloneLab/Research/FluxGradient/Diurnal_ALLSites_BH.Rdata")
 #diurnal.summary.H2O ,diurnal.summary.CO2, 
-# load(file="/Volumes/MaloneLab/Research/FluxGradient/DiurnalSummary_ALLSites_BH.Rdata")
+load(file="/Volumes/MaloneLab/Research/FluxGradient/DiurnalSummary_ALLSites_BH.Rdata")
+sites <- c("KONZ" ,"HARV" ,"JORN", "GUAN")
 
 Diurnal.AE.H2O <- Diurnal.AE.H2O[sites] 
 Diurnal.MBR.H2O <- Diurnal.MBR.H2O[sites] 
@@ -86,50 +87,44 @@ Diurnal.AE.CO2 <- Diurnal.AE.CO2[sites]
 Diurnal.MBR.CO2 <- Diurnal.MBR.CO2[sites] 
 Diurnal.WP.CO2 <- Diurnal.WP.CO2[sites] 
 
-diurnal.summary.H2O <- diurnal.summary.H2O[diurnal.summary.H2O$Site %in% sites,]
-diurnal.summary.CO2 <- diurnal.summary.CO2[diurnal.summary.CO2$Site %in% sites,]
-
 # CPARMS:
-# SITES_MBR_30min_CPARMS_FG , SITES_MBR_30min_CPARMS_EC , SITES_AE_30min_CPARMS_FG, SITES_AE_30min_CPARMS_EC,
-# SITES_WP_30min_CPARMS_EC, SITES_WP_30min_CPARMS_FG , MBR.CPARMS, AE.CPARMS , WP.CPARMS,
+# SITES_MBR_9min_CPARMS_FG , SITES_MBR_9min_CPARMS_EC , SITES_AE_9min_CPARMS_FG, SITES_AE_9min_CPARMS_EC,
+# SITES_WP_9min_CPARMS_EC, SITES_WP_9min_CPARMS_FG , MBR.CPARMS, AE.CPARMS , WP.CPARMS,
 # load('/Volumes/MaloneLab/Research/FluxGradient/CarbonParms_MS1Sites.Rdata')
-SITES_MBR_30min_CPARMS_FG <- SITES_MBR_30min_CPARMS_FG[sites]
-SITES_MBR_30min_CPARMS_EC <- SITES_MBR_30min_CPARMS_EC[sites]
-SITES_AE_30min_CPARMS_FG <- SITES_AE_30min_CPARMS_FG[sites]
-SITES_AE_30min_CPARMS_EC <- SITES_AE_30min_CPARMS_EC[sites]
-SITES_WP_30min_CPARMS_FG <- SITES_WP_30min_CPARMS_FG[sites]
-SITES_WP_30min_CPARMS_EC <- SITES_WP_30min_CPARMS_EC[sites]
+SITES_MBR_9min_CPARMS_FG <- SITES_MBR_9min_CPARMS_FG[sites]
+SITES_MBR_9min_CPARMS_EC <- SITES_MBR_9min_CPARMS_EC[sites]
+SITES_AE_9min_CPARMS_FG <- SITES_AE_9min_CPARMS_FG[sites]
+SITES_AE_9min_CPARMS_EC <- SITES_AE_9min_CPARMS_EC[sites]
+SITES_WP_9min_CPARMS_FG <- SITES_WP_9min_CPARMS_FG[sites]
+SITES_WP_9min_CPARMS_EC <- SITES_WP_9min_CPARMS_EC[sites]
 MBR.CPARMS <- MBR.CPARMS[sites]
 AE.CPARMS <- AE.CPARMS[sites]
 WP.CPARMS <- WP.CPARMS[sites]
 
 ## One2One_Plots: ####
-source(fs::path(DirRepo,'exploratory/FUNCTION_One2One.R' ))
-source(fs::path(DirRepo,'exploratory/FUNCTION_DIURNAL.R' ))
+source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/FUNCTION_One2One.R' )
 
-dir <- fs::path(localdir,'FIGURES')
-dir.create(dir)
-
-oldDir <- getwd()
-setwd(dir)
+dir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/FIGURES'
 
 for ( i in sites){
   print(i)
   
   # Subset the MBR Heights
   
-  th.filter <- SITES_MBR_30min_FILTER[[i]]$TowerH %>% unique()
+  th.filter <- SITES_MBR_9min_FILTER[[i]]$TowerH %>% unique()
+
   SITES_MBR <- list()
-  SITES_MBR[[i]] <- SITES_MBR_30min_FILTER[[i]] %>% filter(TowerH %in% th.filter)
+  SITES_MBR[[i]] <- SITES_MBR_9min_FILTER[[i]] %>% filter(TowerH %in% th.filter)
   
   plot.it.CO2 <- one2one.plots ( MBR.DF = SITES_MBR[i] , 
-                                 AE.DF = SITES_AE_30min_FILTER[i], 
-                                 WP.DF = SITES_WP_30min_FILTER[i] , gas = 'CO2')
+                                 AE.DF = SITES_AE_9min_FILTER[i], 
+                                 WP.DF = SITES_WP_9min_FILTER[i] , gas = 'CO2')
   print("Ready to plot") 
   
   print(plot.it.CO2)
   
-
+  setwd(dir)
+  
   png(paste("One2One_CO2", i,".png", sep=""), width=6, 
       height=5, units="in", res=1200)
   print(plot.it.CO2)
@@ -138,18 +133,19 @@ for ( i in sites){
   print("done")       
   
   try(plot.it.H2O <- one2one.plots ( MBR.DF = SITES_MBR[i] , 
-                                     AE.DF = SITES_AE_30min_FILTER[i], 
-                                     WP.DF = SITES_WP_30min_FILTER[i] , gas = 'H2O'), silent = T)
+                                     AE.DF = SITES_AE_9min_FILTER[i], 
+                                     WP.DF = SITES_WP_9min_FILTER[i] , gas = 'H2O'), silent = T)
   print("Ready to plot") 
   
   print(plot.it.H2O)
   
-
+  setwd(dir)
+  
   png(paste("One2One_H2O", i,".png", sep=""), width=6, 
       height=5, units="in", res=1200)
   print(plot.it.H2O)
   dev.off()
-
+  
   print("done")       
 }
 
@@ -177,8 +173,10 @@ for ( i in sites){
   
   print(ggarrange( p1, p2, p3, nrow=3))
   
+
   png(paste("Diurnal_CO2_", i,".png", sep=""), width=6, 
       height=5, units="in", res=1200)
+  
   print(ggarrange( p1, p2, p3, nrow=3))
   dev.off()
   
@@ -229,11 +227,12 @@ diurnal.summary$Type <- factor( diurnal.summary$Type, levels= c('MBR', 'AE', 'WP
 setwd(dir)
 for ( i in sites){
   
-  p1 <- diurnal.summary %>% filter( Site == i) %>%  ggplot( ) + geom_col( aes( y =Flux.deviation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )
+  p1 <- diurnal.summary %>% filter( Site == i) %>%  ggplot( ) + geom_col( aes( y =Flux.dCHMation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )
   
   
   print(ggarrange( p1, nrow=1))
   
+  setwd(dir)
   png(paste("Diurnal_DIFF_", i,".png", sep=""), width=4, 
       height=4, units="in", res=1200)
   print(ggarrange( p1, nrow=1))
@@ -244,13 +243,13 @@ for ( i in sites){
 }
 
 
-p1 <- diurnal.summary %>% filter( Site == 'HARV' ) %>%  ggplot( ) + geom_col( aes( y =Flux.deviation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) ) + ylim(0, 300)
+p1 <- diurnal.summary %>% filter( Site == 'HARV' ) %>%  ggplot( ) + geom_col( aes( y =Flux.dCHMation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) ) + ylim(0, 300)
 
-p2 <- diurnal.summary %>% filter( Site == 'KONZ' ) %>%  ggplot( ) + geom_col( aes( y =Flux.deviation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )  + ylim(0, 300)
+p2 <- diurnal.summary %>% filter( Site == 'KONZ' ) %>%  ggplot( ) + geom_col( aes( y =Flux.dCHMation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )  + ylim(0, 300)
 
-p3 <- diurnal.summary %>% filter( Site == 'GUAN' ) %>%  ggplot( ) + geom_col( aes( y =Flux.deviation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )  + ylim(0, 300)
+p3 <- diurnal.summary %>% filter( Site == 'GUAN' ) %>%  ggplot( ) + geom_col( aes( y =Flux.dCHMation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )  + ylim(0, 300)
 
-p4 <- diurnal.summary %>% filter( Site == 'JORN' ) %>%  ggplot( ) + geom_col( aes( y =Flux.deviation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )  + ylim(0, 300)
+p4 <- diurnal.summary %>% filter( Site == 'JORN' ) %>%  ggplot( ) + geom_col( aes( y =Flux.dCHMation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )  + ylim(0, 300)
 
 png("Diurnal_Diff_sites.png", width=8, 
     height=8, units="in", res=1200)
@@ -260,6 +259,7 @@ dev.off()
 # Carbon Exchange PARMS: ####
 
 
+setwd(dir)
 
 png("CarbonExchange_LRC_MBR.png", width=10, 
     height=8, units="in", res=1200)
@@ -327,8 +327,7 @@ dev.off()
 
 # Create a file to compile the AOP and the flux data
 #Sites.Summary
-# load('/Volumes/MaloneLab/Research/FluxGradient/Sites_AOP_Summary.Rdata')
-Sites.Summary <- Sites.Summary[Sites.Summary$site %in% sites,]
+load('/Volumes/MaloneLab/Research/FluxGradient/Sites_AOP_Summary.Rdata')
 
 Sites.Summary.sub <- Sites.Summary %>% filter(site %in% sites)
 
@@ -349,7 +348,6 @@ plot.CHM <- Sites.Summary.sub %>% ggplot(aes(x= CHM.mean, y = site, xmin = CHM.m
                                              xmax = CHM.mean + CHM.sd)) + geom_point( aes( )) +
   geom_errorbar(  aes(),width=0.3) + theme_bw() + ylab("") + xlab("CHM")
 
-setwd("~/Desktop")
 png("Structure_Summary_MS1.png", width=6, 
     height=6, units="in", res=1200)
 
@@ -359,4 +357,3 @@ dev.off()
 
 
 # flow.attr.map - makes a map of the sites for manuscript...
-setwd(oldDir)

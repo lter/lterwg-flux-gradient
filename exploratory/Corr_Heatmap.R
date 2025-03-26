@@ -125,8 +125,8 @@ plot_heatmap <- function(results_df) {
 
 
 # Example usage:
-# Assuming SITES_MBR_30min, SITES_AE_9min, etc., are available
-# dataset_list <- list(HARV = SITES_MBR_30min$HARV, GUAN = SITES_MBR_30min$GUAN)
+# Assuming SITES_MBR_9min, SITES_AE_9min, etc., are available
+# dataset_list <- list(HARV = SITES_MBR_9min$HARV, GUAN = SITES_MBR_9min$GUAN)
 # results <- process_all_sites(dataset_list)
 # plot_heatmap(results)
 

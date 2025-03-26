@@ -17,7 +17,6 @@
 # Load needed libraries
 # install.packages("librarian")
 library(data.table)
-library(readr)
 librarian::shelf(tidyverse, googledrive, lter/ltertools)
 
 # Clear environment
@@ -30,10 +29,6 @@ if (siteID == 'US-Uaf'){
   gdrive_path <- "https://drive.google.com/drive/u/0/folders/1AOct-UbwpzkuLMT9EnEspRX_QnX07T4G"
 } else if (siteID == 'SE-Sto'){
   gdrive_path <- "https://drive.google.com/drive/u/1/folders/1F1qZkAZywNUq_fyS1OmlG3C9AkGo6fdc"
-} else if (siteID == 'SE-Deg'){
-  gdrive_path <- "https://drive.google.com/drive/u/1/folders/1MzyDvXudL-A3ZGlzukbhil19fsx3s7Mk"
-} else if (siteID == 'SE-Svb'){
-  gdrive_path <- "https://drive.google.com/drive/u/1/folders/1qPrBaZxX7XBBKq77eEmVXALSoDmUB2_I"
 }
 
 # Create a local folder for data storage
@@ -53,19 +48,13 @@ if (siteID == 'US-Uaf'){
   ch4_files_to_keep <- c('SE-Sto_met_30min.csv',
                   'SE-Sto_gas_fluxes_30min.csv',
                   'SE-Sto_concentration_profile_30min.csv')
-} else if (siteID == 'SE-Deg'){
-  ch4_files_to_keep <- c('SE-Deg_gasflux_biomet_30min',
-                         'SE-Deg_concentration_profile_30min')
-}else if (siteID == 'SE-Svb'){
-  ch4_files_to_keep <- c('CH4_SE_SVB_FLUX+PROFILE_2019')
-}
-
+ }
 
 ## ----------------------------- ##
 # Data Download ----
 ## ----------------------------- ##
 
-# Identify desired files 
+# Identify desired files WITH CORPUS PARAMETER
 ch4_files <- googledrive::drive_ls(
   path = googledrive::as_id(gdrive_path),
   ) %>%  
@@ -109,7 +98,7 @@ if (siteID == 'US-Uaf'){
 }
 
 ## ----------------------------- ##
-          # Key Prep -- at this point the methane/raw_methane folder contains only data that needs columns renamed
+          # Key Prep -- at this poitn the methane/raw_methane folder contains only data that needs columns renamed
 ## ----------------------------- ##
 # NOTE: This code is only run once to make the 'column key' skeleton
 ## Which will be subsequently updated by hand
@@ -141,12 +130,11 @@ if(remake_key == TRUE){
 ## ----------------------------- ##
 
 # Clear environment (again)
-rm(list = setdiff(ls(), "gdrive_path", "SE-Sto"))
-
+rm(list = ls())
 
 # Identify key
-(key_id <- googledrive::drive_ls(path = googledrive::as_id(gdrive_path)) %>% 
-  dplyr::filter(name == paste("Methane_key_", siteID, sep='') ))
+(key_id <- googledrive::drive_ls(path = googledrive::as_id("https://drive.google.com/drive/u/0/folders/1jrOJIu5WfdzmlbL9vMkUNfzBpRC-W0Wd")) %>% 
+  dplyr::filter(name == "Methane-Key") )
 
 # Download key
 googledrive::drive_download(file = key_id$id, overwrite = T,
@@ -159,45 +147,13 @@ ch4_key <- read.csv(file = file.path("methane", "methane-key.csv"))
 dplyr::glimpse(ch4_key)
 
 # Harmonize the raw data with that key
-# Get list of files in the raw_folder
-all_files <- list.files(path = "methane/raw_methane", full.names = TRUE)
-
-
-#rename column names in each file individually, save
-#This part doesn't work yet...
-for (file in all_files) {
-  # Read the file
-  if (tools::file_ext(file) == "csv") {
-    data <- read_csv(file)
-  } else {
-    data <- readxl::read_excel(file)
-  }
-  
-  # Get the filename without extension
-  filename <- tools::file_path_sans_ext(basename(file))
-  
-  # Filter the key for this file
-  file_key <- ch4_key %>% filter(source == paste0(filename, ".", tools::file_ext(file)))
-  
-  # Rename columns only if they exist in the data
-  for (i in 1:nrow(file_key)) {
-    if (file_key$raw_name[i] %in% colnames(data)) {
-      data <- data %>% rename(!!file_key$tidy_name[i] := file_key$raw_name[i])
-    }
-  }
-
-  
- 
-
-
-  # Save the modified file
-  write_csv(data, file.path(raw_folder, paste0(filename, "_harmonized.csv")))
-}
+ch4_tidy <- ltertools::harmonize(key = ch4_key, 
+                                 raw_folder = file.path("methane", "raw_methane"),
+                                 data_format = c("csv", "xlsx", "xls"),
+                                 quiet = FALSE)
 
 # Check structure
 dplyr::glimpse(ch4_tidy)
-
-
 
 # Export locally
 write.csv(x = ch4_tidy, na = "", row.names = F,
