@@ -39,37 +39,3 @@ Bad_Eddy <- function(df, method) {
 
 
 
-######Super Bad Eddy######
-
-Super_Bad_Eddy <- function(df, method, x) {
-  # Access the data
-  site_data <- df
-  
-  # Check if the specified method is valid
-  if (!(method %in% c("EddyDiff", "EddyDiff_WP"))) {
-    stop("Invalid method. Please choose either 'EddyDiff' or 'EddyDiff_WP'.")
-  }
-  
-  # Select the column based on the method
-  method_column <- site_data[[method]]
-  kgas <- site_data$Kgas
-  
-  # Calculate the lower and upper bounds for outliers based on x
-  lower_bound <- method_column - x
-  upper_bound <- method_column + x
-  
-  # Create the s_eddy_outliers column based on the outlier condition
-  site_data$s_eddy_outliers <- ifelse(kgas < lower_bound | kgas > upper_bound, 1, 0)
-  
-  # Calculate the percentage of data flagged as outliers
-  percent_flagged <- mean(site_data$s_eddy_outliers, na.rm=TRUE) * 100
-  
-  # Print the message on how much data was flagged
-  cat("Percentage of data flagged as s_eddy_outliers:", percent_flagged, "%\n")
-  
-  # Return the updated dataframe with the new 's_eddy_outliers' column
-  return(site_data)
-}
-
-
-

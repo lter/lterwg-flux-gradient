@@ -28,7 +28,7 @@ calc.AeroCanopyH <- function(Mdate, ustar, z, L, u, daysAVG, plotYN) {
    h_dsk <- rep(NA, length(ustar)) # Is this ok?
    zh_final <- rep(mean(h_despike, na.rm=TRUE), length(h))
 
- } else if ((length(h_despike) >= length(rep(1/navg, navg))) & (length(unique(Days)) > 30)) { # higher than 30 days of data
+ } else if ((length(h_despike) >= length(navg)) & (length(unique(Days)) > 30)) { # higher than 30 days of data
     #navg <- daysAVG # number of windows to use for average
     hsmooth_dsk <- stats::filter(h_despike, rep(1/navg, navg), sides=2) # smoothing
     h_dsk <- rep(NA, length(ustar))
