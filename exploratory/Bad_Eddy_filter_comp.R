@@ -11,8 +11,8 @@ googledrive::drive_auth(email = email)
 
 # Define Google Drive file IDs for required data files
 file_ids <- list(
-  "SITES_AE_30min.Rdata" = "1GNKLKRZHIR-aFgaECKhsy7e70bwTbKBV",
-  "SITES_WP_30min.Rdata"= "1B3NKyCk4nA7JGojsyF_C-v7eps7cqsAr",
+  "SITES_AE_9min.Rdata" = "12nE75Zh-tQ8oXOXARj2_3J2HjA6Lf1wl",
+  "SITES_WP_9min.Rdata"= "17Y-QYKSof3nMOAz6L8QsCxtLSoqObvn-",
   "FilteredData_MS1Sites.Rdata" = "1fJ_7lG5WO6lyuYVkhaAhyv1uZCPn4EXw",
   "FilteredData_MS1Sites_BH.Rdata" = "1ziIgm1VpSIrwtiuXmhPHMgse1pebi28L"
 )
@@ -64,11 +64,11 @@ rmse <- function(actual, predicted) {
   sqrt(mean((actual - predicted)^2, na.rm=TRUE))
 }
 
-KONZ_df <- SITES_AE_30min$KONZ
+KONZ_df <- SITES_AE_9min$KONZ
 
 KONZ_df <- KONZ_df %>% filter(gas =="CO2")
 
-filt_KONZ_df <- SITES_AE_30min_FILTER_BH$KONZ
+filt_KONZ_df <- SITES_AE_9min_FILTER_BH$KONZ
 best_heights <- unique(filt_KONZ_df$dLevelsAminusB)
 
 ##Needs to be an if statement 

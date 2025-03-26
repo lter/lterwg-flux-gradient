@@ -4,7 +4,7 @@ library(tidyverse)
 library(ggpubr)
 # Import the datafiles: #### 
 # Filter Data:
-# SITES_WP_30min_FILTER,SITES_AE_30min_FILTER, SITES_MBR_30min_FILTER ,
+# SITES_WP_9min_FILTER,SITES_AE_9min_FILTER, SITES_MBR_9min_FILTER ,
 
 #------ CHANGE THIS STUFF ------
 
@@ -51,27 +51,27 @@ setwd(DirRepo)
 # Filter for MS1 Sites
 sites <- c("KONZ" ,"HARV" ,"JORN", "GUAN")
 # load( file="/Volumes/MaloneLab/Research/FluxGradient/FilteredData_MS1Sites.Rdata")
-SITES_WP_30min_FILTER <- SITES_WP_30min_FILTER[sites]
-SITES_AE_30min_FILTER <- SITES_AE_30min_FILTER[sites]
-SITES_MBR_30min_FILTER <- SITES_MBR_30min_FILTER[sites]
+SITES_WP_9min_FILTER <- SITES_WP_9min_FILTER[sites]
+SITES_AE_9min_FILTER <- SITES_AE_9min_FILTER[sites]
+SITES_MBR_9min_FILTER <- SITES_MBR_9min_FILTER[sites]
 
  
-# SITES_WP_30min.report,SITES_AE_30min.report, SITES_MBR_30min.report ,
+# SITES_WP_9min.report,SITES_AE_9min.report, SITES_MBR_9min.report ,
 # load("/Volumes/MaloneLab/Research/FluxGradient/FilterReport_MS1Sites.Rdata")
-SITES_WP_30min.report <- SITES_WP_30min.report[SITES_One2One$site %in% sites,]
-SITES_AE_30min.report <- SITES_AE_30min.report[SITES_One2One$site %in% sites,]
-SITES_MBR_30min.report <- SITES_MBR_30min.report[SITES_One2One$site %in% sites,]
+SITES_WP_9min.report <- SITES_WP_9min.report[SITES_One2One$site %in% sites,]
+SITES_AE_9min.report <- SITES_AE_9min.report[SITES_One2One$site %in% sites,]
+SITES_MBR_9min.report <- SITES_MBR_9min.report[SITES_One2One$site %in% sites,]
 
 # One2One: 
 # SITES_One2One
 # load("/Volumes/MaloneLab/Research/FluxGradient/One2One_MS1Sites.Rdata")
 SITES_One2One <- SITES_One2One[SITES_One2One$Site %in% sites,]
 
-# SITES_WP_30min_FILTER_BH,SITES_AE_30min_FILTER_BH, SITES_MBR_30min_FILTER_BH
+# SITES_WP_9min_FILTER_BH,SITES_AE_9min_FILTER_BH, SITES_MBR_9min_FILTER_BH
 # load("/Volumes/MaloneLab/Research/FluxGradient/FilteredData_MS1Sites_BH.Rdata")
-SITES_WP_30min_FILTER_BH <- SITES_WP_30min_FILTER_BH[sites]
-SITES_AE_30min_FILTER_BH <- SITES_AE_30min_FILTER_BH[sites]
-SITES_MBR_30min_FILTER_BH <- SITES_MBR_30min_FILTER_BH[sites]
+SITES_WP_9min_FILTER_BH <- SITES_WP_9min_FILTER_BH[sites]
+SITES_AE_9min_FILTER_BH <- SITES_AE_9min_FILTER_BH[sites]
+SITES_MBR_9min_FILTER_BH <- SITES_MBR_9min_FILTER_BH[sites]
 
 # Diurnals:
 # load(file="/Volumes/MaloneLab/Research/FluxGradient/Diurnal_ALLSites_BH.Rdata")
@@ -90,15 +90,15 @@ diurnal.summary.H2O <- diurnal.summary.H2O[diurnal.summary.H2O$Site %in% sites,]
 diurnal.summary.CO2 <- diurnal.summary.CO2[diurnal.summary.CO2$Site %in% sites,]
 
 # CPARMS:
-# SITES_MBR_30min_CPARMS_FG , SITES_MBR_30min_CPARMS_EC , SITES_AE_30min_CPARMS_FG, SITES_AE_30min_CPARMS_EC,
-# SITES_WP_30min_CPARMS_EC, SITES_WP_30min_CPARMS_FG , MBR.CPARMS, AE.CPARMS , WP.CPARMS,
+# SITES_MBR_9min_CPARMS_FG , SITES_MBR_9min_CPARMS_EC , SITES_AE_9min_CPARMS_FG, SITES_AE_9min_CPARMS_EC,
+# SITES_WP_9min_CPARMS_EC, SITES_WP_9min_CPARMS_FG , MBR.CPARMS, AE.CPARMS , WP.CPARMS,
 # load('/Volumes/MaloneLab/Research/FluxGradient/CarbonParms_MS1Sites.Rdata')
-SITES_MBR_30min_CPARMS_FG <- SITES_MBR_30min_CPARMS_FG[sites]
-SITES_MBR_30min_CPARMS_EC <- SITES_MBR_30min_CPARMS_EC[sites]
-SITES_AE_30min_CPARMS_FG <- SITES_AE_30min_CPARMS_FG[sites]
-SITES_AE_30min_CPARMS_EC <- SITES_AE_30min_CPARMS_EC[sites]
-SITES_WP_30min_CPARMS_FG <- SITES_WP_30min_CPARMS_FG[sites]
-SITES_WP_30min_CPARMS_EC <- SITES_WP_30min_CPARMS_EC[sites]
+SITES_MBR_9min_CPARMS_FG <- SITES_MBR_9min_CPARMS_FG[sites]
+SITES_MBR_9min_CPARMS_EC <- SITES_MBR_9min_CPARMS_EC[sites]
+SITES_AE_9min_CPARMS_FG <- SITES_AE_9min_CPARMS_FG[sites]
+SITES_AE_9min_CPARMS_EC <- SITES_AE_9min_CPARMS_EC[sites]
+SITES_WP_9min_CPARMS_FG <- SITES_WP_9min_CPARMS_FG[sites]
+SITES_WP_9min_CPARMS_EC <- SITES_WP_9min_CPARMS_EC[sites]
 MBR.CPARMS <- MBR.CPARMS[sites]
 AE.CPARMS <- AE.CPARMS[sites]
 WP.CPARMS <- WP.CPARMS[sites]
@@ -118,13 +118,13 @@ for ( i in sites){
   
   # Subset the MBR Heights
   
-  th.filter <- SITES_MBR_30min_FILTER[[i]]$TowerH %>% unique()
+  th.filter <- SITES_MBR_9min_FILTER[[i]]$TowerH %>% unique()
   SITES_MBR <- list()
-  SITES_MBR[[i]] <- SITES_MBR_30min_FILTER[[i]] %>% filter(TowerH %in% th.filter)
+  SITES_MBR[[i]] <- SITES_MBR_9min_FILTER[[i]] %>% filter(TowerH %in% th.filter)
   
   plot.it.CO2 <- one2one.plots ( MBR.DF = SITES_MBR[i] , 
-                                 AE.DF = SITES_AE_30min_FILTER[i], 
-                                 WP.DF = SITES_WP_30min_FILTER[i] , gas = 'CO2')
+                                 AE.DF = SITES_AE_9min_FILTER[i], 
+                                 WP.DF = SITES_WP_9min_FILTER[i] , gas = 'CO2')
   print("Ready to plot") 
   
   print(plot.it.CO2)
@@ -138,8 +138,8 @@ for ( i in sites){
   print("done")       
   
   try(plot.it.H2O <- one2one.plots ( MBR.DF = SITES_MBR[i] , 
-                                     AE.DF = SITES_AE_30min_FILTER[i], 
-                                     WP.DF = SITES_WP_30min_FILTER[i] , gas = 'H2O'), silent = T)
+                                     AE.DF = SITES_AE_9min_FILTER[i], 
+                                     WP.DF = SITES_WP_9min_FILTER[i] , gas = 'H2O'), silent = T)
   print("Ready to plot") 
   
   print(plot.it.H2O)
