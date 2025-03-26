@@ -44,12 +44,12 @@ source(file.path("functions/aggregate_averages.R"))
 # -------------------------------------------------------
 
 # Authenticate with Google Drive and get site data
-# googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
-# drive_url_extSiteData <- googledrive::as_id("https://drive.google.com/drive/folders/1jrOJIu5WfdzmlbL9vMkUNfzBpRC-W0Wd")
-# data_folder <- googledrive::drive_ls(path = drive_url_extSiteData)
-# site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==site])
-# dirTmp <- fs::path(tempdir(),site)
-# dir.create(dirTmp)
+googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
+drive_url_extSiteData <- googledrive::as_id("https://drive.google.com/drive/folders/1jrOJIu5WfdzmlbL9vMkUNfzBpRC-W0Wd")
+data_folder <- googledrive::drive_ls(path = drive_url_extSiteData)
+site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==site])
+dirTmp <- fs::path(tempdir(),site)
+dir.create(dirTmp)
 
 gdrive_path <- "https://drive.google.com/drive/u/1/folders/1F1qZkAZywNUq_fyS1OmlG3C9AkGo6fdc"
 
@@ -690,7 +690,7 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
 
 # Compute vegetation height based on turbulence measurements
 # These equations stem from Eqn. 9.7.1b in Stull
-lvlTow <- 4
+lvlTow <- 5   #5 heights at SE-Sto
 hgtMax <- tower.heights$TowerHeight[tower.heights$TowerPosition == lvlTow]
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   var$z_veg_aero <- 10*as.numeric(hgtMax)/(exp(0.4*var[[paste0('ubar',lvlTow)]]/var$ustar_interp)+6.6) # m - aerodynamic vegetation height
@@ -736,6 +736,8 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
 
 
 # -------- Save and zip the files to the temp directory. Upload to google drive. -------
+# for some reason this code isn't saving and uploading the .zip file, I'm not sure why...
+
 fileSave <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min.RData'))
 fileZip <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min.zip'))
 save(min9Diff.list,file=fileSave)
