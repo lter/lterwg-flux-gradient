@@ -37,26 +37,26 @@ library(dplyr)
 library(lubridate)
 
 # Load functions in this repo
-source(file.path("functions/interp.flux.R"))
-source(file.path("functions/aggregate_averages.R"))
+# source(file.path("functions/interp.flux.R"))
+# source(file.path("functions/aggregate_averages.R"))
 
 # Final note: This script takes approx 45 min to run per site. 
 # -------------------------------------------------------
 
 # Authenticate with Google Drive and get site data
-# googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
-# drive_url_extSiteData <- googledrive::as_id("https://drive.google.com/drive/folders/1jrOJIu5WfdzmlbL9vMkUNfzBpRC-W0Wd")
-# data_folder <- googledrive::drive_ls(path = drive_url_extSiteData)
-# site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==site])
-# dirTmp <- fs::path(tempdir(),site)
+googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
+drive_url_extSiteData <- googledrive::as_id("https://drive.google.com/drive/folders/1jrOJIu5WfdzmlbL9vMkUNfzBpRC-W0Wd")
+data_folder <- googledrive::drive_ls(path = drive_url_extSiteData)
+site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==site])
+dirTmp <- fs::path(tempdir(),site)
 # dir.create(dirTmp)
 
 gdrive_path <- "https://drive.google.com/drive/u/1/folders/1F1qZkAZywNUq_fyS1OmlG3C9AkGo6fdc"
-
-ch4_files_to_keep <- c(#'SE-Sto_met_30min.csv',
-                       #'SE-Sto_gas_fluxes_30min.csv',
-                       #'SE-Sto_concentration_profile_30min.csv',
-                       'sesto_attr.csv')
+#' 
+#' ch4_files_to_keep <- c(#'SE-Sto_met_30min.csv',
+#'                        #'SE-Sto_gas_fluxes_30min.csv',
+#'                        #'SE-Sto_concentration_profile_30min.csv',
+#'                        'sesto_attr.csv')
 
 # Identify desired files 
 # ch4_files <- googledrive::drive_ls(
@@ -690,7 +690,7 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
 
 # Compute vegetation height based on turbulence measurements
 # These equations stem from Eqn. 9.7.1b in Stull
-lvlTow <- 4
+lvlTow <- 5   #5 heights at SE-Sto
 hgtMax <- tower.heights$TowerHeight[tower.heights$TowerPosition == lvlTow]
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   var$z_veg_aero <- 10*as.numeric(hgtMax)/(exp(0.4*var[[paste0('ubar',lvlTow)]]/var$ustar_interp)+6.6) # m - aerodynamic vegetation height
@@ -736,6 +736,8 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
 
 
 # -------- Save and zip the files to the temp directory. Upload to google drive. -------
+# for some reason this code isn't saving and uploading the .zip file, I'm not sure why...
+# -------- Save and zip the files to the temp directory. Upload to google drive. -------
 fileSave <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min.RData'))
 fileZip <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min.zip'))
 save(min9Diff.list,file=fileSave)
@@ -762,3 +764,33 @@ save(attr.df,file=fileSaveAttr)
 utils::zip(zipfile=fileZipAttr,files=fileSaveAttr)
 googledrive::drive_upload(media = fileZipAttr, overwrite = T, path = data_folderUpld$id[data_folderUpld$name==site])
 setwd(wdPrev)
+
+
+
+
+# fileSave <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min.RData'))
+# fileZip <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min.zip'))
+# save(min9Diff.list,file=fileSave)
+# wdPrev <- getwd()
+# setwd(dirTmp)
+# utils::zip(zipfile=fileZip,files=paste0(site,'_aligned_conc_flux_9min.RData'))
+# setwd(wdPrev)
+# 
+# # Save in same folder as NEON site data
+# drive_url_NEONSiteData <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
+# data_folderUpld <- googledrive::drive_ls(path = drive_url_NEONSiteData)
+# site_folderUpld <- googledrive::drive_ls(path = data_folderUpld$id[data_folderUpld$name==site])
+# googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folderUpld$id[data_folderUpld$name==site]) 
+# 
+# # Do the same for attr.df (attribute file). 
+# # Zip the file with the same folder structure as those created for NEON files 
+# pathSaveAttr <- fs::path(dirTmp,"data", site)
+# dir.create(pathSaveAttr,recursive = TRUE)
+# fileSaveAttr <- fs::path("data", site, paste0(site,'_attr.RData'))
+# fileZipAttr <- fs::path("data", site, paste0(site,'_attr.zip'))
+# wdPrev <- getwd()
+# setwd(dirTmp)
+# save(attr.df,file=fileSaveAttr)
+# utils::zip(zipfile=fileZipAttr,files=fileSaveAttr)
+# googledrive::drive_upload(media = fileZipAttr, overwrite = T, path = data_folderUpld$id[data_folderUpld$name==site])
+# setwd(wdPrev)

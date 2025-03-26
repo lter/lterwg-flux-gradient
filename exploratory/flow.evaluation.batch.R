@@ -6,21 +6,17 @@ library(tidyverse)
 library(ggplot2)
 library(ggpubr)
 
-#------ CHANGE THIS STUFF ------
-
 email <- 'csturtevant@battelleecology.org'
 DirRepo <- "." # Relative or absolute path to lterwg-flux-gradient git repo on your local machine. Make sure you've pulled the latest from main!
-localdir <- 'C:/Users/csturtevant/OneDrive - Battelle Ecology/FluxGradient' # We'll deposit output files here prior to uploading to Google Drive
-DnldFromGoogleDrive <- FALSE # Enter TRUE if you don't have the files listed in dnld_files below locally in the localdir directory
-
-# ------------------------------
+localdir <- 'C:/Users/csturtevant/OneDrive - Battelle Ecology/FluxGradient/9min' # We'll deposit output files here prior to uploading to Google Drive
+DnldFromGoogleDrive <- TRUE # Enter TRUE if you don't have the files listed in dnld_files below locally in the localdir directory
 
 # Download necessary files from Google Drive
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
 googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
 data_folder <- googledrive::drive_ls(path = drive_url)
 
-dnld_files=c("SITES_WP_30min.Rdata","SITES_AE_30min.Rdata","SITES_MBR_30min.Rdata")
+dnld_files=c("SITES_WP_9min.Rdata","SITES_AE_9min.Rdata","SITES_MBR_9min.Rdata")
 if(DnldFromGoogleDrive == TRUE){
   for (focal_file in dnld_files){
   message('Downloading ',focal_file, ' to ',localdir)
@@ -46,13 +42,14 @@ source(fs::path(DirRepo,'exploratory/flow.evaluation.filter.R'))
 
 
 fileSave <- fs::path(localdir,"FilteredData_ALLSites.Rdata")
-save( SITES_WP_30min_FILTER,SITES_AE_30min_FILTER, SITES_MBR_30min_FILTER ,
+save( SITES_WP_9min_FILTER,SITES_AE_9min_FILTER, SITES_MBR_9min_FILTER ,
       file=fileSave)
 googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
 
 
 # Application of the One2One Analysis ####
-load(fileSave)
+# load(fileSave)
+
 source(fs::path(DirRepo,'exploratory/flow.evaluation.One2One.R'))
 
 fileSave <- fs::path(localdir,"One2One_ALLSites.Rdata")
@@ -60,7 +57,7 @@ save( SITES_One2One,file=fileSave)
 googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
 
 fileSave <- fs::path(localdir,"FilteredData_ALLSites_BH.Rdata")
-save( SITES_WP_30min_FILTER_BH,SITES_AE_30min_FILTER_BH, SITES_MBR_30min_FILTER_BH ,
+save( SITES_WP_9min_FILTER_BH,SITES_AE_9min_FILTER_BH, SITES_MBR_9min_FILTER_BH ,
       file=fileSave)
 googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
 
@@ -87,12 +84,12 @@ load(fs::path(localdir,"FilteredData_ALLSites_BH.Rdata"))
 source(fs::path(DirRepo,'exploratory/flow.evaluation.cparms.R'))
 
 fileSave <- fs::path(localdir,'CarbonParms.Rdata')
-save( SITES_MBR_30min_CPARMS_FG ,
-      SITES_MBR_30min_CPARMS_EC ,
-      SITES_AE_30min_CPARMS_FG,
-      SITES_AE_30min_CPARMS_EC,
-      SITES_WP_30min_CPARMS_EC, 
-      SITES_WP_30min_CPARMS_FG ,
+save( SITES_MBR_9min_CPARMS_FG ,
+      SITES_MBR_9min_CPARMS_EC ,
+      SITES_AE_9min_CPARMS_FG,
+      SITES_AE_9min_CPARMS_EC,
+      SITES_WP_9min_CPARMS_EC, 
+      SITES_WP_9min_CPARMS_FG ,
       MBR.CPARMS,
       AE.CPARMS ,
       WP.CPARMS,

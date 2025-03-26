@@ -10,9 +10,9 @@
 calc.mbr <- function(min9, bootstrap, nsamp){
   
   # Calculate modified Bowen ratio (MBR) gradient fluxes:
-  CO2 = min9Diff.list[["CO2"]]
-  CH4 = min9Diff.list[["CH4"]]
-  H2O = min9Diff.list[["H2O"]]
+  CO2 = min9[["CO2"]]
+  CH4 = min9[["CH4"]]
+  H2O = min9[["H2O"]]
   
   # Add gas suffix to all column names to track into combined table
   colnames(CO2) <- paste0(colnames(CO2), '_CO2')
@@ -25,8 +25,19 @@ calc.mbr <- function(min9, bootstrap, nsamp){
   CH4$match_time = CH4$match_time_CH4
   
   # Align CO2, H2O, CH4 conc diffs and fluxes by match_time
-  MBRflux_align = merge(CO2, CH4, by.x = "match_time", by.y = "match_time") 
-  MBRflux_align = merge(MBRflux_align, H2O, by.x = "match_time", by.y = "match_time") 
+  CO2$timeEndA = CO2$timeEnd_A_CO2
+  CH4$timeEndA = CH4$timeEnd_A_CH4
+  H2O$timeEndA = H2O$timeEnd_A_H2O
+  CO2$timeEndB = CO2$timeEnd_B_CO2
+  CH4$timeEndB = CH4$timeEnd_B_CH4
+  H2O$timeEndB = H2O$timeEnd_B_H2O
+  CO2$dlvl = CO2$dLevelsAminusB_CO2
+  CH4$dlvl = CH4$dLevelsAminusB_CH4
+  H2O$dlvl = H2O$dLevelsAminusB_H2O
+ 
+  # Align CO2, H2O, CH4 tables by timeEndA, timeEndB, dlvl (level pair)
+  MBRflux_align = dplyr::left_join(CO2, H2O, by=c("timeEndA","timeEndB","dlvl")) 
+  MBRflux_align = dplyr::left_join(MBRflux_align, CH4, by=c("timeEndA","timeEndB","dlvl")) 
   
   if(bootstrap == 1){
     # Sample over concentration mean & variance 
