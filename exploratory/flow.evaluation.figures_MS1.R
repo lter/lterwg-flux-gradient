@@ -97,24 +97,58 @@ for ( i in sites){
   df.WP <-  Diurnal.WP.CO2[i] %>% as.data.frame
   names( df.WP ) <- substring( names(df.WP ), 6)
   
-  
-  p1 <- ggplot( data = df.MBR) + stat_smooth(aes(x = Hour , y = FG), col="black") + stat_smooth(aes(x = Hour , y = EC), col="black", linetype="dashed") + theme_bw() + ylab("MBR") +  facet_wrap(~TowerH, ncol = length(unique(df.MBR$TowerH)) ) 
-  
-  p2 <- ggplot( data = df.AE) + stat_smooth(aes(x = Hour , y = FG), col="black") + stat_smooth(aes(x = Hour , y = EC), col="black", linetype="dashed") + theme_bw() + ylab("AE") +  facet_wrap(~TowerH, ncol = length(unique(df.AE$TowerH)) )
-  
-  p3 <-ggplot( data = df.WP) + stat_smooth(aes(x = Hour , y = FG), col="black") + stat_smooth(aes(x = Hour , y = EC), col="black", linetype="dashed") + theme_bw() + ylab("WP") +  facet_wrap(~TowerH, ncol = length(unique(df.WP$TowerH)) )
+  p1 <- p2 <- p3 <- NULL
+  try({
+    p1 <- ggplot( data = df.MBR) + stat_smooth(aes(x = Hour , y = FG), col="black") + stat_smooth(aes(x = Hour , y = EC), col="black", linetype="dashed") + theme_bw() + ylab("MBR") +  facet_wrap(~TowerH, ncol = length(unique(df.MBR$TowerH)) ) 
+    
+    p2 <- ggplot( data = df.AE) + stat_smooth(aes(x = Hour , y = FG), col="black") + stat_smooth(aes(x = Hour , y = EC), col="black", linetype="dashed") + theme_bw() + ylab("AE") +  facet_wrap(~TowerH, ncol = length(unique(df.AE$TowerH)) )
+    
+    p3 <-ggplot( data = df.WP) + stat_smooth(aes(x = Hour , y = FG), col="black") + stat_smooth(aes(x = Hour , y = EC), col="black", linetype="dashed") + theme_bw() + ylab("WP") +  facet_wrap(~TowerH, ncol = length(unique(df.WP$TowerH)) )
+  })
   
   print(ggarrange( p1, p2, p3, nrow=3))
   
-  setwd(dir)
-  png(paste("Diurnal_", i,".png", sep=""), width=6, 
+
+  png(paste("Diurnal_CO2_", i,".png", sep=""), width=6, 
+      height=5, units="in", res=1200)
+  
+  print(ggarrange( p1, p2, p3, nrow=3))
+  dev.off()
+  
+  print("done with CO2 Diel")       
+  
+  
+  
+  
+  df.MBR <-  Diurnal.MBR.H2O[i] %>% as.data.frame
+  names( df.MBR ) <- substring( names(df.MBR ), 6)
+  
+  df.AE <-  Diurnal.AE.H2O[i] %>% as.data.frame
+  names( df.AE ) <- substring( names(df.AE ), 6)
+  
+  df.WP <-  Diurnal.WP.H2O[i] %>% as.data.frame
+  names( df.WP ) <- substring( names(df.WP ), 6)
+  
+  p1 <- p2 <- p3 <- NULL
+  try({
+    p1 <- ggplot( data = df.MBR) + stat_smooth(aes(x = Hour , y = FG), col="black") + stat_smooth(aes(x = Hour , y = EC), col="black", linetype="dashed") + theme_bw() + ylab("MBR") +  facet_wrap(~TowerH, ncol = length(unique(df.MBR$TowerH)) ) 
+    
+    p2 <- ggplot( data = df.AE) + stat_smooth(aes(x = Hour , y = FG), col="black") + stat_smooth(aes(x = Hour , y = EC), col="black", linetype="dashed") + theme_bw() + ylab("AE") +  facet_wrap(~TowerH, ncol = length(unique(df.AE$TowerH)) )
+    
+    p3 <-ggplot( data = df.WP) + stat_smooth(aes(x = Hour , y = FG), col="black") + stat_smooth(aes(x = Hour , y = EC), col="black", linetype="dashed") + theme_bw() + ylab("WP") +  facet_wrap(~TowerH, ncol = length(unique(df.WP$TowerH)) )
+  })
+  
+  print(ggarrange( p1, p2, p3, nrow=3))
+  
+  png(paste("Diurnal_H2O_", i,".png", sep=""), width=6, 
       height=5, units="in", res=1200)
   print(ggarrange( p1, p2, p3, nrow=3))
   dev.off()
   
-  print("done")       
+  print("done with H2O diel")   
   
 }
+setwd(oldDir)
 
 # DIURNAL DIFF PLOTS:
 
@@ -125,7 +159,7 @@ diurnal.summary <- Diurnal.Summary(diurnal.tibble = Diurnal.MBR.CO2, TYP='MBR' )
 #standardize across sites:
 
 diurnal.summary$Type <- factor( diurnal.summary$Type, levels= c('MBR', 'AE', 'WP'))
-
+setwd(dir)
 for ( i in sites){
   
   p1 <- diurnal.summary %>% filter( Site == i) %>%  ggplot( ) + geom_col( aes( y =Flux.dCHMation, x = TowerH)) + ylab('Diurnal Difference (%)') + xlab( 'Tower Height') + facet_wrap(~Type, ncol = length(unique(diurnal.summary$Type)) )

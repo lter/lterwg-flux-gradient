@@ -1,18 +1,20 @@
 
 
 # 'These are a series of functions used in the diurnal analysis:'
-DIURNAL <- function( dataframe, flux, flux.other , gas){
+DIURNAL <- function( dataframe, flux, flux.other , Gas){
   
   dataframe <- dataframe %>% as.data.frame
   names(dataframe) <- substring( names( dataframe), 6)
   
   dataframe$flux.other <- dataframe[, flux.other]
   dataframe$flux <- dataframe[, flux]
-  dataframe.GrowS <- dataframe %>% mutate( Month = Month %>% as.numeric) %>% filter( Month >= 4,
-                                                                                     Month < 11, 
-                                                                                    !is.na(flux.other ),
-                                                                                     !is.na(flux),
-                                                                                    gas == gas)
+  dataframe.GrowS <- dataframe %>% 
+                     mutate( Month = Month %>% as.numeric) %>% 
+                     filter( Month >= 4,
+                             Month < 11, 
+                             !is.na(flux.other),
+                             !is.na(flux),
+                             gas == Gas)
   
   dataframe.GrowS$flux <- dataframe.GrowS$flux.other <- NULL
   
@@ -26,50 +28,54 @@ DIURNAL <- function( dataframe, flux, flux.other , gas){
     for( i in yearmon){
       print(i)
       
-      try(subset <- dataframe.GrowS %>% filter(YearMon == i, TowerH == a), silent = T)
+      try({
+          subset <- dataframe.GrowS %>% filter(YearMon == i, TowerH == a)
+        
+          subset$flux <-subset[,flux]
+        
+          model <- loess( flux ~ Hour , data = subset )
+        
+          pred <- predict(model, newdata = subset, se=TRUE)
+        
+          new.data  <- dataframe.GrowS %>% filter(YearMon == i, TowerH == a) %>% mutate(DIURNAL = pred$fit,
+                                                                        DIURNAL.SE =pred$fit* qt(0.95 / 2 + 0.5, pred$df) )
+          Final.data <- rbind(  Final.data, new.data)
+        },silent=T)
       
-      subset$flux <-subset[,flux]
-      
-      try( model <- loess( flux ~ Hour , data = subset ), silent = T)
-      
-      try(pred <- predict(model, newdata = subset, se=TRUE), silent = T)
-      
-      
-      try(new.data  <- dataframe.GrowS %>% filter(YearMon == i, TowerH == a) %>% mutate(DIURNAL = pred$fit,
-                                                                      DIURNAL.SE =pred$fit* qt(0.95 / 2 + 0.5, pred$df) ), silent = T)
-      Final.data <- rbind(  Final.data, new.data)
     }
   }
   
   return( Final.data)
 }
 
-DIURNAL.COMPILE <- function( dataframe, FG_flux, EC_flux, gas){
-  
-  FG.DIURNAL <- DIURNAL( dataframe = dataframe,
-                               flux = FG_flux,
-                             flux.other = EC_flux, gas)
-  
-  EC.DIURNAL <- try(DIURNAL( dataframe = dataframe,
-                          flux = EC_flux,flux.other = FG_flux, gas), silent = T)
-  
-  
-  FG.DIURNAL.1 <- try( FG.DIURNAL %>% select(YearMon, Hour, DIURNAL, DIURNAL.SE, TowerH) %>%  mutate( FG= DIURNAL,
-                  FG.SE= DIURNAL.SE) %>% select( YearMon, Hour, FG, FG.SE,TowerH) %>% distinct() , silent = T)
-  
-  EC.DIURNAL.1 <- try( EC.DIURNAL %>% select(YearMon, Hour, 
-                                        DIURNAL, DIURNAL.SE, TowerH) %>% 
-    mutate( EC= DIURNAL,EC.SE= DIURNAL.SE) %>% 
-    select(YearMon, Hour, EC, EC.SE, TowerH)%>% distinct(), silent = T)
-  
-  
-  DIURNAL <- try (FG.DIURNAL.1 %>% full_join( EC.DIURNAL.1, by= c('YearMon', 'Hour','TowerH')) %>% distinct(), silent = T)
+DIURNAL.COMPILE <- function( dataframe, FG_flux, EC_flux, Gas){
+  DIURNAL <- NULL
+  try({
+        FG.DIURNAL <- DIURNAL( dataframe = dataframe,
+                                     flux = FG_flux,
+                                   flux.other = EC_flux, Gas)
+        
+        EC.DIURNAL <- DIURNAL( dataframe = dataframe,
+                                flux = EC_flux,flux.other = FG_flux, Gas)
+        
+        
+        FG.DIURNAL.1 <- FG.DIURNAL %>% select(YearMon, Hour, DIURNAL, DIURNAL.SE, TowerH) %>%  mutate( FG= DIURNAL,
+                        FG.SE= DIURNAL.SE) %>% select( YearMon, Hour, FG, FG.SE,TowerH) %>% distinct()
+        
+        EC.DIURNAL.1 <- EC.DIURNAL %>% select(YearMon, Hour, 
+                                              DIURNAL, DIURNAL.SE, TowerH) %>% 
+          mutate( EC= DIURNAL,EC.SE= DIURNAL.SE) %>% 
+          select(YearMon, Hour, EC, EC.SE, TowerH)%>% distinct()
+        
+        
+        DIURNAL <- FG.DIURNAL.1 %>% full_join( EC.DIURNAL.1, by= c('YearMon', 'Hour','TowerH')) %>% distinct()
+  })
   
   return( DIURNAL)
   
 }
 
-DIURNAL.COMPILE.Sites <- function( FG.tibble, FG_flux, EC_flux, gas ) {
+DIURNAL.COMPILE.Sites <- function( FG.tibble, FG_flux, EC_flux, Gas ) {
   
   sites <- names(FG.tibble)
   
@@ -81,8 +87,12 @@ DIURNAL.COMPILE.Sites <- function( FG.tibble, FG_flux, EC_flux, gas ) {
     
     df = DIURNAL.COMPILE( dataframe= FG.tibble[i],
                                         FG_flux = FG_flux , 
-                                        EC_flux = EC_flux, gas)
+                                        EC_flux = EC_flux, Gas)
      
+    if(is.null(df)){
+      message('DIURNAL.COMPILE output is NULL (errored) for ',i, '. Skipping.')
+      next
+    }
     Diurnal.list[i] <- list( df %>% mutate( DIFF = FG-EC) )
     print("Done")
   }
