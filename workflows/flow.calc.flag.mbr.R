@@ -1,8 +1,8 @@
 # Pull data from google drive
 #email <- 'csturtevant@battelleecology.org'
-# email <- 'jaclyn_matthes@g.harvard.edu'
+#email <- 'jaclyn_matthes@g.harvard.edu'
 #email <- 'kyle.delwiche@gmail.com'
-#site <- 'HARV'
+site <- 'HARV'
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Requires packages: fs, googledrive, ggplot2
@@ -41,7 +41,6 @@ for(focal_file in fileDnld){
   if(grepl(pattern='.zip',focal_file)){
     utils::unzip(pathDnld,exdir=dirTmp)
   }
-  
 }
 
 # Load the data 

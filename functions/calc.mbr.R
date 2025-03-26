@@ -24,9 +24,37 @@ calc.mbr <- function(min9, bootstrap, nsamp){
   H2O$match_time = H2O$match_time_H2O
   CH4$match_time = CH4$match_time_CH4
   
+  # CHECKING TIMES
+  CO2$timeEnd_A_CO2[1:10]
+  CH4$timeEnd_A_CH4[1:10]
+  CH4$tdiff = CH4$timeEnd_A_CH4 - CH4$timeBgn_A_CH4
+  test = CH4[CH4$tdiff<500,]
+  testco2 = CO2[CH4$tdiff<500,]
+  test$timeEnd_A_CH4[1:10]
+  testco2$timeEnd_A_CO2[1:10]
+  
+  H2O$match_time[1:10]
+  MBRflux_align$lvl_test=ifelse(MBRflux_align$dLevelsAminusB_CO2==MBRflux_align$dLevelsAminusB_CH4,1,0)
+  tmp = MBRflux_align[MBRflux_align$lvl_test==0,]
+  tmp$match_time_CH4[1:10]
+  tmp$match_time_CO2[1:10]
+  tmp$timeEnd_A_CO2[1:10]
+  tmp$timeEnd_A_CH4[1:10]
+  
   # Align CO2, H2O, CH4 conc diffs and fluxes by match_time
-  MBRflux_align = merge(CO2, CH4, by.x = "match_time", by.y = "match_time") 
-  MBRflux_align = merge(MBRflux_align, H2O, by.x = "match_time", by.y = "match_time") 
+  CO2$timeEndA = CO2$timeEnd_A_CO2
+  CH4$timeEndA = CH4$timeEnd_A_CH4
+  H2O$timeEndA = H2O$timeEnd_A_H2O
+  CO2$timeEndB = CO2$timeEnd_B_CO2
+  CH4$timeEndB = CH4$timeEnd_B_CH4
+  H2O$timeEndB = H2O$timeEnd_B_H2O
+  CO2$dlvl = CO2$dLevelsAminusB_CO2
+  CH4$dlvl = CH4$dLevelsAminusB_CH4
+  H2O$dlvl = H2O$dLevelsAminusB_H2O
+ 
+  # Align CO2, H2O, CH4 tables by timeEndA, timeEndB, dlvl (level pair)
+  MBRflux_align = dplyr::left_join(CO2, H2O, by=c("timeEndA","timeEndB","dlvl")) 
+  MBRflux_align = dplyr::left_join(MBRflux_align, CH4, by=c("timeEndA","timeEndB","dlvl")) 
   
   if(bootstrap == 1){
     # Sample over concentration mean & variance 
