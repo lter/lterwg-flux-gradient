@@ -259,7 +259,7 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
 })
 # Compute vegetation height based on turbulence measurements
 # These equations stem from Eqn. 9.7.1b in Stull
-####Not enough ubar measurments to deduce this
+
 lvlTow <- 13 #this is the height at which the wind measurement was obtained
 hgtMax <- tower.heights$TowerHeight[tower.heights$TowerPosition == 16]
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
@@ -288,7 +288,7 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   #var$esat_Pa = var$esat_Pa  #[Pa] saturated water vapor pressure
   
   #var$e_Pa = var$e_Pa #[Pa] vapor water pressure
-  #var$VPD = var$VPD 
+  var$VPD = (var$esat_Pa-var$e_Pa)/1000
   var$rhoa_kgm3 = ma*(P_pa - var$e_Pa)/(R*var$Tair_K) # dry air density  [Kg/m3]
   var$rhov_kgm3 = mv*var$e_Pa/(R*var$Tair_K) # water vapor density  [Kg/m3]
   var$rho_kgm3 = var$rhoa_kgm3 + var$rhov_kgm3 # moist air density  [Kg/m3]
@@ -304,6 +304,10 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   
   return(var)
 })
+
+#missing VPD
+
+
 
 
 # -------- Save and zip the files to the temp directory. Upload to google drive. -------
