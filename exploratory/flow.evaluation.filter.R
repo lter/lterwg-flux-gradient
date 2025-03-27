@@ -9,7 +9,7 @@ SITES_WP_9min.report <-  Generate.filter.report( site.tibble = SITES_AE_9min,
                                                   ustar.filter= 0.3, 
                                                   FG_sd.limit = 3,
                                                   diff.limit = 1000,
-                                                  dConcNorm.min = 3,
+                                                   dConcSNR.min = 3,
                                                   approach = "WP")
 
 SITES_AE_9min.report <-  Generate.filter.report( site.tibble = SITES_AE_9min,
@@ -17,7 +17,7 @@ SITES_AE_9min.report <-  Generate.filter.report( site.tibble = SITES_AE_9min,
                                                   ustar.filter= 0.3, 
                                                   FG_sd.limit = 3,
                                                   diff.limit = 1000,
-                                                  dConcNorm.min = 3,
+                                                   dConcSNR.min = 3,
                                                   approach = "AE")
 
 SITES_MBR_9min.report <-  Generate.filter.report( site.tibble = SITES_MBR_9min,
@@ -25,10 +25,10 @@ SITES_MBR_9min.report <-  Generate.filter.report( site.tibble = SITES_MBR_9min,
                                                    ustar.filter= 0.3, 
                                                    FG_sd.limit = 3,
                                                    diff.limit = 1000,
-                                                   dConcNorm.min = 3,
+                                                    dConcSNR.min = 3,
                                                    approach = "MBR")
 
-fileSave <- fs::path(localdir,"FilterReport_ALLSites.Rdata")
+fileSave <- fs::path(localdir,paste0("FilterReport_",sffx,".Rdata"))
 save( SITES_WP_9min.report,SITES_AE_9min.report, SITES_MBR_9min.report ,
       file=fileSave)
 
@@ -39,7 +39,7 @@ SITES_MBR_9min_FILTER <- Apply.filter( site.tibble = SITES_MBR_9min,
                                         ustar.filter= 0.3, 
                                         FG_sd.limit = 3,
                                         diff.limit = 1000,
-                                        dConcNorm.min = 3,
+                                         dConcSNR.min = 3,
                                         approach = "MBR")  %>% TIME_TOWER_LEVEL_FORMAT( time.col='match_time', dLevelsAminusB.colname= 'dLevelsAminusB')
 
 SITES_AE_9min_FILTER <- Apply.filter( site.tibble = SITES_AE_9min,
@@ -47,7 +47,7 @@ SITES_AE_9min_FILTER <- Apply.filter( site.tibble = SITES_AE_9min,
                                        ustar.filter= 0.3, 
                                        FG_sd.limit = 3,
                                        diff.limit = 1000,
-                                       dConcNorm.min = 3,
+                                        dConcSNR.min = 3,
                                        approach = "AE")  %>% TIME_TOWER_LEVEL_FORMAT( time.col='match_time', dLevelsAminusB.colname= 'dLevelsAminusB')
 
 SITES_WP_9min_FILTER <- Apply.filter ( site.tibble = SITES_WP_9min,
@@ -55,6 +55,6 @@ SITES_WP_9min_FILTER <- Apply.filter ( site.tibble = SITES_WP_9min,
                                         ustar.filter= 0.3, 
                                         FG_sd.limit = 4,
                                         diff.limit = 1000,
-                                        dConcNorm.min = 3,
+                                         dConcSNR.min = 3,
                                         approach = "WP")  %>% TIME_TOWER_LEVEL_FORMAT( time.col='match_time', dLevelsAminusB.colname= 'dLevelsAminusB')
 
