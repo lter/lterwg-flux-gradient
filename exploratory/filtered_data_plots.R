@@ -64,23 +64,6 @@ plot_binned_data(original_data, filtered_data, "x", "y", bins = 20)
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 library(ggplot2)
 library(dplyr)
 
