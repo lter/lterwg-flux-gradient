@@ -7,6 +7,7 @@ load( 'data/US-Uaf/US-Uaf_aligned_conc_flux_9min.RData')
 
   localdir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient'
   setwd(localdir)
+  
   dirTmp <- paste(localdir,"data", sitecode,sep="/")
 
   drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
