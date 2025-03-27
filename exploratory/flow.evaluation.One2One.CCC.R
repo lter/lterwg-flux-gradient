@@ -42,9 +42,9 @@ Best_Level_CCC <- SITES_One2One %>%
   select(Site, Approach, gas, BestHeight)
 
 # Filter dataset to keep only measurements at the best height
-SITES_MBR_9min_FILTER_BH_CCC <- list()
-SITES_AE_9min_FILTER_BH_CCC <- list()
-SITES_WP_9min_FILTER_BH_CCC <- list()
+SITES_MBR_9min_FILTER_BH <- list()
+SITES_AE_9min_FILTER_BH <- list()
+SITES_WP_9min_FILTER_BH <- list()
 
 for(site in unique(SITES_One2One$Site)) {
   print(site)
