@@ -6,7 +6,10 @@ filter_fluxes <- function( df,
                            ustar.filter, 
                            diff.limit, 
                            FG_sd.limit,
-                           dConcSNR.min, approach){
+                           dConcSNR.min,
+                           rmvCrossGrad, # Set to TRUE to remove data where cross_grad_flag == 1. Applies only to AE and WP methods
+                           rmvEddyOutlier, # Set to TRUE to remove data where Eddy_outlier == 1. Applies only to AE and WP methods
+                           approach){
   df <- as.data.frame(df) 
   names(df) <- substring( names(df), 6)
   
@@ -17,6 +20,12 @@ filter_fluxes <- function( df,
     df$Eddy_outlier <- 0 
     df$cross_grad_flag <- 0 
   } 
+  if(rmvCrossGrad == FALSE){
+    df$cross_grad_flag <- 0
+  }
+  if(rmvEddyOutlier == FALSE){
+    df$Eddy_outlier <- 0
+  }
   
   
   df.new <- df %>% mutate(diff.flux = abs(FG_mean - FC_turb_interp),
@@ -24,7 +33,7 @@ filter_fluxes <- function( df,
                                                                               FG_mean < flux.limit & FG_mean > -flux.limit,
                                                                               ustar_interp >  ustar.filter,
                                                                               #Stability_100 == 'unstable',
-                                                                              Eddy_outlier !=1,
+                                                                              Eddy_outlier != 1,
                                                                               cross_grad_flag != 1,
                                                                               dLevelsAminusB  %in% H.filter.list,
                                                                               diff.flux <  diff.limit,
@@ -41,6 +50,8 @@ Apply.filter <- function( site.tibble,
                           ustar.filter, 
                           FG_sd.limit,
                           diff.limit,
+                          rmvCrossGrad, # Set to TRUE to remove data where cross gradient flag == 1. Applies only to AE and WP methods
+                          rmvEddyOutlier, # Set to TRUE to remove data where Eddy_outlier == 1. Applies only to AE and WP methods
                           dConcSNR.min, approach){
   
   sites <- names(site.tibble)
@@ -54,6 +65,8 @@ Apply.filter <- function( site.tibble,
                                     FG_sd.limit = FG_sd.limit,
                                     diff.limit = diff.limit,
                                     dConcSNR.min = dConcSNR.min,
+                                    rmvCrossGrad = rmvCrossGrad, 
+                                    rmvEddyOutlier = rmvEddyOutlier, 
                                     approach = approach) 
     
     filtered.data.new <- filtered.data %>% mutate(time='timeEnd_A', dLevelsAminusB.colname = 'dLevelsAminusB' )
@@ -71,7 +84,10 @@ filter_report <- function( df,
                            ustar.filter, 
                            diff.limit, 
                            FG_sd.limit,
-                           dConcSNR.min, approach){
+                           dConcSNR.min, 
+                           rmvCrossGrad, 
+                           rmvEddyOutlier,
+                           approach){
   df <- as.data.frame(df) 
   
   names(df) <- substring( names(df), 6)
@@ -79,9 +95,9 @@ filter_report <- function( df,
   H.filter.list = df$dLevelsAminusB %>% unique
   
   if( approach =="MBR"){
-    
     df$Eddy_outlier <- 0 
-    df$cross_grad_flag <- 0 } 
+    df$cross_grad_flag <- 0 
+  } 
   
   
   df.new <- df %>% mutate(diff.flux = abs(FG_mean - FC_turb_interp),
@@ -167,6 +183,8 @@ Generate.filter.report <- function( site.tibble,
                                     FG_sd.limit,
                                     diff.limit,
                                     dConcSNR.min,
+                                    rmvCrossGrad, 
+                                    rmvEddyOutlier,
                                     approach){
   
   sites <- names(site.tibble)
@@ -182,6 +200,8 @@ Generate.filter.report <- function( site.tibble,
                                      FG_sd.limit = FG_sd.limit,
                                      diff.limit = diff.limit,
                                      dConcSNR.min =  dConcSNR.min,
+                                     rmvCrossGrad = rmvCrossGrad, 
+                                     rmvEddyOutlier = rmvEddyOutlier,
                                      approach = approach) %>% mutate(site = i)
     
     REPORT <-  REPORT %>% rbind(filtered.data )
