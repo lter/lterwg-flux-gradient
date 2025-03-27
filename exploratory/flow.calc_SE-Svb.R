@@ -1,0 +1,24 @@
+library(tidyverse)
+rm(list = ls())
+
+localdir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient'
+setwd(localdir)
+
+load( 'data/SE-Svb/SE-Svb_aligned_conc_flux_9min.RData')
+
+sitecode <- 'SE-Svb'
+site <- 'SE-Svb'
+
+dirTmp <- paste(localdir,"data", sitecode,sep="/")
+
+drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
+data_folder <- googledrive::drive_ls(path = drive_url)
+
+setwd(localdir)
+source(file.path("exploratory/flow.calc.flag.mbr.batch.R"))
+setwd(localdir)
+source(file.path("exploratory/flow.calc.flag.aero.batch.R"))
+setwd(localdir)
+source(file.path("exploratory/flow.calc.flag.windprof.batch.R"))
+
+message('Next run the flow.validation.dataframe.batch.R')
