@@ -1,7 +1,7 @@
 # Function to produce plots and calculations using Lin's Concordance Correlation Coefficient:
 
 # Source the CCC calculation function
-source("calc.lins.ccc.R")
+source("./functions/calc.lins.ccc.R")
 
 # CCC PLOTS: ####
 
