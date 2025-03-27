@@ -259,7 +259,7 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
 })
 # Compute vegetation height based on turbulence measurements
 # These equations stem from Eqn. 9.7.1b in Stull
-####Not enough ubar measurments to deduce this
+
 lvlTow <- 13 #this is the height at which the wind measurement was obtained
 hgtMax <- tower.heights$TowerHeight[tower.heights$TowerPosition == 16]
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
