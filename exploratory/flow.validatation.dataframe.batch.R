@@ -127,6 +127,7 @@ for( site in site.list){
     
     # Additional Formatting for the MBR:
     source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/Function.Format_MBR.R' )
+    MBR_9min.df.final <-format_MBR(MBR_9min.df.flag)
     MBR_30min.df.final <-format_MBR(MBR_30min.df.flag)
     
   # Save the files
@@ -136,6 +137,7 @@ for( site in site.list){
          WP_30min.df.final,
          AE_9min.df.final,
          AE_30min.df.final,
+         MBR_9min.df.final,
          MBR_30min.df.final, file = file.path(paste(site.dir ,paste(site,"_Validation.RDATA", sep=""), sep="/"))  )
 
   rm( WP_9min.df , WP_30min.df,
@@ -171,9 +173,9 @@ site.list <- all.site.list[ all.site.list != 'TEAK'&
 # Add local directory for downloaded data here:
 localdir <- '/Volumes/MaloneLab/Research/FluxGradient/FluxData'
 
-SITES_WP_30min <- list()
-SITES_AE_30min <- list()
-SITES_MBR_30min <- list()
+SITES_WP_9min <- list()
+SITES_AE_9min <- list()
+SITES_MBR_9min <- list()
 
 for ( site in site.list){
   print(site)
@@ -182,11 +184,11 @@ for ( site in site.list){
   
   load(file = file.path(paste(site.dir ,paste(site,"_Validation.RDATA", sep=""), sep="/"))  )
   
-  SITES_MBR_30min[[site]] <- MBR_30min.df.final
-  SITES_WP_30min[[site]] <- WP_30min.df.final
-  SITES_AE_30min[[site]] <- AE_30min.df.final
+  SITES_MBR_9min[[site]] <- MBR_9min.df.final
+  SITES_WP_9min[[site]] <- WP_9min.df.final
+  SITES_AE_9min[[site]] <- AE_9min.df.final
 
-  rm( MBR_30min.df.final, WP_30min.df.final, AE_30min.df.final )
+  rm( MBR_9min.df.final, WP_9min.df.final, AE_9min.df.final )
   
   print(paste(site, "done", sep=""))
 }
@@ -195,24 +197,24 @@ for ( site in site.list){
 # Save .Rdata locally:
 
 
-save(SITES_WP_30min, file = file.path(paste(localdir, "SITES_WP_30min.Rdata", sep="/")))
-save(SITES_AE_30min, file = file.path(paste(localdir, "SITES_AE_30min.Rdata", sep="/")))
-save(SITES_MBR_30min, file = file.path(paste(localdir, "SITES_MBR_30min.Rdata", sep="/")))
+save(SITES_WP_9min, file = file.path(paste(localdir, "SITES_WP_9min.Rdata", sep="/")))
+save(SITES_AE_9min, file = file.path(paste(localdir, "SITES_AE_9min.Rdata", sep="/")))
+save(SITES_MBR_9min, file = file.path(paste(localdir, "SITES_MBR_9min.Rdata", sep="/")))
 
-load("/Volumes/MaloneLab/Research/FluxGradient/FluxData/SITES_MBR_30min.Rdata")
-load("/Volumes/MaloneLab/Research/FluxGradient/FluxData/SITES_AE_30min.Rdata")
-load("/Volumes/MaloneLab/Research/FluxGradient/FluxData/SITES_WP_30min.Rdata")
+load("/Volumes/MaloneLab/Research/FluxGradient/FluxData/SITES_MBR_9min.Rdata")
+load("/Volumes/MaloneLab/Research/FluxGradient/FluxData/SITES_AE_9min.Rdata")
+load("/Volumes/MaloneLab/Research/FluxGradient/FluxData/SITES_WP_9min.Rdata")
 
 # Save Files on google drive: 
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/14Ga9sLRMlQVvorZdHBiYxCbUybiGwPNp")
 
-fileSave <- file.path(paste(localdir, "SITES_WP_30min.Rdata", sep="/"))
+fileSave <- file.path(paste(localdir, "SITES_WP_9min.Rdata", sep="/"))
 googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
 
-fileSave <- file.path(paste(localdir, "SITES_AE_30min.Rdata", sep="/"))
+fileSave <- file.path(paste(localdir, "SITES_AE_9min.Rdata", sep="/"))
 googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
 
-fileSave <- file.path(paste(localdir, "SITES_MBR_30min.Rdata", sep="/"))
+fileSave <- file.path(paste(localdir, "SITES_MBR_9min.Rdata", sep="/"))
 googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
 
 
