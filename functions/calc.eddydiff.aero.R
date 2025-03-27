@@ -29,6 +29,7 @@ calc.eddydiff.aero <- function(sitecode, min9){
 
   # EDDY DIFF WP: create column to store wind profile eddy diffusivity with Wind Profiler Method
   H2O$EddyDiff_WP <- "hold"
+  
   #TO DO: REFORMAT ubar COLUMNS SO THAT WE CAN SELECT FOR CORRECT ubar USING TowerPosition
   for(j in 1:dim(H2O)[1]){
     c.name <- paste0("ubar", as.character(H2O[j,"TowerPosition_A"]))

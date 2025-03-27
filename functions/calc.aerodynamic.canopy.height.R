@@ -39,7 +39,8 @@ calc.AeroCanopyH <- function(Mdate, ustar, z, L, u, daysAVG, plotYN) {
       zh_final <- rep(mean(h_despike, na.rm=TRUE), length(h))
     } else {
       # Interpolate daily measurements back to 30 (9) min values
-      zh_final <- approx(Mdate[!is.na(h_dsk)], h_dsk[!is.na(h_dsk)], Mdate, method="linear", rule=2)$y
+      zh_final <- approx(Mdate[!is.na(h_dsk)], h_dsk[!is.na(h_dsk)], 
+                         Mdate, method="linear", rule=2)$y
       # Fix the interpolation at the end
       fff <- which(!is.na(h_dsk))
       zh_final[1:fff[1]] <- zh_final[fff[1]]
