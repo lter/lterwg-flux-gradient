@@ -1,106 +1,95 @@
-## Taking the 1-second interval concentration data from SE-Deg and aggregating it to 30 minute
-## Kyle Delwiche, March 26, 2025
+# install.packages("librarian")
+# librarian::shelf(data.table)
 library(data.table)
-library(lubridate)
 library(dplyr)
+library(tictoc)
+# Load data more efficiently
+file_path <- "/global/scratch/users/kdelwiche/Flux_Gradient/concentration_2020_aa.csv"
 
-# file_id2020 <- "C:/Users/kyled/Dropbox/Research/NCEAS_flux gradient/Data/SE-Deg/concentration_2020.csv"
-# file_id2021 <- "C:/Users/kyled/Dropbox/Research/NCEAS_flux gradient/Data/SE-Deg/concentration_2021.csv"
-# files <- c("concentration_2020", "concentration_2021", "concentration_2022", "concentration_2023")
-# files <- "concentration_2020"
-# 
-# # Read first 5 rows to identify columns
-# # for (file_id in files){
-# 
-# file_path <- paste0("C:/Users/kyled/Dropbox/Research/NCEAS_flux gradient/Data/SE-Deg/", files, ".csv")
-# print(file_path)
-# dt <- fread(file_path)
-# 
-# 
-# dt <- dt[-1]  # first row is units, need to change this
-# 
-# # Specify the column names you want to convert to numeric
-# columns_to_convert <- c("CO2", "H2O", "CH4","T_CELL","PRESS_CELL","FLOW_VOLRATE","FLOW_VOLRATE_IU")  # Replace with your actual column names
-# 
-# # Convert specified columns to numeric
-# dt[, (columns_to_convert) := lapply(.SD, as.numeric), .SDcols = columns_to_convert]
-
-
-# header_sample[, TIMESTAMP := as.POSIXct(TIMESTAMP, tz = "UTC")]
-
-
-
+# Clear environment
+rm(list = ls())
 Sys.setenv(tz="UTC")
 
+base.path = "/global/scratch/users/kdelwiche/Flux_Gradient/"
+filename1 = paste0(base.path,"concentration_2020_aa.csv")
+
 ### Read in csv file
-file_path <- "C:/Users/kyled/Dropbox/Research/NCEAS_flux gradient/Data/SE-Deg/concentration_2020.csv"
-data1.raw <- fread(file_path)
+### Terminal command to split the files up
+### split -l 345600 -d concentration_2021.csv concentration_2021_
+#data1.raw = read.csv("/Users/rcommane/Data_LTER/FluxGradient/data/SE-Deg_concentration_2020_first1000rows.csv",sep=",",header=T)
+file.1 = paste0(base.path,"concentration_2020_aa.csv")
+data1.raw <- fread(file.1,sep=",",header=T)
+###fread(filename1, sep=",", header=TRUE)[-1, ]
 
-data1.raw <- data1.raw[-1]  # first row is units, need to drop this
+### read in individual files
+file.list1 = list.files(path=base.path,pattern="concentration_2020_",full.names = T)
 
-data2 <- data1.raw %>%
-  mutate(
-    DateTime = as.POSIXct(TIMESTAMP, tz = "UTC"),
-    Date = as.Date(DateTime))
+### Read in first file on list
+pb <- txtProgressBar(min = 1, max = length(file.list1), style = 3)
 
-# Convert all possible numeric columns
-data1 <- data2 %>% 
-  mutate(across(where(is.character), ~ as.numeric(.)))
-
-# Identify transition points for LEVEL changes
-end_time <- data1$DateTime[which(diff(data1$LEVEL) != 0)]
-time.avg.interval = 30
-#head(end_time)
-
-# Compute statistics efficiently
-mean_sum_all <- lapply(end_time, function(t) {
-  subset_data <- data1 %>%
-    filter(DateTime > (t - time.avg.interval) & DateTime < t)
+for (j in 1:length(file.list1)){
+  #length(file.list1)){
+  tic()
+  print(j) #for (i in 1:length(file.list1)){
   
-  if (nrow(subset_data) > 0) {
-    subset_data %>%
-      summarise(
-        Date = as.POSIXct(mean(as.numeric(DateTime), na.rm=TRUE),origin="1970-01-01",tz="UTC"), 
-        Start_Time = format(as.POSIXct(min(as.numeric(DateTime), na.rm=TRUE),
+  #j=2
+  data.rawA = fread(file.list1[j],sep=",",header=F,skip=2)
+  colnames(data.rawA) = colnames(data1.raw)
+  
+  data2 <- data.rawA %>%
+    mutate(
+      DateTime = as.POSIXct(data.rawA$TIMESTAMP, format="%Y-%m-%d %H:%M:%S", tz="UTC"),
+      Date = as.Date(DateTime))
+  
+  # Convert all possible numeric columns
+  data1 <- as.data.frame(data2 %>% 
+                           mutate(across(where(is.character), ~ as.numeric(.))),)
+  
+  # Identify transition points for LEVEL changes
+  end_time <- data1$DateTime[which(diff(data1$LEVEL) != 0)]
+  time.avg.interval = 30
+  #head(end_time)
+  
+  # Compute statistics efficiently
+  print("mean_sum-ing")
+  mean_sum <- lapply(end_time, function(t) {
+    subset_data <- data1 %>%
+      filter(DateTime > (t - time.avg.interval) & DateTime < t)
+    
+    if (nrow(subset_data) > 0) {
+      subset_data %>%
+        summarise(
+          Date = as.POSIXct(mean(as.numeric(DateTime), na.rm=TRUE),origin="1970-01-01",tz="UTC"), 
+          Start_Time = format(as.POSIXct(min(as.numeric(DateTime), na.rm=TRUE),
+                                         origin="1970-01-01",tz="UTC"), "%H:%M:%S"),
+          End_Time = format(as.POSIXct(max(as.numeric(DateTime), na.rm=TRUE),
                                        origin="1970-01-01",tz="UTC"), "%H:%M:%S"),
-        End_Time = format(as.POSIXct(max(as.numeric(DateTime), na.rm=TRUE),
-                                     origin="1970-01-01",tz="UTC"), "%H:%M:%S"),
-        LEVEL = mean(LEVEL, na.rm=TRUE),
-        CO2.mean = mean(CO2, na.rm=TRUE),
-        CH4.mean = mean(CH4, na.rm=TRUE),
-        H2O.mean = mean(H2O, na.rm=TRUE),
-        CO2.sd = sd(CO2, na.rm=TRUE),
-        CH4.sd = sd(CH4, na.rm=TRUE),
-        H2O.sd = sd(H2O, na.rm=TRUE),
-        CO2.n = sum(!is.na(CO2)),
-        CH4.n = sum(!is.na(CH4)),
-        H2O.n = sum(!is.na(H2O))
-      )
-  }
-}) %>%
-  bind_rows()  # Combine results into a data frame
-
-# View result
-print(mean_sum_all)
-
-
-
-
-
-# # Proper solution with verification steps
-# data <- dt %>%
-#   # 1. Ensure TIMESTAMP is POSIXct datetime
-#   mutate(TIMESTAMP = as.POSIXct(TIMESTAMP, format = "%Y-%m-%d %H:%M:%S")) %>%
-# 
-#   # 2. Use standard quotes and verify unit argument
-#   mutate(timeBgn_A = floor_date(TIMESTAMP, unit = "30 minutes"))
-# 
-# # Summarize high-frequency data to 30-min
-# data_agg <- data %>%
-#   group_by(timeBgn_A) %>%
-#   summarise(across(c(CO2, H2O, CH4, LEVEL, T_CELL, PRESS_CELL, FLOW_VOLRATE, FLOW_VOLRATE_IU),
-#                    ~ mean(.x, na.rm = TRUE)), .groups = "drop")
-# # rm(dt)
-# gc()
-# }
-write.csv(data_agg, "C:/Users/kyled/Dropbox/Research/NCEAS_flux gradient/Data/SE-Deg/concentration_2020_30min.csv")
+          LEVEL = mean(LEVEL, na.rm=TRUE),
+          CO2.mean = mean(CO2, na.rm=TRUE),
+          CH4.mean = mean(CH4, na.rm=TRUE),
+          H2O.mean = mean(H2O, na.rm=TRUE),
+          CO2.sd = sd(CO2, na.rm=TRUE),
+          CH4.sd = sd(CH4, na.rm=TRUE),
+          H2O.sd = sd(H2O, na.rm=TRUE),
+          CO2.n = sum(!is.na(CO2)),
+          CH4.n = sum(!is.na(CH4)),
+          H2O.n = sum(!is.na(H2O))
+        )
+    }
+  }) %>%
+    bind_rows()  # Combine results into a data frame
+  
+  print("saving out data files")
+  if (j < 10){use.num = sprintf("%02d", j)}else{use.num=j}
+  file.out1 = paste0(base.path,"data_1min/conc_2020_",use.num,"_1min.csv")
+  write.table(mean_sum,file=file.out1,sep = ",",row.names = F)
+  
+  #mean_sum_all =  rbind(mean_sum_all,mean_sum) 
+  ### %>% bind_rows()  # Combine results into a data frame
+  #setTxtProgressBar(pb, j)
+  rm(list=c("data.rawA","data1","data2"))
+  toc()
+}
+close(pb)
+#file.out1 = paste0("/Users/rcommane/Data_LTER/FluxGradient/data/conc_2021_1min_all.csv")
+#write.table(mean_sum_all,file=file.out1,sep = ",",row.names = F)
