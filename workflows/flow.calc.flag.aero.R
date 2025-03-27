@@ -34,8 +34,8 @@ dir.create(dirTmp)
 
 # Uncomment the next line and comment the following line if you want all the files
 #fileDnld <- site_folder$name 
-fileDnld <- c(paste0(site,'_aligned_conc_flux_9min.zip'), 
-              paste0(site,'_aligned_conc_flux_30min.zip'))
+fileDnld <- paste0(site,'_aligned_conc_flux_9min.zip')#, 
+              #paste0(site,'_aligned_conc_flux_30min.zip'))
 
 message(paste0('Downloading aligned concentration & flux data for ',site))
 for(focal_file in fileDnld){
@@ -58,21 +58,21 @@ for(focal_file in fileDnld){
 fileIn <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min.RData'))
 load(fileIn)
 
-fileIn <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_30min.RData'))
-load(fileIn)
+# fileIn <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_30min.RData'))
+# load(fileIn)
 
 # Calculate eddy diffusivity with the aerodynamic method
 min9.K.AE.list <- calc.eddydiff.aero(sitecode = sitecode, min9 = min9Diff.list)
 
-min30.K.AE.list <- calc.eddydiff.aero(sitecode = sitecode, min9 = min30Diff.list)
+#min30.K.AE.list <- calc.eddydiff.aero(sitecode = sitecode, min9 = min30Diff.list)
 
 # Compute aerodynamic flux gradient fluxes for all gases
 # Optional bootstrap (1) or skip bootstrap (0) for gas conc uncertainty
 # function contains option to manual set name of eddy diffusivity column default is "EddyDiff"
 min9.FG.AE.list <- calc.gas.aero.windprof.flux(min9.K = min9.K.AE.list,
                                                bootstrap = 1, nsamp = 1000)
-min30.FG.AE.list <- calc.gas.aero.windprof.flux(min9.K = min30.K.AE.list,
-                                               bootstrap = 1, nsamp = 1000)
+# min30.FG.AE.list <- calc.gas.aero.windprof.flux(min9.K = min30.K.AE.list,
+#                                                bootstrap = 1, nsamp = 1000)
 
 # # Plot FH2O comparison between FG and EC
 # data <- dplyr::filter(min9.FG.AE.list$H2O, dLevelsAminusB=="4_1")[c("FH2O_interp","FG_mean")]
@@ -124,8 +124,8 @@ if (DoWP==1){
 # Apply Wind Profile Method
 min9.FG.WP.list <- calc.gas.aero.windprof.flux_WP(min9.K = min9.K.AE.list,
                                                bootstrap = 0, nsamp = 1000)
-min30.FG.WP.list <- calc.gas.aero.windprof.flux_WP(min9.K = min30.K.AE.list,
-                                                bootstrap = 0, nsamp = 1000)
+# min30.FG.WP.list <- calc.gas.aero.windprof.flux_WP(min9.K = min30.K.AE.list,
+#                                                 bootstrap = 0, nsamp = 1000)
 }
 
 
@@ -149,15 +149,15 @@ setwd(wdPrev)
 googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folder$id[data_folder$name==site]) # path might need work
 #googledrive::drive_upload(media = fileSave, overwrite = T, path = data_folder$id[data_folder$name==site]) # couldn't make zip work (crs)
 
-# Save 30-minute
-fileSave <- fs::path(dirTmp,paste0(site,"_AE_30min.Rdata"))
-fileZip <- fs::path(dirTmp,paste0(site,"_AE_30min.zip"))
-save(min30.FG.AE.list,file=fileSave)
-setwd(dirTmp)
-utils::zip(zipfile=fileZip,files=paste0(site,"_AE_30min.Rdata"))
-setwd(wdPrev)
-#googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folder$id[data_folder$name==site]) # path might need work
-googledrive::drive_upload(media = fileSave, overwrite = T, path = data_folder$id[data_folder$name==site]) # couldn't make zip work (crs)
+# # Save 30-minute
+# fileSave <- fs::path(dirTmp,paste0(site,"_AE_30min.Rdata"))
+# fileZip <- fs::path(dirTmp,paste0(site,"_AE_30min.zip"))
+# save(min30.FG.AE.list,file=fileSave)
+# setwd(dirTmp)
+# utils::zip(zipfile=fileZip,files=paste0(site,"_AE_30min.Rdata"))
+# setwd(wdPrev)
+# #googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folder$id[data_folder$name==site]) # path might need work
+# googledrive::drive_upload(media = fileSave, overwrite = T, path = data_folder$id[data_folder$name==site]) # couldn't make zip work (crs)
 
 # Optional. Save csv to analyze in Matlab
 

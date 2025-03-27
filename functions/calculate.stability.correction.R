@@ -20,53 +20,57 @@ calculate.stability.correction <- function(gas){
   #gas <- gas[, data.cols]
   
   # Define top level where fluxes are measured
-  maxL=max(min9Diff.list$H2O$TowerPosition_A)
+  maxL=max(min9$H2O$TowerPosition_A)
   nextL = sort(unique(min9Diff.list$H2O$TowerPosition_A),
        decreasing = TRUE)[2]
   TopLevel = paste0(maxL,"_",nextL)
   
   #calculate obukov length (Obukhov length)
   
-  # Detect the highest Tair
-  Tair_at_TowerTop <- function(gas){
-    #df <- data.frame(gas)
-    #names(df) <- substring( names(df), 5)
-    df <- gas
-    levels <- df %>% select( starts_with( 'Tair')) %>% names %>% str_split_fixed( 'Tair',2) 
-    max.levels <- levels[,2] %>% max 
-    Tair <- paste('Tair',max.levels, sep="")
-    return( Tair)
-  }
+  # Get Tair column name at tower top
+  Tair_name <- paste0("Tair",maxL)
   
-  Tair <- Tair_at_TowerTop(gas)
-  
-  #gas <- gas[complete.cases(gas[,c(data.cols, Tair)]),]
-  
-  MO.vars <- MOlength(press = gas$P_kPa, temp = gas[,Tair], H = gas$H_turb_interp, LE = gas$LE_turb_interp, velofric = gas$ustar_interp)
+  # Calculate MO length  
+  MO.vars <- MOlength(press = gas$P_kPa, temp = gas[,Tair_name], 
+                      H = gas$H_turb_interp, LE = gas$LE_turb_interp, 
+                      velofric = gas$ustar_interp)
   
   # add OB params to data frame for eddy diffusivty calculation
   #gas <- cbind(gas, MO.vars$rho, MO.vars$vpotflux, MO.vars$L)
-  gas <- data.frame(gas, rho = MO.vars$rho, vpotflux = MO.vars$vpotflux, L = MO.vars$L)
+  gas <- data.frame(gas, rho = MO.vars$rho, vpotflux = MO.vars$vpotflux, 
+                    L = MO.vars$L)
   
   # Calculate Aerodynamic Canopy Height to later calculate d and zo
-  
   daysAVG=20
   plotYN=0
   
   Mdate=gas$timeEnd_A[gas$dLevelsAminusB == TopLevel]
   ustar=gas$ustar_interp[gas$dLevelsAminusB == TopLevel]
-  gas$mean_TowerH <- rowMeans((cbind(as.numeric(gas$TowerHeight_A), as.numeric(gas$TowerHeight_B))), na.rm = TRUE)
+  gas$mean_TowerH <- rowMeans((cbind(as.numeric(gas$TowerHeight_A), 
+                                     as.numeric(gas$TowerHeight_B))), na.rm = TRUE)
   z=mean(as.numeric((gas$mean_TowerH[gas$dLevelsAminusB == TopLevel])))
   L=gas$L[gas$dLevelsAminusB == TopLevel]
-  if (maxL==8) {ubar=gas$ubar8}
-  if (maxL==7) {ubar=gas$ubar7}
-  if (maxL==6) {ubar=gas$ubar6}
-  if (maxL==5) {ubar=gas$ubar5}
-  if (maxL==4) {ubar=gas$ubar4}
-  if (maxL==3) {ubar=gas$ubar3}
-  u=ubar[gas$dLevelsAminusB == TopLevel]
   
-  AeroVars=calc.AeroCanopyH(Mdate=Mdate, ustar=ustar, z=z, L=L, u=u, daysAVG=daysAVG, plotYN=plotYN)
+  maxL=max(min9$H2O$TowerPosition_A)
+  nextL = sort(unique(min9Diff.list$H2O$TowerPosition_A),
+               decreasing = TRUE)[2]
+  TopLevel = paste0(maxL,"_",nextL)
+  
+  # Get Tair column name at tower top
+  ubar_name <- paste0("ubar",maxL)
+  u = gas[,ubar_name]
+  u = u[gas$dLevelsAminusB == TopLevel]
+  
+  # if (maxL==8) {ubar=gas$ubar8}
+  # if (maxL==7) {ubar=gas$ubar7}
+  # if (maxL==6) {ubar=gas$ubar6}
+  # if (maxL==5) {ubar=gas$ubar5}
+  # if (maxL==4) {ubar=gas$ubar4}
+  # if (maxL==3) {ubar=gas$ubar3}
+  # u=ubar[gas$dLevelsAminusB == TopLevel]
+  
+  AeroVars=calc.AeroCanopyH(Mdate=Mdate, ustar=ustar, z=z, L=L, u=u, 
+                            daysAVG=daysAVG, plotYN=plotYN)
   
   # Interpolate AeroCanopy Height to the other levels
   levels=unique(gas$dLevelsAminusB)
@@ -105,8 +109,8 @@ calculate.stability.correction <- function(gas){
   gas$phim[gas$MO.param>0&!is.na(gas$MO.param>0)] = 1+5*gas$MO.param[gas$MO.param>0&!is.na(gas$MO.param>0)] 
   
   #Eq 4.35 Lee. Stability correction function for wind shear
-  gas$phim[gas$MO.param<=0&!is.na(gas$MO.param>0)]=(1-16*mo.param[gas$MO.param<=0&!is.na(gas$MO.param>0)])^(-0.25)  
-  gas$phih[gas$MO.param<=0&!is.na(gas$MO.param>0)]=(1-16*mo.param[gas$MO.param<=0&!is.na(gas$MO.param>0)])^(-0.5) 
+  gas$phim[gas$MO.param<=0&!is.na(gas$MO.param>0)]=(1-16*gas$MO.param[gas$MO.param<=0&!is.na(gas$MO.param>0)])^(-0.25)  
+  gas$phih[gas$MO.param<=0&!is.na(gas$MO.param>0)]=(1-16*gas$MO.param[gas$MO.param<=0&!is.na(gas$MO.param>0)])^(-0.5) 
   
   
   # #grab canopy height
