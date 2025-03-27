@@ -18,6 +18,14 @@
 #email <- 'jaclyn_matthes@g.harvard.edu'
 email <- 'sam.jurado@yale.edu'
 site <- 'SE-Svb'
+
+
+########TO ASK THE PI#########
+#Whether conc is in dry or wet mol ratio
+#ask for the rest of the ubars, we need a profile of ubars
+
+
+
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: fs, googledrive
 options(digits=12)
@@ -137,7 +145,7 @@ dmmyOut <- data.frame(timeEnd_A=dataSESVB$timeEnd,
                       Tair8=dataSESVB$Ta_degC_35m, # Increasing number with height, start at level 11, 1st methane height
                       Tair13=dataSESVB$Ta_degC_85m, # Methane level is in the middle
                       Tair16=dataSESVB$Ta_degC_150m,
-                      ubar13=dataSESVB$WS_ms_85m, #only one windspeed height
+                      ubar16=dataSESVB$WS_ms_85m, #only one windspeed height, setting to top height even though it is in the middle
                       z_veg_aero=dmmyNum,
                       z_displ_calc=dmmyNum,
                       roughLength_calc=dmmyNum,
@@ -260,7 +268,7 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
 # Compute vegetation height based on turbulence measurements
 # These equations stem from Eqn. 9.7.1b in Stull
 
-lvlTow <- 13 #this is the height at which the wind measurement was obtained
+lvlTow <- 16 #this is the height at which the wind measurement was obtained
 hgtMax <- tower.heights$TowerHeight[tower.heights$TowerPosition == 16]
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   var$z_veg_aero <- 10*as.numeric(hgtMax)/(exp(0.4*var[[paste0('ubar',lvlTow)]]/var$ustar_interp)+6.6) # m - aerodynamic vegetation height
