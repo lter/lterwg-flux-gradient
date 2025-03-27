@@ -21,14 +21,11 @@ calculate.stability.correction <- function(gas){
   
   # Define top level where fluxes are measured
   maxL=max(min9Diff.list$H2O$TowerPosition_A)
-  if (maxL==8){ TopLevel="8_7"}
-  if (maxL==7){ TopLevel="7_6"}
-  if (maxL==6){ TopLevel="6_5"}
-  if (maxL==5) { TopLevel="5_4"}
-  if (maxL==4) { TopLevel="4_3"}
-  if (maxL==3) { TopLevel="3_2"}
+  nextL = sort(unique(min9Diff.list$H2O$TowerPosition_A),
+       decreasing = TRUE)[2]
+  TopLevel = paste0(maxL,"_",nextL)
   
-  #calculate obukov length (Obukhov lenght)
+  #calculate obukov length (Obukhov length)
   
   # Detect the highest Tair
   Tair_at_TowerTop <- function(gas){
