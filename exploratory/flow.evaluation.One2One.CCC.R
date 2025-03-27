@@ -27,7 +27,7 @@ Best_Level_CCC_CO2 <- SITES_CCC_CO2 %>%
   )
 
 # Combine all CCC data with gas indicator
-SITES_CCC <- SITES_CCC_CO2 %>% 
+SITES_One2One <- SITES_CCC_CO2 %>% 
   mutate(gas = "CO2") %>% 
   rbind(
     SITES_CCC_H2O %>% 
@@ -35,7 +35,7 @@ SITES_CCC <- SITES_CCC_CO2 %>%
   )
 
 # Determine the best height for each site, approach, and gas based on maximum CCC
-Best_Level_CCC <- SITES_CCC %>% 
+Best_Level_CCC <- SITES_One2One %>% 
   left_join(Best_Level_CCC_CO2, by = c('Site', 'Approach', 'gas')) %>% 
   filter(CCC == maxCCC | (is.na(CCC) & is.na(maxCCC))) %>%
   mutate(BestHeight = dLevelsAminusB) %>% 
@@ -46,7 +46,7 @@ SITES_MBR_9min_FILTER_BH_CCC <- list()
 SITES_AE_9min_FILTER_BH_CCC <- list()
 SITES_WP_9min_FILTER_BH_CCC <- list()
 
-for(site in unique(SITES_CCC$Site)) {
+for(site in unique(SITES_One2One$Site)) {
   print(site)
   
   # Filter MBR data for best height
@@ -54,7 +54,7 @@ for(site in unique(SITES_CCC$Site)) {
     filter(Site == site, Approach == 'MBR') %>% 
     mutate(site = Site)
   
-  SITES_MBR_9min_FILTER_BH_CCC[[site]] <- SITES_MBR_9min_FILTER[[site]] %>% 
+  SITES_MBR_9min_FILTER_BH[[site]] <- SITES_MBR_9min_FILTER[[site]] %>% 
     full_join(BH.MBR, by = c('site', 'gas')) %>% 
     filter(dLevelsAminusB == BestHeight)
   
@@ -63,7 +63,7 @@ for(site in unique(SITES_CCC$Site)) {
     filter(Site == site, Approach == 'AE') %>% 
     mutate(site = Site)
   
-  SITES_AE_9min_FILTER_BH_CCC[[site]] <- SITES_AE_9min_FILTER[[site]] %>% 
+  SITES_AE_9min_FILTER_BH[[site]] <- SITES_AE_9min_FILTER[[site]] %>% 
     full_join(BH.AE, by = c('site', 'gas')) %>% 
     filter(dLevelsAminusB == BestHeight)
   
@@ -72,7 +72,7 @@ for(site in unique(SITES_CCC$Site)) {
     filter(Site == site, Approach == 'WP') %>% 
     mutate(site = Site)
   
-  SITES_WP_9min_FILTER_BH_CCC[[site]] <- SITES_WP_9min_FILTER[[site]] %>% 
+  SITES_WP_9min_FILTER_BH[[site]] <- SITES_WP_9min_FILTER[[site]] %>% 
     full_join(BH.WP, by = c('site', 'gas')) %>% 
     filter(dLevelsAminusB == BestHeight)
 }
