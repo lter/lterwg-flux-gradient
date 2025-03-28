@@ -1,12 +1,11 @@
 # Filter flux data:
 
-DirRepo <- "." # Relative or absolute path to lterwg-flux-gradient git repo on your local machine. Make sure you've pulled the latest from main!localdir <- tempdir()
 source(fs::path(DirRepo,'exploratory/FUNCTION_Filter_FG.R' ))
 source(fs::path(DirRepo,'exploratory/FUNCTION_SITELIST_FORMATTING.R' ))
 
 SITES_WP_9min.report <-  Generate.filter.report( site.tibble = SITES_AE_9min,
                                                   flux.limit = 5000, 
-                                                  ustar.filter= 0.1, 
+                                                  ustar.filter= 0.3, 
                                                   FG_sd.limit = 3000,
                                                   diff.limit = 100000,
                                                   dConcSNR.min = 3,
@@ -16,7 +15,7 @@ SITES_WP_9min.report <-  Generate.filter.report( site.tibble = SITES_AE_9min,
 
 SITES_AE_9min.report <-  Generate.filter.report( site.tibble = SITES_AE_9min,
                                                   flux.limit = 5000, 
-                                                  ustar.filter= 0.1, 
+                                                  ustar.filter= 0.3, 
                                                   FG_sd.limit = 3000,
                                                   diff.limit = 100000,
                                                   dConcSNR.min = 3,
@@ -26,7 +25,7 @@ SITES_AE_9min.report <-  Generate.filter.report( site.tibble = SITES_AE_9min,
 
 SITES_MBR_9min.report <-  Generate.filter.report( site.tibble = SITES_MBR_9min,
                                                   flux.limit = 5000, 
-                                                  ustar.filter= 0.1, 
+                                                  ustar.filter= 0.3, 
                                                   FG_sd.limit = 3000,
                                                   diff.limit = 100000,
                                                   dConcSNR.min = 3,
@@ -37,7 +36,7 @@ SITES_MBR_9min.report <-  Generate.filter.report( site.tibble = SITES_MBR_9min,
 
 SITES_MBR_9min_FILTER <- Apply.filter( site.tibble = SITES_MBR_9min,
                                        flux.limit = 5000, 
-                                       ustar.filter= 0.1, 
+                                       ustar.filter= 0.3, 
                                        FG_sd.limit = 3000,
                                        diff.limit = 100000,
                                        dConcSNR.min = 3,
@@ -47,7 +46,7 @@ SITES_MBR_9min_FILTER <- Apply.filter( site.tibble = SITES_MBR_9min,
 
 SITES_AE_9min_FILTER <- Apply.filter( site.tibble = SITES_AE_9min,
                                       flux.limit = 5000, 
-                                      ustar.filter= 0.1, 
+                                      ustar.filter= 0.3, 
                                       FG_sd.limit = 3000,
                                       diff.limit = 100000,
                                       dConcSNR.min = 3,
@@ -57,7 +56,7 @@ SITES_AE_9min_FILTER <- Apply.filter( site.tibble = SITES_AE_9min,
 
 SITES_WP_9min_FILTER <- Apply.filter ( site.tibble = SITES_WP_9min,
                                        flux.limit = 5000, 
-                                       ustar.filter= 0.1, 
+                                       ustar.filter= 0.3, 
                                        FG_sd.limit = 3000,
                                        diff.limit = 100000,
                                        dConcSNR.min = 3,

@@ -19,7 +19,12 @@ filter_fluxes <- function( df,
     
     df$Eddy_outlier <- 0 
     df$cross_grad_flag <- 0 
-  } 
+  } else {
+    df$dConc.tracer <- dConcSNR.min
+    df$dConc.tracer_sd <- 1
+  }
+  
+  
   if(rmvCrossGrad == FALSE){
     df$cross_grad_flag <- 0
   }
@@ -29,17 +34,20 @@ filter_fluxes <- function( df,
   
   
   df.new <- df %>% mutate(diff.flux = abs(FG_mean - FC_turb_interp),
-                          dConcSNR.filter = abs(dConc)/dConc_sd ) %>%  filter(dConc_pvalue <= 0.1, 
-                                                                              FG_mean < flux.limit & FG_mean > -flux.limit,
-                                                                              ustar_interp >  ustar.filter,
-                                                                              #Stability_100 == 'unstable',
-                                                                              Eddy_outlier != 1,
-                                                                              cross_grad_flag != 1,
-                                                                              dLevelsAminusB  %in% H.filter.list,
-                                                                              diff.flux <  diff.limit,
-                                                                              abs(FG_sd) < FG_sd.limit,
-                                                                              dConcSNR.filter > dConcSNR.min,
-                                                                              TowerPosition_A != TowerPosition_B)
+                          dConcSNR.filter = abs(dConc)/dConc_sd,
+                          dConcTSNR.filter = abs(dConc.tracer)/dConc.tracer_sd) %>%  
+                              filter(dConc_pvalue <= 0.1, 
+                                     FG_mean < flux.limit & FG_mean > -flux.limit,
+                                     ustar_interp >  ustar.filter,
+                                     #Stability_100 == 'unstable',
+                                     Eddy_outlier != 1,
+                                     cross_grad_flag != 1,
+                                     dLevelsAminusB  %in% H.filter.list,
+                                     diff.flux <  diff.limit,
+                                     abs(FG_sd) < FG_sd.limit,
+                                     dConcSNR.filter >= dConcSNR.min,
+                                     dConcTSNR.filter >= dConcSNR.min,
+                                     TowerPosition_A != TowerPosition_B)
   
   return(df.new)
 }
@@ -97,11 +105,20 @@ filter_report <- function( df,
   if( approach =="MBR"){
     df$Eddy_outlier <- 0 
     df$cross_grad_flag <- 0 
-  } 
-  
+  } else {
+    df$dConc.tracer <- dConcSNR.min
+    df$dConc.tracer_sd <- 1
+  }
+  if(rmvCrossGrad == FALSE){
+    df$cross_grad_flag <- 0
+  }
+  if(rmvEddyOutlier == FALSE){
+    df$Eddy_outlier <- 0
+  }
   
   df.new <- df %>% mutate(diff.flux = abs(FG_mean - FC_turb_interp),
-                          dConcSNR.filter = abs(dConc)/dConc_sd ) %>%  
+                          dConcSNR.filter = abs(dConc)/dConc_sd,
+                          dConcTSNR.filter = abs(dConc.tracer)/dConc.tracer_sd) %>%  
     filter(dLevelsAminusB  %in% H.filter.list,
            TowerPosition_A != TowerPosition_B) %>% 
     mutate(flag.dConc_pvalue = case_when( dConc_pvalue <= 0.1 ~ 0, dConc_pvalue > 0.1 ~ 1, is.na(dConc_pvalue ) ~ 0),
@@ -110,7 +127,7 @@ filter_report <- function( df,
            flag.cross_grad_flag = case_when(cross_grad_flag != 1 ~ 0, cross_grad_flag == 1 ~ 1, is.na(cross_grad_flag) ~ 0),
            flag.Eddy_outlier = case_when(Eddy_outlier !=1 ~ 0, Eddy_outlier ==1 ~ 1, is.na( Eddy_outlier) ~ 0),
            flag.FG_sd = case_when( abs(FG_sd) <= FG_sd.limit ~ 0 ,abs(FG_sd) > FG_sd.limit ~ 1, is.na( FG_sd) ~ 0),
-           flag.dConc = case_when( dConcSNR.filter >= dConcSNR.min ~ 0, dConcSNR.filter < dConcSNR.min ~ 1, is.na( FG_sd) ~ 0),
+           flag.dConc = case_when( (dConcSNR.filter >= dConcSNR.min) & (dConcTSNR.filter >= dConcSNR.min) ~ 0 , (dConcSNR.filter < dConcSNR.min) | (dConcTSNR.filter < dConcSNR.min) ~ 1, is.na( FG_sd) ~ 0),
            
            # Interactions with ustar
            interaction.ustar_dConc_pvalue = flag.ustar_interp + flag.dConc_pvalue,

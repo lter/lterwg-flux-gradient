@@ -8,12 +8,16 @@ library(ggpubr)
 
 # -------------- Change this stuff -------------
 email <- 'csturtevant@battelleecology.org'
-DirRepo <- "." # Relative or absolute path to lterwg-flux-gradient git repo on your local machine. Make sure you've pulled the latest from main!
-localdir <- 'C:/Users/csturtevant/OneDrive - Battelle Ecology/FluxGradient/9min_filterOnlySNR_CCC' # We'll deposit output files here prior to uploading to Google Drive
+DirRepo <- 'C:/Users/csturtevant/Documents/Git/lterwg-flux-gradient' # Relative or absolute path to lterwg-flux-gradient git repo on your local machine. Make sure you've pulled the latest from main!
+localdir <- 'C:/Users/csturtevant/OneDrive - Battelle Ecology/FluxGradient/filterTesting' # We'll deposit output files here prior to uploading to Google Drive
 DnldFromGoogleDrive <- FALSE # Enter TRUE to grab files listed in dnld_files from Google Drive. Enter FALSE if you have the most up-to-date versions locally in localdir
-
 sffx <- c('ALLSites','MS1Sites')[2]
 MS1Sites <- c('HARV','KONZ','JORN','GUAN')
+
+dnld_files=c("SITES_WP_9min_MS1Sites.Rdata",
+             "SITES_AE_9min_MS1Sites.Rdata",
+             "SITES_MBR_9min_MS1Sites.Rdata")
+
 
 # ---------------------------------------------
 
@@ -21,12 +25,6 @@ MS1Sites <- c('HARV','KONZ','JORN','GUAN')
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
 googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
 data_folder <- googledrive::drive_ls(path = drive_url)
-
-  
-dnld_files=c("SITES_WP_9min_MS1Sites.Rdata",
-             "SITES_AE_9min_MS1Sites.Rdata",
-             "SITES_MBR_9min_MS1Sites.Rdata")
-
 
 if(DnldFromGoogleDrive == TRUE){
   for (focal_file in dnld_files){
@@ -105,7 +103,6 @@ save( Diurnal.AE.H2O , Diurnal.MBR.H2O,  Diurnal.WP.H2O,
 googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
 
 # Carbon Exchange PARMS: ####
-
 load(fs::path(localdir,paste0("FilteredData_",sffx,"_BH.Rdata")))
 
 source(fs::path(DirRepo,'exploratory/flow.evaluation.cparms.R'))
