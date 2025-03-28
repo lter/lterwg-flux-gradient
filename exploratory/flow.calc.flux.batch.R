@@ -58,7 +58,7 @@ for( site in site.list ){
   print('WP Done')
   
   print('done')
-
+rm(min9)
 }
 
 message('Next run the flow.validation.dataframe.batch.R')
