@@ -12,7 +12,7 @@ source(file.path("functions/calculate.stability.correction.R"))
 source(file.path("functions/calc.aerodynamic.canopy.height.R"))
 
 # Calculate eddy diffusivity with the aerodynamic method
-min9.K.AE.list <- calc.eddydiff.aero(sitecode = sitecode, min9 = min9Diff.list)
+min9.K.AE.list <- calc.eddydiff.aero(sitecode = sitecode, min9 =min9Diff.list)
 
 #min30.K.AE.list <- calc.eddydiff.aero(sitecode = sitecode, min9 = min30Diff.list)
 
