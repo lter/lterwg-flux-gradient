@@ -10,8 +10,8 @@ library(ggpubr)
 #------ CHANGE THIS STUFF ------
 
 email <- 'csturtevant@battelleecology.org'
-DirRepo <- "." # Relative or absolute path to lterwg-flux-gradient git repo on your local machine. Make sure you've pulled the latest from main!
-localdir <- 'C:/Users/csturtevant/OneDrive - Battelle Ecology/FluxGradient/9min_filterOnlySNR_CCC' # We'll deposit output files here prior to uploading to Google Drive
+DirRepo <- 'C:/Users/csturtevant/Documents/Git/lterwg-flux-gradient' # Relative or absolute path to lterwg-flux-gradient git repo on your local machine. Make sure you've pulled the latest from main!
+localdir <- 'C:/Users/csturtevant/OneDrive - Battelle Ecology/FluxGradient/filterTesting' # We'll deposit output files here prior to uploading to Google Drive
 DnldFromGoogleDrive <- FALSE # Enter TRUE if you don't have the files listed in dnld_files below locally in the localdir directory
 sffx <- c('ALLSites','MS1Sites')[2]
 
