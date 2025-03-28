@@ -9,7 +9,6 @@ metadata <- read.csv('/Volumes/MaloneLab/Research/FluxGradient/Ameriflux_NEON fi
 site.list <- metadata$Site_Id.NEON %>% unique
 
 local <- '/Volumes/MaloneLab/Research/FluxGradient/FluxData'
-site.list <- c("TEAK", "TOOL", "TREE", "UKFS", "UNDE", "WOOD", "WREF", "YELL")
 
 # Download and unzip:
 for( site in site.list){
@@ -44,14 +43,16 @@ for( site in site.list){
 }
 
 
-attr.data$Site %>% unique %>% 
+attr.data$Site %>% unique %>% length
+attr.data %>% names
 # Summarize the different tower height levels...
 # we need to understand which heights are within and above the canopy:
 
 canopy_A <- attr.data %>% mutate(canopyHeight_m = DistZaxsCnpy %>% as.numeric, 
                      MeasurementHeight_m_A = DistZaxsLvlMeasTow%>% as.numeric,
                      TowerPosition_A = TowerPosition) %>% 
-  select(canopyHeight_m, MeasurementHeight_m_A , TowerPosition_A, Site) %>% 
+  select(canopyHeight_m, MeasurementHeight_m_A , TowerPosition_A, Site,
+  DistZaxsDisp, DistZaxsGrndOfst) %>% 
   mutate(Canopy_A= case_when(canopyHeight_m - MeasurementHeight_m_A <= 0 ~ 0,
                                canopyHeight_m - MeasurementHeight_m_A > 0 ~ 1))
 
