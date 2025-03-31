@@ -7,6 +7,8 @@ library(ggplot2)
 library(dplyr)
 library(hrbrthemes)
 library(ggpubr)
+library(factoextra)
+library(reshape2)
 
 Sites.Summary %>% names
 
@@ -87,7 +89,7 @@ matrix <- Sites.Summary.scaled %>% select(EVI.mean.scaled,
 
 rownames(matrix) <- Sites.Summary.scaled$site
 colnames(matrix) <- c("EVI", "NDVI", "PRI", "LAI", "SAVI", "CHM")
-library(reshape2)
+
 
 
 longData <- melt(matrix)
@@ -151,6 +153,6 @@ png("Structure_Summary_Allsites_Cluster.png", width=8,
 fviz_cluster(cluster, data=distance, pointsize = 0.5, labelsize=8) + theme_bw()
 dev.off()
 
-library(factoextra)
+
 
 

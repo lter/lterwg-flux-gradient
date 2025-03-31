@@ -23,11 +23,12 @@
 #email <- 'alexisrose0525@gmail.com'
 #email <- 'jaclyn_matthes@g.harvard.edu'
 # email <- 'csturtevant@battelleecology.org'
-email <- 'kyle.delwiche@gmail.com'
+#email <- 'kyle.delwiche@gmail.com'
 
+
+
+email <- 'sam.jurado@yale.edu'
 site <- 'SE-Sto'
-
-
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: fs, googledrive
 options(digits=12)
@@ -35,14 +36,11 @@ library(foreach)
 library(doParallel)
 library(dplyr)
 library(lubridate)
-
 # Load functions in this repo
 source(file.path("functions/interp.flux.R"))
 source(file.path("functions/aggregate_averages.R"))
-
 # Final note: This script takes approx 45 min to run per site. 
 # -------------------------------------------------------
-
 # Authenticate with Google Drive and get site data
 googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
 drive_url_extSiteData <- googledrive::as_id("https://drive.google.com/drive/folders/1jrOJIu5WfdzmlbL9vMkUNfzBpRC-W0Wd")
@@ -50,48 +48,53 @@ data_folder <- googledrive::drive_ls(path = drive_url_extSiteData)
 site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==site])
 dirTmp <- fs::path(tempdir(),site)
 dir.create(dirTmp)
+focal_files <- site_folder$name # Default - downloads all files to the temp folder
+focal_files <- c('SE-Sto_met_30min.csv',
+                       'SE-Sto_gas_fluxes_30min.csv',
+                      'SE-Sto_concentration_profile_30min.csv',
+                      'sesto_attr.csv')
+for(focal_file in focal_files){
+  
+  # Find the file identifier for that file
+  file_id <- subset(site_folder, name == focal_file)
+  
+  # Download that file
+  pathDnld <- fs::path(dirTmp,focal_file)
+  googledrive::drive_download(file = file_id$id, 
+                              path = pathDnld,
+                              overwrite = T)
+  # Unzip
+  if(grepl(pattern='.zip',focal_file)){
+    utils::unzip(pathDnld,exdir=dirTmp)
+  }
+  
+}
+fileIn <- fs::path(dirTmp,"SE-Sto_met_30min.csv")
+dataMet <- read.table(fileIn,header=TRUE,sep=",",skip=0)
 
-gdrive_path <- "https://drive.google.com/drive/u/1/folders/1F1qZkAZywNUq_fyS1OmlG3C9AkGo6fdc"
+fileIn <- fs::path(dirTmp,"SE-Sto_gas_fluxes_30min.csv")
+dataFlux <- read.table(fileIn,header=TRUE,sep=",",skip=0)
 
-ch4_files_to_keep <- c(#'SE-Sto_met_30min.csv',
-                       #'SE-Sto_gas_fluxes_30min.csv',
-                       #'SE-Sto_concentration_profile_30min.csv',
-                       'sesto_attr.csv')
+fileIn <- fs::path(dirTmp,"SE-Sto_concentration_profile_30min.csv")
+dataConc <- read.table(fileIn,header=TRUE,sep=",",skip=0)
 
-# Identify desired files 
-# ch4_files <- googledrive::drive_ls(
-#   path = googledrive::as_id(gdrive_path),
-# ) %>%  
-#   # Filter to keep only specified files
-#   dplyr::filter(name %in% ch4_files_to_keep) %>% 
-#   # Add explicit path column for safety
-#   dplyr::mutate(target_path = file.path("methane", "raw_methane", name))
-# 
-# # Download files with explicit path specification
-# purrr::walk2(
-#   .x = ch4_files$id,
-#   .y = ch4_files$target_path,
-#   .f = ~ googledrive::drive_download(
-#     file = googledrive::as_id(.x),
-#     path = .y,
-#     overwrite = TRUE
-#   )
-# )
-# 
+fileIn <- fs::path(dirTmp,"sesto_attr.csv")
+attr.df <- read.csv(fileIn)
 
-# Load in data files
-fileIn <- file.path("methane", "raw_methane",'SE-Sto_gas_fluxes_30min.csv')
-dataFlux <- read.table(fileIn,header=TRUE,sep=",")
-
-fileIn <- file.path("methane", "raw_methane",'SE-Sto_concentration_profile_30min.csv')
-dataConc <- read.csv(fileIn,header=TRUE)
-
-fileIn <- file.path("methane", "raw_methane",'SE-Sto_met_30min.csv')
-dataMet <- read.csv(fileIn,header=TRUE)
-
-fileIn <- file.path("methane", "raw_methane",'sesto_attr.csv')
-attr.df <- read.csv(fileIn,header=TRUE)
-
+# Transform the attr.df data frame into same format as NEON sites
+attr.df.transpose <- as.data.frame(t(attr.df))
+nameCol <- attr.df.transpose[1,]
+dtype <- attr.df.transpose[2,]
+attr.df <- attr.df.transpose[3:nrow(attr.df.transpose),]
+names(attr.df) <- nameCol
+attr.df[attr.df == "na"] <- NA
+for (idxCol in 1:ncol(attr.df)){
+  x <- switch(dtype[[idxCol]],
+              num=as.numeric(attr.df[,idxCol]),
+              chr=attr.df[,idxCol],
+              int=as.integer(attr.df[,idxCol]))
+  attr.df[[idxCol]] <- x
+}
 
 ## ***Manually update column names for necessary variables (tried making this fancy but it wasn't working, so just going to brute force it)
 # dataFlux <- dataFlux %>% rename(LE_turb_interp = LEraw_1_1_1)
@@ -190,30 +193,9 @@ dataConc$timeEnd_A  <- make_datetime(
   sec = second(hms(dataConc$time))
 ) + days(dataConc$doy - 1)
 
-
-
-
-# Transform the attr.df data frame into same format as NEON sites
-attr.df.transpose <- as.data.frame(t(attr.df))
-nameCol <- attr.df.transpose[1,]
-dtype <- attr.df.transpose[2,]
-attr.df <- attr.df.transpose[3:nrow(attr.df.transpose),]
-names(attr.df) <- nameCol
-attr.df[attr.df == "na"] <- NA
-for (idxCol in 1:ncol(attr.df)){
-  x <- switch(dtype[[idxCol]],
-              num=as.numeric(attr.df[,idxCol]),
-              chr=attr.df[,idxCol],
-              int=as.integer(attr.df[,idxCol]))
-  attr.df[[idxCol]] <- x
-}
-
 # Parse tower heights
 tower.heights <- data.frame(TowerHeight=as.numeric(attr.df$DistZaxsLvlMeasTow),
                             TowerPosition=as.numeric(attr.df$TowerPosition))
-if(any(diff(tower.heights$TowerPosition) < 0)){
-  stop("Tower Position must be increasing in the attr.df file")
-}
 
 # ------------------- Populate output --------------------
 # merge the tables based on measurement time
@@ -301,7 +283,7 @@ dmmyOut <- data.frame(timeEnd_A=data$timeEnd_A,
                       qfFinl_A=dmmyNum,
                       min_A=dmmyNum,
                       max_A=dmmyNum,
-                      vari_A=dmmyNum,
+                      vari_A=0,
                       numSamp_A=dmmyNum,
                       timeEnd_B=data$timeEnd_A,
                       timeBgn_B=data$timeBgn_A,
@@ -310,7 +292,7 @@ dmmyOut <- data.frame(timeEnd_A=data$timeEnd_A,
                       qfFinl_B=dmmyNum,
                       min_B=dmmyNum,
                       max_B=dmmyNum,
-                      vari_B=dmmyNum,
+                      vari_B=0,
                       numSamp_B=dmmyNum,
                       diffTowerPosition=dmmyChr,
                       dLevelsAminusB=dmmyChr,
@@ -692,6 +674,8 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
 # These equations stem from Eqn. 9.7.1b in Stull
 lvlTow <- 5   #5 heights at SE-Sto
 hgtMax <- tower.heights$TowerHeight[tower.heights$TowerPosition == lvlTow]
+
+
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   var$z_veg_aero <- 10*as.numeric(hgtMax)/(exp(0.4*var[[paste0('ubar',lvlTow)]]/var$ustar_interp)+6.6) # m - aerodynamic vegetation height
   var$z_displ_calc <- 0.66*var$z_veg_aero # m - zero plane displacement height
@@ -700,6 +684,7 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   return(var)
 })
 
+
 # -------------- Compute water flux from LE --------------------
 min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   
@@ -707,7 +692,7 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   Tair_C <- var[[paste0('Tair',lvlTow)]]
   
   # Variables to calculate air physics vars & convert H and LE to flux
-  P_pa = var$P_kPa*1000  #Atmospheric pressure [Pa]
+  P_pa = var$P_kPa*100  #Atmospheric pressure [Pa] In this file, they were actaully hecto pascals
   ma = 28.964/1000    #molar mass of dry air [Kg/mol]
   mv = 18/1000        #molar mass of water vapor [Kg/mol]
   R = 8.314          #Universal gas constant dry air [J/(K mol)]
@@ -735,9 +720,10 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
 })
 
 
+
 # -------- Save and zip the files to the temp directory. Upload to google drive. -------
 # for some reason this code isn't saving and uploading the .zip file, I'm not sure why...
-
+# -------- Save and zip the files to the temp directory. Upload to google drive. -------
 fileSave <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min.RData'))
 fileZip <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min.zip'))
 save(min9Diff.list,file=fileSave)
@@ -764,3 +750,33 @@ save(attr.df,file=fileSaveAttr)
 utils::zip(zipfile=fileZipAttr,files=fileSaveAttr)
 googledrive::drive_upload(media = fileZipAttr, overwrite = T, path = data_folderUpld$id[data_folderUpld$name==site])
 setwd(wdPrev)
+
+
+
+
+# fileSave <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min.RData'))
+# fileZip <- fs::path(dirTmp,paste0(site,'_aligned_conc_flux_9min.zip'))
+# save(min9Diff.list,file=fileSave)
+# wdPrev <- getwd()
+# setwd(dirTmp)
+# utils::zip(zipfile=fileZip,files=paste0(site,'_aligned_conc_flux_9min.RData'))
+# setwd(wdPrev)
+# 
+# # Save in same folder as NEON site data
+# drive_url_NEONSiteData <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
+# data_folderUpld <- googledrive::drive_ls(path = drive_url_NEONSiteData)
+# site_folderUpld <- googledrive::drive_ls(path = data_folderUpld$id[data_folderUpld$name==site])
+# googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folderUpld$id[data_folderUpld$name==site]) 
+# 
+# # Do the same for attr.df (attribute file). 
+# # Zip the file with the same folder structure as those created for NEON files 
+# pathSaveAttr <- fs::path(dirTmp,"data", site)
+# dir.create(pathSaveAttr,recursive = TRUE)
+# fileSaveAttr <- fs::path("data", site, paste0(site,'_attr.RData'))
+# fileZipAttr <- fs::path("data", site, paste0(site,'_attr.zip'))
+# wdPrev <- getwd()
+# setwd(dirTmp)
+# save(attr.df,file=fileSaveAttr)
+# utils::zip(zipfile=fileZipAttr,files=fileSaveAttr)
+# googledrive::drive_upload(media = fileZipAttr, overwrite = T, path = data_folderUpld$id[data_folderUpld$name==site])
+# setwd(wdPrev)

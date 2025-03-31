@@ -24,12 +24,14 @@ metadata <- read.csv('/Volumes/MaloneLab/Research/FluxGradient/Ameriflux_NEON fi
 # -------------------------------------------------------
 site.list <- metadata$Site_Id.NEON %>% unique
 
-site.list <- "TEAK"
 # something is wrong with TEAK, TOOL, WREF- cant run ae and wp
 ## Error in calculate.stability.correction(gas = H2O) : object 'TopLevel' not found
 # Gradient Flux Calculations: ####
-site <- "TEAK"
+
 for( site in site.list ){
+  
+  setwd("/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient")
+  
   sitecode <- site
   print(sitecode)
   
@@ -45,16 +47,18 @@ for( site in site.list ){
   source(file.path("exploratory/flow.calc.flag.mbr.batch.R"))
   print('MBR Done')
   
+  setwd("/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient")
   print( 'Running AE')
   source(file.path("exploratory/flow.calc.flag.aero.batch.R"))
   print('AE Done')
   
+  setwd("/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient")
   print( 'Running WP')
   source(file.path("exploratory/flow.calc.flag.windprof.batch.R"))
   print('WP Done')
   
   print('done')
-
+rm(min9)
 }
 
 message('Next run the flow.validation.dataframe.batch.R')
