@@ -9,19 +9,19 @@ one2one.plots <- function ( MBR.DF, AE.DF, WP.DF, gas){
   
   AE.DF <- AE.DF %>% as.data.frame
   names(AE.DF) <- substring( names( AE.DF), 6) 
-  
+
   WP.DF <- WP.DF %>% as.data.frame
   names(WP.DF) <- substring( names( WP.DF), 6)
   
   if( gas == 'CO2'){
-    
+ 
     AE.DF <- AE.DF %>% filter(gas == "CO2")
     WP.DF <- WP.DF %>% filter(gas == "CO2")
     MBR.DF <- MBR.DF %>% filter(gas == "CO2")
     
     p.1 <- ggplot(data = MBR.DF , aes(x = FC_turb_interp, y = FG_mean ))  + 
-      stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
-      geom_point(alpha=0.1) +
+  stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
+  geom_point(alpha=0.1) +
       stat_cor(aes(label = paste(after_stat(rr.label), after_stat(..p.label..), sep = "~`,`~")), # adds R^2 and p-value
                r.accuracy = 0.01,
                p.accuracy = 0.001,
@@ -30,7 +30,7 @@ one2one.plots <- function ( MBR.DF, AE.DF, WP.DF, gas){
                             label.x = -30, label.y = 20, size =3) +
       geom_abline(intercept = 0, slope = 1, col = 'grey50',linetype="dashed") + 
       facet_wrap(~dLevelsAminusB, ncol = length(unique(MBR.DF$dLevelsAminusB)) ) + 
-      ylab("MBR") + xlim(-30, 30)+ ylim(-30, 30) + xlab("EC") +theme_bw()
+  ylab("MBR") + xlim(-30, 30)+ ylim(-30, 30) + xlab("EC") +theme_bw()
     
     
     p.2 <- ggplot(data = WP.DF  , aes(x = FC_turb_interp, y = FG_mean ))  + 
@@ -58,8 +58,8 @@ one2one.plots <- function ( MBR.DF, AE.DF, WP.DF, gas){
       geom_abline(intercept = 0, slope = 1, col = 'grey50',linetype="dashed") + 
       facet_wrap(~ dLevelsAminusB, ncol = length(unique(AE.DF$dLevelsAminusB ))) +
       ylab("AE")+ xlim(-30, 30)+ ylim(-30, 30) + xlab("EC")+theme_bw()
-    
-    final.plot <- ggpubr::ggarrange(p.1, p.3, p.2,
+      
+      final.plot <- ggpubr::ggarrange(p.1, p.3, p.2,
                                     ncol=1, nrow=3)
   }
   
@@ -69,7 +69,7 @@ one2one.plots <- function ( MBR.DF, AE.DF, WP.DF, gas){
     WP.DF <- WP.DF %>% filter(gas == "H2O")
     MBR.DF <- MBR.DF %>% filter(gas == "H2O")
     
-    p.1 <- ggplot(data = MBR.DF , aes(x = FH2O_interp, y = FG_mean ))  + 
+    p.1 <- ggplot(data = MBR.DF , aes(x = FC_turb_interp, y = FG_mean ))  + 
       stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
       geom_point(alpha=0.1) +
       stat_cor(aes(label = paste(..rr.label.., ..p.label.., sep = "~`,`~")), # adds R^2 and p-value
@@ -83,7 +83,7 @@ one2one.plots <- function ( MBR.DF, AE.DF, WP.DF, gas){
       ylab("MBR") + xlim(-30, 30)+ ylim(-30, 30) + xlab("EC") +theme_bw()
     
     
-    p.2 <- ggplot(data = WP.DF  , aes(x = FH2O_interp, y = FG_mean ))  + 
+    p.2 <- ggplot(data = WP.DF  , aes(x = FC_turb_interp, y = FG_mean ))  + 
       stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
       geom_point(alpha=0.1) +
       stat_cor(aes(label = paste(..rr.label.., ..p.label.., sep = "~`,`~")), # adds R^2 and p-value
@@ -96,7 +96,7 @@ one2one.plots <- function ( MBR.DF, AE.DF, WP.DF, gas){
       facet_wrap(~ dLevelsAminusB, ncol = length(unique(WP.DF$dLevelsAminusB ))) + 
       ylab("WP")+ xlim(-30, 30)+ ylim(-30, 30) + xlab("EC")+theme_bw()
     
-    p.3 <- ggplot(data = AE.DF  ,aes(x = FH2O_interp, y = FG_mean ))  + 
+    p.3 <- ggplot(data = AE.DF  ,aes(x = FC_turb_interp, y = FG_mean ))  + 
       stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
       geom_point(alpha=0.1) +
       stat_cor(aes(label = paste(..rr.label.., ..p.label.., sep = "~`,`~")), # adds R^2 and p-value
@@ -108,13 +108,13 @@ one2one.plots <- function ( MBR.DF, AE.DF, WP.DF, gas){
       geom_abline(intercept = 0, slope = 1, col = 'grey50',linetype="dashed") + 
       facet_wrap(~ dLevelsAminusB, ncol = length(unique(AE.DF$dLevelsAminusB ))) + 
       ylab("AE")+ xlim(-30, 30)+ ylim(-30, 30) + xlab("EC")+theme_bw()
-    
-    final.plot <- ggpubr::ggarrange(p.1, p.3, p.2,
-                                    ncol=1, nrow=3)
-  }
-  
-  
-  return(final.plot )
+      
+      final.plot <- ggpubr::ggarrange(p.1, p.3, p.2,
+                                      ncol=1, nrow=3)
+    }
+ 
+
+return(final.plot )
 }
 
 linear.parms <- function ( Y, X, DF, TYPE){
@@ -140,7 +140,7 @@ one2one.parms <- function ( MBR.DF, AE.DF, WP.DF, gas){
   
   MBR.DF <- MBR.DF %>% as.data.frame
   names(MBR.DF) <- substring( names( MBR.DF), 6)
-  
+
   AE.DF <- AE.DF %>% as.data.frame
   names(AE.DF) <- substring( names( AE.DF), 6)
   
@@ -155,54 +155,41 @@ one2one.parms <- function ( MBR.DF, AE.DF, WP.DF, gas){
                                     Approach = as.character() , 
                                     dLevelsAminusB = as.character() )
   
-  dLevelsAll <- unique(c(unique( AE.DF$dLevelsAminusB),unique( WP.DF$dLevelsAminusB),unique( MBR.DF$dLevelsAminusB)))
-  
-  if(gas == 'CO2'){
+  if(gas == 'CO2'){ 
     
     AE.DF <- AE.DF %>% filter(gas == "CO2")
     WP.DF <- WP.DF %>% filter(gas == "CO2")
     MBR.DF <- MBR.DF %>% filter(gas == "CO2")
+  
+  for ( a in unique( AE.DF$dLevelsAminusB)){
+    print(a)
     
-    for ( a in dLevelsAll){
-      print(a)
-      
-      if(any(a %in% MBR.DF$dLevelsAminusB)){
-        linear.parms.mbr <- linear.parms( Y= 'FG_mean', 
+    linear.parms.mbr <- linear.parms( Y= 'FG_mean', 
                                           X='FC_turb_interp', 
                                           DF = MBR.DF %>% 
                                             filter(dLevelsAminusB == a),
                                           TYPE= 'MBR')
-      } else {
-        linear.parms.mbr <- NULL
-      }
-      
-      if(any(a %in% AE.DF$dLevelsAminusB)){
-        linear.parms.AE <- linear.parms( Y= 'FG_mean', 
-                                         X='FC_turb_interp', 
-                                         DF = AE.DF %>% 
-                                           filter(dLevelsAminusB == a),
-                                         TYPE= 'AE')
-      } else {
-        linear.parms.AE <- NULL
-      }
-      
-      if(any(a %in% WP.DF$dLevelsAminusB)){
-        linear.parms.WP <-linear.parms( Y= 'FG_mean', 
-                                        X='FC_turb_interp', 
-                                        DF = WP.DF %>% 
-                                          filter(dLevelsAminusB == a),
-                                        TYPE= 'WP')
-      } else {
-        linear.parms.WP <- NULL
-      }  
-      
-      linear.parms.data <- rbind(linear.parms.mbr, linear.parms.AE, linear.parms.WP) %>% as.data.frame %>% mutate( dLevelsAminusB = a) 
-      
-      linear.parms.final <- rbind( linear.parms.final , linear.parms.data )
-      
-    }
     
-    row.names(linear.parms.final) <- NULL
+    linear.parms.AE <- linear.parms( Y= 'FG_mean', 
+                                   X='FC_turb_interp', 
+                                   DF = AE.DF %>% 
+                                    filter(dLevelsAminusB == a),
+                                  TYPE= 'AE')
+  
+    linear.parms.WP <-linear.parms( Y= 'FG_mean', 
+                                  X='FC_turb_interp', 
+                                  DF = WP.DF %>% 
+                                    filter(dLevelsAminusB == a),
+                                  TYPE= 'WP')
+  
+  
+  linear.parms.data <- rbind(linear.parms.mbr, linear.parms.AE, linear.parms.WP) %>% as.data.frame %>% mutate( dLevelsAminusB = a) 
+
+  linear.parms.final <- rbind( linear.parms.final , linear.parms.data )
+    
+  }
+  
+  row.names(linear.parms.final) <- NULL
   }
   
   if(gas == 'H2O'){ 
@@ -211,38 +198,25 @@ one2one.parms <- function ( MBR.DF, AE.DF, WP.DF, gas){
     WP.DF <- WP.DF %>% filter(gas == "H2O")
     MBR.DF <- MBR.DF %>% filter(gas == "H2O")
     
-    for ( a in dLevelsAll){
+    for ( a in unique(AE.DF$dLevelsAminusB)){
       print(a)
       
-      if(any(a %in% MBR.DF$dLevelsAminusB)){
-        linear.parms.mbr <- linear.parms( Y= 'FG_mean', 
-                                          X='FH2O_interp', 
-                                          DF = MBR.DF %>% 
-                                            filter(dLevelsAminusB == a),
-                                          TYPE= 'MBR')
-      } else {
-        linear.parms.MBR <- NULL
-      }
+      linear.parms.mbr <- linear.parms( Y= 'FG_mean', 
+                                            X='FC_turb_interp', 
+                                            DF = MBR.DF %>% 
+                                              filter(dLevelsAminusB == a),
+                                            TYPE= 'MBR')
+      linear.parms.AE <- linear.parms( Y= 'FG_mean', 
+                                           X='FC_turb_interp', 
+                                           DF = AE.DF %>% 
+                                             filter(dLevelsAminusB == a),
+                                           TYPE= 'AE')
       
-      if(any(a %in% AE.DF$dLevelsAminusB)){
-        linear.parms.AE <- linear.parms( Y= 'FG_mean', 
-                                         X='FH2O_interp', 
-                                         DF = AE.DF %>% 
-                                           filter(dLevelsAminusB == a),
-                                         TYPE= 'AE')
-      } else {
-        linear.parms.AE <- NULL
-      }
-      
-      if(any(a %in% WP.DF$dLevelsAminusB)){
-        linear.parms.WP <- linear.parms( Y= 'FG_mean', 
-                                         X='FH2O_interp', 
-                                         DF = WP.DF %>% 
-                                           filter(dLevelsAminusB == a),
-                                         TYPE= 'WP')
-      } else {
-        linear.parms.WP <- NULL
-      }
+      linear.parms.WP <- linear.parms( Y= 'FG_mean', 
+                                           X='FC_turb_interp', 
+                                           DF = WP.DF %>% 
+                                             filter(dLevelsAminusB == a),
+                                           TYPE= 'WP')
       
       
       linear.parms.data <- rbind(linear.parms.mbr, linear.parms.AE, linear.parms.WP) %>% as.data.frame %>% mutate( dLevelsAminusB = a) 
@@ -274,12 +248,12 @@ one2one.parms.site <- function ( MBR.tibble, AE.tibble, WP.tibble, gas){
     print(i)
     
     df.parms <- one2one.parms( MBR.DF= MBR.tibble[i] , 
-                               AE.DF = AE.tibble[i], 
-                               WP.DF= WP.tibble[i], gas) %>%
+                      AE.DF = AE.tibble[i], 
+                      WP.DF= WP.tibble[i], gas) %>%
       mutate( Site = i)
     
     site.tibble_parms  <- rbind( site.tibble_parms ,  df.parms)
   }
   
-  return(site.tibble_parms ) 
+ return(site.tibble_parms ) 
 }

@@ -27,7 +27,7 @@ lterwg-flux-gradient/
 │
 ├── exploratory/             # Preliminary analyses and development
 │   ├── flow.calc.flux.batch.R
-│   ├── flow.validation.*.R
+│   ├── flow.evaluation_dataframe.R
 │   └── flow.evaluation.*.R
 │
 └── deprecated/              # Unused workflows and functions

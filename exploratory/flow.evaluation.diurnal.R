@@ -2,17 +2,17 @@
 source(fs::path(DirRepo,'exploratory/FUNCTION_DIURNAL.R' ))
 
 # Calculate Diurnal Patterns by Year-month:
-Diurnal.MBR.CO2 <- DIURNAL.COMPILE.Sites( FG.tibble =  SITES_MBR_9min_FILTER_BH, 
+Diurnal.MBR.CO2 <- DIURNAL.COMPILE.Sites( FG.tibble =  SITES_MBR_30min_FILTER_BH, 
                                           FG_flux = 'FG_mean', 
                                           EC_flux = 'FC_turb_interp',
                                           Gas = "CO2")
 
-Diurnal.WP.CO2 <- DIURNAL.COMPILE.Sites( FG.tibble =  SITES_WP_9min_FILTER_BH, 
+Diurnal.WP.CO2 <- DIURNAL.COMPILE.Sites( FG.tibble =  SITES_WP_30min_FILTER_BH, 
                                          FG_flux = 'FG_mean', 
                                          EC_flux = 'FC_turb_interp', 
                                          Gas = "CO2")
 
-Diurnal.AE.CO2 <- DIURNAL.COMPILE.Sites( FG.tibble =  SITES_AE_9min_FILTER_BH, 
+Diurnal.AE.CO2 <- DIURNAL.COMPILE.Sites( FG.tibble =  SITES_AE_30min_FILTER_BH, 
                                          FG_flux = 'FG_mean', 
                                          EC_flux = 'FC_turb_interp', 
                                          Gas = "CO2")
@@ -22,15 +22,15 @@ diurnal.summary.CO2 <- Diurnal.Summary(diurnal.tibble = Diurnal.MBR.CO2, TYP='MB
 # DIurnals for H2O
 
 # add Gas to the function!!!!
-Diurnal.MBR.H2O <- DIURNAL.COMPILE.Sites( FG.tibble =  SITES_MBR_9min_FILTER_BH, 
+Diurnal.MBR.H2O <- DIURNAL.COMPILE.Sites( FG.tibble =  SITES_MBR_30min_FILTER_BH, 
                                           FG_flux = 'FG_mean', 
                                           EC_flux = 'FH2O_interp', Gas = "H2O")
 
-Diurnal.WP.H2O <- DIURNAL.COMPILE.Sites( FG.tibble =  SITES_WP_9min_FILTER_BH, 
+Diurnal.WP.H2O <- DIURNAL.COMPILE.Sites( FG.tibble =  SITES_WP_30min_FILTER_BH, 
                                          FG_flux = 'FG_mean', 
                                          EC_flux = 'FH2O_interp', Gas = "H2O")
 
-Diurnal.AE.H2O <- DIURNAL.COMPILE.Sites( FG.tibble =  SITES_AE_9min_FILTER_BH, 
+Diurnal.AE.H2O <- DIURNAL.COMPILE.Sites( FG.tibble =  SITES_AE_30min_FILTER_BH, 
                                          FG_flux = 'FG_mean', 
                                          EC_flux = 'FH2O_interp', Gas = "H2O")
 
