@@ -11,7 +11,7 @@ filter_fluxes <- function( df,
                            rmvEddyOutlier, # Set to TRUE to remove data where Eddy_outlier == 1. Applies only to AE and WP methods
                            approach){
   df <- as.data.frame(df) 
-  names(df) <- substring( names(df), 6)
+  #names(df) <- substring( names(df), 6)
   
   H.filter.list = df$dLevelsAminusB %>% unique
   
@@ -31,7 +31,6 @@ filter_fluxes <- function( df,
   if(rmvEddyOutlier == FALSE){
     df$Eddy_outlier <- 0
   }
-  
   
   df.new <- df %>% mutate(diff.flux = abs(FG_mean - FC_turb_interp),
                           dConcSNR.filter = abs(dConc)/dConc_sd,
@@ -98,7 +97,7 @@ filter_report <- function( df,
                            approach){
   df <- as.data.frame(df) 
   
-  names(df) <- substring( names(df), 6)
+  #names(df) <- substring( names(df), 6)
   
   H.filter.list = df$dLevelsAminusB %>% unique
   
