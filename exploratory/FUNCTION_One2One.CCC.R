@@ -8,13 +8,13 @@ source("./functions/calc.lins.ccc.R")
 ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
   
   MBR.DF <- MBR.DF %>% as.data.frame
-  names(MBR.DF) <- substring(names(MBR.DF), 6)
+  #names(MBR.DF) <- substring(names(MBR.DF), 6)
   
   AE.DF <- AE.DF %>% as.data.frame
-  names(AE.DF) <- substring(names(AE.DF), 6) 
+  #names(AE.DF) <- substring(names(AE.DF), 6) 
   
   WP.DF <- WP.DF %>% as.data.frame
-  names(WP.DF) <- substring(names(WP.DF), 6)
+  #names(WP.DF) <- substring(names(WP.DF), 6)
   
   if(gas == 'CO2') {
     
@@ -25,26 +25,25 @@ ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
     p.1 <- ggplot(data = MBR.DF, aes(x = FC_turb_interp, y = FG_mean))  + 
       stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
       geom_point(alpha=0.1) +
+      facet_wrap(~dLevelsAminusB, ncol = length(unique(MBR.DF$dLevelsAminusB))) +
       # Add CCC annotation using annotate instead of stat_cor
-      annotate("text", x = -30, y = 30, size = 3, 
+      annotate("text", x = -20, y = 20, size = 5, 
                label = MBR.DF %>% 
                  group_by(dLevelsAminusB) %>% 
-                 summarize(ccc = calculate_lins_ccc(FC_turb_interp, FG_mean)$rho.c$est %>% 
-                             round(2) %>% 
+                 summarize(ccc = calculate_lins_ccc(FC_turb_interp, FG_mean)$rho.c$est %>% round(2) %>% 
                              paste("CCC =", .)) %>% 
                  pull(ccc) %>% 
                  paste(collapse = "\n")) +
       stat_regline_equation(aes(label = ..eq.label..), # adds equation to linear regression
-                            label.x = -30, label.y = 20, size =3) +
+                            label.x = -20, label.y = 20, size =1) +
       geom_abline(intercept = 0, slope = 1, col = 'grey50', linetype="dashed") + 
-      facet_wrap(~dLevelsAminusB, ncol = length(unique(MBR.DF$dLevelsAminusB))) + 
       ylab("MBR") + xlim(-30, 30) + ylim(-30, 30) + xlab("EC") + theme_bw()
     
     p.2 <- ggplot(data = WP.DF, aes(x = FC_turb_interp, y = FG_mean))  + 
       stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
       geom_point(alpha=0.1) +
       # Add CCC annotation
-      annotate("text", x = -30, y = 30, size = 3, 
+      annotate("text", x = -20, y = 30, size = 5, 
                label = WP.DF %>% 
                  group_by(dLevelsAminusB) %>% 
                  summarize(ccc = calculate_lins_ccc(FC_turb_interp, FG_mean)$rho.c$est %>% 
@@ -53,7 +52,7 @@ ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
                  pull(ccc) %>% 
                  paste(collapse = "\n")) +
       stat_regline_equation(aes(label = ..eq.label..), # adds equation to linear regression
-                            label.x = -30, label.y = 20, size =3) +
+                            label.x = -20, label.y = 20, size =1) +
       geom_abline(intercept = 0, slope = 1, col = 'grey50', linetype="dashed") + 
       facet_wrap(~ dLevelsAminusB, ncol = length(unique(WP.DF$dLevelsAminusB))) + 
       ylab("WP") + xlim(-30, 30) + ylim(-30, 30) + xlab("EC") + theme_bw()
@@ -62,7 +61,7 @@ ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
       stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
       geom_point(alpha=0.1) +
       # Add CCC annotation
-      annotate("text", x = -30, y = 30, size = 3, 
+      annotate("text", x = -20, y = 30, size = 5, 
                label = AE.DF %>% 
                  group_by(dLevelsAminusB) %>% 
                  summarize(ccc = calculate_lins_ccc(FC_turb_interp, FG_mean)$rho.c$est %>% 
@@ -71,7 +70,7 @@ ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
                  pull(ccc) %>% 
                  paste(collapse = "\n")) +
       stat_regline_equation(aes(label = ..eq.label..), # adds equation to linear regression
-                            label.x = -30, label.y = 20, size =3) +
+                            label.x = -20, label.y = 20, size =1) +
       geom_abline(intercept = 0, slope = 1, col = 'grey50', linetype="dashed") + 
       facet_wrap(~ dLevelsAminusB, ncol = length(unique(AE.DF$dLevelsAminusB))) +
       ylab("AE") + xlim(-30, 30) + ylim(-30, 30) + xlab("EC") + theme_bw()
@@ -90,7 +89,7 @@ ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
       stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
       geom_point(alpha=0.1) +
       # Add CCC annotation
-      annotate("text", x = -30, y = 30, size = 3, 
+      annotate("text", x = -20, y = 30, size = 5, 
                label = MBR.DF %>% 
                  group_by(dLevelsAminusB) %>% 
                  summarize(ccc = calculate_lins_ccc(FH2O_interp, FG_mean)$rho.c$est %>% 
@@ -99,7 +98,7 @@ ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
                  pull(ccc) %>% 
                  paste(collapse = "\n")) +
       stat_regline_equation(aes(label = ..eq.label..), # adds equation to linear regression
-                            label.x = -30, label.y = 20, size =3) +
+                            label.x = -20, label.y = 20, size =1) +
       geom_abline(intercept = 0, slope = 1, col = 'grey50', linetype="dashed") + 
       facet_wrap(~dLevelsAminusB, ncol = length(unique(MBR.DF$dLevelsAminusB))) + 
       ylab("MBR") + xlim(-30, 30) + ylim(-30, 30) + xlab("EC") + theme_bw()
@@ -108,7 +107,7 @@ ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
       stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
       geom_point(alpha=0.1) +
       # Add CCC annotation
-      annotate("text", x = -30, y = 30, size = 3, 
+      annotate("text", x = -20, y = 30, size = 5, 
                label = WP.DF %>% 
                  group_by(dLevelsAminusB) %>% 
                  summarize(ccc = calculate_lins_ccc(FH2O_interp, FG_mean)$rho.c$est %>% 
@@ -117,7 +116,7 @@ ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
                  pull(ccc) %>% 
                  paste(collapse = "\n")) +
       stat_regline_equation(aes(label = ..eq.label..), # adds equation to linear regression
-                            label.x = -30, label.y = 20, size =3) +
+                            label.x = -20, label.y = 20, size =1) +
       geom_abline(intercept = 0, slope = 1, col = 'grey50', linetype="dashed") + 
       facet_wrap(~ dLevelsAminusB, ncol = length(unique(WP.DF$dLevelsAminusB))) + 
       ylab("WP") + xlim(-30, 30) + ylim(-30, 30) + xlab("EC") + theme_bw()
@@ -126,7 +125,7 @@ ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
       stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
       geom_point(alpha=0.1) +
       # Add CCC annotation
-      annotate("text", x = -30, y = 30, size = 3, 
+      annotate("text", x = -20, y = 30, size = 5, 
                label = AE.DF %>% 
                  group_by(dLevelsAminusB) %>% 
                  summarize(ccc = calculate_lins_ccc(FH2O_interp, FG_mean)$rho.c$est %>% 
@@ -135,7 +134,7 @@ ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
                  pull(ccc) %>% 
                  paste(collapse = "\n")) +
       stat_regline_equation(aes(label = ..eq.label..), # adds equation to linear regression
-                            label.x = -30, label.y = 20, size =3) +
+                            label.x = -20, label.y = 20, size =1) +
       geom_abline(intercept = 0, slope = 1, col = 'grey50', linetype="dashed") + 
       facet_wrap(~ dLevelsAminusB, ncol = length(unique(AE.DF$dLevelsAminusB))) + 
       ylab("AE") + xlim(-30, 30) + ylim(-30, 30) + xlab("EC") + theme_bw()
@@ -150,8 +149,11 @@ ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
 ccc.parms <- function(Y, X, DF, TYPE) {
   
   if(sum(!is.na(DF[,X]+DF[,Y])) < 3) {
-    ccc.parms <- data.frame(Intercept = as.numeric(NA), Slope = as.numeric(NA),
-                            CCC = as.numeric(NA), RMSE = as.numeric(NA)) %>% 
+    ccc.parms <- data.frame(Intercept = as.numeric(NA), 
+                            Slope = as.numeric(NA),
+                            CCC = as.numeric(NA), 
+                            RMSE = as.numeric(NA),
+                            R2= as.numeric(NA)) %>% 
       mutate(Approach = TYPE)
     return(ccc.parms)
   }
@@ -165,8 +167,11 @@ ccc.parms <- function(Y, X, DF, TYPE) {
   # Calculate CCC
   ccc_result <- calculate_lins_ccc(DF[,X], DF[,Y])
   
-  ccc.parms <- data.frame(Intercept = model$coefficients[1], Slope = model$coefficients[2],
-                          CCC = ccc_result$rho.c$est, RMSE = rmse) %>% 
+  ccc.parms <- data.frame(Intercept = model$coefficients[1], 
+                          Slope = model$coefficients[2],
+                          CCC = ccc_result$rho.c$est, 
+                          RMSE = rmse,
+                          R2= summary(model)$r.squared) %>% 
     mutate(Approach = TYPE)
   
   return(ccc.parms)
