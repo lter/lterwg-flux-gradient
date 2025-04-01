@@ -85,33 +85,35 @@ message('Running Filter...')
 
 source(fs::path(DirRepo,'exploratory/flow.evaluation.filter.R'))
 
-
-#fileSave <- fs::path(localdir,paste0("FilteredData_",sffx,".Rdata"))
-#save( SITES_WP_9min_FILTER,SITES_AE_9min_FILTER, SITES_MBR_9min_FILTER ,
-#      file=fileSave)
-#googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
-
-#fileSave <- fs::path(localdir,paste0("FilterReport_",sffx,".Rdata"))
-#save( SITES_WP_9min.report,SITES_AE_9min.report, SITES_MBR_9min.report ,
-#      file=fileSave)
-#googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
+# Compiles Dataframes into one list:
+source(fs::path(DirRepo,'exploratory/flow.evaluation.SITELIST.R'))
 
 # Application of the One2One Analysis ####
 
 message('Running One2One with CCC computation for best height...')
+# set where you want plots to go:
+dir.one2one <- '/Volumes/MaloneLab/Research/FluxGradient/One2One_Plots'
 source(fs::path(DirRepo,'exploratory/flow.evaluation.One2One.CCC.R'))
 
-fileSave <- fs::path(localdir,paste0("One2One_",sffx,".Rdata"))
+fileSave <- fs::path(localdir,paste0("SITES_One2One.Rdata"))
 save( SITES_One2One,file=fileSave)
 googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
 
-fileSave <- fs::path(localdir,paste0("FilteredData_",sffx,"_BH.Rdata"))
+fileSave <- fs::path(localdir,paste0("FilteredData_BH.Rdata"))
 save( SITES_WP_9min_FILTER_BH,SITES_AE_9min_FILTER_BH, SITES_MBR_9min_FILTER_BH ,
       file=fileSave)
 googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
 
+# Zip the plots and upload to google"
+
+files2zip <- dir(dir.one2one, full.names = TRUE)
+zip(zipfile = 'One2One.zip', files = files2zip)
+
+fileSave <- paste(dir.one2one, 'One2One.zip', sep="/")
+googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
+
+
 # Application of the Diurnal Analysis ####
-load(fileSave)
 
 source(fs::path(DirRepo,'exploratory/flow.evaluation.diurnal.R'))
 
