@@ -86,10 +86,9 @@ message('Running Filter...')
 source(fs::path(DirRepo,'exploratory/flow.evaluation.filter.R'))
 
 # Compiles Dataframes into one list:
-source(fs::path(DirRepo,'exploratory/flow.evaluation.SITELIST.R'))
+source(fs::path(DirRepo,'exploratory/flow.evaluation_SITELIST.R'))
 
 # Application of the One2One Analysis ####
-
 message('Running One2One with CCC computation for best height...')
 # set where you want plots to go:
 dir.one2one <- '/Volumes/MaloneLab/Research/FluxGradient/One2One_Plots'
@@ -114,19 +113,33 @@ googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
 
 
 # Application of the Diurnal Analysis ####
+load(fs::path(localdir,paste0("FilteredData_BH.Rdata")))
+# set where you want plots to go:
+dir.diel <- '/Volumes/MaloneLab/Research/FluxGradient/DIEL_Plots'
 
 source(fs::path(DirRepo,'exploratory/flow.evaluation.diurnal.R'))
 
-fileSave <- fs::path(localdir,paste0("DiurnalSummary_",sffx,"_BH.Rdata"))
+fileSave <- fs::path(localdir,paste0("DiurnalSummary_BH.Rdata"))
+
 save( diurnal.summary.H2O ,diurnal.summary.CO2, 
       file=fileSave)
 googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
 
-fileSave <- fs::path(localdir,paste0("Diurnal_",sffx,"_BH.Rdata"))
+fileSave <- fs::path(localdir,paste0("Diurnal_SITES_BH.Rdata"))
+
 save( Diurnal.AE.H2O , Diurnal.MBR.H2O,  Diurnal.WP.H2O,
       Diurnal.AE.CO2 , Diurnal.MBR.CO2,  Diurnal.WP.CO2,
       file=fileSave)
 googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
+
+# Zip the plots and upload to google"
+
+files2zip <- dir(dir.diel, full.names = TRUE)
+zip(zipfile = 'DIEL.zip', files = files2zip)
+
+fileSave <- paste(dir.diel, 'DIEL.zip', sep="/")
+googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
+
 
 # Carbon Exchange PARMS: ####
 load(fs::path(localdir,paste0("FilteredData_",sffx,"_BH.Rdata")))

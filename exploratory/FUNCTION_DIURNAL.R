@@ -9,13 +9,14 @@ DIURNAL <- function( dataframe, flux, flux.other , Gas){
   dataframe$flux.other <- dataframe[, flux.other]
   dataframe$flux <- dataframe[, flux]
   dataframe.GrowS <- dataframe %>% 
-                     mutate( Month = Month %>% as.numeric) %>% 
-                     filter( Month >= 4,
-                             Month < 11, 
-                             !is.na(flux.other),
+                     mutate(  Month = match_time %>% format("%m") %>% as.numeric,
+                              YearMon = match_time %>% format("%Y-%m"),
+                              Hour = match_time %>% format("%H"),
+                              TowerH = paste(TowerPosition_A, TowerPosition_B, sep="-")) %>% 
+                     filter( !is.na(flux.other),
                              !is.na(flux),
                              gas == Gas)
-  
+
   dataframe.GrowS$flux <- dataframe.GrowS$flux.other <- NULL
   
   yearmon <- unique(dataframe.GrowS$YearMon)
@@ -37,8 +38,8 @@ DIURNAL <- function( dataframe, flux, flux.other , Gas){
         
           pred <- predict(model, newdata = subset, se=TRUE)
         
-          new.data  <- dataframe.GrowS %>% filter(YearMon == i, TowerH == a) %>% mutate(DIURNAL = pred$fit,
-                                                                        DIURNAL.SE =pred$fit* qt(0.95 / 2 + 0.5, pred$df) )
+          new.data  <- subset %>% mutate(DIURNAL = pred$fit, DIURNAL.SE =pred$fit* qt(0.95 / 2 + 0.5, pred$df) )
+          
           Final.data <- rbind(  Final.data, new.data)
         },silent=T)
       
@@ -102,14 +103,19 @@ DIURNAL.COMPILE.Sites <- function( FG.tibble, FG_flux, EC_flux, Gas ) {
 
 Diurnal.Summary <- function(diurnal.tibble, TYP ) {
   # Summarize the Diurnal Information:
-  diurnal.tibble
   sites <- names( diurnal.tibble)
   
   summary.diurnal <- data.frame(
     TowerH = as.character(), 
+    FG.count = as.numeric(),
     FG.mean = as.numeric(),   
+    FG.min = as.numeric(),
+    FG.max = as.numeric(),
     FG.SE = as.numeric(), 
+    EC.count = as.numeric(),
     EC.mean = as.numeric(),
+    EC.min = as.numeric(),
+    EC.max = as.numeric(),
     EC.SE = as.numeric(),
     DIFF.mean = as.numeric(),  
     DIFF.SE = as.numeric(),
@@ -123,16 +129,26 @@ Diurnal.Summary <- function(diurnal.tibble, TYP ) {
     
     sub <- dataframe %>% reframe(.by = c(YearMon, TowerH),
                                  FG = sum(abs(FG), na.rm=T), 
+                                 FG.count = length(FG %>% na.omit ),
+                                 EC.count = length(EC %>% na.omit ),
                                  FG.SE = sum(abs(FG.SE), na.rm=T), 
                                  EC = sum(abs(EC), na.rm=T), 
                                  EC.SE = sum(abs(EC.SE), na.rm=T),
-                                 DIFF = sum(abs(DIFF), na.rm=T)) %>% reframe( .by = TowerH,
-                                                                     FG.mean = mean(FG, na.rm=T), 
-                                                                     FG.SE = var(FG, na.rm=T)/sqrt(length(FG)), 
-                                                                     EC.mean = mean(EC, na.rm=T), 
-                                                                     EC.SE = var(EC, na.rm=T)/sqrt(length(EC)),
-                                                                     DIFF.mean = mean(DIFF, na.rm=T), 
-                                                                     DIFF.SE = var(DIFF, na.rm=T)/sqrt(length(DIFF)),) %>% mutate( Site = i)
+                                 DIFF = sum(abs(DIFF), na.rm=T)) %>% 
+      reframe( .by = TowerH,
+               FG.count = sum(FG.count ),
+               FG.min = min(FG, na.rm=T),
+               FG.max = max(FG, na.rm=T),
+               FG.mean = mean(FG, na.rm=T), 
+               FG.SE = var(FG, na.rm=T)/sqrt(length(FG)),
+               EC.count = sum(EC.count ),
+               EC.min = min(EC, na.rm=T), 
+               EC.max = max(EC, na.rm=T), 
+               EC.mean = mean(EC, na.rm=T), 
+               EC.SE = var(EC, na.rm=T)/sqrt(length(EC)),
+               DIFF.mean = mean(DIFF, na.rm=T), 
+               DIFF.SE = var(DIFF, na.rm=T)/sqrt(length(DIFF))) %>% mutate( Site = i)
+                                                                              
     
     summary.diurnal <- rbind( summary.diurnal, sub)
     
