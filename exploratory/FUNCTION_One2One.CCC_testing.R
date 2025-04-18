@@ -1,5 +1,5 @@
 # Source the CCC calculation function
-source("./functions/calc.lins.ccc.R")
+source(fs::path(DirRepo,"./functions/calc.lins.ccc.R"))
 
 # CCC PLOTS: ####
 
@@ -66,42 +66,51 @@ ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
     })
     
     # Create the plots with custom labels
+  #  p.1 <- ggplot(data = MBR.DF, aes(x = FC_turb_interp, y = FG_mean)) + 
+  #   stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
+   #   geom_point(alpha=0.1) +
+  #    facet_wrap(~ dLevelsAminusB, ncol = length(unique(MBR.DF$dLevelsAminusB)),
+  #               labeller = function(variable, value) {
+   #                if(variable == "dLevelsAminusB") {
+ #                   return(mbr_labels[as.character(value)])
+  #                 }
+   #                return(value)
+   #              }) +
+   #   geom_abline(intercept = 0, slope = 1, col = 'grey50', linetype="dashed") + 
+   #   ylab("MBR") + xlim(-30, 30) + ylim(-30, 30) + xlab("EC") + theme_bw()
+    
     p.1 <- ggplot(data = MBR.DF, aes(x = FC_turb_interp, y = FG_mean)) + 
       stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
       geom_point(alpha=0.1) +
-      facet_wrap(~ dLevelsAminusB, ncol = length(unique(MBR.DF$dLevelsAminusB)),
-                 labeller = function(variable, value) {
-                   if(variable == "dLevelsAminusB") {
-                     return(mbr_labels[as.character(value)])
-                   }
-                   return(value)
-                 }) +
+      facet_wrap(~ dLevelsAminusB, ncol = length(unique(MBR.DF$dLevelsAminusB))) +
       geom_abline(intercept = 0, slope = 1, col = 'grey50', linetype="dashed") + 
       ylab("MBR") + xlim(-30, 30) + ylim(-30, 30) + xlab("EC") + theme_bw()
+    
+  
+   # p.2 <- ggplot(data = WP.DF, aes(x = FC_turb_interp, y = FG_mean)) + 
+    #  stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
+    #  geom_point(alpha=0.1) +
+    #  facet_wrap(~ dLevelsAminusB, ncol = length(unique(WP.DF$dLevelsAminusB)),
+    #             labeller = function(variable, value) {
+    #               if(variable == "dLevelsAminusB") {
+     #                return(wp_labels[as.character(value)])
+     #              }
+       #            return(value)
+      #           }) +
+      #geom_abline(intercept = 0, slope = 1, col = 'grey50', linetype="dashed") + 
+      #ylab("WP") + xlim(-30, 30) + ylim(-30, 30) + xlab("EC") + theme_bw()
     
     p.2 <- ggplot(data = WP.DF, aes(x = FC_turb_interp, y = FG_mean)) + 
       stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
       geom_point(alpha=0.1) +
-      facet_wrap(~ dLevelsAminusB, ncol = length(unique(WP.DF$dLevelsAminusB)),
-                 labeller = function(variable, value) {
-                   if(variable == "dLevelsAminusB") {
-                     return(wp_labels[as.character(value)])
-                   }
-                   return(value)
-                 }) +
+      facet_wrap(~ dLevelsAminusB, ncol = length(unique(WP.DF$dLevelsAminusB))) +
       geom_abline(intercept = 0, slope = 1, col = 'grey50', linetype="dashed") + 
       ylab("WP") + xlim(-30, 30) + ylim(-30, 30) + xlab("EC") + theme_bw()
     
     p.3 <- ggplot(data = AE.DF, aes(x = FC_turb_interp, y = FG_mean)) + 
       stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
       geom_point(alpha=0.1) +
-      facet_wrap(~ dLevelsAminusB, ncol = length(unique(AE.DF$dLevelsAminusB)),
-                 labeller = function(variable, value) {
-                   if(variable == "dLevelsAminusB") {
-                     return(ae_labels[as.character(value)])
-                   }
-                   return(value)
-                 }) +
+      facet_wrap(~ dLevelsAminusB, ncol = length(unique(AE.DF$dLevelsAminusB))) +
       geom_abline(intercept = 0, slope = 1, col = 'grey50', linetype="dashed") + 
       ylab("AE") + xlim(-30, 30) + ylim(-30, 30) + xlab("EC") + theme_bw()
     
@@ -131,39 +140,21 @@ ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
     p.1 <- ggplot(data = MBR.DF, aes(x = FH2O_interp, y = FG_mean)) + 
       stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
       geom_point(alpha=0.1) +
-      facet_wrap(~ dLevelsAminusB, ncol = length(unique(MBR.DF$dLevelsAminusB)),
-                 labeller = function(variable, value) {
-                   if(variable == "dLevelsAminusB") {
-                     return(mbr_labels[as.character(value)])
-                   }
-                   return(value)
-                 }) +
+      facet_wrap(~ dLevelsAminusB, ncol = length(unique(MBR.DF$dLevelsAminusB))) +
       geom_abline(intercept = 0, slope = 1, col = 'grey50', linetype="dashed") + 
       ylab("MBR") + xlim(-30, 30) + ylim(-30, 30) + xlab("EC") + theme_bw()
     
     p.2 <- ggplot(data = WP.DF, aes(x = FH2O_interp, y = FG_mean)) + 
       stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
       geom_point(alpha=0.1) +
-      facet_wrap(~ dLevelsAminusB, ncol = length(unique(WP.DF$dLevelsAminusB)),
-                 labeller = function(variable, value) {
-                   if(variable == "dLevelsAminusB") {
-                     return(wp_labels[as.character(value)])
-                   }
-                   return(value)
-                 }) +
+      facet_wrap(~ dLevelsAminusB, ncol = length(unique(WP.DF$dLevelsAminusB))) +
       geom_abline(intercept = 0, slope = 1, col = 'grey50', linetype="dashed") + 
       ylab("WP") + xlim(-30, 30) + ylim(-30, 30) + xlab("EC") + theme_bw()
     
     p.3 <- ggplot(data = AE.DF, aes(x = FH2O_interp, y = FG_mean)) + 
       stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
       geom_point(alpha=0.1) +
-      facet_wrap(~ dLevelsAminusB, ncol = length(unique(AE.DF$dLevelsAminusB)),
-                 labeller = function(variable, value) {
-                   if(variable == "dLevelsAminusB") {
-                     return(ae_labels[as.character(value)])
-                   }
-                   return(value)
-                 }) +
+      facet_wrap(~ dLevelsAminusB, ncol = length(unique(AE.DF$dLevelsAminusB))) +
       geom_abline(intercept = 0, slope = 1, col = 'grey50', linetype="dashed") + 
       ylab("AE") + xlim(-30, 30) + ylim(-30, 30) + xlab("EC") + theme_bw()
     
