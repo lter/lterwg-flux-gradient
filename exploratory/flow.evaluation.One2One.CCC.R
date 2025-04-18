@@ -1,7 +1,6 @@
 # DirRepo <- "." # Relative or absolute path to lterwg-flux-gradient git repo on your local machine. Make sure you've pulled the latest from main!
 # localdir <- tempdir()
-
-source(fs::path(DirRepo, 'exploratory/FUNCTION_One2One.CCC.R'))
+source(fs::path(DirRepo, 'exploratory/FUNCTION_One2One.CCC_testing.R'))
 
 # Calculate CCC parameters for CO2
 SITES_CCC_CO2 <- ccc.parms.site(MBR.tibble = SITES_MBR_9min_FILTER,
@@ -29,8 +28,7 @@ SITES_One2One <- SITES_CCC_CO2 %>%
   mutate(gas = "CO2") %>% 
   rbind(
     SITES_CCC_H2O %>% 
-      mutate(gas = "H2O")
-  )
+      mutate(gas = "H2O"))
 
 # Determine the best height for each site, approach, and gas based on maximum CCC
 Best_Level_CCC <- SITES_One2One %>% 
