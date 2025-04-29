@@ -22,8 +22,8 @@ for( site in site.list){
                                    FG_sd.limit = 3000,
                                    diff.limit = 100000,
                                    dConcSNR.min = 0,
-                                   rmvCrossGrad = TRUE,
-                                   rmvEddyOutlier = TRUE,
+                                   rmvCrossGrad = FALSE,
+                                   rmvEddyOutlier = FALSE,
                                    approach = "WP")
   
   AE_9min.report <-  filter_report( df = AE_9min.df.final,
@@ -32,8 +32,8 @@ for( site in site.list){
                                     FG_sd.limit = 3000,
                                     diff.limit = 100000,
                                     dConcSNR.min = 0,
-                                    rmvCrossGrad = TRUE,
-                                    rmvEddyOutlier = TRUE,
+                                    rmvCrossGrad = FALSE,
+                                    rmvEddyOutlier = FALSE,
                                     approach = "AE"
   )
   
@@ -65,8 +65,8 @@ for( site in site.list){
                                    FG_sd.limit = 3000,
                                    diff.limit = 100000,
                                    dConcSNR.min = 0,
-                                   rmvCrossGrad = TRUE,
-                                   rmvEddyOutlier = TRUE,
+                                   rmvCrossGrad = FALSE,
+                                   rmvEddyOutlier = FALSE,
                                    approach = "AE") 
   
   WP_9min_FILTER <- filter_fluxes ( df = WP_9min.df.final,
@@ -75,8 +75,8 @@ for( site in site.list){
                                     FG_sd.limit = 3000,
                                     diff.limit = 100000,
                                     dConcSNR.min = 0,
-                                    rmvCrossGrad = TRUE,
-                                    rmvEddyOutlier = TRUE,
+                                    rmvCrossGrad = FALSE,
+                                    rmvEddyOutlier = FALSE,
                                     approach = "WP") 
   
   
