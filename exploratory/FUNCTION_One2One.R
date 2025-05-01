@@ -120,7 +120,8 @@ one2one.plots <- function ( MBR.DF, AE.DF, WP.DF, gas){
 linear.parms <- function ( Y, X, DF, TYPE){
   
   if(sum(!is.na(DF[,X]+DF[,Y])) < 3){
-    linear.parms <- data.frame( Intercept =as.numeric(NA) , Slope = as.numeric(NA),
+    linear.parms <- data.frame( Intercept =as.numeric(NA) , 
+                                Slope = as.numeric(NA),
                                 R2= as.numeric(NA), RMSE= as.numeric(NA)) %>% 
       mutate( Approach = TYPE)
     return()
