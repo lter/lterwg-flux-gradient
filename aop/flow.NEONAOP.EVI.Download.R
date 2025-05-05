@@ -19,7 +19,7 @@ VI.availabilityDf <- Site.Data.Availability.AOP(VegetationIndice)
 LAI.availabilityDf <- Site.Data.Availability.AOP(LAI)
 CH.availabilityDf <- Site.Data.Availability.AOP(Canopy_Height)
 
-source("~/Dropbox (YSE)/Research/FluxGradient/lterwg-flux-gradient/exploratory/aop_merge_raster_functions.R")
+source("~/Dropbox (YSE)/Research/FluxGradient/lterwg-flux-gradient/aop/aop_merge_raster_functions.R")
 
 NEON_TOKEN <-'eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzI1NiJ9.eyJhdWQiOiJodHRwczovL2RhdGEubmVvbnNjaWVuY2Uub3JnL2FwaS92MC8iLCJzdWIiOiJzcGFya2xlbG1hbG9uZUBnbWFpbC5jb20iLCJzY29wZSI6InJhdGU6cHVibGljIiwiaXNzIjoiaHR0cHM6Ly9kYXRhLm5lb25zY2llbmNlLm9yZy8iLCJleHAiOjE4NjgxNTUzODQsImlhdCI6MTcxMDQ3NTM4NCwiZW1haWwiOiJzcGFya2xlbG1hbG9uZUBnbWFpbC5jb20ifQ.A9PxSOT-3FxbAbxV7xqkM1Ps3OqMnzZcTe14PK3Vi16BaCdz_ClmPGqzLRxD8K61Mv-6XouIf8ToaqnP-NXxnQ'
 

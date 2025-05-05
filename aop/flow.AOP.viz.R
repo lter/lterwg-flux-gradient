@@ -1,5 +1,5 @@
 load(file='/Volumes/MaloneLab/Research/FluxGradient/Sites_AOP_Summary.Rdata')
-
+localdir <- '/Volumes/MaloneLab/Research/FluxGradient/FluxData'
 Sites.Summary
 
 # Library
@@ -57,7 +57,7 @@ plot.range.savi <- Sites.Summary %>% ggplot() +
   ylab( "") + xlab("SAVI") + theme(text = element_text(size = 10),
                                   panel.background = element_rect(fill='transparent') ) 
 
-setwd("~/Desktop")
+setwd(localdir)
 png("Structure_Summary_Allsites.png", width=10, 
     height=10, units="in", res=1200)
 
@@ -96,7 +96,7 @@ longData <- melt(matrix)
 longData<-longData[longData$value!=0,] %>% na.omit
 
 
-setwd("~/Desktop")
+setwd(localdir)
 png("Structure_Summary_Allsites_Matrix.png", width=7, 
     height=10, units="in", res=1200)
 

@@ -29,6 +29,12 @@ lterwg-flux-gradient/
 │   ├── flow.calc.flux.batch.R
 │   ├── flow.evaluation_dataframe.R
 │   └── flow.evaluation.*.R
+├── aop/             # Preparation of AOP, canopy diversity, and caopy information data
+│   ├── flow.NEONAOP.EVI.Download.R
+│   ├── flow_AOP_FormatLayers.R
+│   └── flow.StructuralDiversity*.R
+│   ├── flow.Combine.Data.R
+│   ├── flow.AOP.viz.R
 │
 └── deprecated/              # Unused workflows and functions
 ```
