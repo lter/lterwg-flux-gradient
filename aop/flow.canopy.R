@@ -57,8 +57,9 @@ canopy_A <- attr.data %>% mutate(canopyHeight_m = DistZaxsCnpy %>% as.numeric,
                                canopyHeight_m - MeasurementHeight_m_A > 0 ~ 1))
 
 # subset tower position and site to merge every combination.
-canopy_B <- canopy_A %>% select( TowerPosition_A, Site, Canopy_A) %>% 
-  mutate( TowerPosition_B =TowerPosition_A , Canopy_B= Canopy_A) %>% select(TowerPosition_B, Site, Canopy_B )
+canopy_B <- canopy_A %>% select( TowerPosition_A, Site, Canopy_A, MeasurementHeight_m_A) %>% 
+  mutate( TowerPosition_B =TowerPosition_A , Canopy_B= Canopy_A,
+          MeasurementHeight_m_B =  MeasurementHeight_m_A %>% as.numeric) %>% select(TowerPosition_B, Site, Canopy_B,  MeasurementHeight_m_B )
 
 canopy_commbined <- canopy_A %>% full_join(canopy_B, by='Site') %>% 
   filter( TowerPosition_B != TowerPosition_A) %>% mutate(TowerLevels = paste(TowerPosition_B, "_", TowerPosition_A, sep="" ),

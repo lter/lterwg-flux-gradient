@@ -61,25 +61,6 @@ if(DnldFromGoogleDrive == TRUE){
   }
 } }
 
-# Load the files
-#for (focal_file in dnld_files){
-#  message('Loading ',focal_file, ' from ',localdir)
-#  load(fs::path(localdir,focal_file))
-#  gc()
-#}
-
-
-#message('Running script for ',sffx, '...')
-#if(sffx == 'MS1Sites'){
-#  SITES_WP_9min <- SITES_WP_9min[MS1Sites]
-#  gc()
-# SITES_AE_9min <- SITES_AE_9min[MS1Sites]
-#  gc()
-#  SITES_MBR_9min <- SITES_MBR_9min[MS1Sites]
-#  gc()
-  
-#}
-
 # Application of Filter Functions: ####
 message('Running Filter...')
 
@@ -94,8 +75,6 @@ message('Running One2One with CCC computation for best height...')
 dir.one2one <- '/Volumes/MaloneLab/Research/FluxGradient/One2One_Plots'
 source(fs::path(DirRepo,'exploratory/flow.evaluation.One2One.CCC.R'))
 
-  
-  
 fileSave <- fs::path(localdir,paste0("SITES_One2One.Rdata"))
 save( SITES_One2One,file=fileSave)
 googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)

@@ -1,4 +1,5 @@
 # Canopy Diversity Indices:
+## https://www.nature.com/articles/s41597-024-04018-0#Sec7
 
 library(terra)
 library(sf)
