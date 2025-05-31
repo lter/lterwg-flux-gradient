@@ -61,25 +61,6 @@ if(DnldFromGoogleDrive == TRUE){
   }
 } }
 
-# Load the files
-#for (focal_file in dnld_files){
-#  message('Loading ',focal_file, ' from ',localdir)
-#  load(fs::path(localdir,focal_file))
-#  gc()
-#}
-
-
-#message('Running script for ',sffx, '...')
-#if(sffx == 'MS1Sites'){
-#  SITES_WP_9min <- SITES_WP_9min[MS1Sites]
-#  gc()
-# SITES_AE_9min <- SITES_AE_9min[MS1Sites]
-#  gc()
-#  SITES_MBR_9min <- SITES_MBR_9min[MS1Sites]
-#  gc()
-  
-#}
-
 # Application of Filter Functions: ####
 message('Running Filter...')
 

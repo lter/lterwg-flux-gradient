@@ -1,5 +1,37 @@
 # Source the CCC calculation function
-source("./functions/calc.lins.ccc.R")
+source(fs::path(DirRepo,"./functions/calc.lins.ccc.R"))
+
+# Define get_facet_stats as a global function
+get_facet_stats <- function(df, facet_level, x_col, y_col) {
+  subset_df <- df %>% filter(dLevelsAminusB == facet_level)
+  
+  # Skip if insufficient data
+  if(nrow(subset_df) < 10) {
+    return("Insufficient data")
+  }
+  
+  # Calculate CCC
+  ccc_result <- tryCatch({
+    calculate_lins_ccc(subset_df[[x_col]], subset_df[[y_col]])$rho.c$est
+  }, error = function(e) NA)
+  
+  # Calculate R² and RMSE
+  model <- tryCatch({
+    lm(as.formula(paste(y_col, "~", x_col)), data = subset_df)
+  }, error = function(e) NULL)
+  
+  if(!is.null(model)) {
+    r2_val <- summary(model)$r.squared
+    rmse_val <- sqrt(mean((subset_df[[y_col]] - predict(model))^2, na.rm = TRUE))
+  } else {
+    r2_val <- NA
+    rmse_val <- NA
+  }
+  
+  # Return formatted statistics
+  return(sprintf("CCC = %.2f\nR² = %.2f\nRMSE = %.2f", 
+                 ccc_result, r2_val, rmse_val))
+}
 
 # CCC PLOTS: ####
 
@@ -19,38 +51,6 @@ ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
     AE.DF <- AE.DF %>% filter(gas == "CO2")
     WP.DF <- WP.DF %>% filter(gas == "CO2")
     MBR.DF <- MBR.DF %>% filter(gas == "CO2")
-    
-    # Create a function to generate statistics for each facet
-    get_facet_stats <- function(df, facet_level, x_col, y_col) {
-      subset_df <- df %>% filter(dLevelsAminusB == facet_level)
-      
-      # Skip if insufficient data
-      if(nrow(subset_df) < 10) {
-        return("Insufficient data")
-      }
-      
-      # Calculate CCC
-      ccc_result <- tryCatch({
-        calculate_lins_ccc(subset_df[[x_col]], subset_df[[y_col]])$rho.c$est
-      }, error = function(e) NA)
-      
-      # Calculate R² and RMSE
-      model <- tryCatch({
-        lm(as.formula(paste(y_col, "~", x_col)), data = subset_df)
-      }, error = function(e) NULL)
-      
-      if(!is.null(model)) {
-        r2_val <- summary(model)$r.squared
-        rmse_val <- sqrt(mean((subset_df[[y_col]] - predict(model))^2, na.rm = TRUE))
-      } else {
-        r2_val <- NA
-        rmse_val <- NA
-      }
-      
-      # Return formatted statistics
-      return(sprintf("CCC = %.2f\nR² = %.2f\nRMSE = %.2f", 
-                     ccc_result, r2_val, rmse_val))
-    }
     
     # Custom labeller function for facets
     mbr_labels <- sapply(unique(MBR.DF$dLevelsAminusB), function(level) {
@@ -79,13 +79,16 @@ ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
       geom_abline(intercept = 0, slope = 1, col = 'grey50', linetype="dashed") + 
       ylab("MBR") + xlim(-30, 30) + ylim(-30, 30) + xlab("EC") + theme_bw()
     
+    
+    
+    
     p.2 <- ggplot(data = WP.DF, aes(x = FC_turb_interp, y = FG_mean)) + 
       stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
       geom_point(alpha=0.1) +
-      facet_wrap(~ dLevelsAminusB, ncol = length(unique(WP.DF$dLevelsAminusB)),
+      facet_wrap(~ dLevelsAminusB, ncol = length(unique(MBR.DF$dLevelsAminusB)),
                  labeller = function(variable, value) {
                    if(variable == "dLevelsAminusB") {
-                     return(wp_labels[as.character(value)])
+                     return(mbr_labels[as.character(value)])
                    }
                    return(value)
                  }) +
@@ -95,10 +98,10 @@ ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
     p.3 <- ggplot(data = AE.DF, aes(x = FC_turb_interp, y = FG_mean)) + 
       stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
       geom_point(alpha=0.1) +
-      facet_wrap(~ dLevelsAminusB, ncol = length(unique(AE.DF$dLevelsAminusB)),
+      facet_wrap(~ dLevelsAminusB, ncol = length(unique(MBR.DF$dLevelsAminusB)),
                  labeller = function(variable, value) {
                    if(variable == "dLevelsAminusB") {
-                     return(ae_labels[as.character(value)])
+                     return(mbr_labels[as.character(value)])
                    }
                    return(value)
                  }) +
@@ -144,10 +147,10 @@ ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
     p.2 <- ggplot(data = WP.DF, aes(x = FH2O_interp, y = FG_mean)) + 
       stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
       geom_point(alpha=0.1) +
-      facet_wrap(~ dLevelsAminusB, ncol = length(unique(WP.DF$dLevelsAminusB)),
+      facet_wrap(~ dLevelsAminusB, ncol = length(unique(MBR.DF$dLevelsAminusB)),
                  labeller = function(variable, value) {
                    if(variable == "dLevelsAminusB") {
-                     return(wp_labels[as.character(value)])
+                     return(mbr_labels[as.character(value)])
                    }
                    return(value)
                  }) +
@@ -157,10 +160,10 @@ ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
     p.3 <- ggplot(data = AE.DF, aes(x = FH2O_interp, y = FG_mean)) + 
       stat_smooth(method = "lm", se=FALSE, color="red", formula = y ~ x) + 
       geom_point(alpha=0.1) +
-      facet_wrap(~ dLevelsAminusB, ncol = length(unique(AE.DF$dLevelsAminusB)),
+      facet_wrap(~ dLevelsAminusB, ncol = length(unique(MBR.DF$dLevelsAminusB)),
                  labeller = function(variable, value) {
                    if(variable == "dLevelsAminusB") {
-                     return(ae_labels[as.character(value)])
+                     return(mbr_labels[as.character(value)])
                    }
                    return(value)
                  }) +
@@ -353,3 +356,4 @@ ccc.parms.site <- function(MBR.tibble, AE.tibble, WP.tibble, gas) {
   
   return(site.tibble_parms) 
 }
+
