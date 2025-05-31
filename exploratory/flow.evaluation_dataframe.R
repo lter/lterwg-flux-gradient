@@ -16,10 +16,6 @@ setwd("/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flu
 
 metadata <- read.csv('/Volumes/MaloneLab/Research/FluxGradient/Ameriflux_NEON field-sites.csv') # has a list of all the sites
 
-# Ustar Threshold:
-
-ustar.neon.sites <- read.csv("/Volumes/MaloneLab/Research/FluxGradient/UstarNeonSites.csv" )
-
 # -------------------------------------------------------
 site.list <- metadata$Site_Id.NEON %>% unique
 # Add local directory for downloaded data here:
@@ -31,12 +27,20 @@ for( site in site.list){
   
   site <- site
   
+# Create a list to store all data in:
+# min9.FG.WP.list <- list()
+# min30.FG.WP.list <- list()
+#min9.FG.AE.list <- list()
+#min30.FG.AE.list <- list()
+#MBRflux_align <- list()
+#MBRflux_align_30min <- list()
+  
   setwd(paste( localdir,"/", site,"/", sep=""))
   load( paste(site, "_WP_9min.Rdata", sep=""))
   load( paste(site, "_AE_9min.Rdata", sep=""))
   load( paste(site, "_MBR_9min.Rdata", sep=""))
   
-
+  
   # Add information to the files to make one large dataframe
   min9.FG.WP.list$H2O$gas <- "H2O"
   min9.FG.WP.list$H2O$site <- paste0(site)
@@ -88,13 +92,6 @@ for( site in site.list){
     # Additional Formatting for the MBR:
     source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/Function.Format_MBR.R' )
     MBR_9min.df.final <-format_MBR(MBR_9min.df.flag)
-    
-    # Ustar Threshold:
-    ustar.Threshold <- ustar.neon.sites %>% filter(Site_Id.NEON == site ) %>% select(Threshold.final)
-  
-    WP_9min.df.final$ustar_threshold <- ustar.Threshold$Threshold.final
-    AE_9min.df.final$ustar_threshold <- ustar.Threshold$Threshold.final
-    MBR_9min.df.final$ustar_threshold <- ustar.Threshold$Threshold.final
     
   # Save the files
     site.dir <- paste(localdir, "/", site, sep="")

@@ -33,10 +33,7 @@ calc.eddydiff.windprof <- function(sitecode, min9){
     ubar = as.numeric(H2O[j,grep(c.name, names(H2O))])
     z = as.numeric(H2O[j,"TowerHeight_A"])
     
-    #H2O[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(H2O[j,"GeometricMean_AB"])/(log(z/as.numeric(H2O[j,"roughLength_interp"]))*H2O[j,"phih"]))
-
-    H2O[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(H2O[j,"GeometricMean_AB"])/(log(z/as.numeric(H2O[j,"roughLength_interp"]))))
-    
+    H2O[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(H2O[j,"GeometricMean_AB"])/(log(z/as.numeric(H2O[j,"roughLength_interp"]))*H2O[j,"phih"]))
   }
   #set EddyDiff as numeric
   H2O$EddyDiff <- as.numeric(H2O$EddyDiff)

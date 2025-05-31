@@ -1,9 +1,8 @@
 # Function to produce plots and calculations using Lin's Concordance Correlation Coefficient:
 
 # Source the CCC calculation function
-source(fs::path(DirRepo,"./functions/calc.lins.ccc.R"))
+source("./functions/calc.lins.ccc.R")
 
-library(ggpubr)
 # CCC PLOTS: ####
 
 ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {

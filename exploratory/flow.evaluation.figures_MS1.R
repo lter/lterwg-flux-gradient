@@ -1,6 +1,8 @@
 # Creates tables and figures for MS1
+rm(list=ls())
 
-
+library(tidyverse)
+library(ggpubr)
 # Import the datafiles: #### 
 # Filter Data:
 # SITES_WP_9min_FILTER,SITES_AE_9min_FILTER, SITES_MBR_9min_FILTER ,

@@ -45,3 +45,7 @@ total.report %>% na.omit %>% ggplot( ) + geom_violin( aes( x= approach, y = flag
 total.report %>% na.omit %>% ggplot( ) + geom_violin( aes( x= approach, y = total))+
   facet_wrap(~ site) + xlab("") + ylab("Filtered (%)")
 
+
+
+
+

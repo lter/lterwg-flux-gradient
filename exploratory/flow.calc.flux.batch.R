@@ -24,6 +24,8 @@ metadata <- read.csv('/Volumes/MaloneLab/Research/FluxGradient/Ameriflux_NEON fi
 # -------------------------------------------------------
 site.list <- metadata$Site_Id.NEON %>% unique
 
+# something is wrong with TEAK, TOOL, WREF- cant run ae and wp
+## Error in calculate.stability.correction(gas = H2O) : object 'TopLevel' not found
 # Gradient Flux Calculations: ####
 
 for( site in site.list ){
@@ -59,4 +61,4 @@ for( site in site.list ){
 rm(min9)
 }
 
-message('Next run the flow.evaluation.dataframe.R')
+message('Next run the flow.validation.dataframe.batch.R')

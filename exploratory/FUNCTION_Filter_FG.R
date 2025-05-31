@@ -23,6 +23,8 @@ filter_fluxes <- function( df,
     df$dConc.tracer <- dConcSNR.min
     df$dConc.tracer_sd <- 1
   }
+  
+  
   if(rmvCrossGrad == FALSE){
     df$cross_grad_flag <- 0
   }
@@ -30,23 +32,22 @@ filter_fluxes <- function( df,
     df$Eddy_outlier <- 0
   }
   
-  
-  
   df.new <- df %>% mutate(diff.flux = abs(FG_mean - FC_turb_interp),
-                          dConcSNR = abs(dConc)/dConc_sd,
-                          dConcTSNR = abs(dConc.tracer)/dConc.tracer_sd) %>%  
-                              filter(dLevelsAminusB  %in% H.filter.list,
-                                     TowerPosition_A != TowerPosition_B,
-                                     dConcSNR <= dConcSNR.min,
-                                     dConcTSNR <= dConcSNR.min,
-                                     #dConc_pvalue <= 0.1, 
-                                     #FG_mean < flux.limit & FG_mean > -flux.limit,
-                                     ustar_interp >=  ustar_threshold )
+                          dConcSNR.filter = abs(dConc)/dConc_sd,
+                          dConcTSNR.filter = abs(dConc.tracer)/dConc.tracer_sd) %>%  
+                              filter(dConc_pvalue <= 0.1, 
+                                     FG_mean < flux.limit & FG_mean > -flux.limit,
+                                     ustar_interp >  ustar.filter,
                                      #Stability_100 == 'unstable',
-                                     #Eddy_outlier != 1,
-                                     #cross_grad_flag != 1,
-                                     #diff.flux <  diff.limit,
-                                     #abs(FG_sd) < FG_sd.limit,)
+                                     Eddy_outlier != 1,
+                                     cross_grad_flag != 1,
+                                     dLevelsAminusB  %in% H.filter.list,
+                                     diff.flux <  diff.limit,
+                                     abs(FG_sd) < FG_sd.limit,
+                                     dConcSNR.filter >= dConcSNR.min,
+                                     dConcTSNR.filter >= dConcSNR.min,
+                                     TowerPosition_A != TowerPosition_B)
+  
   return(df.new)
 }
 
@@ -115,36 +116,78 @@ filter_report <- function( df,
   }
   
   df.new <- df %>% mutate(diff.flux = abs(FG_mean - FC_turb_interp),
-                          dConcSNR = abs(dConc)/dConc_sd,
-                          dConcTSNR = abs(dConc.tracer)/dConc.tracer_sd) %>%  
+                          dConcSNR.filter = abs(dConc)/dConc_sd,
+                          dConcTSNR.filter = abs(dConc.tracer)/dConc.tracer_sd) %>%  
     filter(dLevelsAminusB  %in% H.filter.list,
            TowerPosition_A != TowerPosition_B) %>% 
-    mutate(
-      #flag.dConc_pvalue = case_when( dConc_pvalue <= 0.1 ~ 0, dConc_pvalue > 0.1 ~ 1, is.na(dConc_pvalue ) ~ 0),
-          # flag.FG_mean = case_when(abs(FG_mean) <= flux.limit ~ 0 , abs(FG_mean) > flux.limit ~ 1, is.na(FG_mean) ~ 0),
-      flag.dConcSNR = case_when( dConcSNR <= dConcSNR.min ~ 0, dConcSNR > dConcSNR.min ~ 1, is.na(dConcSNR ) ~ 0),
-      flag.dConcTSNR = case_when( dConcTSNR <= dConcSNR.min ~ 0, dConcTSNR > dConcSNR.min ~ 1, is.na(dConcTSNR ) ~ 0),
-           flag.ustar_interp = case_when( ustar_interp >=  ustar_threshold ~ 0, ustar_interp <  ustar_threshold ~ 1, is.na(ustar_interp) ~ 0), 
-           #flag.cross_grad_flag = case_when(cross_grad_flag != 1 ~ 0, cross_grad_flag == 1 ~ 1, is.na(cross_grad_flag) ~ 0),
-          # flag.Eddy_outlier = case_when(Eddy_outlier !=1 ~ 0, Eddy_outlier ==1 ~ 1, is.na( Eddy_outlier) ~ 0),
-           #flag.FG_sd = case_when( abs(FG_sd) <= FG_sd.limit ~ 0 ,abs(FG_sd) > FG_sd.limit ~ 1, is.na( FG_sd) ~ 0),
-           #flag.dConc = case_when( (dConcSNR.filter >= dConcSNR.min) & (dConcTSNR.filter >= dConcSNR.min) ~ 0 , (dConcSNR.filter < dConcSNR.min) | (dConcTSNR.filter < dConcSNR.min) ~ 1, is.na( FG_sd) ~ 0),
+    mutate(flag.dConc_pvalue = case_when( dConc_pvalue <= 0.1 ~ 0, dConc_pvalue > 0.1 ~ 1, is.na(dConc_pvalue ) ~ 0),
+           flag.FG_mean = case_when(abs(FG_mean) <= flux.limit ~ 0 , abs(FG_mean) > flux.limit ~ 1, is.na(FG_mean) ~ 0),
+           flag.ustar_interp = case_when( ustar_interp >=  ustar.filter~ 0, ustar_interp <  ustar.filter ~ 1, is.na(ustar_interp) ~ 0), 
+           flag.cross_grad_flag = case_when(cross_grad_flag != 1 ~ 0, cross_grad_flag == 1 ~ 1, is.na(cross_grad_flag) ~ 0),
+           flag.Eddy_outlier = case_when(Eddy_outlier !=1 ~ 0, Eddy_outlier ==1 ~ 1, is.na( Eddy_outlier) ~ 0),
+           flag.FG_sd = case_when( abs(FG_sd) <= FG_sd.limit ~ 0 ,abs(FG_sd) > FG_sd.limit ~ 1, is.na( FG_sd) ~ 0),
+           flag.dConc = case_when( (dConcSNR.filter >= dConcSNR.min) & (dConcTSNR.filter >= dConcSNR.min) ~ 0 , (dConcSNR.filter < dConcSNR.min) | (dConcTSNR.filter < dConcSNR.min) ~ 1, is.na( FG_sd) ~ 0),
            
-          # interaction.ALL= flag.dConc_pvalue + flag.FG_mean + flag.ustar_interp +flag.cross_grad_flag + flag.Eddy_outlier+flag.FG_sd + flag.dConc  ,
-      interaction.ALL= flag.ustar_interp + flag.dConcTSNR + flag.dConcSNR ,
-      
+           # Interactions with ustar
+           interaction.ustar_dConc_pvalue = flag.ustar_interp + flag.dConc_pvalue,
+           flag.ustar_dConc_pvalue = case_when( interaction.ustar_dConc_pvalue == 2 ~ 1 ),
+           
+           interaction.ustar_FG_mean = flag.ustar_interp + flag.FG_mean,
+           flag.ustar_FG_mean = case_when( interaction.ustar_FG_mean == 2 ~ 1 ),
+           
+           interaction.ustar_cross_grad_flag = flag.ustar_interp + flag.cross_grad_flag,
+           flag.ustar_cross_grad_flag = case_when( interaction.ustar_cross_grad_flag == 2 ~ 1 ),
+           
+           interaction.ustar_Eddy_outlier = flag.ustar_interp + flag.Eddy_outlier,
+           flag.ustar_Eddy_outlier = case_when(  interaction.ustar_Eddy_outlier == 2 ~ 1 ),
+           
+           interaction.ustar_FG_sd = flag.ustar_interp + flag.FG_sd,
+           flag.ustar_FG_sd = case_when( interaction.ustar_FG_sd == 2 ~ 1 ),
+           
+           interaction.ustar_dConc= flag.ustar_interp + flag.dConc,
+           flag.ustar_dConc = case_when(  interaction.ustar_dConc == 2 ~ 1 ),
+           
+           # Interactions with Eddy Outlier
+           interaction.Eddy_outlier_dConc_pvalue = flag.Eddy_outlier + flag.dConc_pvalue,
+           flag.Eddy_outlier_dConc_pvalue = case_when( interaction.Eddy_outlier_dConc_pvalue == 2 ~ 1 ),
+           
+           interaction.Eddy_outlier_FG_mean = flag.Eddy_outlier + flag.FG_mean,
+           flag.Eddy_outlier_FG_mean = case_when( interaction.Eddy_outlier_FG_mean == 2 ~ 1 ),
+           
+           interaction.Eddy_outlier_cross_grad_flag = flag.Eddy_outlier + flag.cross_grad_flag,
+           flag.Eddy_outlier_cross_grad_flag = case_when( interaction.Eddy_outlier_cross_grad_flag == 2 ~ 1 ),
+           
+           interaction.Eddy_outlier_FG_sd = flag.Eddy_outlier + flag.FG_sd,
+           flag.Eddy_outlier_FG_sd = case_when( interaction.Eddy_outlier_FG_sd == 2 ~ 1 ),
+           
+           interaction.Eddy_outlier_dConc= flag.Eddy_outlier + flag.dConc,
+           flag.Eddy_outlier_dConc= case_when( interaction.Eddy_outlier_dConc == 2 ~ 1 ) , 
+           
+           interaction.ALL= flag.dConc_pvalue + flag.FG_mean + flag.ustar_interp +flag.cross_grad_flag + flag.Eddy_outlier+flag.FG_sd + flag.dConc  ,
            flag.interaction.ALL = case_when( interaction.ALL > 0 ~1 ) )  %>% 
-    reframe( .by = dLevelsAminusB,
-             total =  length(timeEnd_A), 
-             #flag.dConc_pvalue = sum(flag.dConc_pvalue, na.rm=T)/ total *100,
-             #flag.FG_mean  = sum(flag.FG_mean, na.rm=T)/ total *100,
+    reframe( total =  length(timeEnd_A), 
+             flag.dConc_pvalue = sum(flag.dConc_pvalue, na.rm=T)/ total *100,
+             flag.FG_mean  = sum(flag.FG_mean, na.rm=T)/ total *100,
              flag.ustar_interp = sum(flag.ustar_interp, na.rm=T) /total *100,
-             flag.dConcTSNR =  sum(flag.dConcTSNR, na.rm=T) /total *100,
-             flag.dConcSNR =  sum(flag.dConcSNR, na.rm=T) /total *100,
-             #flag.cross_grad_flag  = sum(flag.cross_grad_flag, na.rm=T) /total *100,
-             #flag.Eddy_outlier  = sum( flag.Eddy_outlier, na.rm=T)/ total *100,
-             #flag.FG_sd  = sum(flag.FG_sd, na.rm=T)/ total *100,
-             #flag.dConc  = sum(flag.dConc, na.rm=T) /total *100,
+             flag.cross_grad_flag  = sum(flag.cross_grad_flag, na.rm=T) /total *100,
+             flag.Eddy_outlier  = sum( flag.Eddy_outlier, na.rm=T)/ total *100,
+             flag.FG_sd  = sum(flag.FG_sd, na.rm=T)/ total *100,
+             flag.dConc  = sum(flag.dConc, na.rm=T) /total *100,
+             
+             # Interactions with ustar
+             flag.ustar_dConc_pvalue = sum( flag.ustar_dConc_pvalue, na.rm=T) /total *100,
+             flag.ustar_FG_mean  = sum( flag.ustar_FG_mean, na.rm=T) / total *100,
+             flag.ustar_cross_grad_flag  = sum( flag.ustar_cross_grad_flag, na.rm=T)/ total *100,
+             flag.ustar_Eddy_outlier  = sum( flag.ustar_Eddy_outlier , na.rm=T)/ total *100,
+             flag.ustar_FG_sd  = sum( flag.ustar_FG_sd, na.rm=T)/ total *100,
+             flag.ustar_dConc  = sum(flag.ustar_dConc, na.rm=T)/ total *100,
+             
+             # Interactions with Eddy Outlier
+             flag.Eddy_outlier_dConc_pvalue  = sum(flag.Eddy_outlier_dConc_pvalue, na.rm=T) /total *100,
+             flag.Eddy_outlier_FG_mean  = sum(flag.Eddy_outlier_FG_mean, na.rm=T)/ total *100,
+             flag.Eddy_outlier_cross_grad_flag  = sum(flag.Eddy_outlier_cross_grad_flag, na.rm=T) /total *100,
+             flag.Eddy_outlier_FG_sd  = sum(flag.Eddy_outlier_FG_sd, na.rm=T) /total *100,
+             flag.Eddy_outlier_dConc  = sum(flag.Eddy_outlier_dConc, na.rm=T)/total *100,
              flag.interaction.ALL = sum(flag.interaction.ALL, na.rm=T)/total *100)
   
   return(df.new)
@@ -184,14 +227,3 @@ Generate.filter.report <- function( site.tibble,
   
   return(REPORT  )  
 }
-
-# Measure the sample bias:
-library(dispRity)
-
-x = AE_9min.df.final$PAR %>% na.omit
-
-AE_9min_FILTER
-y = AE_9min_FILTER$PAR %>% as.numeric %>% na.omit
-bhatt.coeff(x= , y = )
-
-

@@ -12,8 +12,9 @@ googledrive::drive_auth(email = email)
 
 # Define Google Drive file IDs for required data files
 file_ids <- list(
-   "SITES_AE_9min.Rdata" = "12nE75Zh-tQ8oXOXARj2_3J2HjA6Lf1wl",
+ # "SITES_AE_9min.Rdata" = "12nE75Zh-tQ8oXOXARj2_3J2HjA6Lf1wl",
 #  "SITES_WP_9min.Rdata"= "17Y-QYKSof3nMOAz6L8QsCxtLSoqObvn-",
+ # "FilteredData_MS1Sites.Rdata" = "1fJ_7lG5WO6lyuYVkhaAhyv1uZCPn4EXw",
   "FilteredData_MS1Sites_BH.Rdata" = "1Uc1KquqdvRGi6J1vxaKFEO0FkP5IC7Tv"
 )
 
@@ -73,11 +74,7 @@ Bad_df <- df %>% dplyr::filter( s_eddy_outliers == 0)
 #Compare the same heights and the same gas
 best_heights <- unique(filt_df$dLevelsAminusB)
 
-if (length(best_heights) >= 2) {
-  df <- df %>% dplyr::filter(dLevelsAminusB %in% best_heights[1:2])
-} else {
-  df <- df %>% dplyr::filter(dLevelsAminusB %in% best_heights)
-}
+df <- df %>% filter(dLevelsAminusB == best_heights[1] | dLevelsAminusB == best_heights[2])
 
 Gas = "CO2"
 df <- df %>% dplyr::filter(gas == Gas)
@@ -226,7 +223,6 @@ abline(a = 0, b = 1)
 ############################PURITAN APPROACH####################################
 ################################################################################
 
-
 #GET DATA
 filt_df<- SITES_AE_9min_FILTER_BH$KONZ
 df <- SITES_AE_9min$KONZ
@@ -247,7 +243,7 @@ filt_df_H2O <- filt_df %>% dplyr::filter(gas == Gas)
 
 ####FILTER BY SUPER BAD EDDY, first we check getting H2O from filtered CO2
 
-df_CO2 <- Super_Bad_Eddy(df_CO2,"EddyDiff",.1)
+df_CO2 <- Super_Bad_Eddy(df_CO2,"EddyDiff_WP",.3)
 Bad_df_CO2 <- df_CO2 %>% dplyr::filter( s_eddy_outliers == 0)
 
 # Filter df_H2O to keep only timestamps that exist in Bad_df_CO2
@@ -268,12 +264,22 @@ abline(a = 0, b = 1)
 rmse(df_H2O_filtered$FH2O_interp,df_H2O_filtered$FG_mean)
 
 
+hist(df_H2O$FG_mean/df_H2O$FH2O_interp, n=100000,xlim = c(-10,10), ylim =c(0,1000))
+
+hist(filt_df_H2O$FG_mean/filt_df_H2O$FH2O_interp, n=10000,xlim = c(-10,10),add = TRUE, col="blue")
+hist(df_H2O_filtered$FG_mean/df_H2O_filtered$FH2O_interp, n=10000,xlim = c(-10,10),add=TRUE, col="red")
+
+
+
+hist(df_H2O$Kgas, n=100000,xlim = c(-10,10), ylim =c(0,1000))
+
+
 ########################Getting CO2 from filtered H2O###########################
 
 
 #GET DATA
-filt_df<- SITES_AE_9min_FILTER_BH$HARV
-df <- SITES_AE_9min$HARV
+filt_df<- SITES_AE_9min_FILTER_BH$KONZ
+df <- SITES_AE_9min$KONZ
 
 #Compare the same heights and the same gas
 best_heights <- unique(filt_df$dLevelsAminusB)
@@ -291,7 +297,7 @@ filt_df_H2O <- filt_df %>% dplyr::filter(gas == Gas)
 
 ####FILTER BY SUPER BAD EDDY, first we check getting H2O from filtered CO2
 
-df_H2O <- Super_Bad_Eddy(df_H2O,"EddyDiff",.5)
+df_H2O <- Super_Bad_Eddy(df_H2O,"EddyDiff_WP",.2)
 Bad_df_H2O <- df_H2O %>% dplyr::filter( s_eddy_outliers == 0)
 
 # Filter df_H2O to keep only timestamps that exist in Bad_df_CO2
@@ -314,63 +320,26 @@ rmse(df_CO2_filtered$FC_turb_interp,df_CO2_filtered$FG_mean)
 
 #############################DOES IT WORK FOR MBR###############################
 
-##How do I know when to stop filtering? keep at least some %?
-#For forested sites, we may be overestimating because we are in the roughness sublayer
 
 
-# Function to iterate through values of x and compute RMSE & data retention
-evaluate_x_rmse <- function(df, method, x_values) {
-  results <- data.frame(x = numeric(), RMSE = numeric(), Data_Left = numeric())
-  
-  total_data <- nrow(df)  # Total number of data points before filtering
-  
-  for (x in x_values) {
-    # Apply Super_Bad_Eddy function
-    modified_df <- Super_Bad_Eddy(df, method, x)
-    
-    # Filter out outliers
-    filtered_df <- modified_df %>% filter(s_eddy_outliers == 0)
-    
-    # Compute percent data retained
-    percent_data_left <- (nrow(filtered_df) / total_data) * 100
-    
-    # Ensure there is data left after filtering
-    if (nrow(filtered_df) > 0) {
-      # Compute RMSE between FC_turb_interp and FG_mean
-      rmse_value <- rmse(filtered_df$FC_turb_interp, filtered_df$FG_mean)
-      
-      # Store results
-      results <- rbind(results, data.frame(x = x, RMSE = rmse_value, Data_Left = percent_data_left))
-    } else {
-      # If all data is filtered out, assign NA
-      results <- rbind(results, data.frame(x = x, RMSE = NA, Data_Left = 0))
-    }
-  }
-  
-  return(results)
-}
 
-# Define range of x values
-x_values <- seq(0, 2, by = 0.001)  # Adjust range as needed
 
-# Run evaluation
-rmse_results <- evaluate_x_rmse(df_CO2, "EddyDiff", x_values)
 
-# Print results
-print(rmse_results)
 
-# Plot RMSE and % Data Left vs x
-par(mar = c(5, 5, 4, 5))  # Adjust margins for second y-axis
-plot(rmse_results$x, rmse_results$RMSE, type = "b", pch = 16, col = "blue",
-     xlab = "Absolute Difference between KEC and Kcalc", ylab = "RMSE",
-     main = "RMSE and % Data Left vs. x", ylim = range(rmse_results$RMSE, na.rm = TRUE))
 
-# Add second y-axis for % data left
-par(new = TRUE)
-plot(rmse_results$x, rmse_results$Data_Left, type = "b", pch = 16, col = "red", 
-     axes = FALSE, xlab = "", ylab = "", ylim = c(0, 100))
-axis(side = 4)  # Add right-side axis
-mtext("% Data Left", side = 4, line = 3, col = "red")  # Label second y-axis
 
-# Add legend
-legend("topright", legend = c("RMSE", "% Data Left"), col = c("blue", "red"), pch = 16, lty = 1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

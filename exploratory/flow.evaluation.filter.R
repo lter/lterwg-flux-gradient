@@ -21,9 +21,9 @@ for( site in site.list){
                                    ustar.filter= 0.1, 
                                    FG_sd.limit = 3000,
                                    diff.limit = 100000,
-                                   dConcSNR.min = 3,
-                                   rmvCrossGrad = FALSE,
-                                   rmvEddyOutlier = FALSE,
+                                   dConcSNR.min = 0,
+                                   rmvCrossGrad = TRUE,
+                                   rmvEddyOutlier = TRUE,
                                    approach = "WP")
   
   AE_9min.report <-  filter_report( df = AE_9min.df.final,
@@ -31,9 +31,9 @@ for( site in site.list){
                                     ustar.filter= 0.1, 
                                     FG_sd.limit = 3000,
                                     diff.limit = 100000,
-                                    dConcSNR.min = 3,
-                                    rmvCrossGrad = FALSE,
-                                    rmvEddyOutlier = FALSE,
+                                    dConcSNR.min = 0,
+                                    rmvCrossGrad = TRUE,
+                                    rmvEddyOutlier = TRUE,
                                     approach = "AE"
   )
   
@@ -47,14 +47,8 @@ for( site in site.list){
                                      rmvEddyOutlier = FALSE,
                                      approach = "MBR")
   
-  # Add the approach into the file:
-  MBR_9min.report$approach = "MBR"
-  AE_9min.report$approach = "AE" 
-  WP_9min.report$approach = "WP"
-  
   SITE_9min.report <- rbind( WP_9min.report, AE_9min.report, MBR_9min.report)
-  # Add the site into the file:
-  SITE_9min.report$site <- site
+  
   MBR_9min_FILTER <- filter_fluxes( df = MBR_9min.df.final,
                                     flux.limit = 5000, 
                                     ustar.filter= 0.1, 
@@ -70,9 +64,9 @@ for( site in site.list){
                                    ustar.filter= 0.1, 
                                    FG_sd.limit = 3000,
                                    diff.limit = 100000,
-                                   dConcSNR.min = 3,
-                                   rmvCrossGrad = FALSE,
-                                   rmvEddyOutlier = FALSE,
+                                   dConcSNR.min = 0,
+                                   rmvCrossGrad = TRUE,
+                                   rmvEddyOutlier = TRUE,
                                    approach = "AE") 
   
   WP_9min_FILTER <- filter_fluxes ( df = WP_9min.df.final,
@@ -80,11 +74,11 @@ for( site in site.list){
                                     ustar.filter= 0.1, 
                                     FG_sd.limit = 3000,
                                     diff.limit = 100000,
-                                    dConcSNR.min = 3,
-                                    rmvCrossGrad = FALSE,
-                                    rmvEddyOutlier = FALSE,
+                                    dConcSNR.min = 0,
+                                    rmvCrossGrad = TRUE,
+                                    rmvEddyOutlier = TRUE,
                                     approach = "WP") 
-
+  
   
   # Output the files
   localdir.site <- paste(localdir,"/", site, sep = "")
