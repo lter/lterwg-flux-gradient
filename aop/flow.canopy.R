@@ -1,5 +1,6 @@
 
-# Summarize attribute information to understand where each height relative to the canopy:
+# Summarize attribute and canopy information to understand where each height relative to the canopy:
+
 library(tidyverse)
 
 email <- 'sparklelmalone@gmail.com'
@@ -10,7 +11,7 @@ site.list <- metadata$Site_Id.NEON %>% unique
 
 local <- '/Volumes/MaloneLab/Research/FluxGradient/FluxData'
 
-# Download and unzip:
+# Download and unzip: #### Only if you dont have data
 for( site in site.list){
   print(site)
   
@@ -30,10 +31,11 @@ for( site in site.list){
 }
 # Import and build the file
 
+# Build dataset
 attr.data <- data.frame() # Build a DF:
 for( site in site.list){
  
-   print(site)
+  print(site)
   localdir <- paste(local, site, sep="/" )
   file.new <-paste(site,"_attr.Rdata", sep="")
   localdir.new <- paste( localdir, "data", site, file.new, sep="/")
@@ -42,34 +44,106 @@ for( site in site.list){
   print("Done")
 }
 
-
-attr.data$Site %>% unique %>% length
-attr.data %>% names
-# Summarize the different tower height levels...
-# we need to understand which heights are within and above the canopy:
-
+# Canopy Height descriptors:
 canopy_A <- attr.data %>% mutate(canopyHeight_m = DistZaxsCnpy %>% as.numeric, 
                      MeasurementHeight_m_A = DistZaxsLvlMeasTow%>% as.numeric,
                      TowerPosition_A = TowerPosition) %>% 
   select(canopyHeight_m, MeasurementHeight_m_A , TowerPosition_A, Site,
-  DistZaxsDisp, DistZaxsGrndOfst) %>% 
-  mutate(Canopy_A= case_when(canopyHeight_m - MeasurementHeight_m_A <= 0 ~ 0,
-                               canopyHeight_m - MeasurementHeight_m_A > 0 ~ 1))
+  DistZaxsDisp, DistZaxsGrndOfst)
 
-# subset tower position and site to merge every combination.
-canopy_B <- canopy_A %>% select( TowerPosition_A, Site, Canopy_A, MeasurementHeight_m_A) %>% 
-  mutate( TowerPosition_B =TowerPosition_A , Canopy_B= Canopy_A,
-          MeasurementHeight_m_B =  MeasurementHeight_m_A %>% as.numeric) %>% select(TowerPosition_B, Site, Canopy_B,  MeasurementHeight_m_B )
 
-canopy_commbined <- canopy_A %>% full_join(canopy_B, by='Site') %>% 
-  filter( TowerPosition_B != TowerPosition_A) %>% mutate(TowerLevels = paste(TowerPosition_B, "_", TowerPosition_A, sep="" ),
-                                                       Canopy = case_when(Canopy_B + Canopy_A > 0 ~ 1,
-                                                                          Canopy_B + Canopy_A == 0 ~ 0))
+# subset tower position and site to merge every combination:
+canopy_B <- canopy_A %>% select( TowerPosition_A, Site, MeasurementHeight_m_A) %>% 
+  rename( TowerPosition_B =TowerPosition_A ,
+          MeasurementHeight_m_B = MeasurementHeight_m_A )
+
+
+canopy_B.max <- canopy_B %>% reframe(.by= Site, Max1_Tower_Position = max(TowerPosition_B),
+                                     Max2_Tower_Position = max(TowerPosition_B)-1)
+
+canopy_B_final <-canopy_B %>% full_join( canopy_B.max, by="Site")
+
+canopy_commbined <- canopy_A %>% full_join(canopy_B_final, by='Site') %>% 
+  filter( TowerPosition_B != TowerPosition_A,
+          TowerPosition_B > TowerPosition_A) %>% mutate(TowerLevels = paste(TowerPosition_B, "_", TowerPosition_A, sep="" ))
+
+# I need to determine which height is closest above and closest below the canopy:
+load(file='/Volumes/MaloneLab/Research/FluxGradient/Sites_AOP_Summary.Rdata')
+load(file='/Volumes/MaloneLab/Research/FluxGradient/Structral_Diversity.Rdata' )
+
+Sites.Summary # AOP information for the sites
+Structural.Diversity.mean.summary  # Diversity information for the different sites.
+
+Sites.Summary.AOP <- Sites.Summary %>% rename(Site = site)
+sd.names <- Structural.Diversity.mean.summary %>% names
+SD.summary <- Structural.Diversity.mean.summary %>% select(sd.names[c(1, 4:30,85, 95:97)]) %>% filter(wedge == 8) # Structural
+
+CanopyInformation <- canopy_commbined %>% full_join( Sites.Summary.AOP, by = "Site") %>% full_join( SD.summary , by = "Site") %>% 
+  rename(dLevelsAminusB = TowerLevels) %>% mutate( CHM.mean= coalesce(CHM.mean, canopyHeight_m )) %>% 
+  mutate(Canopy_A= case_when(CHM.mean - MeasurementHeight_m_A <= 0 ~ 0,
+                             CHM.mean - MeasurementHeight_m_A > 0 ~ 1),
+         Canopy_B= case_when(CHM.mean - MeasurementHeight_m_B <= 0 ~ 0,
+                             CHM.mean - MeasurementHeight_m_B > 0 ~ 1),
+         Canopy_L1 = case_when(Canopy_B + Canopy_A == 1 ~ "AW",
+                               Canopy_B + Canopy_A == 2 ~ "WW",
+                               Canopy_B + Canopy_A == 0 ~ "AA"))
+
+# Calculate the index for the nearest height above and below the canopy:
+
+attr.h <- attr.data %>% mutate(canopyHeight_m = DistZaxsCnpy %>% as.numeric, 
+                               MeasurementHeight_m = DistZaxsLvlMeasTow%>% as.numeric) %>% 
+  select(canopyHeight_m, MeasurementHeight_m , TowerPosition, Site) %>% 
+  mutate(Canopy= case_when(canopyHeight_m - MeasurementHeight_m <= 0 ~ 0,
+                             canopyHeight_m - MeasurementHeight_m > 0 ~ 1)) %>% 
+  full_join(CanopyInformation %>% reframe( .by= Site, CHM.mean= mean(CHM.mean)), by="Site")
+
+nearest.measurement.height <- attr.h %>% select( Site, CHM.mean, Canopy, MeasurementHeight_m) %>% 
+  reframe( .by= c(Site, Canopy), 
+           MH.min = min(MeasurementHeight_m),
+           MH.max = max(MeasurementHeight_m)) %>% 
+  mutate( MH.min =  replace_na(MH.min, 0),
+          MH.max =  replace_na(MH.max, 0)) %>%
+  mutate(closest.below.MH = case_when(Canopy == 1 ~ MH.max),
+         closest.above.MH = case_when(Canopy == 0 ~ MH.max)) %>% 
+  reframe(.by= Site, closest.below.MH = mean(closest.below.MH, na.rm=T), 
+          closest.above.MH = mean(closest.above.MH, na.rm=T)) 
+
+nearest.measurement.height[ is.na(nearest.measurement.height)] <- 0
+
+
+CanopyInfo <- CanopyInformation %>% full_join(nearest.measurement.height, by="Site" ) %>% mutate(
+  Closet.Below = case_when( closest.below.MH == MeasurementHeight_m_A ~ 1,
+                            closest.below.MH == MeasurementHeight_m_B ~ 1,
+                            closest.below.MH != MeasurementHeight_m_B & closest.below.MH != MeasurementHeight_m_A  ~ 0),
+  Closet.Above = case_when( closest.above.MH == MeasurementHeight_m_A ~ 1,
+                            closest.above.MH == MeasurementHeight_m_B ~ 1,
+                            closest.above.MH != MeasurementHeight_m_A | closest.above.MH != MeasurementHeight_m_B  ~ 0)) %>% 
+  mutate(Canopy_L2 = case_when(Canopy_L1 == "AA" & Closet.Above == 1 & Closet.Below == 1 ~ "AA+-",
+                               Canopy_L1 == "AA" & Closet.Above == 1 & Closet.Below != 1 ~ "AA+",
+                               Canopy_L1 == "AA" & Closet.Above != 1 & Closet.Below != 1 ~ "AA",
+                               Canopy_L1 == "AA" & Closet.Above != 1 & Closet.Below == 1 ~ "AA-",
+                               
+                               Canopy_L1 == "AW" & Closet.Above == 1 & Closet.Below == 1 ~ "AW+-",
+                               Canopy_L1 == "AW" & Closet.Above == 1 & Closet.Below != 1 ~ "AW+",
+                               Canopy_L1 == "AW" & Closet.Above != 1 & Closet.Below != 1 ~ "AW",
+                               Canopy_L1 == "AW" & Closet.Above != 1 & Closet.Below == 1 ~ "AW-",
+                               
+                               Canopy_L1 == "WW" & Closet.Above == 1 & Closet.Below == 1 ~ "WW+-",
+                               Canopy_L1 == "WW" & Closet.Above == 1 & Closet.Below != 1 ~ "WW+",
+                               Canopy_L1 == "WW" & Closet.Above != 1 & Closet.Below != 1 ~ "WW",
+                               Canopy_L1 == "WW" & Closet.Above != 1 & Closet.Below == 1 ~ "WW-",) )
+
+# Save and upload the canopy information:
+
+save( CanopyInfo,
+      file="/Volumes/MaloneLab/Research/FluxGradient/CanopyInformation.Rdata")
+
+fileSave <- file.path("/Volumes/MaloneLab/Research/FluxGradient/CanopyInformation.Rdata")
+drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3") 
+googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
 
 localdir <- '/Volumes/MaloneLab/Research/FluxGradient/FluxData'
-write.csv(canopy_commbined, paste(localdir, "canopy_commbined.csv", sep="/") )
-
+write.csv(CanopyInfo, paste(localdir, "canopy_commbined.csv", sep="/") )
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/14Ga9sLRMlQVvorZdHBiYxCbUybiGwPNp")
 fileSave <- file.path(paste(localdir, "canopy_commbined.csv", sep="/"))
 googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
-

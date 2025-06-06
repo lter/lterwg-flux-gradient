@@ -1,111 +1,197 @@
 
-
 # 'These are a series of functions used in the diurnal analysis:'
-DIURNAL <- function( dataframe, flux, flux.other , Gas){
+
+# Need to add CCC into the file to be able to filter by good data only
+# Decide if it is possible to fit by year.... Measurement levels....
+
+DIEL <- function( dataframe, flux, Gas){
   
   dataframe <- dataframe %>% as.data.frame
-  names(dataframe) <- substring( names( dataframe), 6)
+  #names(dataframe) <- substring( names( dataframe), 6)
   
   dataframe$flux.other <- dataframe[, flux.other]
   dataframe$flux <- dataframe[, flux]
+  
+  # Need to define the growing season???
+  dataframe.gs <- dataframe %>% 
+    mutate(  Month = timeEndA.local %>% format("%m") %>% as.numeric,
+             YearMon = timeEndA.local %>% format("%Y-%m"),
+             Year = timeEndA.local %>% format("%Y"),
+             Hour = timeEndA.local %>% format("%H") %>% as.numeric,
+             TowerH = paste(TowerPosition_A, TowerPosition_B, sep="-")) %>% filter(!is.na(FC_turb_interp) == TRUE) %>% reframe(.by=YearMon, min.EC = min(FC_turb_interp, na.rm=T) ) 
+  
+  dataframe.gs.threshold <-   dataframe.gs$min.EC %>% mean 
+  
   dataframe.GrowS <- dataframe %>% 
-                     mutate(  Month = match_time %>% format("%m") %>% as.numeric,
-                              YearMon = match_time %>% format("%Y-%m"),
-                              Hour = match_time %>% format("%H"),
+                     mutate(  Month = timeEndA.local %>% format("%m") %>% as.numeric,
+                              YearMon = timeEndA.local %>% format("%Y-%m"),
+                              Year = timeEndA.local %>% format("%Y"),
+                              Hour = timeEndA.local %>% format("%H")%>% as.numeric,
                               TowerH = paste(TowerPosition_A, TowerPosition_B, sep="-")) %>% 
                      filter( !is.na(flux.other),
                              !is.na(flux),
-                             gas == Gas)
+                             gas == Gas) %>% left_join( dataframe.gs, by="YearMon") %>% filter( min.EC <= dataframe.gs.threshold)
+
 
   dataframe.GrowS$flux <- dataframe.GrowS$flux.other <- NULL
   
-  yearmon <- unique(dataframe.GrowS$YearMon)
+ Year <- unique(dataframe.GrowS$Year)
   
+
+  message(" Ready to fit loess for all data")
   new.data <- data.frame()
-  Final.data <- data.frame()
-  
-  for ( a in unique(dataframe.GrowS$TowerH)) {
-    print(a)
-    for( i in yearmon){
+  Final.data.all <- data.frame()
+    for( i in Year){
       print(i)
-      
       try({
-          subset <- dataframe.GrowS %>% filter(YearMon == i, TowerH == a)
-        
+          subset <- dataframe.GrowS %>% filter(Year == i)
           subset$flux <-subset[,flux]
-        
+          count <- subset$flux %>% na.omit %>% length
           model <- loess( flux ~ Hour , data = subset )
-        
-          pred <- predict(model, newdata = subset, se=TRUE)
-        
-          new.data  <- subset %>% mutate(DIURNAL = pred$fit, DIURNAL.SE =pred$fit* qt(0.95 / 2 + 0.5, pred$df) )
-          
-          Final.data <- rbind(  Final.data, new.data)
-        },silent=T)
+          model %>% plot
+          Diel.df <- data.frame(Hour = seq(0, 23), Year = i)
+          pred <- predict(model, newdata = Diel.df, se=TRUE)
       
+          new.data  <- Diel.df %>% mutate(DIEL = pred$fit, 
+                                         DIEL.SE =pred$fit* qt(0.95 / 2 + 0.5, pred$df)) %>% mutate(data="all")
+          
+          new.data %>% ggplot( aes(x=Hour, y=DIEL)) +geom_point()
+          Peak <- new.data$DIEL %>% max(na.rm=T)
+          MIN <- new.data$DIEL %>% min(na.rm=T)
+          
+          new.data$Peak.Hour <-  new.data$Hour[new.data$DIEL == Peak] %>% as.numeric %>% mean(na.rm=T)
+          new.data$Min.Hour <-  new.data$Hour[new.data$DIEL == MIN] %>% as.numeric %>% mean(na.rm=T)
+          new.data$count <- count
+          Final.data.all <- rbind(Final.data.all, new.data) 
+        },silent=T)
     }
+  rm(new.data)
+  message(" Done fitting loess for all data")
+  
+  
+  message(" Ready to fit loess for good data")
+  new.data <- data.frame()
+  Final.data.good <- data.frame()
+  for( i in Year){
+    print(i)
+    try({
+      subset <- dataframe.GrowS %>% filter(Year == i, Good.CCC == 1)
+      count <- subset[,flux] %>% na.omit %>% length
+      subset$flux <-subset[,flux]
+      model <- loess( flux ~ Hour , data = subset )
+      model %>% plot
+      Diel.df <- data.frame(Hour = seq(0, 23), Year = i)
+      pred <- predict(model, newdata = Diel.df, se=TRUE)
+      
+      new.data  <- Diel.df %>% mutate(DIEL = pred$fit, 
+                                      DIEL.SE =pred$fit* qt(0.95 / 2 + 0.5, pred$df)) %>% mutate(data="good")
+      
+      new.data %>% ggplot( aes(x=Hour, y=DIEL)) +geom_point()
+      Peak <- new.data$DIEL %>% max(na.rm=T)
+      MIN <- new.data$DIEL %>% min(na.rm=T)
+      
+      new.data$Peak.Hour <-  new.data$Hour[new.data$DIEL == Peak] %>% as.numeric %>% mean(na.rm=T)
+      new.data$Min.Hour <-  new.data$Hour[new.data$DIEL == MIN] %>% as.numeric %>% mean(na.rm=T)
+      new.data$count <- count
+      Final.data.good  <- rbind(Final.data.good , new.data) %>% mutate(data="good")
+      
+    },silent=T)
   }
+  rm(new.data)
+  message(" Done fitting loess for good data")
+  
+  
+  message(" Ready to fit loess for bad data")
+  new.data <- data.frame()
+  Final.data.bad <- data.frame()
+  for( i in Year){
+    print(i)
+    try({
+      subset <- dataframe.GrowS %>% filter(Year == i, Good.CCC == 0)
+      count <- subset[,flux] %>% na.omit %>% length
+      subset$flux <-subset[,flux]
+      model <- loess( flux ~ Hour , data = subset )
+      model %>% plot
+      Diel.df <- data.frame(Hour = seq(0, 23), Year = i)
+      pred <- predict(model, newdata = Diel.df, se=TRUE)
+      
+      new.data  <- Diel.df %>% mutate(DIEL = pred$fit, 
+                                      DIEL.SE =pred$fit* qt(0.95 / 2 + 0.5, pred$df))%>% mutate(data="bad")
+      
+      new.data %>% ggplot( aes(x=Hour, y=DIEL)) +geom_point()
+      Peak <- new.data$DIEL %>% max(na.rm=T)
+      MIN <- new.data$DIEL %>% min(na.rm=T)
+      
+      new.data$Peak.Hour <-  new.data$Hour[new.data$DIEL == Peak] %>% as.numeric %>% mean(na.rm=T)
+      new.data$Min.Hour <-  new.data$Hour[new.data$DIEL == MIN] %>% as.numeric %>% mean(na.rm=T)
+      new.data$count <- count
+      Final.data.bad  <- rbind(Final.data.bad , new.data) %>% mutate(data="bad")
+      
+    },silent=T)
+  }
+  rm(new.data)
+  message(" Done fitting loess for all data")
+  
+  Final.data <- rbind(Final.data.all, Final.data.good, Final.data.bad )
   
   return( Final.data)
+ 
 }
 
-DIURNAL.COMPILE <- function( dataframe, FG_flux, EC_flux, Gas){
-  DIURNAL <- NULL
+DIEL.COMPILE <- function( dataframe, FG_flux, EC_flux, Gas){
+
   try({
-        FG.DIURNAL <- DIURNAL( dataframe = dataframe,
-                                     flux = FG_flux,
-                                   flux.other = EC_flux, Gas)
+        FG.DIEL <- DIEL( dataframe = dataframe, flux = FG_flux, Gas)
         
-        EC.DIURNAL <- DIURNAL( dataframe = dataframe,
-                                flux = EC_flux,flux.other = FG_flux, Gas)
+        EC.DIEL <- DIEL( dataframe = dataframe, flux = EC_flux, Gas)
         
         
-        FG.DIURNAL.1 <- FG.DIURNAL %>% select(YearMon, Hour, DIURNAL, DIURNAL.SE, TowerH) %>%  mutate( FG= DIURNAL,
-                        FG.SE= DIURNAL.SE) %>% select( YearMon, Hour, FG, FG.SE,TowerH) %>% distinct()
+        FG.DIEL.1 <- FG.DIEL %>%  rename( FG= DIEL, FG.SE= DIEL.SE,Peak.Hour.FG = Peak.Hour, Min.Hour.FG = Min.Hour) %>% 
+          select( Year, Hour, FG, FG.SE, Peak.Hour.FG, Min.Hour.FG, data, count) %>% distinct()
         
-        EC.DIURNAL.1 <- EC.DIURNAL %>% select(YearMon, Hour, 
-                                              DIURNAL, DIURNAL.SE, TowerH) %>% 
-          mutate( EC= DIURNAL,EC.SE= DIURNAL.SE) %>% 
-          select(YearMon, Hour, EC, EC.SE, TowerH)%>% distinct()
+        EC.DIEL.1 <- EC.DIEL %>% rename( EC= DIEL, EC.SE= DIEL.SE, Peak.Hour.EC = Peak.Hour, Min.Hour.EC = Min.Hour ) %>% 
+          select(Year, Hour, EC, EC.SE,  Peak.Hour.EC, Min.Hour.EC, data)%>% distinct()
         
         
-        DIURNAL <- FG.DIURNAL.1 %>% full_join( EC.DIURNAL.1, by= c('YearMon', 'Hour','TowerH')) %>% distinct()
+        DIEL.df <- FG.DIEL.1 %>% full_join( EC.DIEL.1, by= c('Year', 'Hour', 'data')) %>% distinct() %>% mutate( DIFF.DIEL = FG-EC)
   })
   
-  return( DIURNAL)
+  return( DIEL.df)
   
 }
 
-DIURNAL.COMPILE.Sites <- function( FG.tibble, FG_flux, EC_flux, Gas ) {
+# Depreciated:
+
+DIEL.COMPILE.Sites <- function( FG.tibble, FG_flux, EC_flux, Gas ) {
   
   sites <- names(FG.tibble)
   
-  Diurnal.list <- list()
+  DIEL.list <- list()
   
   for ( i in sites){
     
-    print(paste("Diurnal Calculation for", i, sep= " "))
+    print(paste("DIEL Calculation for", i, sep= " "))
     
-    df = DIURNAL.COMPILE( dataframe= FG.tibble[i],
-                                        FG_flux = FG_flux , 
-                                        EC_flux = EC_flux, Gas)
-     
+    df = DIEL.COMPILE( dataframe= FG.tibble[i],
+                          FG_flux = FG_flux , 
+                          EC_flux = EC_flux, Gas)
+    
     if(is.null(df)){
-      message('DIURNAL.COMPILE output is NULL (errored) for ',i, '. Skipping.')
+      message('DIEL.COMPILE output is NULL (errored) for ',i, '. Skipping.')
       next
     }
-    Diurnal.list[i] <- list( df %>% mutate( DIFF = FG-EC) )
+    DIEL.list[i] <- list( df %>% mutate( DIFF = FG-EC) )
     print("Done")
   }
   
-  return( Diurnal.list )
+  return( DIEL.list )
 }
 
-Diurnal.Summary <- function(diurnal.tibble, TYP ) {
-  # Summarize the Diurnal Information:
-  sites <- names( diurnal.tibble)
+DIEL.Summary.old <- function(DIEL.tibble, TYP ) {
+  # Summarize the DIEL Information:
+  sites <- names( DIEL.tibble)
   
-  summary.diurnal <- data.frame(
+  summary.DIEL <- data.frame(
     TowerH = as.character(), 
     FG.count = as.numeric(),
     FG.mean = as.numeric(),   
@@ -123,7 +209,7 @@ Diurnal.Summary <- function(diurnal.tibble, TYP ) {
   
   for( i in sites){
     
-    dataframe <-  diurnal.tibble[i]  %>% as.data.frame
+    dataframe <-  DIEL.tibble[i]  %>% as.data.frame
     names(dataframe) <- substring( names( dataframe), 6)
     
     
@@ -148,15 +234,15 @@ Diurnal.Summary <- function(diurnal.tibble, TYP ) {
                EC.SE = var(EC, na.rm=T)/sqrt(length(EC)),
                DIFF.mean = mean(DIFF, na.rm=T), 
                DIFF.SE = var(DIFF, na.rm=T)/sqrt(length(DIFF))) %>% mutate( Site = i)
-                                                                              
     
-    summary.diurnal <- rbind( summary.diurnal, sub)
+    
+    summary.DIEL <- rbind( summary.DIEL, sub)
     
   }
-  summary.diurnal.final <- summary.diurnal %>% mutate(Type= TYP, 
-                              Flux.deviation = (DIFF.mean/EC.mean)*100)
+  summary.DIEL.final <- summary.DIEL %>% mutate(Type= TYP, 
+                                                      Flux.deviation = (DIFF.mean/EC.mean)*100)
   
   
-  return(summary.diurnal.final)
+  return(summary.DIEL.final)
   
 }

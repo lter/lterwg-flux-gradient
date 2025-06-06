@@ -5,6 +5,8 @@ library(dispRity)
 library(tidyverse)
 library(sf)
 
+# https://rdrr.io/bioc/immunoClust/man/bhattacharyya.html
+
 bhatt.coeff.df <- function(df , df.filter, approach){
   
   heights <- df$dLevelsAminusB %>% na.omit() %>% unique 

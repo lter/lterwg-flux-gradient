@@ -45,34 +45,15 @@ for( site in site.list){
   # Run the filter functions... Report:
   
   WP_9min.report <-  filter_report(df = WP_9min.df.final,
-                                   flux.limit = 5000, 
-                                   ustar.filter= 0.1, 
-                                   FG_sd.limit = 3000,
-                                   diff.limit = 100000,
                                    dConcSNR.min = 3,
-                                   rmvCrossGrad = FALSE,
-                                   rmvEddyOutlier = FALSE,
                                    approach = "WP")
   
   AE_9min.report <-  filter_report( df = AE_9min.df.final,
-                                    flux.limit = 5000, 
-                                    ustar.filter= 0.1, 
-                                    FG_sd.limit = 3000,
-                                    diff.limit = 100000,
                                     dConcSNR.min = 3,
-                                    rmvCrossGrad = FALSE,
-                                    rmvEddyOutlier = FALSE,
-                                    approach = "AE"
-  )
+                                    approach = "AE")
   
   MBR_9min.report <-  filter_report( df = MBR_9min.df.final,
-                                     flux.limit = 5000, 
-                                     ustar.filter= 0.1, 
-                                     FG_sd.limit = 3000,
-                                     diff.limit = 100000,
                                      dConcSNR.min = 3,
-                                     rmvCrossGrad = FALSE,
-                                     rmvEddyOutlier = FALSE,
                                      approach = "MBR")
   
   # Add the approach into the file:
@@ -86,33 +67,15 @@ for( site in site.list){
   
   # Run the filter functions... FILTER data:
   MBR_9min_FILTER <- filter_fluxes( df = MBR_9min.df.final,
-                                    flux.limit = 5000, 
-                                    ustar.filter= 0.1, 
-                                    FG_sd.limit = 3000,
-                                    diff.limit = 100000,
                                     dConcSNR.min = 3,
-                                    rmvCrossGrad = FALSE,
-                                    rmvEddyOutlier = FALSE,
                                     approach = "MBR")  
   
   AE_9min_FILTER <- filter_fluxes( df = AE_9min.df.final,
-                                   flux.limit = 5000, 
-                                   ustar.filter= 0.1, 
-                                   FG_sd.limit = 3000,
-                                   diff.limit = 100000,
                                    dConcSNR.min = 3,
-                                   rmvCrossGrad = FALSE,
-                                   rmvEddyOutlier = FALSE,
                                    approach = "AE") 
   
   WP_9min_FILTER <- filter_fluxes ( df = WP_9min.df.final,
-                                    flux.limit = 5000, 
-                                    ustar.filter= 0.1, 
-                                    FG_sd.limit = 3000,
-                                    diff.limit = 100000,
                                     dConcSNR.min = 3,
-                                    rmvCrossGrad = FALSE,
-                                    rmvEddyOutlier = FALSE,
                                     approach = "WP") 
  # Bhatt:
   source(fs::path(DirRepo,'exploratory/flow.bhatt.R' ))

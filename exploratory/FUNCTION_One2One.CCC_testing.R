@@ -184,7 +184,8 @@ ccc.parms <- function(Y, X, DF, TYPE) {
                             Slope = as.numeric(NA),
                             CCC = as.numeric(NA), 
                             RMSE = as.numeric(NA),
-                            R2= as.numeric(NA)) %>% 
+                            R2= as.numeric(NA),
+                            count = as.numeric(NA)) %>% 
       mutate(Approach = TYPE)
     return(ccc.parms)
   }
@@ -194,7 +195,7 @@ ccc.parms <- function(Y, X, DF, TYPE) {
   DF <- DF[,c(X, Y)] %>% na.omit
   predicted <- predict(model, DF)
   rmse <- sqrt(mean((DF[,Y] %>% na.omit - predicted)^2))
-  
+  count <- DF[,Y] %>% na.omit() %>% length()
   # Calculate CCC
   ccc_result <- calculate_lins_ccc(DF[,X], DF[,Y])
   
@@ -202,13 +203,14 @@ ccc.parms <- function(Y, X, DF, TYPE) {
                           Slope = model$coefficients[2],
                           CCC = ccc_result$rho.c$est, 
                           RMSE = rmse,
-                          R2= summary(model)$r.squared) %>% 
+                          R2= summary(model)$r.squared,
+                          count= count) %>% 
     mutate(Approach = TYPE)
   
   return(ccc.parms)
 }
 
-ccc.parms.height <- function(MBR.DF, AE.DF, WP.DF, gas) {
+ccc.parms.height <- function(MBR.DF, AE.DF, WP.DF, gas) {   
   
   MBR.DF <- MBR.DF %>% as.data.frame
   names(MBR.DF) <- substring(names(MBR.DF), 6)
@@ -225,7 +227,8 @@ ccc.parms.height <- function(MBR.DF, AE.DF, WP.DF, gas) {
                                 RMSE = as.numeric(), 
                                 R2 = as.numeric(),
                                 Approach = as.character(), 
-                                dLevelsAminusB = as.character())
+                                dLevelsAminusB = as.character(),
+                                count=as.numeric())
   
   dLevelsAll <- unique(c(unique(AE.DF$dLevelsAminusB), unique(WP.DF$dLevelsAminusB), unique(MBR.DF$dLevelsAminusB)))
   
@@ -341,7 +344,8 @@ ccc.parms.site <- function(MBR.tibble, AE.tibble, WP.tibble, gas) {
                                   R2 = as.numeric(),
                                   Approach = as.character(),
                                   dLevelsAminusB = as.character(), 
-                                  Site = as.character())
+                                  Site = as.character(),
+                                  count = as.numeric())
   
   for(i in sites) {
     print(i)
