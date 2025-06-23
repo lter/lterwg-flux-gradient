@@ -340,3 +340,5 @@ save(Sites.Summary, file='/Volumes/MaloneLab/Research/FluxGradient/Sites_AOP_Sum
 fileSave <- file.path('/Volumes/MaloneLab/Research/FluxGradient/Sites_AOP_Summary.Rdata')
 drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
 googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
+
+message("Next run flow.structuralDiversity.R")

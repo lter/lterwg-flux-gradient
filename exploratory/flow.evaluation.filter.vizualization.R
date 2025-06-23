@@ -18,14 +18,13 @@ canopy <- read.csv(file.path(paste(localdir, "canopy_commbined.csv", sep="/"))) 
 
 filter.report %>% summary
 
-canopy <- canopy %>% mutate( dLevelsAminusB =TowerLevels,
-                   site = Site)
+canopy <- canopy %>% mutate( site = Site)
 
 total.report <- filter.report %>%  full_join(canopy,  by=c( 'dLevelsAminusB', 'site'))
 
 total.report$approach <- total.report$approach %>% as.factor
 # We need to add in canopy information to the file:
-
+total.report %>% names
 total.report %>% na.omit %>%  ggplot( ) + geom_violin( aes( x= approach, y = flag.interaction.ALL))+
   facet_wrap(~ site) + xlab("") + ylab("Filtered (%)") + theme_bw() + ylim(0,100)
 

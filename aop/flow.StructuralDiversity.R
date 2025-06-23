@@ -79,3 +79,4 @@ Structural.Diversity.mean.summary.sd <- Structural.Diversity.mean %>% filter (we
 save( Structural.Diversity.mean, Structural.Diversity.sd, Structural.Diversity.mean.summary,Structural.Diversity.mean.summary.sd,
       file='/Volumes/MaloneLab/Research/FluxGradient/Structral_Diversity.Rdata' )
 
+message("Next run flow.canopy to bring attribute, AOP, and structural diversity data together.")
