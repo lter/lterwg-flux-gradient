@@ -44,6 +44,7 @@ n_wedges <- 8
 Sites.shp$X <- Sites.shp %>% st_coordinates() %>% as.data.frame %>% select(X)
 Sites.shp$Y <- Sites.shp %>% st_coordinates() %>% as.data.frame %>% select(Y)
 
+
 assign.wedge <- function(shp, r, n_wedges) {
   wedges <- st_wedges(shp$X[1,], shp$Y[1,], r, n_wedges) %>%
     st_as_sf() %>%
@@ -70,11 +71,11 @@ for( i in 1:length(Sites.shp$Name)){
 # Load shapefile created in flow.neon.site.squarebuffers.R:
 load('/Volumes/MaloneLab/Research/FluxGradient/NEONLTERsiteBuffers.Rdata')
 
-sites.wedges <- sites.wedges %>% st_transform( st_crs(Sites.shp)) 
-# Take the intersection of the site files and the wedges:
+sites.wedges <- sites.wedges %>% st_transform( st_crs(Sites.shp))
 site.Buffers <- Site.Buffers %>% st_transform( st_crs(Sites.shp)) 
 
-site.buffers.wedges <- site.Buffers %>% st_intersection(sites.wedges)
+# Take the intersection of the site files and the wedges:
+site.buffers.wedges <- site.Buffers %>% st_intersection(sites.wedges) %>% filter( site == site.1)
 
 save(site.Buffers,site.buffers.wedges,
      file='/Volumes/MaloneLab/Research/FluxGradient/FG_Site_Wdges.RDATA')
