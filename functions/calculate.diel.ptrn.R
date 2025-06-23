@@ -10,7 +10,7 @@
 #' 
 
 #' @param time A POSIX vector of time values
-#' @param data A numeric vector consisting of the data for computing the diel pattern
+#' @param data A data frame consisting of the data for computing the diel pattern. Must be same row-dimension as time vector.
 #' @param Int A difftime object of the binning interval. Default is as.difftime(30,units='mins'))
 #' @param Stat Character value. The statistic to compute, 'mean' or 'median' (median). Default is 'mean'
 #' @param Ucrt Character value. The uncertainty statistic to compute, 'sd' (standard deviation), 'var' (variance), 'mad' (median absolute deviation). Default is 'sd'
@@ -47,7 +47,7 @@ calculate.diel.ptrn <- function (time,
 ){
   # Error checking
   stopifnot("POSIXt" %in% class(time))
-  stopifnot(base::is.numeric(data))
+  stopifnot(all(unlist(lapply(data,base::is.numeric))))
   stopifnot(class(Int)=='difftime')
   stopifnot(Stat %in% c('mean','median'))
   stopifnot(base::is.numeric(NumSampMin) &&
@@ -76,58 +76,74 @@ calculate.diel.ptrn <- function (time,
   units(timeDiel) <- 'hours'
 
   # Go through each diel time value, compute the mean/median over the dataset
-  dataDiel <- 
-    base::lapply(1:length(secDiel),FUN=function(idxDiel){
-      setData <- binDiel==idxDiel
+  dielOut <- list()
+  for(idxVar in seq_len(ncol(data))){
+    dataDiel <- 
+      base::lapply(seq_len(numBin),FUN=function(idxDiel){
+        setData <- binDiel==idxDiel
+        
+        # Check whether we have enough data
+        numEnuf <- sum(!is.na(data[setData,idxVar])) >= NumSampMin
+        
+        # Compute the statistic
+        if(numEnuf == FALSE){
+          stat <- as.numeric(NA)
+        } else if(Stat == 'mean'){
+          stat <- base::mean(data[setData,idxVar],na.rm=TRUE)
+        } else if(Stat == 'median') {
+          stat <- stats::median(data[setData,idxVar],na.rm=TRUE)
+        }
+        
+        # Compute the uncertainty
+        if(numEnuf == FALSE){
+          ucrt <- as.numeric(NA)
+        } else if(Ucrt == 'sd'){
+          ucrt <- stats::sd(data[setData,idxVar],na.rm=TRUE)
+        } else if(Ucrt == 'var') {
+          ucrt <- stats::var(data[setData,idxVar],na.rm=TRUE)
+        } else if(Ucrt == 'mad') {
+          ucrt <- stats::mad(data[setData,idxVar],na.rm=TRUE)
+        } else if(Ucrt == 'se') {
+          sd <- stats::sd(data[setData,idxVar],na.rm=TRUE)
+          ucrt <- sd/sqrt(sum(!is.na(data[setData,idxVar])))
+        }
+        
+        rpt <- base::data.frame(time=timeDiel[idxDiel],stat=stat,ucrt=ucrt,n=sum(!is.na(data[setData,idxVar])),stringsAsFactors=FALSE)
+  
+        return(rpt)      
+      })
+      dataDiel <- base::do.call(base::rbind,dataDiel)
+      attr(dataDiel$stat,'statistic',Stat)
+      attr(dataDiel$ucrt,'statistic',Ucrt)
       
-      # Check whether we have enough data
-      numEnuf <- sum(!is.na(data[setData])) >= NumSampMin
-      
-      # Compute the statistic
-      if(numEnuf == FALSE){
-        stat <- as.numeric(NA)
-      } else if(Stat == 'mean'){
-        stat <- base::mean(data[setData],na.rm=TRUE)
-      } else if(Stat == 'median') {
-        stat <- stats::median(data[setData],na.rm=TRUE)
-      }
-      
-      # Compute the uncertainty
-      if(numEnuf == FALSE){
-        ucrt <- as.numeric(NA)
-      } else if(Ucrt == 'sd'){
-        ucrt <- stats::sd(data[setData],na.rm=TRUE)
-      } else if(Ucrt == 'var') {
-        ucrt <- stats::var(data[setData],na.rm=TRUE)
-      } else if(Ucrt == 'mad') {
-        ucrt <- stats::mad(data[setData],na.rm=TRUE)
-      } else if(Ucrt == 'se') {
-        sd <- stats::sd(data[setData],na.rm=TRUE)
-        ucrt <- sd/sqrt(sum(!is.na(data[setData])))
-      }
-      
-      rpt <- base::data.frame(time=timeDiel[idxDiel],stat=stat,ucrt=ucrt,stringsAsFactors=FALSE)
-
-      return(rpt)      
-    })
-    dataDiel <- base::do.call(base::rbind,dataDiel)
-    attr(dataDiel$stat,'statistic',Stat)
-    attr(dataDiel$stat,'statistic',Ucrt)
+      dielOut[[idxVar]] <- dataDiel
+  }
+  
+  nameVar <- names(data)  
+  names(dielOut) <- nameVar
+  
+  # Plotting
+  if(Plot == TRUE){
+     library(plotly)
     
-    # Plotting
-    if(Plot == TRUE){
-       library(plotly)
-      
-      fig <- plot_ly(data = dataDiel, x = ~time, y = ~stat, type = 'scatter', mode = 'markers+lines',
-                     error_y = ~list(array = ucrt,
-                                     color = '#999999')) %>%
-        layout(title = TitlPlot,
-               xaxis = list(title = 'Time (hours)',
-                            range=c(0,24)), 
-               yaxis = list(title = Stat))
-      print(fig)
-     
-    }
-    
-    return(dataDiel)
+    for (idxVar in seq_len(ncol(data)))
+      if(idxVar == 1){
+        fig <- plot_ly(data = dielOut[[idxVar]], x = ~time, y = ~stat, type = 'scatter', mode = 'markers+lines',name=nameVar[idxVar],
+                       error_y = ~list(array = ucrt,
+                                       color = '#999999'))
+      } else {
+        fig <- add_trace(fig,data = dielOut[[idxVar]], x = ~time, y = ~stat, type = 'scatter', mode = 'markers+lines',name=nameVar[idxVar],
+                         error_y = ~list(array = ucrt,
+                                         color = '#999999'))
+      }
+    fig <- fig %>%
+      layout(title = TitlPlot,
+             xaxis = list(title = 'Time (hours)',
+                          range=c(0,24)), 
+             yaxis = list(title = Stat))
+    print(fig)
+   
+  }
+  
+  return(dielOut)
 }
