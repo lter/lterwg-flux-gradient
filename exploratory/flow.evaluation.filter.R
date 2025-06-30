@@ -43,7 +43,7 @@ for( site in site.list){
   WP_9min.df.final$hour.local <- WP_9min.df.final$timeEndA.local %>% format("%H")
   
   # Run the filter functions... Report:
-  
+
   WP_9min.report <-  filter_report(df = WP_9min.df.final,
                                    dConcSNR.min = 3,
                                    approach = "WP")
@@ -56,14 +56,34 @@ for( site in site.list){
                                      dConcSNR.min = 3,
                                      approach = "MBR")
   
+  
+  WP_9min.report.stability <-  filter_report_stability(df = WP_9min.df.final,
+                                   dConcSNR.min = 3,
+                                   approach = "WP")
+  
+  AE_9min.report.stability <-  filter_report_stability( df = AE_9min.df.final,
+                                    dConcSNR.min = 3,
+                                    approach = "AE")
+  
+  MBR_9min.report.stability <-  filter_report_stability( df = MBR_9min.df.final,
+                                     dConcSNR.min = 3,
+                                     approach = "MBR")
+  
   # Add the approach into the file:
   MBR_9min.report$approach = "MBR"
   AE_9min.report$approach = "AE" 
   WP_9min.report$approach = "WP"
   
+  MBR_9min.report.stability $approach = "MBR"
+  AE_9min.report.stability $approach = "AE" 
+  WP_9min.report.stability $approach = "WP"
+  
   SITE_9min.report <- rbind( WP_9min.report, AE_9min.report, MBR_9min.report)
+  SITE_9min.report.stability <- rbind( WP_9min.report.stability, AE_9min.report.stability, MBR_9min.report.stability)
+  
   # Add the site into the file:
   SITE_9min.report$site <- site
+  SITE_9min.report.stability$site <- site
   
   # Run the filter functions... FILTER data:
   MBR_9min_FILTER <- filter_fluxes( df = MBR_9min.df.final,
@@ -77,28 +97,18 @@ for( site in site.list){
   WP_9min_FILTER <- filter_fluxes ( df = WP_9min.df.final,
                                     dConcSNR.min = 3,
                                     approach = "WP") 
- # Bhatt:
-  source(fs::path(DirRepo,'exploratory/flow.bhatt.R' ))
-  
-  SITE_9min.report.bhatt <-   SITE_9min.report %>% left_join( total.bhatt, by=c("approach", "dLevelsAminusB" ))
-  
-  
+ 
   # Output the files
   localdir.site <- paste(localdir,"/", site, sep = "")
   
-  write.csv( SITE_9min.report.bhatt,  paste(localdir.site, "/", site,"_9min.report.csv", sep=""))
+  write.csv( SITE_9min.report.stability,  paste(localdir.site, "/", site,"_9min.report.stability.csv", sep=""))
+  write.csv( SITE_9min.report,  paste(localdir.site, "/", site,"_9min.report.csv", sep=""))
   
   save( AE_9min_FILTER,
         WP_9min_FILTER,
         MBR_9min_FILTER, file = paste(localdir.site, "/", site, "_FILTER.Rdata", sep=""))
   
-  # Temporal Coverage:
-  
-  source(fs::path(DirRepo,'exploratory/flow.temporalCoverage.R' ))
-  
-  save( sample.diel ,
-        sample.month, file = paste(localdir.site, "/", site, "_Temporal_Coverage.Rdata", sep=""))
-  
+
   # Upload files to the google
   
   site_folder <-data_folder$id[data_folder$name==site]
@@ -109,13 +119,14 @@ for( site in site.list){
   fileSave <- paste(localdir.site, "/", site,"_9min.report.csv", sep="")
   googledrive::drive_upload(media = fileSave, overwrite = T, path =site_folder)
   
-  fileSave <- paste(localdir.site, "/", site, "_Temporal_Coverage.Rdata", sep="")
-  googledrive::drive_upload(media = fileSave, overwrite = T, path = site_folder)
-  
+  fileSave <- paste(localdir.site, "/", site,"_9min.report.stability.csv", sep="")
+  googledrive::drive_upload(media = fileSave, overwrite = T, path =site_folder)
+
   message( paste("Done with filtering", site))
   
   rm( AE_9min_FILTER,
       WP_9min_FILTER,
       MBR_9min_FILTER,SITE_9min.report, WP_9min.report, AE_9min.report, MBR_9min.report,
-      sample.diel, sample.month)
+      SITE_9min.report.stability, WP_9min.report.stability, AE_9min.report.stability, MBR_9min.report.stability,
+      SITE_9min.report, sample.diel, sample.month)
 }

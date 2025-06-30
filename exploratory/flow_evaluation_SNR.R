@@ -5,8 +5,6 @@ library(sf)
 source(fs::path(DirRepo,'exploratory/FUNCTION_Filter_FG.R' ))
 source(fs::path(DirRepo,'exploratory/FUNCTION_SITELIST_FORMATTING.R' ))
 
-
-
 for( site in site.list){
   
   print( site)
@@ -61,7 +59,7 @@ for( site in site.list){
     lm_object <- lm(data = df.filter , 
                     FC_nee_interp~FG_mean) 
     
-    rmse <- sqrt(mean(lm_object$residuals^2))
+    rmse <- sqrt(mean(lm_object$residuals^2,na.rm=T))
     
     return(rmse)
   }
@@ -79,24 +77,24 @@ for( site in site.list){
                               gas = as.numeric())
 
   for( j in seq(0, 5, 1)){
-    for ( i in MBR_9min_FILTER$dLevelsAminusB %>% unique){
+    for ( i in MBR_9min.df.final$dLevelsAminusB %>% unique %>% na.omit){
       print( i)
       print(j)
       
       
-      MBR.rmse  =  try(get.rmse( dataframe = MBR_9min_FILTER,
+      MBR.rmse  =  try(get.rmse( dataframe = MBR_9min.df.final,
                                  SNR.threshold = j, 
                                  approach="MBR", 
                                  gas.t = "CO2",
                                  MLevel= i), silent = T) %>% as.numeric
       
-      AE.rmse =  try(get.rmse( dataframe = AE_9min_FILTER,
+      AE.rmse =  try(get.rmse( dataframe = AE_9min.df.final,
                                SNR.threshold = j, 
                                approach="AE", 
                                gas = "CO2",
                                MLevel= i),  silent = T) %>% as.numeric
       
-      WP.rmse =  try(get.rmse( dataframe = WP_9min_FILTER,
+      WP.rmse =  try(get.rmse( dataframe = WP_9min.df.final,
                                SNR.threshold = j, 
                                approach="WP", 
                                gas = "CO2",
@@ -112,16 +110,36 @@ for( site in site.list){
       summary.rmse <- rbind( summary.rmse, df)
       
     }
+    
+    
   }
-
+  
+  
   
   # plots: 
-  
-  summary.rmse %>% ggplot() + geom_point(aes( x=dConcSNR.min ,y=MBR.rmse, col=dLevelsAminusB)) + geom_line(aes(x=dConcSNR.min ,y=MBR.rmse, col=dLevelsAminusB)) 
-  summary.rmse %>% ggplot() + geom_point(aes( x=dConcSNR.min ,y=AE.rmse, col=dLevelsAminusB)) + geom_line(aes(x=dConcSNR.min ,y=AE.rmse, col=dLevelsAminusB))
-  summary.rmse %>% ggplot() + geom_point(aes( x=dConcSNR.min ,y=WP.rmse, col=dLevelsAminusB)) + geom_line(aes(x=dConcSNR.min ,y=AE.rmse, col=dLevelsAminusB))
-  
-  # Save Summary Data: 
-  
-  
-}
+  plot <- summary.rmse %>% ggplot() + geom_smooth(aes(x=dConcSNR.min ,y=MBR.rmse), col="Black")  + 
+    geom_smooth(aes(x=dConcSNR.min ,y=AE.rmse), col="goldenrod") + 
+    geom_smooth(aes(x=dConcSNR.min ,y=WP.rmse), col="gray40") + theme_bw() + ylim(0,15)+
+    annotate(geom="text", x=2, y=10, label="MBR ",color="black")+
+    annotate(geom="text", x=2.5, y=10, label="AE ",color="goldenrod")+
+    annotate(geom="text", x=3, y=10, label="WP",color="gray40") + geom_vline(xintercept=3, linetype="dashed", 
+                                                                            color = "red", size=2) + xlim(0, 5)
+  print(  plot )
+
+  # Save plots
+  plot.name <- paste(site,"_SNR.png", sep="")
+  SNR.dir <- '/Volumes/MaloneLab/Research/FluxGradient/SNR_plot'
+ggsave( plot.name , 
+        plot=plot,
+  path =  SNR.dir)
+message( paste(site, "plot saved"))
+# Save Summary:
+summary.rmse <- summary.rmse %>% mutate(site = site)
+
+summary.file.name <- paste("/Volumes/MaloneLab/Research/FluxGradient/SNR_Summary/",site, "_SNR.csv", sep="")
+write.csv(summary.rmse ,summary.file.name )
+
+message( paste(site, "file saved"))
+
+message( paste(site, "is done"))
+}  

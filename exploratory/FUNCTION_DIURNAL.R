@@ -4,7 +4,7 @@
 # Need to add CCC into the file to be able to filter by good data only
 # Decide if it is possible to fit by year.... Measurement levels....
 
-DIEL <- function( dataframe, flux, Gas){
+DIEL <- function( dataframe, flux, Gas, flux.other){
   
   dataframe <- dataframe %>% as.data.frame
   #names(dataframe) <- substring( names( dataframe), 6)
@@ -141,9 +141,9 @@ DIEL <- function( dataframe, flux, Gas){
 DIEL.COMPILE <- function( dataframe, FG_flux, EC_flux, Gas){
 
   try({
-        FG.DIEL <- DIEL( dataframe = dataframe, flux = FG_flux, Gas)
+        FG.DIEL <- DIEL( dataframe = dataframe, flux = FG_flux, Gas, flux.other = EC_flux)
         
-        EC.DIEL <- DIEL( dataframe = dataframe, flux = EC_flux, Gas)
+        EC.DIEL <- DIEL( dataframe = dataframe, flux = EC_flux, Gas, flux.other = FG_flux)
         
         
         FG.DIEL.1 <- FG.DIEL %>%  rename( FG= DIEL, FG.SE= DIEL.SE,Peak.Hour.FG = Peak.Hour, Min.Hour.FG = Min.Hour) %>% 

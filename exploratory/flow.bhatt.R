@@ -7,6 +7,27 @@ library(sf)
 
 # https://rdrr.io/bioc/immunoClust/man/bhattacharyya.html
 
+# Bhatt:
+source(fs::path(DirRepo,'exploratory/flow.bhatt.R' ))
+
+SITE_9min.report.bhatt <-   SITE_9min.report %>% left_join( total.bhatt, by=c("approach", "dLevelsAminusB" ))
+
+
+
+# Temporal Coverage:
+
+source(fs::path(DirRepo,'exploratory/flow.temporalCoverage.R' ))
+
+save( sample.diel ,
+      sample.month, file = paste(localdir.site, "/", site, "_Temporal_Coverage.Rdata", sep=""))
+
+localdir.site <- paste(localdir,"/", site, sep = "")
+
+write.csv( SITE_9min.report.bhatt,  paste(localdir.site, "/", site,"_9min.report.csv", sep=""))
+fileSave <- paste(localdir.site, "/", site, "_Temporal_Coverage.Rdata", sep="")
+googledrive::drive_upload(media = fileSave, overwrite = T, path = site_folder)
+
+
 bhatt.coeff.df <- function(df , df.filter, approach){
   
   heights <- df$dLevelsAminusB %>% na.omit() %>% unique 

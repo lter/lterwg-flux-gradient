@@ -82,6 +82,44 @@ filter_report <- function( df,
   return(df.new)
 }
 
+# Stability filter report:
+WP_9min.df.final$Stability_500
+filter_report_stability <- function( df, 
+                           dConcSNR.min, 
+                           approach){
+  df <- as.data.frame(df) 
+  
+  H.filter.list = df$dLevelsAminusB %>% unique
+  
+  if( approach !="MBR"){
+    
+    df$dConc.tracer <- dConcSNR.min
+    df$dConc.tracer_sd <- 1
+  }
+  
+  df.new <- df %>% mutate(diff.flux = abs(FG_mean - FC_turb_interp),
+                          dConcSNR = abs(dConc)/dConc_sd,
+                          dConcTSNR = abs(dConc.tracer)/dConc.tracer_sd) %>%  
+    filter(dLevelsAminusB  %in% H.filter.list,
+           TowerPosition_A != TowerPosition_B) %>% 
+    mutate(
+      flag.dConcSNR = case_when( dConcSNR >= dConcSNR.min ~ 0, dConcSNR < dConcSNR.min ~ 1, is.na(dConcSNR ) ~ 0),
+      flag.dConcTSNR = case_when( dConcTSNR >= dConcSNR.min ~ 0, dConcTSNR < dConcSNR.min ~ 1, is.na(dConcTSNR ) ~ 0),
+      flag.ustar_interp = case_when( ustar_interp >=  ustar_threshold ~ 0, ustar_interp <  ustar_threshold ~ 1, is.na(ustar_interp) ~ 0),   
+      interaction.ALL= flag.ustar_interp + flag.dConcTSNR + flag.dConcSNR ,
+      
+      flag.interaction.ALL = case_when( interaction.ALL > 0 ~1 ) )  %>% 
+    reframe( .by = c(dLevelsAminusB,Stability_500),
+             total =  length(timeEnd_A), 
+             flag.ustar_interp = sum(flag.ustar_interp, na.rm=T) /total *100,
+             flag.dConcTSNR =  sum(flag.dConcTSNR, na.rm=T) /total *100,
+             flag.dConcSNR =  sum(flag.dConcSNR, na.rm=T) /total *100,
+             flag.interaction.ALL = sum(flag.interaction.ALL, na.rm=T)/total *100)
+  
+  return(df.new)
+}
+
+
 Generate.filter.report <- function( site.tibble,
                                     dConcSNR.min,
                                     approach){
@@ -104,6 +142,7 @@ Generate.filter.report <- function( site.tibble,
   
   return(REPORT  )  
 }
+
 
 # Old Version of functions
 filter_fluxes_old <- function( df, 

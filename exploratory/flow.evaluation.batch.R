@@ -59,14 +59,17 @@ if(DnldFromGoogleDrive == TRUE){
     unzip(zip.file, exdir=localdir.site)
   
   }
-} }
+  } }
+
+# Evaluation of SNR Threshold: (ETA 1 Hour)
+source(fs::path(DirRepo,'exploratory/flow_evaluation_SNR.R'))
 
 # Application of Filter Functions: ####
 message('Running Filter...')
 library(sf)
 source(fs::path(DirRepo,'exploratory/flow.evaluation.filter.R'))
 
-# Compiles Dataframes into one list:
+# Compiles Dataframes into one list: ####
 source(fs::path(DirRepo,'exploratory/flow.evaluation_SITELIST.R'))
 
 # Application of the One2One Analysis ####
