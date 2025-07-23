@@ -41,12 +41,15 @@ DIEL <- function( dataframe, flux, Gas, flux.other){
   message(" Ready to fit loess for all data")
   new.data <- data.frame()
   Final.data.all <- data.frame()
+  
     for( i in Year){
       print(i)
       try({
           subset <- dataframe.GrowS %>% filter(Year == i)
           subset$flux <-subset[,flux]
           count <- subset$flux %>% na.omit %>% length
+          
+          if(count > 48){
           model <- loess( flux ~ Hour , data = subset )
           model %>% plot
           Diel.df <- data.frame(Hour = seq(0, 23), Year = i)
@@ -62,9 +65,8 @@ DIEL <- function( dataframe, flux, Gas, flux.other){
           new.data$Peak.Hour <-  new.data$Hour[new.data$DIEL == Peak] %>% as.numeric %>% mean(na.rm=T)
           new.data$Min.Hour <-  new.data$Hour[new.data$DIEL == MIN] %>% as.numeric %>% mean(na.rm=T)
           new.data$count <- count
-          Final.data.all <- rbind(Final.data.all, new.data) 
-        },silent=T)
-    }
+          Final.data.all <- rbind(Final.data.all, new.data) } },silent=T)}
+  
   rm(new.data)
   message(" Done fitting loess for all data")
   
@@ -72,11 +74,14 @@ DIEL <- function( dataframe, flux, Gas, flux.other){
   message(" Ready to fit loess for good data")
   new.data <- data.frame()
   Final.data.good <- data.frame()
+  
   for( i in Year){
     print(i)
     try({
       subset <- dataframe.GrowS %>% filter(Year == i, Good.CCC == 1)
       count <- subset[,flux] %>% na.omit %>% length
+      
+      if(count > 48){
       subset$flux <-subset[,flux]
       model <- loess( flux ~ Hour , data = subset )
       model %>% plot
@@ -93,10 +98,7 @@ DIEL <- function( dataframe, flux, Gas, flux.other){
       new.data$Peak.Hour <-  new.data$Hour[new.data$DIEL == Peak] %>% as.numeric %>% mean(na.rm=T)
       new.data$Min.Hour <-  new.data$Hour[new.data$DIEL == MIN] %>% as.numeric %>% mean(na.rm=T)
       new.data$count <- count
-      Final.data.good  <- rbind(Final.data.good , new.data) %>% mutate(data="good")
-      
-    },silent=T)
-  }
+      Final.data.good  <- rbind(Final.data.good , new.data) %>% mutate(data="good")}},silent=T)}
   rm(new.data)
   message(" Done fitting loess for good data")
   
@@ -109,6 +111,7 @@ DIEL <- function( dataframe, flux, Gas, flux.other){
     try({
       subset <- dataframe.GrowS %>% filter(Year == i, Good.CCC == 0)
       count <- subset[,flux] %>% na.omit %>% length
+      if(count > 48){
       subset$flux <-subset[,flux]
       model <- loess( flux ~ Hour , data = subset )
       model %>% plot
@@ -125,16 +128,15 @@ DIEL <- function( dataframe, flux, Gas, flux.other){
       new.data$Peak.Hour <-  new.data$Hour[new.data$DIEL == Peak] %>% as.numeric %>% mean(na.rm=T)
       new.data$Min.Hour <-  new.data$Hour[new.data$DIEL == MIN] %>% as.numeric %>% mean(na.rm=T)
       new.data$count <- count
-      Final.data.bad  <- rbind(Final.data.bad , new.data) %>% mutate(data="bad")
-      
-    },silent=T)
-  }
+      Final.data.bad  <- rbind(Final.data.bad , new.data) %>% mutate(data="bad")}},silent=T) }
   rm(new.data)
   message(" Done fitting loess for all data")
   
   Final.data <- rbind(Final.data.all, Final.data.good, Final.data.bad )
   
-  return( Final.data)
+  if( exists('Final.data' )) { 
+    return( Final.data)
+  }
  
 }
 
@@ -145,18 +147,27 @@ DIEL.COMPILE <- function( dataframe, FG_flux, EC_flux, Gas){
         
         EC.DIEL <- DIEL( dataframe = dataframe, flux = EC_flux, Gas, flux.other = FG_flux)
         
+        if(length(FG.DIEL ) > 0) {
+          
+          FG.DIEL.1 <- FG.DIEL %>%  rename( FG= DIEL, FG.SE= DIEL.SE,Peak.Hour.FG = Peak.Hour, Min.Hour.FG = Min.Hour) %>% 
+            select( Year, Hour, FG, FG.SE, Peak.Hour.FG, Min.Hour.FG, data, count) %>% distinct()
+          
+          EC.DIEL.1 <- EC.DIEL %>% rename( EC= DIEL, EC.SE= DIEL.SE, Peak.Hour.EC = Peak.Hour, Min.Hour.EC = Min.Hour ) %>% 
+            select(Year, Hour, EC, EC.SE,  Peak.Hour.EC, Min.Hour.EC, data)%>% distinct()
+          
+          
+          DIEL.df <- FG.DIEL.1 %>% full_join( EC.DIEL.1, by= c('Year', 'Hour', 'data')) %>% distinct() %>% mutate( DIFF.DIEL = FG-EC)
+        } })
+          
+        }
         
-        FG.DIEL.1 <- FG.DIEL %>%  rename( FG= DIEL, FG.SE= DIEL.SE,Peak.Hour.FG = Peak.Hour, Min.Hour.FG = Min.Hour) %>% 
-          select( Year, Hour, FG, FG.SE, Peak.Hour.FG, Min.Hour.FG, data, count) %>% distinct()
         
-        EC.DIEL.1 <- EC.DIEL %>% rename( EC= DIEL, EC.SE= DIEL.SE, Peak.Hour.EC = Peak.Hour, Min.Hour.EC = Min.Hour ) %>% 
-          select(Year, Hour, EC, EC.SE,  Peak.Hour.EC, Min.Hour.EC, data)%>% distinct()
-        
-        
-        DIEL.df <- FG.DIEL.1 %>% full_join( EC.DIEL.1, by= c('Year', 'Hour', 'data')) %>% distinct() %>% mutate( DIFF.DIEL = FG-EC)
-  })
   
-  return( DIEL.df)
+  if(exists('DIEL.df' )) { 
+    return( DIEL.df)
+    }
+    
+  
   
 }
 
