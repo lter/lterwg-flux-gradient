@@ -1,5 +1,6 @@
 # Creates the validation dataframe
 rm(list=ls())
+
 # Develops the validation dataframes needed to perform the evaluation
 library(fs)
 library(googledrive)
@@ -75,18 +76,18 @@ for( site in site.list){
     WP_9min.df <-  WP_9min.df %>% mutate(Diff_EC_GF= FC_turb_interp - FG_mean )
     
     # Cross Gradient Calculations:
-    source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/Flow.CrossGradient.R' )
+    source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/workflows/flow.CrossGradient.R' )
     AE_9min.df.CG <- eddy_diff_real(AE_9min.df.flag) %>% cross_grad_flag( Kgas)
     WP_9min.df.CG <- eddy_diff_real(WP_9min.df.flag) %>% cross_grad_flag( Kgas)
     
     # Eddy Diffusivity:
-    source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/Bad_Eddy.R' )
+    source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/workflows/flow.bad_eddy.R' )
     
     AE_9min.df.final <- Bad_Eddy(  AE_9min.df.CG, "EddyDiff")
     WP_9min.df.final <- Bad_Eddy(  WP_9min.df.CG, "EddyDiff")
     
     # Additional Formatting for the MBR:
-    source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/exploratory/Function.Format_MBR.R' )
+    source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/functions/calc.format_MBR.R' )
     MBR_9min.df.final <-format_MBR(MBR_9min.df.flag)
     
     # Ustar Threshold:
@@ -213,7 +214,4 @@ write.csv(site.att, '/Volumes/MaloneLab/Research/FluxGradient/Site_Attributes.cs
 fileSave <- file.path('/Volumes/MaloneLab/Research/FluxGradient/Site_Attributes.csv')
 googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
 
-message("Next run flow.evaluation.batch")
-
-
-
+message("Next run flow.evaluation.batch in the repo: ") 

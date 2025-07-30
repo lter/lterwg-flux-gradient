@@ -19,10 +19,10 @@ localdir <- '/Volumes/MaloneLab/Research/FluxGradient/FluxData' # MaloneLab Serv
 setwd("/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient")
 
 # Add all sites here:
-metadata <- read.csv('/Volumes/MaloneLab/Research/FluxGradient/Ameriflux_NEON field-sites.csv') # has a list of all the sites
+metadata <- read.csv('/Volumes/MaloneLab/Research/FluxGradient/Site_Attributes.csv') # has a list of all the sites
 
 # -------------------------------------------------------
-site.list <- metadata$Site_Id.NEON %>% unique
+site.list <- metadata$Site %>% unique
 
 # Gradient Flux Calculations: ####
 
@@ -42,17 +42,17 @@ for( site in site.list ){
   print('Data Loaded')
   
   print( 'Running MBR')
-  source(file.path("exploratory/flow.calc.flag.mbr.batch.R"))
+  source(file.path("workflows/flow.calc.flag.mbr.batch.R"))
   print('MBR Done')
   
   setwd("/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient")
   print( 'Running AE')
-  source(file.path("exploratory/flow.calc.flag.aero.batch.R"))
+  source(file.path("workflows/flow.calc.flag.aero.batch.R"))
   print('AE Done')
   
   setwd("/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient")
   print( 'Running WP')
-  source(file.path("exploratory/flow.calc.flag.windprof.batch.R"))
+  source(file.path("workflows/flow.calc.flag.windprof.batch.R"))
   print('WP Done')
   
   print('done')

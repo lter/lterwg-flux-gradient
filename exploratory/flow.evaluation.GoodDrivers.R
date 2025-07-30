@@ -5,7 +5,9 @@ rm(list=ls())
 library(dplyr)
 library(ggplot2)
 library(ggridges)
+library(ggpubr)
 
+dir <- '/Volumes/MaloneLab/Research/FluxGradient/RandomForestModel/'
 localdir <- '/Volumes/MaloneLab/Research/FluxGradient/FluxData'
 load(fs::path(localdir,paste0("SITES_One2One.Rdata")))
 canopy <- read.csv(file.path(paste(localdir, "canopy_commbined.csv", sep="/"))) %>% distinct
@@ -35,6 +37,7 @@ SITES_One2One_canopy %>% summary
 train  %>% summary
 test  %>% summary
 
+# Variable Selection : ####
 library(VSURF)
 library(randomForest)
 
@@ -84,6 +87,7 @@ rf_index.Cstructure.vars <-names( train.sub[-17]) [rf_index.Cstructure.vsurf$var
 
 train.sub <- train[,c(rf_index.sdesign.vars, rf_index.Cspec.vars, rf_index.Cstructure.vars,"Canopy_L1", "Canopy_L2","dLevelsAminusB","Good.CCC")] %>% na.omit
 train.sub %>% names
+
 rf_index.final.vsurf <- VSURF(train.sub[-10], 
                                    train.sub[["Good.CCC"]],
                                    ntree = 500,
@@ -96,6 +100,7 @@ rf_index.final.vsurf <- VSURF(train.sub[-10],
 rf_index.final.vsurf$varselect.pred
 rf_index.final.vars <- c(names( train.sub[-25]) [rf_index.final.vsurf$varselect.pred], "Canopy_L2")
 
+# Final Model Fit : ####
 
 final.vars <- c("Approach","CHM.sd", "EVI.mean" ,"LAI.mean" ,"SAVI.mean" ,"Cutoff05.SDH", "Canopy_L2")    
 
@@ -114,9 +119,13 @@ library(caret)
 train$rf_model <- predict(rf_model , train)
 confusionMatrix(train$rf_model, train$Good.CCC)
 
+# Save the model 
+dir <- '/Volumes/MaloneLab/Research/FluxGradient/RandomForestModel/'
+save(train, test,rf_model, final.vars, SITES_One2One_canopy, file= paste(dir, "Good_Fluxes.Rdata", sep="") )
 
-# Sensitivity Analysis:
-final.vars <- c("Approach","CHM.sd", "EVI.mean" ,"LAI.mean" ,"SAVI.mean" ,"Cutoff05.SDH", "Canopy_L2")
+
+# Sensitivity Analysis: ####
+load(file= paste(dir, "Good_Fluxes.Rdata", sep="") )
 
 SITES_One2One_canopy$Approach %>% unique
 SITES_One2One_canopy$Canopy_L2 %>% unique
@@ -197,7 +206,7 @@ Sensitivity_plot <- function(df, approach, label, var){
 }
 
 # MBR
-plot.mbr.1 <- Sensitivity_plot(df = CHM.sd.final, approach = "MBR", label= "Deviation in Canopy Height", var='CHM.sd' )
+plot.mbr.1 <- Sensitivity_plot(df = CHM.sd.final, approach = "MBR", label= "SD Canopy Height", var='CHM.sd' )
 plot.mbr.2 <- Sensitivity_plot(df = Cutoff05.SDH.final, approach = "MBR", label= "SDH", var='Cutoff05.SDH' )
 plot.mbr.3 <- Sensitivity_plot(df = EVI.mean.final, approach = "MBR", label= "EVI", var='EVI.mean' )
 plot.mbr.4 <- Sensitivity_plot(df = SAVI.mean.final , approach = "MBR", label= "SAVI", var='SAVI.mean' )
@@ -211,7 +220,7 @@ ggarrange(plot.mbr.1,
           plot.mbr.5, common.legend = TRUE )
 
 plot.ae.1 <- Sensitivity_plot(df = CHM.sd.final, approach = "AE", label= "Deviation in Canopy Height", var='CHM.sd' )
-plot.ae.2 <- Sensitivity_plot(df = Cutoff05.SDH.final, approach = "AE", label= "SDH", var='Cutoff05.SDH' )
+plot.ae.2 <- Sensitivity_plot(df = Cutoff05.SDH.final, approach = "AE", label= "SD Height", var='Cutoff05.SDH' )
 plot.ae.3 <- Sensitivity_plot(df = EVI.mean.final, approach = "AE", label= "EVI", var='EVI.mean' )
 plot.ae.4 <- Sensitivity_plot(df = SAVI.mean.final , approach = "AE", label= "SAVI", var='SAVI.mean' )
 plot.ae.5 <- Sensitivity_plot(df = LAI.mean.final , approach = "AE", label= "LAI", var='LAI.mean' )  
