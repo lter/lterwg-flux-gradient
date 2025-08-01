@@ -85,13 +85,13 @@ lterwg-flux-gradient/
 
 4. `flow.neon.data.format.conc.diffs.R` & `flow.neon.data.format.conc.diffs.30m.R` → Grabs output from `flow.neon.data.extract.R` from Google Drive. Align the 9-min or 30-min concentration data among adjacent tower levels (and also the bottom-top levels). The base conc.diffs file interpolates 30-min eddy flux and MET data to the 9-min/6-min concentrations, including but not limited to u*, ubar (profile), roughness length. The conc.diff.30m file connects the nearest 9-min/6-min data to each 30-min eddy covariance measurement. Also derives kinematic water flux (LE -> w'q'), heat flux (w'T'), aerodynamic canopy height, displacement height, that are needed for the various methods. Differences the concentrations for CH4, CO2, and H2O for adjacent tower levels (and bottom-top). Saves output as SITE_aligned_conc_flux_9min.RData, where SITE is the NEON site code. Zips and uploads to Google Drive.
 
-5. `flow.download.aligned_conc_flux.R` → Grabs the output from `flow.neon.data.format.conc.diffs.R` SITE_aligned_conc_flux_9min.RData, where SITE is the NEON site code. Zips and uploads to Google Drive.
+5. `flow.download.aligned.conc.flux.R` → Grabs the output from `flow.neon.data.format.conc.diffs.R` SITE_aligned_conc_flux_9min.RData, where SITE is the NEON site code. Zips and uploads to Google Drive.
 
    ```
    min9.list, min30.list, min1.list → flow.neon.data.format.conc.diffs.R → SITE_aligned_conc_flux_9min.RData
                                    → flow.neon.data.format.conc.diffs.30m.R → SITE_aligned_conc_flux_30min.RData
    
-   SITE_aligned_conc_flux_9min.RData → flow.download.aligned_conc_flux.R (downloads aligned data)
+   SITE_aligned_conc_flux_9min.RData → flow.download.aligned.conc.flux.R (downloads aligned data)
    ```
 
 ### Exploratory Workflows

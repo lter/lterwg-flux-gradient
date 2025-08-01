@@ -1,4 +1,4 @@
-# flow.download.aligned_conc_flux 
+# flow.download.aligned.conc.flux 
 library(tidyverse)
 
 metadata <- read.csv('/Volumes/MaloneLab/Research/FluxGradient/Ameriflux_NEON field-sites.csv') # has a list of all the sites
