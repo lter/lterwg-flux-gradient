@@ -27,7 +27,7 @@ lterwg-flux-gradient/
 │
 ├── exploratory/             # Preliminary analyses and development
 │   ├── flow.calc.flux.batch.R
-│   ├── flow.evaluation_dataframe.R
+│   ├── flow.evaluation.dataframe.R
 │   └── flow.evaluation.*.R
 ├── aop/             # Preparation of AOP, canopy diversity, and caopy information data
 │   ├── flow.NEONAOP.EVI.Download.R
