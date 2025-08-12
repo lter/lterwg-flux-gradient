@@ -43,7 +43,7 @@ enddate <- "2023-09"
 #                              savepath = file.path(sitename))
 
 # Un-ZIP those downloaded products
-unzip_neon(in_path = file.path(sitename, "filesToStack00200"),
+unzip.neon(in_path = file.path(sitename, "filesToStack00200"),
            out_path = file.path(sitename), 
            quiet = FALSE)
 
