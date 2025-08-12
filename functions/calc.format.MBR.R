@@ -1,6 +1,6 @@
 # Reformat the MBR list to be the same as the AE and WP list:
 
-format_MBR <- function(df){
+format.MBR <- function(df){
   
   
   df <- df %>% distinct(match_time, .keep_all = TRUE)
@@ -198,7 +198,7 @@ format_MBR <- function(df){
 return(mbr.ec )
  }
 
-apply_format_MBR <- function(site.list){
+apply.format.MBR <- function(site.list){
   
   sites <- names(site.list)
   site.tibble_Reformat <- list()
@@ -210,7 +210,7 @@ apply_format_MBR <- function(site.list){
     df <- site.list[i] %>% as.data.frame
     names(df) <- substring( names(df), 6)
     
-    df.reformat <- format_MBR(df)
+    df.reformat <- format.MBR(df)
     site.tibble_Reformat[i] <- list(df.reformat)
     
   }

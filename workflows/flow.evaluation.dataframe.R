@@ -87,8 +87,8 @@ for( site in site.list){
     WP_9min.df.final <- Bad_Eddy(  WP_9min.df.CG, "EddyDiff")
     
     # Additional Formatting for the MBR:
-    source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/functions/calc.format_MBR.R' )
-    MBR_9min.df.final <-format_MBR(MBR_9min.df.flag)
+    source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/functions/calc.format.MBR.R' )
+    MBR_9min.df.final <-format.MBR(MBR_9min.df.flag)
     
     # Ustar Threshold:
     ustar.Threshold <- ustar.neon.sites %>% filter(Site_Id.NEON == site ) %>% select(Threshold.final)
