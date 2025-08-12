@@ -8,7 +8,7 @@ library('data.table')
 library('docstring')
 library('gdalUtilities')
 
-source("~/Dropbox (YSE)/Research/FluxGradient/lterwg-flux-gradient/functions/compile_DataAvailability_AOP.R")
+source("~/Dropbox (YSE)/Research/FluxGradient/lterwg-flux-gradient/functions/compile.data.availability.AOP.R")
 
 VegetationIndice <- 'DP3.30026.001'
 LAI <- 'DP3.30012.001'
