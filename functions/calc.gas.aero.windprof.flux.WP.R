@@ -18,7 +18,7 @@
 #'
 #' @author Alexis Helgeson, Jackie Matthes
 #' 
-calc.gas.aero.windprof.flux_WP <- function(min9.K, eddy.diff.name = "EddyDiff_WP", 
+calc.gas.aero.windprof.flux.WP <- function(min9.K, eddy.diff.name = "EddyDiff_WP", 
                             bootstrap, nsamp){
   
   # Calculate H2O fluxes.

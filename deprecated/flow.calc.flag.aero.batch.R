@@ -6,7 +6,7 @@ Savecsv=0 # Save csv files to analyze in matlab? 1 for true 0 for False.
 source(file.path("functions/MO_Length_CRS.R"))
 source(file.path("functions/calc.eddydiff.aero.R"))
 source(file.path("functions/calc.gas.aero.windprof.flux.R"))
-source(file.path("functions/calc.gas.aero.windprof.flux_WP.R"))
+source(file.path("functions/calc.gas.aero.windprof.flux.WP.R"))
 source(file.path("functions/calc.eqn.aero.windprof.flux.R"))
 source(file.path("functions/calculate.stability.correction.R"))
 source(file.path("functions/calc.aerodynamic.canopy.height.R"))
@@ -26,9 +26,9 @@ min30.FG.AE.list <- calc.gas.aero.windprof.flux(min9.K = min30.K.AE.list,
 
 if (DoWP==1){
 # Apply Wind Profile Method
-min9.FG.WP.list <- calc.gas.aero.windprof.flux_WP(min9.K = min9.K.AE.list,
+min9.FG.WP.list <- calc.gas.aero.windprof.flux.WP(min9.K = min9.K.AE.list,
                                                bootstrap = 1, nsamp = 1000)
-min30.FG.WP.list <- calc.gas.aero.windprof.flux_WP(min9.K = min30.K.AE.list,
+min30.FG.WP.list <- calc.gas.aero.windprof.flux.WP(min9.K = min30.K.AE.list,
                                                 bootstrap = 1, nsamp = 1000)
 }
 
