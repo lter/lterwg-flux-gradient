@@ -5,8 +5,8 @@
 #' This applies the same equation for aero/windprof methods, 
 #' where k is is calculated upstream for each method. 
 #'
-#' @param min9 gas concentration data frame, passed from computeFG.AE.WP.R
-#' @param eddy.diff.name name of which eddy diffusivity to use, passed from computeFG.AE.WP.R
+#' @param min9 gas concentration data frame, passed from computeFG.AE.WP.R (now calc.gas.aero.windprof.flux.R)
+#' @param eddy.diff.name name of which eddy diffusivity to use, passed from computeFG.AE.WP.R (now calc.gas.aero.windprof.flux.R)
 #'
 #'  Code inputs molar mixing ratio: # CO2 umol mol-1, CH4 nmol mol-1, H2O mmol mol-1
 #'  Code outputs molar flux: # CO2 umol m-2 s-1, CH4 nmol m-2 s-1, H2O mmol m-2 s-1
