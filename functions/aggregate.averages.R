@@ -23,7 +23,7 @@
 #   Cove Sturtevant (2024-11-11)
 #     optimize performance
 #' ----------------------------------------------------------------------------------
-aggregate_averages <- function(timeBgn,
+aggregate.averages <- function(timeBgn,
                                timeEnd,
                                meas,
                                timeAgrBgn,

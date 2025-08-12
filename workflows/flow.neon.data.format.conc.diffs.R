@@ -31,7 +31,7 @@ library(dplyr)
 
 # Load functions in this repo
 source(file.path("functions/interp.flux.R"))
-source(file.path("functions/aggregate_averages.R"))
+source(file.path("functions/aggregate.averages.R"))
 source('./functions/MO_Length_CRS.R')
 
 
@@ -455,7 +455,7 @@ for (site in sites){
     timeAgrEnd[AbeforeB] <- min9Diff.list[[idxDf]]$timeEnd_B[AbeforeB]
     
     # Aggregate the 1-min data to the combined window of the profile pair
-    MET_agr <- aggregate_averages(timeBgn=MET_1min$timeBgn,
+    MET_agr <- aggregate.averages(timeBgn=MET_1min$timeBgn,
                                   timeEnd=MET_1min$timeEnd,
                                   meas=MET_1min[,-c(1,2)],
                                   timeAgrBgn=timeAgrBgn,
@@ -477,7 +477,7 @@ for (site in sites){
     timeAgrEnd[AbeforeB] <- min9Diff.list[[idxDf]]$timeEnd_B[AbeforeB]
     
     # Aggregate the 1-min data to the combined window of the profile pair
-    ubar_agr <- aggregate_averages(timeBgn=ubar_2min$timeBgn,
+    ubar_agr <- aggregate.averages(timeBgn=ubar_2min$timeBgn,
                                   timeEnd=ubar_2min$timeEnd,
                                   meas=ubar_2min[,-c(1,2)],
                                   timeAgrBgn=timeAgrBgn,
