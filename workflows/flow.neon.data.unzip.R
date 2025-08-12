@@ -27,7 +27,7 @@ for( sitecode in site.list){
   print(sitecode)
   
   #unzip eddy-co bundled files
-  unzip_neon(in_path = file.path("data", sitecode, "filesToStack00200"), out_path = file.path("data", sitecode), quiet = FALSE)
+  unzip.neon(in_path = file.path("data", sitecode, "filesToStack00200"), out_path = file.path("data", sitecode), quiet = FALSE)
   
 }
 

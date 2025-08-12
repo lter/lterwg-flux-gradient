@@ -12,7 +12,7 @@
 #' @author Alexis Helgeson, Nick Lyon, Sparkle Malone
 #' 
 #' 
-unzip_neon <- function(in_path = NULL, out_path = NULL, quiet = FALSE){
+unzip.neon <- function(in_path = NULL, out_path = NULL, quiet = FALSE){
 
   # Identify names of downloaded ZIP files
   zip.files <- dir(path = in_path, pattern = ".zip")
