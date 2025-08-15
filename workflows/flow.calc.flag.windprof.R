@@ -13,7 +13,7 @@ source(file.path("functions/calc.MO.length.R"))
 source(file.path("functions/calc.eddydiff.windprof.R"))
 source(file.path("functions/calc.gas.aero.windprof.flux.R"))
 source(file.path("functions/calc.eqn.aero.windprof.flux.R"))
-source(file.path("functions/calculate.stability.correction.R"))
+source(file.path("functions/calc.stability.correction.R"))
 source(file.path("functions/calc.aerodynamic.canopy.height.R"))
 
 # Download aligned concentration and micromet dataframe 

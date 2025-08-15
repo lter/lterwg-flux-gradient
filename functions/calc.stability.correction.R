@@ -1,5 +1,5 @@
 
-#' calculate.stability.correction
+#' calc.stability.correction
 #'
 #' @param gas dataframe of gas taken from min9
 #'
@@ -8,7 +8,7 @@
 #'
 #' @author Alexis Helgeson, Samuel Jurado, Roisin Commane, and Camilo Rey-Sanchez, Sparkle L. Malone
 
-calculate.stability.correction <- function(gas){
+calc.stability.correction <- function(gas){
   #remove NAs from data columns used in calculation for AE this includes: P_kPa, Tair1, H_turb_interp, LE_turb_interp, ustar_interp, z_displ_calc
   
   #select for data columns -> remember there are as many ubar cols as there are TowerPositions for a given site

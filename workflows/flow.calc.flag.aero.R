@@ -15,7 +15,7 @@ source(file.path("functions/calc.eddydiff.aero.R"))
 source(file.path("functions/calc.gas.aero.windprof.flux.R"))
 source(file.path("functions/calc.gas.aero.windprof.flux.WP.R"))
 source(file.path("functions/calc.eqn.aero.windprof.flux.R"))
-source(file.path("functions/calculate.stability.correction.R"))
+source(file.path("functions/calc.stability.correction.R"))
 source(file.path("functions/calc.aerodynamic.canopy.height.R"))
 
 # Pull averaged data for concentration difference across height
