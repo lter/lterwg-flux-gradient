@@ -1,4 +1,4 @@
-#' calculate.all.sites.diurnal.avg
+#' calc.all.sites.diurnal.avg
 #'
 #' @param all.sites data frame of fluxes across all sites
 #' @param gas.name name of desired gas CO2, H2O, CH4
@@ -7,7 +7,7 @@
 #' 
 #'
 #' @author Alexis Helgeson and Sam Jurado
-calculate.all.sites.diurnal.avg <- function(all.sites, FG.name = "FG", EC.name = "FC_turb_interp"){
+calc.all.sites.diurnal.avg <- function(all.sites, FG.name = "FG", EC.name = "FC_turb_interp"){
   #calculate diurnal averages by site for each flux type
   all.sites.diurnal.FG <- all.sites  %>% group_by(hour, site) %>% summarise(mean_flux = mean(!! sym(FG.name), na.rm=TRUE), sd_flux = sd(!! sym(FG.name), na.rm=TRUE), n =n())
   all.sites.diurnal.EC <- all.sites  %>% group_by(hour, site) %>% summarise(mean_flux = mean(!! sym(EC.name), na.rm =TRUE), sd_flux = sd(!! sym(EC.name), na.rm =TRUE), n =n())

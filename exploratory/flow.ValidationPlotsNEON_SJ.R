@@ -21,7 +21,7 @@ source(file.path("functions/plot.light.response.R"))
 source(file.path("functions/temp.response.curve.R"))
 source(file.path("functions/plot.temp.response.R"))
 source(file.path("functions/plot.all.sites.diurnal.R"))
-source(file.path("functions/calculate.all.sites.diurnal.avg.R"))
+source(file.path("functions/calc.all.sites.diurnal.avg.R"))
 source(file.path("functions/all.sites.light.response.curve.R"))
 source(file.path("functions/all.sites.temp.response.curve.R"))
 
@@ -202,7 +202,7 @@ mtext(subtitle)
 
 #REFERENCE
 #METHOD AE
-all.sites.diurnal.ae <- calculate.all.sites.diurnal.avg(all.sites = all.sites.ae)
+all.sites.diurnal.ae <- calc.all.sites.diurnal.avg(all.sites = all.sites.ae)
 #plot dirnual cycle for all sites
 plot.all.sites.diurnal(all.sites = all.sites.diurnal.ae, plot.title = "Aerodynamic Method")
 #SINGLE SITE
@@ -223,7 +223,7 @@ df$cross_grad_flag
 
 #ALL SITES
 #METHOD AE
-all.sites.diurnal.ae <- calculate.all.sites.diurnal.avg(all.sites = df)
+all.sites.diurnal.ae <- calc.all.sites.diurnal.avg(all.sites = df)
 #plot dirnual cycle for all sites
 plot.all.sites.diurnal(all.sites = all.sites.diurnal.ae, plot.title = "Aerodynamic Method")
 
@@ -237,7 +237,7 @@ plot.all.sites.diurnal(all.sites = all.sites.diurnal.ae %>% filter(site == "NIWO
 
 #REFERENCE
 #METHOD AE
-all.sites.diurnal.ae <- calculate.all.sites.diurnal.avg(all.sites = all.sites.ae)
+all.sites.diurnal.ae <- calc.all.sites.diurnal.avg(all.sites = all.sites.ae)
 
 EC <- all.sites.diurnal.ae %>% filter(flux.name == "EC")
 FG <- all.sites.diurnal.ae %>% filter(flux.name == "FG")
@@ -256,7 +256,7 @@ df <- cross_grad_flag(df_CO2,df_CO2$dConc, df_CO2$FC_turb_interp)
 df$cross_grad_flag
 df <- df %>% filter(df$cross_grad_flag == 0)
 df$cross_grad_flag
-all.sites.diurnal.ae <- calculate.all.sites.diurnal.avg(all.sites = df)
+all.sites.diurnal.ae <- calc.all.sites.diurnal.avg(all.sites = df)
 
 
 
@@ -277,7 +277,7 @@ df_H2O <- all.sites.wp %>% filter(gas == "H2O")
 df_CH4 <- all.sites.wp %>% filter(gas == "CH4")
 
 
-all.sites.diurnal.wp <- calculate.all.sites.diurnal.avg(all.sites =df_CO2)
+all.sites.diurnal.wp <- calc.all.sites.diurnal.avg(all.sites =df_CO2)
 EC <- all.sites.diurnal.wp %>% filter(flux.name == "EC")
 FG <- all.sites.diurnal.wp %>% filter(flux.name == "FG")
 plot(EC$mean_flux,FG$mean_flux,ylim = c(-200,50))
@@ -291,13 +291,13 @@ summary(cross_grad_model)
 
 
 #this is the relationship between EC and FG when there are cross gradients
-all.sites.diurnal.wp <- calculate.all.sites.diurnal.avg(all.sites =df_CO2)
+all.sites.diurnal.wp <- calc.all.sites.diurnal.avg(all.sites =df_CO2)
 
 df <- cross_grad_flag(df_CO2,df_CO2$dConc, df_CO2$FC_turb_interp)
 df$cross_grad_flag
 df <- df %>% filter(df$cross_grad_flag == 0)
 df$cross_grad_flag
-all.sites.diurnal.wp <- calculate.all.sites.diurnal.avg(all.sites = df)
+all.sites.diurnal.wp <- calc.all.sites.diurnal.avg(all.sites = df)
 
 
 EC <- all.sites.diurnal.wp %>% filter(flux.name == "EC")
@@ -575,11 +575,11 @@ plot.temp.response(model = model.TRC.EC.WP, site = all.sites.ae %>% filter(gas =
 #OPTION TO FILTER DATA BEFORE TAKING HOURLY AVERAGE BY FILTERING COLUMN IQR.flag == "0" or spike.flag == "0"
 #ALL SITES
 #METHOD AE
-all.sites.diurnal.ae <- calculate.all.sites.diurnal.avg(all.sites = all.sites.ae %>% filter(gas == "H2O"))
+all.sites.diurnal.ae <- calc.all.sites.diurnal.avg(all.sites = all.sites.ae %>% filter(gas == "H2O"))
 #plot dirnual cycle for all sites
 plot.all.sites.diurnal(all.sites = all.sites.diurnal.ae, plot.title = "Aerodynamic Method")
 #METHOD WP
-all.sites.diurnal.wp <- calculate.all.sites.diurnal.avg(all.sites = all.sites.wp)
+all.sites.diurnal.wp <- calc.all.sites.diurnal.avg(all.sites = all.sites.wp)
 #plot dirnual cycle for all sites
 plot.all.sites.diurnal(all.sites = all.sites.diurnal.wp, plot.title = "Wind Profile Method")
 #SINGLE SITE

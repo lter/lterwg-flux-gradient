@@ -21,7 +21,7 @@ source(file.path("functions/plot.light.response.R"))
 source(file.path("functions/temp.response.curve.R"))
 source(file.path("functions/plot.temp.response.R"))
 source(file.path("functions/plot.all.sites.diurnal.R"))
-source(file.path("functions/calculate.all.sites.diurnal.avg.R"))
+source(file.path("functions/calc.all.sites.diurnal.avg.R"))
 source(file.path("functions/all.sites.light.response.curve.R"))
 source(file.path("functions/all.sites.temp.response.curve.R"))
 
@@ -279,11 +279,11 @@ plot.temp.response(model = model.TRC.EC.WP, site = all.sites.ae %>% filter(gas =
 #OPTION TO FILTER DATA BEFORE TAKING HOURLY AVERAGE BY FILTERING COLUMN IQR.flag == "0" or spike.flag == "0"
 #ALL SITES
 #METHOD AE
-all.sites.diurnal.ae <- calculate.all.sites.diurnal.avg(all.sites = all.sites.ae)
+all.sites.diurnal.ae <- calc.all.sites.diurnal.avg(all.sites = all.sites.ae)
 #plot dirnual cycle for all sites
 plot.all.sites.diurnal(all.sites = all.sites.diurnal.ae, plot.title = "Aerodynamic Method")
 #METHOD WP
-all.sites.diurnal.wp <- calculate.all.sites.diurnal.avg(all.sites = all.sites.wp)
+all.sites.diurnal.wp <- calc.all.sites.diurnal.avg(all.sites = all.sites.wp)
 #plot dirnual cycle for all sites
 plot.all.sites.diurnal(all.sites = all.sites.diurnal.wp, plot.title = "Wind Profile Method")
 #SINGLE SITE
