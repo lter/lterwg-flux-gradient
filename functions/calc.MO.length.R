@@ -11,7 +11,7 @@
 #' Modified by Camilo Rey Sanchez March 14 2024
 
 
-MOlength <- function(press,temp,H,LE,velofric){
+calc.MO.length <- function(press,temp,H,LE,velofric){
   #######ATMOSPHERIC COMPUTATION######
   
   #Constants

@@ -3,7 +3,7 @@ DoWP = 1 # Do Wind Profile Method here as well? 1 for true O for False.
 Savecsv = 0 # Save csv files to analyze in matlab? 1 for true 0 for False.
 
 # Load functions in this repo
-source(file.path("functions/MO_Length_CRS.R"))
+source(file.path("functions/calc.MO.length.R"))
 source(file.path("functions/calc.eddydiff.aero.R"))
 source(file.path("functions/calc.gas.aero.windprof.flux.R"))
 source(file.path("functions/calc.gas.aero.windprof.flux.WP.R"))

@@ -1,6 +1,6 @@
 
 # Load functions for the wind profile flux gradient calculation
-source(file.path("functions/MO_Length_CRS.R"))
+source(file.path("functions/calc.MO.length.R"))
 source(file.path("functions/calc.eddydiff.windprof.R"))
 source(file.path("functions/calc.gas.aero.windprof.flux.R"))
 source(file.path("functions/calc.eqn.aero.windprof.flux.R"))

@@ -35,7 +35,7 @@ cccMin <- 0.5 # minimum ccc value to have the tower pair included in the diel co
 # Requires packages: fs, googledrive
 library(plotly)
 source('./functions/calculate.diel.ptrn.R')
-source('./functions/MO_Length_CRS.R')
+source('./functions/calc.MO.length.R')
 source("./functions/calc.lins.ccc.R")
 # -------------------------------------------------------
 
@@ -87,7 +87,7 @@ LE <- MBRflux_align$LE_turb_interp_H2O
 LE[is.na(LE)] <- MBRflux_align$LE_turb_interp_CO2[is.na(LE)]
 velofric <- MBRflux_align$ustar_interp_H2O
 velofric[is.na(velofric)] <- MBRflux_align$ustar_interp_CO2[is.na(velofric)]
-MOlength <- MOlength(press,temp,H,LE,velofric)$L
+MOlength <- calc.MO.length(press,temp,H,LE,velofric)$L
 MBRflux_align$zoL <- as.numeric(attr.df$DistZaxsTow[1])/MOlength
 
 # Select time range & tower level pair

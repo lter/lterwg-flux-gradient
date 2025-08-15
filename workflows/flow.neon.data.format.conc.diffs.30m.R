@@ -39,7 +39,7 @@ googledrive::drive_auth() # Likely will not work on RStudio Server. If you get a
 # Load functions in this repo
 source(file.path("functions/interp.flux.R"))
 source(file.path("functions/aggregate.averages.R"))
-source('./functions/MO_Length_CRS.R')
+source('./functions/calc.MO.length.R')
 
 
 
@@ -482,7 +482,7 @@ for(sitecode in site.list){
     var$FH2O_interp <- var$LE_turb_interp/var$lambda/mv*1000 # mmol m-2 s-1
     
     # Monin-Obukhov length & stability parameter (z/L)
-    var$L_obukhov <- MOlength(var$P_kPa,Tair_C,var$H_turb_interp,var$LE_turb_interp,var$ustar_interp)$L
+    var$L_obukhov <- calc.MO.length(var$P_kPa,Tair_C,var$H_turb_interp,var$LE_turb_interp,var$ustar_interp)$L
     var$zoL <- as.numeric(attr.df$DistZaxsTow[1])/var$L_obukhov
     
     var = as.data.frame(var) 
