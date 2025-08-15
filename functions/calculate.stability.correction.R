@@ -31,7 +31,7 @@ calculate.stability.correction <- function(gas){
   Tair_name <- paste0("Tair",maxL)
   
   # Calculate MO length  
-  MO.vars <- MOlength(press = gas$P_kPa, temp = gas[,Tair_name], 
+  MO.vars <- calc.MO.length(press = gas$P_kPa, temp = gas[,Tair_name], 
                       H = gas$H_turb_interp, LE = gas$LE_turb_interp, 
                       velofric = gas$ustar_interp)
   
