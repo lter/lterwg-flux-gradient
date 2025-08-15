@@ -6,7 +6,7 @@
 # h_dsk= Smoothed series of aerodynamic canopy height (m, non-gapfilled)
 
 
-calc.AeroCanopyH <- function(Mdate, ustar, z, L, u, daysAVG, plotYN) {
+calc.aerodynamic.canopy.height <- function(Mdate, ustar, z, L, u, daysAVG, plotYN) {
   k <- 0.4
   d_h <- 0.6 # Default from paper
   z0_h <- 0.1 # Default from paper

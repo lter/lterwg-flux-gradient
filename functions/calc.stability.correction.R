@@ -69,7 +69,7 @@ calc.stability.correction <- function(gas){
   # if (maxL==3) {ubar=gas$ubar3}
   # u=ubar[gas$dLevelsAminusB == TopLevel]
   
-  AeroVars=calc.AeroCanopyH(Mdate=Mdate, ustar=ustar, z=z, L=L, u=u, 
+  AeroVars=calc.aerodynamic.canopy.height(Mdate=Mdate, ustar=ustar, z=z, L=L, u=u, 
                             daysAVG=daysAVG, plotYN=plotYN)
   
   # Interpolate AeroCanopy Height to the other levels
