@@ -7,7 +7,7 @@ rm(list=ls())
 library(plotly)
 library(dplyr)
 source("./functions/calc.lins.ccc.R")
-source('./functions/calculate.diel.ptrn.R')
+source('./functions/calc.diel.ptrn.R')
 
 # ----- SETUP -----
 
@@ -210,9 +210,9 @@ for( site in site.list){
   tower_pair_diel <- ccc$tower_pair[ccc$ccc >= cccMin] 
   if(length(tower_pair_diel) > 0){
     setDiel <- tower_pair %in% tower_pair_diel
-    flux_diel <- calculate.diel.ptrn(time=time[setDiel],data=data.frame(flux_meas=flux_meas[setDiel],flux_pred=flux_pred[setDiel]),Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=FALSE,NumSampMin=NumSampMin,TitlPlot=paste0(site,' F',gas,' Diel Pattern'))
+    flux_diel <- calc.diel.ptrn(time=time[setDiel],data=data.frame(flux_meas=flux_meas[setDiel],flux_pred=flux_pred[setDiel]),Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=FALSE,NumSampMin=NumSampMin,TitlPlot=paste0(site,' F',gas,' Diel Pattern'))
     setDiel_raw <- tower_pair_raw %in% tower_pair_diel
-    flux_diel_raw <- calculate.diel.ptrn(time=time_raw[setDiel_raw],data=data.frame(flux_meas=flux_meas_raw[setDiel_raw],flux_pred=flux_pred_raw[setDiel_raw]),Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=FALSE,NumSampMin=NumSampMin,TitlPlot=paste0(site,' F',gas,' Unfiltered Diel Pattern'))
+    flux_diel_raw <- calc.diel.ptrn(time=time_raw[setDiel_raw],data=data.frame(flux_meas=flux_meas_raw[setDiel_raw],flux_pred=flux_pred_raw[setDiel_raw]),Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=FALSE,NumSampMin=NumSampMin,TitlPlot=paste0(site,' F',gas,' Unfiltered Diel Pattern'))
     
     # Save
     flux_diel_site <- data.frame(time=c(flux_diel$flux_meas$time,
@@ -394,9 +394,9 @@ for( site in site.list){
   tower_pair_diel <- ccc$tower_pair[ccc$ccc >= cccMin] 
   if(length(tower_pair_diel) > 0){
     setDiel <- tower_pair %in% tower_pair_diel
-    flux_diel <- calculate.diel.ptrn(time=time[setDiel],data=data.frame(flux_meas=flux_meas[setDiel],flux_pred=flux_pred[setDiel]),Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=FALSE,NumSampMin=NumSampMin,TitlPlot=paste0(site,' F',gas,' Diel Pattern'))
+    flux_diel <- calc.diel.ptrn(time=time[setDiel],data=data.frame(flux_meas=flux_meas[setDiel],flux_pred=flux_pred[setDiel]),Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=FALSE,NumSampMin=NumSampMin,TitlPlot=paste0(site,' F',gas,' Diel Pattern'))
     setDiel_raw <- tower_pair_raw %in% tower_pair_diel
-    flux_diel_raw <- calculate.diel.ptrn(time=time_raw[setDiel_raw],data=data.frame(flux_meas=flux_meas_raw[setDiel_raw],flux_pred=flux_pred_raw[setDiel_raw]),Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=FALSE,NumSampMin=NumSampMin,TitlPlot=paste0(site,' F',gas,' Unfiltered Diel Pattern'))
+    flux_diel_raw <- calc.diel.ptrn(time=time_raw[setDiel_raw],data=data.frame(flux_meas=flux_meas_raw[setDiel_raw],flux_pred=flux_pred_raw[setDiel_raw]),Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=FALSE,NumSampMin=NumSampMin,TitlPlot=paste0(site,' F',gas,' Unfiltered Diel Pattern'))
     
     # Save
     flux_diel_site <- data.frame(time=c(flux_diel$flux_meas$time,

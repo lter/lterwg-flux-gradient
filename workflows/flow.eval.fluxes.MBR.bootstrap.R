@@ -34,7 +34,7 @@ cccMin <- 0.5 # minimum ccc value to have the tower pair included in the diel co
 # ------ Prerequisites! Make sure these packages are installed ----
 # Requires packages: fs, googledrive
 library(plotly)
-source('./functions/calculate.diel.ptrn.R')
+source('./functions/calc.diel.ptrn.R')
 source('./functions/calc.MO.length.R')
 source("./functions/calc.lins.ccc.R")
 # -------------------------------------------------------
@@ -308,7 +308,7 @@ for(idxSNR in seq_len(length(SNRMin))){
   
   tower_pair_diel <- ccc$tower_pair[ccc$ccc >= cccMin] 
   setDiel <- tower_pair %in% tower_pair_diel
-  flux_diel <- calculate.diel.ptrn(time=time[setDiel],data=data.frame(flux_meas=flux_meas[setDiel],flux_pred=flux_pred[setDiel]),Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=PlotCO2,NumSampMin=NumSampMin,TitlPlot=paste0(site,' FCO2 Diel Pattern'))
+  flux_diel <- calc.diel.ptrn(time=time[setDiel],data=data.frame(flux_meas=flux_meas[setDiel],flux_pred=flux_pred[setDiel]),Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=PlotCO2,NumSampMin=NumSampMin,TitlPlot=paste0(site,' FCO2 Diel Pattern'))
 
   
 
@@ -504,13 +504,13 @@ for(idxSNR in seq_len(length(SNRMin))){
 
   tower_pair_diel <- ccc$tower_pair[ccc$ccc >= cccMin] 
   setDiel <- tower_pair %in% tower_pair_diel
-  flux_diel <- calculate.diel.ptrn(time=time[setDiel],data=data.frame(flux_meas=flux_meas[setDiel],flux_pred=flux_pred[setDiel]),Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=PlotH2O,NumSampMin=NumSampMin,TitlPlot=paste0(site,' FH2O Diel Pattern'))
+  flux_diel <- calc.diel.ptrn(time=time[setDiel],data=data.frame(flux_meas=flux_meas[setDiel],flux_pred=flux_pred[setDiel]),Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=PlotH2O,NumSampMin=NumSampMin,TitlPlot=paste0(site,' FH2O Diel Pattern'))
   
   # if (Stat == 'mean'){
-  #   flux_resid_diel <- calculate.diel.ptrn(time=time,data=flux_resid,Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=PlotH2O,NumSampMin=NumSampMin,TitlPlot=paste0(site,' FH2O Diel Pattern (MBR residual)'))
+  #   flux_resid_diel <- calc.diel.ptrn(time=time,data=flux_resid,Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=PlotH2O,NumSampMin=NumSampMin,TitlPlot=paste0(site,' FH2O Diel Pattern (MBR residual)'))
   # } else {
   #   flux_resid_diel <- flux_pred_diel-flux_meas_diel
-  #   flux_resid_diel <- calculate.diel.ptrn(time=as.POSIXct('2010-01-01',tz='GMT')+flux_meas_diel$time,data=flux_resid_diel$stat,Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=PlotH2O,NumSampMin=1,TitlPlot=paste0(site,' FH2O Diel pattern residual (predicted-measured)'))
+  #   flux_resid_diel <- calc.diel.ptrn(time=as.POSIXct('2010-01-01',tz='GMT')+flux_meas_diel$time,data=flux_resid_diel$stat,Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=PlotH2O,NumSampMin=1,TitlPlot=paste0(site,' FH2O Diel pattern residual (predicted-measured)'))
   #   
   # }
   
@@ -604,7 +604,7 @@ for(idxSNR in seq_len(length(SNRMin))){
   tower_pair_diel <- ccc$tower_pair[ccc$ccc >= cccMin] 
   setDielNA <- !(tower_pair %in% tower_pair_diel)
   flux_pred_FCtrace[setDielNA] <- NA
-  flux_pred_diel <- calculate.diel.ptrn(time=time,data=data.frame(flux_pred_FH2Otrace=flux_pred_FH2Otrace,flux_pred_FCtrace=flux_pred_FCtrace),Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=plotCH4,NumSampMin=NumSampMin,TitlPlot=paste0(site,' FCH4 Diel Pattern (MBR predicted flux with CO2 tracer)'))
+  flux_pred_diel <- calc.diel.ptrn(time=time,data=data.frame(flux_pred_FH2Otrace=flux_pred_FH2Otrace,flux_pred_FCtrace=flux_pred_FCtrace),Int=as.difftime(30,units='mins'),Stat=Stat,Ucrt=Ucrt,Plot=plotCH4,NumSampMin=NumSampMin,TitlPlot=paste0(site,' FCH4 Diel Pattern (MBR predicted flux with CO2 tracer)'))
 
 }
 

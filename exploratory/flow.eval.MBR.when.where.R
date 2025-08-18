@@ -6,7 +6,7 @@
 rm(list=ls())
 library(plotly)
 source("./functions/calc.lins.ccc.R")
-source('./functions/calculate.diel.ptrn.R')
+source('./functions/calc.diel.ptrn.R')
 
 # ----- SETUP -----
 

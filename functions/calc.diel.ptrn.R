@@ -36,7 +36,7 @@
 #     original creation
 ##############################################################################################
 
-calculate.diel.ptrn <- function (time,
+calc.diel.ptrn <- function(time,
                            data,
                            Int=as.difftime(30,units='mins'),
                            Stat=c('mean','median')[1],
