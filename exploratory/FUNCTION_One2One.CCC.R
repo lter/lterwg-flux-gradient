@@ -31,7 +31,7 @@ ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
       annotate("text", x = -20, y = 20, size = 5, 
                label = MBR.DF %>% 
                  group_by(dLevelsAminusB) %>% 
-                 summarize(ccc = calculate_lins_ccc(FC_turb_interp, FG_mean)$rho.c$est %>% round(2) %>% 
+                 summarize(ccc = calc.lins.ccc(FC_turb_interp, FG_mean)$rho.c$est %>% round(2) %>% 
                              paste("CCC =", .)) %>% 
                  pull(ccc) %>% 
                  paste(collapse = "\n")) +
@@ -47,7 +47,7 @@ ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
       annotate("text", x = -20, y = 30, size = 5, 
                label = WP.DF %>% 
                  group_by(dLevelsAminusB) %>% 
-                 summarize(ccc = calculate_lins_ccc(FC_turb_interp, FG_mean)$rho.c$est %>% 
+                 summarize(ccc = calc.lins.ccc(FC_turb_interp, FG_mean)$rho.c$est %>% 
                              round(2) %>% 
                              paste("CCC =", .)) %>% 
                  pull(ccc) %>% 
@@ -65,7 +65,7 @@ ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
       annotate("text", x = -20, y = 30, size = 5, 
                label = AE.DF %>% 
                  group_by(dLevelsAminusB) %>% 
-                 summarize(ccc = calculate_lins_ccc(FC_turb_interp, FG_mean)$rho.c$est %>% 
+                 summarize(ccc = calc.lins.ccc(FC_turb_interp, FG_mean)$rho.c$est %>% 
                              round(2) %>% 
                              paste("CCC =", .)) %>% 
                  pull(ccc) %>% 
@@ -93,7 +93,7 @@ ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
       annotate("text", x = -20, y = 30, size = 5, 
                label = MBR.DF %>% 
                  group_by(dLevelsAminusB) %>% 
-                 summarize(ccc = calculate_lins_ccc(FH2O_interp, FG_mean)$rho.c$est %>% 
+                 summarize(ccc = calc.lins.ccc(FH2O_interp, FG_mean)$rho.c$est %>% 
                              round(2) %>% 
                              paste("CCC =", .)) %>% 
                  pull(ccc) %>% 
@@ -111,7 +111,7 @@ ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
       annotate("text", x = -20, y = 30, size = 5, 
                label = WP.DF %>% 
                  group_by(dLevelsAminusB) %>% 
-                 summarize(ccc = calculate_lins_ccc(FH2O_interp, FG_mean)$rho.c$est %>% 
+                 summarize(ccc = calc.lins.ccc(FH2O_interp, FG_mean)$rho.c$est %>% 
                              round(2) %>% 
                              paste("CCC =", .)) %>% 
                  pull(ccc) %>% 
@@ -129,7 +129,7 @@ ccc.plots <- function(MBR.DF, AE.DF, WP.DF, gas) {
       annotate("text", x = -20, y = 30, size = 5, 
                label = AE.DF %>% 
                  group_by(dLevelsAminusB) %>% 
-                 summarize(ccc = calculate_lins_ccc(FH2O_interp, FG_mean)$rho.c$est %>% 
+                 summarize(ccc = calc.lins.ccc(FH2O_interp, FG_mean)$rho.c$est %>% 
                              round(2) %>% 
                              paste("CCC =", .)) %>% 
                  pull(ccc) %>% 
@@ -166,7 +166,7 @@ ccc.parms <- function(Y, X, DF, TYPE) {
   rmse <- sqrt(mean((DF[,Y] %>% na.omit - predicted)^2))
   
   # Calculate CCC
-  ccc_result <- calculate_lins_ccc(DF[,X], DF[,Y])
+  ccc_result <- calc.lins.ccc(DF[,X], DF[,Y])
   
   ccc.parms <- data.frame(Intercept = model$coefficients[1], 
                           Slope = model$coefficients[2],

@@ -199,7 +199,7 @@ for(idxSNR in seq_len(length(SNRMin))){
     setTp <- tower_pair == idxTp
     
     # Compute ccc
-    cccIdx <- calculate_lins_ccc(flux_pred[setTp], flux_meas[setTp])$rho.c$est
+    cccIdx <- calc.lins.ccc(flux_pred[setTp], flux_meas[setTp])$rho.c$est
     
     ccc[ccc$tower_pair==idxTp,"ccc"] <- cccIdx
     
@@ -393,7 +393,7 @@ for(idxSNR in seq_len(length(SNRMin))){
     setTp <- tower_pair == idxTp
     
     # Compute ccc
-    cccIdx <- calculate_lins_ccc(flux_pred[setTp], flux_meas[setTp])$rho.c$est
+    cccIdx <- calc.lins.ccc(flux_pred[setTp], flux_meas[setTp])$rho.c$est
     
     ccc[ccc$tower_pair==idxTp,"ccc"] <- cccIdx
     

@@ -143,7 +143,7 @@ for( site in site.list){
     setTp_raw <- tower_pair_raw == idxTp
     
     # Compute ccc
-    cccIdx <- calculate_lins_ccc(flux_pred[setTp], flux_meas[setTp])$rho.c$est
+    cccIdx <- calc.lins.ccc(flux_pred[setTp], flux_meas[setTp])$rho.c$est
     
     ccc[ccc$tower_pair==idxTp,"ccc"] <- cccIdx
     
@@ -332,7 +332,7 @@ for( site in site.list){
     setTp_raw <- tower_pair_raw == idxTp
     
     # Compute ccc
-    cccIdx <- calculate_lins_ccc(flux_pred[setTp], flux_meas[setTp])$rho.c$est
+    cccIdx <- calc.lins.ccc(flux_pred[setTp], flux_meas[setTp])$rho.c$est
     
     ccc[ccc$tower_pair==idxTp,"ccc"] <- cccIdx
     

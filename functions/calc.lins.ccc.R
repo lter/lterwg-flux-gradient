@@ -27,7 +27,7 @@
 #' Lin, L. (1989). A concordance correlation coefficient to evaluate reproducibility.
 #' Biometrics, 45, 255-268.
 #'
-calculate_lins_ccc <- function(x, y, ci = "z-transform", conf.level = 0.95, 
+calc.lins.ccc <- function(x, y, ci = "z-transform", conf.level = 0.95, 
                                rep.measure = FALSE, subjectid = NULL) {
   # Calculate the normal quantile for the confidence level
   N. <- 1 - ((1 - conf.level)/2)

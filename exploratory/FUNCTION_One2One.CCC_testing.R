@@ -12,7 +12,7 @@ get_facet_stats <- function(df, facet_level, x_col, y_col) {
   
   # Calculate CCC
   ccc_result <- tryCatch({
-    calculate_lins_ccc(subset_df[[x_col]], subset_df[[y_col]])$rho.c$est
+    calc.lins.ccc(subset_df[[x_col]], subset_df[[y_col]])$rho.c$est
   }, error = function(e) NA)
   
   # Calculate R² and RMSE
@@ -197,7 +197,7 @@ ccc.parms <- function(Y, X, DF, TYPE) {
   rmse <- sqrt(mean((DF[,Y] %>% na.omit - predicted)^2))
   count <- DF[,Y] %>% na.omit() %>% length()
   # Calculate CCC
-  ccc_result <- calculate_lins_ccc(DF[,X], DF[,Y])
+  ccc_result <- calc.lins.ccc(DF[,X], DF[,Y])
   
   ccc.parms <- data.frame(Intercept = model$coefficients[1], 
                           Slope = model$coefficients[2],
