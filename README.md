@@ -33,7 +33,7 @@ lterwg-flux-gradient/
 │   ├── flow_AOP_FormatLayers.R
 │   └── flow.StructuralDiversity*.R
 │   ├── flow.Combine.Data.R
-│   ├── flow.AOP.viz.R
+│   └── flow.AOP.viz.R
 │
 └── deprecated/              # Unused workflows and functions
 ```
@@ -164,4 +164,4 @@ ADD LINKS TO NEON DATA PRODUCTS PAGE
 
 ## Supplementary Resources
 
-NCEAS Scientific Computing Support Team page [link](https://nceas.github.io/scicomp.github.io)
+LTER Scientific Computing Team [website](https://lter.github.io/scicomp/) & NCEAS' [Resources for Working Groups](https://www.nceas.ucsb.edu/working-group-resources)
