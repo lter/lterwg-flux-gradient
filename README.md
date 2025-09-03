@@ -99,7 +99,7 @@ lterwg-flux-gradient/
 
 7. `flow.evaluation.dataframe.R` → standardizes the data format from the MBR, AE, and WP. This file uses the product of `flow.calc.flux.batch.R` to develop the validation dataframes needed to perform the evaluation. This file produces a list of dataframes in an object called SITE_Evaluation.RData.
 
-8. `flow.evaluation.batch` → Creates the data needed to evaluate gradient fluxes using the products of `flow.validation.dataframe.batch.R`.
+8. `flow.evaluation.batch` → Creates the data needed to evaluate gradient fluxes using the products of `flow.evaluation.dataframe.R`.
 First data is filtered (`flow.evaluation.filter.R`) to produce: FilteredData_ALLSites.Rdata and FilterReport_ALLSites.Rdata. Next, the One2One analysis (`flow.evaluation.One2One.R`) is done on filtered data to produce: One2One_ALLSites.Rdata and FilteredData_ALLSites_BH.Rdata. BH stands for the best height, which is determined by the height levels with the highest R2. Next the diurnal analysis (`flow.evaluation.diurnal.R`) produces: DiurnalSummary_ALLSites_BH.Rdata. Finally, we fit carbon exchange parameters (`flow.evaluation.cparms.R`) to produce: CarbonParms.Rdata. 
 
 9. `flow.evaluation.figures` → produces the figures and tables that evaluate the gradient flux. The products of `flow.evaluation.batch` are used. 
@@ -111,13 +111,13 @@ First data is filtered (`flow.evaluation.filter.R`) to produce: FilteredData_ALL
                                      └─ flow.calc.flag.windprof.batch.R
                                      → SITE_METHOD.RData
    
-   SITE_METHOD.RData → flow.validation.dataframe.batch.R → SITES_METHOD_30min.RData
+   SITE_METHOD.RData → flow.evaluation.dataframe.R → SITE_Evaluation.RData
    
-   SITES_METHOD_30min.RData → flow.evaluation.batch
-                            ├─ flow.evaluation.filter.R → FilteredData_ALLSites.Rdata, FilterReport_ALLSites.Rdata
-                            ├─ flow.evaluation.One2One.R → One2One_ALLSites.Rdata, FilteredData_ALLSites_BH.Rdata
-                            ├─ flow.evaluation.diurnal.R → DiurnalSummary_ALLSites_BH.Rdata
-                            └─ flow.evaluation.cparms.R → CarbonParms.Rdata
+   SITE_Evaluation.RData → flow.evaluation.batch
+                         ├─ flow.evaluation.filter.R → FilteredData_ALLSites.Rdata, FilterReport_ALLSites.Rdata
+                         ├─ flow.evaluation.One2One.R → One2One_ALLSites.Rdata, FilteredData_ALLSites_BH.Rdata
+                         ├─ flow.evaluation.diurnal.R → DiurnalSummary_ALLSites_BH.Rdata
+                         └─ flow.evaluation.cparms.R → CarbonParms.Rdata
    
    FilteredData_ALLSites.Rdata, etc. → flow.evaluation.figures → Figures and tables
    ```
