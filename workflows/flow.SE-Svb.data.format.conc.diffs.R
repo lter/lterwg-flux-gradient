@@ -35,7 +35,7 @@ library(dplyr)
 library(lubridate)
 # Load functions in this repo
 source(file.path("functions/interp.flux.R"))
-source(file.path("functions/aggregate_averages.R"))
+source(file.path("functions/aggregate.averages.R"))
 # Final note: This script takes approx 45 min to run per site. 
 # -------------------------------------------------------
 # Authenticate with Google Drive and get site data
