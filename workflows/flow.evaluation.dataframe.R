@@ -76,7 +76,7 @@ for( site in site.list){
     WP_9min.df <-  WP_9min.df %>% mutate(Diff_EC_GF= FC_turb_interp - FG_mean )
     
     # Cross Gradient Calculations:
-    source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/workflows/flow.CrossGradient.R' )
+    source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/functions/calc.cross.gradient.R' )
     AE_9min.df.CG <- eddy_diff_real(AE_9min.df.flag) %>% cross_grad_flag( Kgas)
     WP_9min.df.CG <- eddy_diff_real(WP_9min.df.flag) %>% cross_grad_flag( Kgas)
     
