@@ -81,7 +81,7 @@ for( site in site.list){
     WP_9min.df.CG <- eddy_diff_real(WP_9min.df.flag) %>% cross_grad_flag( Kgas)
     
     # Eddy Diffusivity:
-    source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/workflows/flow.bad.eddy.R' )
+    source('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient/functions/calc.bad.eddy.R' )
     
     AE_9min.df.final <- Bad_Eddy(  AE_9min.df.CG, "EddyDiff")
     WP_9min.df.final <- Bad_Eddy(  WP_9min.df.CG, "EddyDiff")
