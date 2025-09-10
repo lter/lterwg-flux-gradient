@@ -99,11 +99,11 @@ lterwg-flux-gradient/
 
 `flow.non.neon.data.harmonize.ch4.R` → Harmonizes methane data from non-NEON sites. Uploads to Google Drive as methane_non-neon_harmonized.csv.
 
-`flow.SE-Sto.data.format.conc.diffs.R` → Merges together flux, met, and profile concentration data for site SE-Sto. Aligns the profile concentration data (CH4, CO2, and H2O) among adjacent tower levels (and also the bottom-top levels) and computes the difference in mean concentration. Aligns non-concentration data with the mid-point of the paired-level concentration differences. 
+`flow.SE-Sto.data.format.conc.diffs.R` → Merges together flux, met, and profile concentration data for site SE-Sto. Aligns the profile concentration data (CH4, CO2, and H2O) among adjacent tower levels (and also the bottom-top levels) and computes the difference in mean concentration. Aligns non-concentration data with the mid-point of the paired-level concentration differences. Uploads to Google Drive as SE-Sto_attr.zip and SE-Sto_aligned_conc_flux_9min.zip.
 
-`flow.SE-Svb.data.format.conc.diffs.R` → Merges together flux, met, and profile concentration data for site SE-Svb. Aligns the profile concentration data (CH4, CO2, and H2O) among adjacent tower levels (and also the bottom-top levels) and computes the difference in mean concentration. Aligns non-concentration data with the mid-point of the paired-level concentration differences. 
+`flow.SE-Svb.data.format.conc.diffs.R` → Merges together flux, met, and profile concentration data for site SE-Svb. Aligns the profile concentration data (CH4, CO2, and H2O) among adjacent tower levels (and also the bottom-top levels) and computes the difference in mean concentration. Aligns non-concentration data with the mid-point of the paired-level concentration differences. Uploads to Google Drive as SE-Svb_attr.zip and SE-Svb_aligned_conc_flux_9min.zip.
 
-`flow.US-Uaf.data.format.conc.diffs.R` → Merges together flux, met, and profile concentration data for site US-Uaf. Aligns the profile concentration data (CH4, CO2, and H2O) among adjacent tower levels (and also the bottom-top levels) and computes the difference in mean concentration. Aligns non-concentration data with the mid-point of the paired-level concentration differences. 
+`flow.US-Uaf.data.format.conc.diffs.R` → Merges together flux, met, and profile concentration data for site US-Uaf. Aligns the profile concentration data (CH4, CO2, and H2O) among adjacent tower levels (and also the bottom-top levels) and computes the difference in mean concentration. Aligns non-concentration data with the mid-point of the paired-level concentration differences. Uploads to Google Drive as US-Uaf_attr.zip and US-Uaf_aligned_conc_flux_9min.zip.
 
 ### Misc
 
