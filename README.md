@@ -58,15 +58,15 @@ lterwg-flux-gradient/
    BiocManager::install("rhdf5")
    ```
 
-## Flux Workflow
+## Main Flux Workflow
 
 ### Data Acquisition and Processing
 
-1. `flow.neon.data.download.R` → Workflow script that download and unzip NEON HDF5 (eddy covariance files) files for all sites and time periods of interest. ALSO downloads all required MET data products that are not in the bundled HDF5 file.
+1. `flow.neon.data.download.R` → Workflow script that downloads and unzips NEON HDF5 (eddy covariance files) files for all sites and time periods of interest. ALSO downloads all required MET data products that are not in the bundled HDF5 file.
 
-2. `flow.neon.data.unzip.R` → Workflow. Unzips all downloaded NEON data files.
+2. `flow.neon.data.unzip.R` → Unzips all downloaded NEON data files.
 
-3. `flow.neon.data.extract.R` → Extract and stack downloaded and unzipped data into R objects for each data averaging interval, saved in their own RData file. These are currently min9.list (9-min/6-min concentrations), min30.list (30-min met and flux data), and min1.list (1-min met data), WS2D (2D wind speed data). Also extracts and saves site attributes from the HDF5 files into an R object called attr.df. Zips and saves objects to Google Drive. For example, `googledrive::drive_upload(media = path to the local file to upload, overwrite = T, path = googledrive::as_id("url to Drive folder"))`.
+3. `flow.neon.data.extract.R` → Extracts and stacks downloaded and unzipped data into R objects for each data averaging interval, saved in their own RData file. These are currently min9.list (9-min/6-min concentrations), min30.list (30-min met and flux data), and min1.list (1-min met data), WS2D (2D wind speed data). Also extracts and saves site attributes from the HDF5 files into an R object called attr.df. Zips and saves objects to Google Drive. For example, `googledrive::drive_upload(media = path to the local file to upload, overwrite = T, path = googledrive::as_id("url to Drive folder"))`.
 
    ```
    NEON Data → flow.neon.data.download.R → flow.neon.data.unzip.R → flow.neon.data.extract.R 
@@ -88,9 +88,32 @@ lterwg-flux-gradient/
 
 ### Exploratory Workflows
 
-6. `flow.calc.flux.batch.R` → Grab aligned concentration & flux data and calculates the fluxes using MBR (`flow.calc.flag.mbr.batch.R`), AE (`flow.calc.flag.aero.batch.R`), and WP (`flow.calc.flag.windprof.batch.R`) methods and adds quality flag columns, month, hour, residual, rmse for calculated fluxes. Save output as SITE_METHOD.RData, where SITE is NEON site code, METHOD is the computation method (e.g. MBR=modified bowen ratio, aero = aerodynamic, windprof=wind profile). 
+6. `flow.calc.flux.batch.R` → Grabs aligned concentration & flux data and calculates the fluxes using MBR (`flow.calc.flag.mbr.batch.R`), AE (`flow.calc.flag.aero.batch.R`), and WP (`flow.calc.flag.windprof.batch.R`) methods and adds quality flag columns, month, hour, residual, rmse for calculated fluxes. Save output as SITE_METHOD.RData, where SITE is NEON site code, METHOD is the computation method (e.g. MBR=modified bowen ratio, aero = aerodynamic, windprof=wind profile). 
 
-7. `flow.evaluation.dataframe.R` → standardizes the data format from the MBR, AE, and WP. This file uses the product of `flow.calc.flux.batch.R` to develop the validation dataframes needed to perform the evaluation. This file produces a list of dataframes in an object called SITE_Evaluation.RData.
+7. `flow.evaluation.dataframe.R` → Standardizes the data format from the MBR, AE, and WP. This file uses the product of `flow.calc.flux.batch.R` to develop the validation dataframes needed to perform the evaluation. This file produces a list of dataframes in an object called SITE_Evaluation.RData.
+
+## Other Workflows
+
+### Non-NEON Processing
+`flow.non.neon.attribute.tables.R` → Creates attribute tables for non-NEON sites that are consistent with those of NEON sites. Uploads to Google Drive as SITE_attr.RData and SITE_attr.zip where SITE is the non-NEON site.
+
+`flow.non.neon.data.harmonize.ch4.R` → Harmonizes methane data from non-NEON sites. Uploads to Google Drive as methane_non-neon_harmonized.csv.
+
+`flow.SE-Sto.data.format.conc.diffs.R` → Merges together flux, met, and profile concentration data for site SE-Sto. Aligns the profile concentration data (CH4, CO2, and H2O) among adjacent tower levels (and also the bottom-top levels) and computes the difference in mean concentration. Aligns non-concentration data with the mid-point of the paired-level concentration differences. 
+
+`flow.SE-Svb.data.format.conc.diffs.R` → Merges together flux, met, and profile concentration data for site SE-Svb. Aligns the profile concentration data (CH4, CO2, and H2O) among adjacent tower levels (and also the bottom-top levels) and computes the difference in mean concentration. Aligns non-concentration data with the mid-point of the paired-level concentration differences. 
+
+`flow.US-Uaf.data.format.conc.diffs.R` → Merges together flux, met, and profile concentration data for site US-Uaf. Aligns the profile concentration data (CH4, CO2, and H2O) among adjacent tower levels (and also the bottom-top levels) and computes the difference in mean concentration. Aligns non-concentration data with the mid-point of the paired-level concentration differences. 
+
+### Misc
+
+`flow.eval.fluxes.MBR.bootstrap.R` → Computes diel averages after filtering the MBR fluxes for tracer concentrations that are close to zero.
+
+`flow.eval.plots.R` → Creates linear 1 to 1 plots across all sites and bar plots of variable across all sites. Also plots light response curves for daytime CO2 vs daytime PAR for FG and EC calculated fluxes, and temperature response curves for nighttime CO2 vs nighttime air temperature for FG and EC calculated fluxes. Plots diurnal averages for all sites.
+
+`flow.flag.flux.stats.R` → Runs quality flag functions and calculates residuals. Uploads to Google Drive as SITES_WP_val.Rdata, SITES_AE_val.Rdata, and SITES_MBR_val.zip. 
+
+`flow.icos.data.1sec.summarize.R` → Aggregates ICOS high frequency data.
 
 ## Function Folder
 - Use hierarchical naming with the active verb first, i.e. "flag.iqr.R"
