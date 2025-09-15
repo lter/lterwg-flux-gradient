@@ -37,6 +37,14 @@ Bad_Eddy <- function(df, method) {
 
 
 ######Super Bad Eddy######
+"""Super_Bad_eddy takes a dataframe (df), an eddy diffusivity (method) to analyze (calculated from either AE or WP method) and specified bound (x). We then compare the K
+calculated by the AE or WP method against the eddy diffusivity back calculated from the eddy covariance method (kgas). If kgas is different from the 
+eddy diffusivity calcuated from AE and WP, we flag it as an outlier with the assumption that the difference was caused by conditions unsuitable for the 
+gradient method. The argument x determines what the boundaries of what is interpreted as unsuitable are. Argument x could possibly be defined as +- a 
+certain percentage of a each EC kgas observation, or in the case of the Bad_Eddy function, if kgas is within 1.5IQR of the range calculated by AE and WP 
+for each site."""
+
+
 
 Super_Bad_Eddy <- function(df, method, x) {
   # Access the data
