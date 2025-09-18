@@ -7,7 +7,7 @@
 #setwd('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient')
 
 # Source unzip.neon fcn
-source(file.path("functions/unzip.neon.R"))
+source(file.path("functions", "unzip.neon.R"))
 
 # Add all sites here:
 site.list <- c("ABBY", "BARR", "BART", "BLAN",
@@ -22,9 +22,6 @@ site.list <- c("ABBY", "BARR", "BART", "BLAN",
                "STEI", "STER", "TALL", "TEAK",
                "TOOL", "TREE", "UKFS", "UNDE",
                "WOOD", "WREF", "YELL")
-
-#localdir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient'
-#setwd(localdir)
 
 for(sitecode in site.list){
   
