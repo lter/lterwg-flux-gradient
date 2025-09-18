@@ -12,19 +12,18 @@ startdate <- "2021-08"
 enddate <- "2024-06"
 
 # Add all sites here:
-# site.list <- c("BONA","CPER","GUAN","HARV")
-# site.list <- c("JORN","KONZ","NIWO","TOOL")
-# site.list <- c("ABBY","BARR","BART","BLAN")
-# site.list <- c("CLBJ","DCFS","DEJU","DELA")
-# site.list <- c("DSNY","GRSM","HEAL","JERC")
-# site.list <- c("KONA","LAJA","LENO","MLBS")
-# site.list <- c("MOAB","NOGP","OAES","ONAQ")
-# site.list <- c("ORNL","OSBS","PUUM","RMNP")
-# site.list <- c("SCBI","SERC","SJER","SOAP")
-# site.list <- c("SRER","STEI","STER","TALL")
-# site.list <- c("TEAK","TREE","UKFS","UNDE")
-# site.list <- c("WOOD","WREF","YELL")
-site.list <- c("HARV")
+# site.list <- c("ABBY", "BARR", "BART", "BLAN")
+# site.list <- c("BONA", "CLBJ", "CPER", "DCFS")
+# site.list <- c("DEJU", "DELA", "DSNY", "GRSM")
+# site.list <- c("GUAN", "HARV", "HEAL", "JERC")
+# site.list <- c("JORN", "KONA", "KONZ", "LAJA")
+# site.list <- c("LENO", "MLBS", "MOAB", "NIWO")
+# site.list <- c("NOGP", "OAES", "ONAQ", "ORNL")
+# site.list <- c("OSBS", "PUUM", "RMNP", "SCBI")
+# site.list <- c("SERC", "SJER", "SOAP", "SRER")
+# site.list <- c("STEI", "STER", "TALL", "TEAK")
+# site.list <- c("TOOL", "TREE", "UKFS", "UNDE")
+# site.list <- c("WOOD", "WREF", "YELL")
 
 # Add local directory for downloaded data here:
 #localdir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient'
