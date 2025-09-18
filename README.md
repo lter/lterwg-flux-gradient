@@ -91,7 +91,16 @@ lterwg-flux-gradient/
 6. `flow.calc.flux.batch.R` → Grabs aligned concentration & flux data and calculates the fluxes using MBR (`flow.calc.flag.mbr.batch.R`), AE (`flow.calc.flag.aero.batch.R`), and WP (`flow.calc.flag.windprof.batch.R`) methods and adds quality flag columns, month, hour, residual, rmse for calculated fluxes. Save output as SITE_METHOD.RData, where SITE is NEON site code, METHOD is the computation method (e.g. MBR=modified bowen ratio, aero = aerodynamic, windprof=wind profile). 
 
 7. `flow.evaluation.dataframe.R` → Standardizes the data format from the MBR, AE, and WP. This file uses the product of `flow.calc.flux.batch.R` to develop the validation dataframes needed to perform the evaluation. This file produces a list of dataframes in an object called SITE_Evaluation.RData.
-
+   
+   ```
+   SITE_aligned_conc_flux_9min.RData → flow.calc.flux.batch.R 
+                                     ├─ flow.calc.flag.mbr.batch.R
+                                     ├─ flow.calc.flag.aero.batch.R 
+                                     └─ flow.calc.flag.windprof.batch.R
+                                     → SITE_METHOD.RData
+   
+   SITE_METHOD.RData → flow.evaluation.dataframe.R → SITE_Evaluation.RData
+   ```
 ## Other Workflows
 
 ### Non-NEON Processing
