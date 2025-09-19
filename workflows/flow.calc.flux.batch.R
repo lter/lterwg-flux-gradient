@@ -1,62 +1,78 @@
+## --------------------------------------------- ##
+#               Housekeeping -----
+## --------------------------------------------- ##
+# Purpose:
+# Uses the aligned concentration file combined with the 30min and 9min data files to calculates fluxes and saves locally. 
+# You must download the aligned concentration data using flow.download.aligned.conc.flux.R.
 
-# Uses the aligned concentration file combined with the 30min and 9min data files to calculates fluxes and saves locally. You must download the aligned concentration data using flow.download.aligned_concflux.R.
-
+# Load packages
 library(fs)
 library(googledrive)
 library(dplyr)
 library(stringr)
 library(tidyverse)
 
-email <- 'sparklelmalone@gmail.com'
-googledrive::drive_auth(email = TRUE) 
-drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3") # The Data 
-
-data_folder <- googledrive::drive_ls(path = drive_url)
-
-# Add local directory for downloaded data here:
-localdir <- '/Volumes/MaloneLab/Research/FluxGradient/FluxData' # MaloneLab Server
-
-setwd("/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient")
-
 # Add all sites here:
 metadata <- read.csv('/Volumes/MaloneLab/Research/FluxGradient/Site_Attributes.csv') # has a list of all the sites
 
-# -------------------------------------------------------
-site.list <- metadata$Site %>% unique
+# Get unique sites
+site.list <- metadata$Site %>% unique()
 
-# Gradient Flux Calculations: ####
+# Add local directory for downloaded data here:
+localdir1 <- '/Volumes/MaloneLab/Research/FluxGradient/FluxData' # MaloneLab Server
 
-for( site in site.list ){
+# Add local directory for your Flux repo here:
+localdir2 <- "/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient"
+setwd(localdir2)
+
+## --------------------------------------------- ##
+#               Authenticate -----
+## --------------------------------------------- ##
+
+email <- 'sparklelmalone@gmail.com'
+googledrive::drive_auth(email = TRUE) 
+
+# Authenticate with Google Drive
+drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3") # The Data 
+
+# Data on google drive
+data_folder <- googledrive::drive_ls(path = drive_url)
+
+## --------------------------------------------- ##
+#         Gradient Flux Calculations -----
+## --------------------------------------------- ##
+
+for(site in site.list){
   
-  setwd("/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient")
+  setwd(localdir2)
   
   sitecode <- site
   print(sitecode)
   
   # Load Data:
-  load(fs::path(paste(localdir, site,sep="/"), paste0(site,'_aligned_conc_flux_30min.RData')))
-  load(fs::path(paste(localdir, site,sep="/"), paste0(site,'_aligned_conc_flux_9min.RData')))
+  load(fs::path(paste(localdir1, site, sep = "/"), paste0(site, '_aligned_conc_flux_30min.RData')))
+  load(fs::path(paste(localdir1, site, sep = "/"), paste0(site, '_aligned_conc_flux_9min.RData')))
 
-  dirTmp <- paste(localdir, site,sep="/")
+  dirTmp <- paste(localdir1, site, sep = "/")
     
   print('Data Loaded')
   
-  print( 'Running MBR')
-  source(file.path("workflows/flow.calc.flag.mbr.batch.R"))
+  print('Running MBR')
+  source(file.path("workflows", "flow.calc.flag.mbr.batch.R"))
   print('MBR Done')
   
-  setwd("/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient")
-  print( 'Running AE')
-  source(file.path("workflows/flow.calc.flag.aero.batch.R"))
+  setwd(localdir2)
+  print('Running AE')
+  source(file.path("workflows", "flow.calc.flag.aero.batch.R"))
   print('AE Done')
   
-  setwd("/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient")
-  print( 'Running WP')
-  source(file.path("workflows/flow.calc.flag.windprof.batch.R"))
+  setwd(localdir2)
+  print('Running WP')
+  source(file.path("workflows", "flow.calc.flag.windprof.batch.R"))
   print('WP Done')
   
   print('done')
-rm(min9)
+  rm(min9)
 }
 
 message('Next run the flow.evaluation.dataframe.R')
