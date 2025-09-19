@@ -17,13 +17,27 @@
 # Saves output as SITE_aligned_conc_flux_30min.RData, where SITE is the NEON site code. 
 # Zips and uploads to Google Drive.
 
-# Pull data from google drive
-#email <- 'csturtevant@battelleecology.org'
-# email <- 'jaclyn_matthes@g.harvard.edu'
-#email <- 'sparkle.malone@yale.edu'
+# Set local dir
+#setwd('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient')
 
-#site.list <- c("BONA","CPER","GUAN","HARV","JORN","KONZ","NIWO","TOOL")
-site.list <- c("HARV")
+# Pull data from google drive
+# email <- 'csturtevant@battelleecology.org'
+# email <- 'jaclyn_matthes@g.harvard.edu'
+# email <- 'sparkle.malone@yale.edu'
+
+# Add all sites here:
+# site.list <- c("ABBY", "BARR", "BART", "BLAN")
+# site.list <- c("BONA", "CLBJ", "CPER", "DCFS")
+# site.list <- c("DEJU", "DELA", "DSNY", "GRSM")
+# site.list <- c("GUAN", "HARV", "HEAL", "JERC")
+# site.list <- c("JORN", "KONA", "KONZ", "LAJA")
+# site.list <- c("LENO", "MLBS", "MOAB", "NIWO")
+# site.list <- c("NOGP", "OAES", "ONAQ", "ORNL")
+# site.list <- c("OSBS", "PUUM", "RMNP", "SCBI")
+# site.list <- c("SERC", "SJER", "SOAP", "SRER")
+# site.list <- c("STEI", "STER", "TALL", "TEAK")
+# site.list <- c("TOOL", "TREE", "UKFS", "UNDE")
+# site.list <- c("WOOD", "WREF", "YELL")
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: fs, googledrive
@@ -32,29 +46,25 @@ library(doParallel)
 library(dplyr)
 
 # Authenticate with Google Drive and get site data
-googledrive::drive_auth() # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
-
-#setwd('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient')
+googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
 
 # Load functions in this repo
-source(file.path("functions/interp.flux.R"))
-source(file.path("functions/aggregate.averages.R"))
-source('./functions/calc.MO.length.R')
-
-
+source(file.path("functions", "interp.flux.R"))
+source(file.path("functions", "aggregate.averages.R"))
+source(file.path("functions", "calc.MO.length.R"))
 
 # Final note: This script takes approx 45 min to run per site. 
 # -------------------------------------------------------
 for(sitecode in site.list){
   
-  site <-  sitecode 
-  rm('min9.list','min30.list','attr.df','min1.list','min9Diff.list')
+  site <- sitecode 
+  rm('min9.list', 'min30.list', 'attr.df', 'min1.list', 'min9Diff.list')
   
   drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
   data_folder <- googledrive::drive_ls(path = drive_url)
-  site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name== sitecode])
+  site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==sitecode])
   
-  focal_files = paste0(sitecode,c('_9min.zip','_30min.zip','_1min.zip','_WS2D2min.zip','_attr.zip'))
+  focal_files = paste0(sitecode,c('_9min.zip', '_30min.zip', '_1min.zip', '_WS2D2min.zip', '_attr.zip'))
 
   dirTmp <- fs::path(tempdir(), sitecode)
   dir.create(dirTmp)
@@ -65,46 +75,46 @@ for(sitecode in site.list){
     file_id <- subset(site_folder, name == focal_file)
      
     # Download that file
-    pathDnld <- fs::path(dirTmp,focal_file)
+    pathDnld <- fs::path(dirTmp, focal_file)
     googledrive::drive_download(file = file_id$id, 
-                            path = pathDnld,
-                            overwrite = T)
+                                path = pathDnld,
+                                overwrite = T)
     # Unzip
-    if(grepl(pattern='.zip',focal_file)){
-      utils::unzip(pathDnld,exdir=dirTmp)
+    if(grepl(pattern = '.zip', focal_file)){
+      utils::unzip(pathDnld, exdir = dirTmp)
     }
     
   }
   
   # Extract data in 1, 2, 9, and 30 min & attribute files
-  fileIn <- fs::path(dirTmp,'data', sitecode,paste0( sitecode,'_9min.Rdata'))
+  fileIn <- fs::path(dirTmp, 'data', sitecode, paste0(sitecode, '_9min.Rdata'))
   load(fileIn)
   
-  fileIn <- fs::path(dirTmp,'data', sitecode,paste0( sitecode,'_30min.Rdata'))
+  fileIn <- fs::path(dirTmp, 'data', sitecode, paste0(sitecode, '_30min.Rdata'))
   load(fileIn)
   
-  fileIn <- fs::path(dirTmp,'data', sitecode,paste0( sitecode,'_1min.Rdata'))
+  fileIn <- fs::path(dirTmp, 'data', sitecode, paste0(sitecode, '_1min.Rdata'))
   load(fileIn)
   
-  fileIn <- fs::path(dirTmp,'data', sitecode ,paste0(site,'_WS2D2min.Rdata'))
+  fileIn <- fs::path(dirTmp, 'data', sitecode, paste0(sitecode, '_WS2D2min.Rdata'))
   load(fileIn)
   
-  fileIn <- fs::path(dirTmp,'data', sitecode ,paste0( sitecode ,'_attr.Rdata'))
+  fileIn <- fs::path(dirTmp, 'data', sitecode, paste0(sitecode, '_attr.Rdata'))
   load(fileIn)
   
   # ------------------- Get concentration diffs for subsequent tower levels --------------
-  message(paste0(Sys.time(),': Computing concentration profile differences among subsequent levels...'))
+  message(paste0(Sys.time(), ': Computing concentration profile differences among subsequent levels...'))
   
   # For each concentration, compute difference in concentration among tower levels
   list.idx = seq_len(length(min9.list))
-  min30Diff.list <- lapply(list.idx,FUN=function(idx){
+  min30Diff.list <- lapply(list.idx, FUN = function(idx){
     var <- min9.list[[idx]] %>%
       # Remove the rows where mean, qfFinl, min, max, vari, and numSamp are missing 
       dplyr::filter(!(is.na(mean) & is.na(qfFinl) & is.na(min) & is.na(max) & is.na(vari) & is.na(numSamp)))
     scalar = names(min9.list)[idx]
-    var$timeBgn <- as.POSIXct(strptime(var$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
-    var$timeEnd <- as.POSIXct(strptime(var$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))
-    var <- dplyr::arrange(var,timeBgn)
+    var$timeBgn <- as.POSIXct(strptime(var$timeBgn, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))
+    var$timeEnd <- as.POSIXct(strptime(var$timeEnd, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))
+    var <- dplyr::arrange(var, timeBgn)
     var$TowerPosition <- as.numeric(var$TowerPosition)
     
     # Without any filtering, this provides concentration diff for each adjacent tower level AND the top/bottom. 
@@ -115,7 +125,7 @@ for(sitecode in site.list){
     # row difference up to N/2 (rounding down), where N is the number of tower levels.
     # This ensures that we have every combination of tower levels, while restricting the
     # data to when those two tower levels are measured closest in time
-    for (diffRowIdx in seq_len(floor(max(attr.df$LvlMeasTow,na.rm=TRUE)/2))){
+    for (diffRowIdx in seq_len(floor(max(attr.df$LvlMeasTow, na.rm = TRUE)/2))){
       OUTidx <- var
       vars <- names(OUTidx)
       ncol <- ncol(OUTidx)
@@ -123,14 +133,14 @@ for(sitecode in site.list){
       OUTidx[1:(nrow-diffRowIdx),(ncol+1):(ncol*2)] <- OUTidx[(1+diffRowIdx):(nrow),]
       OUTidx <- OUTidx[1:(nrow-diffRowIdx),] #last row removed because becomes NA
       
-      names(OUTidx)[1:ncol] <- paste0(vars,'_A')
-      names(OUTidx)[(ncol+1):(ncol*2)] <- paste0(vars,'_B')
+      names(OUTidx)[1:ncol] <- paste0(vars, '_A')
+      names(OUTidx)[(ncol+1):(ncol*2)] <- paste0(vars, '_B')
       
       # Combine results
       if(diffRowIdx == 1){
         OUT <- OUTidx
       } else {
-        OUT <- rbind(OUT,OUTidx)
+        OUT <- rbind(OUT, OUTidx)
       }
     }
 
@@ -150,7 +160,7 @@ for(sitecode in site.list){
     OUT[idxNeg,1:ncol] <- B
     OUT[idxNeg,(ncol+1):(ncol*2)] <- A
     OUT$diffTowerPosition<- OUT$TowerPosition_A-OUT$TowerPosition_B
-    OUT$dLevelsAminusB <- paste0(OUT$TowerPosition_A,'_',OUT$TowerPosition_B)
+    OUT$dLevelsAminusB <- paste0(OUT$TowerPosition_A, '_', OUT$TowerPosition_B)
     
     # Compute concentration diffs
     OUT$dConc <- OUT$mean_A-OUT$mean_B
@@ -160,11 +170,11 @@ for(sitecode in site.list){
     t <- OUT$dConc/sqrt(OUT$vari_A/OUT$numSamp_A + OUT$vari_B/OUT$numSamp_B)
     df <- ((OUT$vari_A/OUT$numSamp_A + OUT$vari_B/OUT$numSamp_B)^2)/
       ((OUT$vari_A^2)/((OUT$numSamp_A^2)*(OUT$numSamp_A-1))+(OUT$vari_B^2)/((OUT$numSamp_B^2)*(OUT$numSamp_B-1)))
-    p <- rep(as.numeric(NA),length(df))
+    p <- rep(as.numeric(NA), length(df))
     setNeg <- !is.na(t+df) & t <= 0
     setPos <- !is.na(t+df) & t > 0
-    p[setNeg] <- stats::pt(t[setNeg],df[setNeg])
-    p[setPos] <- stats::pt(t[setPos],df[setPos],lower.tail=FALSE)
+    p[setNeg] <- stats::pt(t[setNeg], df[setNeg])
+    p[setPos] <- stats::pt(t[setPos], df[setPos], lower.tail = FALSE)
     OUT$dConc_pvalue <- p*2 # 1-tailed probability to achieve a difference greater than the measured concentration difference if the two concentration values were were sampled from the same distribution
     
     OUT$timeMid <- OUT$timeEnd_A+(0.5*difftime(OUT$timeBgn_B, OUT$timeEnd_A, units = "secs"))
@@ -198,7 +208,7 @@ for(sitecode in site.list){
   
   
   # ----- Align the 9-min conc diff data to 30 min eddy flux values ------
-  message(paste0(Sys.time(),': Interpolating fluxes to midpoint of each paired profile window...'))
+  message(paste0(Sys.time(), ': Interpolating fluxes to midpoint of each paired profile window...'))
   
   # carbon flux
   turb <- min30.list$F_co2$turb
@@ -208,11 +218,13 @@ for(sitecode in site.list){
   nee <- min30.list$F_co2$nsae
   qf <- min30.list$F_co2$nsae.qfFinl ; nee[qf == 1] <- NA
   FCdf = data.frame(datetime = as.POSIXct((as.numeric(as.POSIXct(strptime(min30.list$F_co2$timeBgn, 
-                                                                          format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))) +
-                                             as.numeric(as.POSIXct(strptime(min30.list$F_co2$timeEnd, 
-                                                                            format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))))/2,
-                                          origin = '1970-01-01',tz='GMT'),
-                    FC_turb_interp = turb,FC_stor_interp = stor, FC_nee_interp = nee)
+                                                                          format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))) +
+                                           as.numeric(as.POSIXct(strptime(min30.list$F_co2$timeEnd, 
+                                                                          format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))))/2,
+                                          origin = '1970-01-01', tz = 'GMT'),
+                    FC_turb_interp = turb,
+                    FC_stor_interp = stor, 
+                    FC_nee_interp = nee)
   
   # water flux
   turb <- min30.list$F_LE$turb
@@ -222,11 +234,13 @@ for(sitecode in site.list){
   nsae <- min30.list$F_LE$nsae
   qf <- min30.list$F_LE$nsae.qfFinl ; nsae[qf == 1] <- NA
   FLEdf = data.frame(datetime = as.POSIXct((as.numeric(as.POSIXct(strptime(min30.list$F_LE$timeBgn, 
-                                                                           format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))) +
-                                              as.numeric(as.POSIXct(strptime(min30.list$F_LE$timeEnd, 
-                                                                             format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))))/2,
-                                           origin = '1970-01-01',tz='GMT'),
-                     LE_turb_interp = turb,LE_stor_interp = stor, LE_nsae_interp = nsae)
+                                                                           format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))) +
+                                            as.numeric(as.POSIXct(strptime(min30.list$F_LE$timeEnd, 
+                                                                           format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))))/2,
+                                           origin = '1970-01-01', tz = 'GMT'),
+                     LE_turb_interp = turb,
+                     LE_stor_interp = stor, 
+                     LE_nsae_interp = nsae)
   
   # heat flux
   turb <- min30.list$F_H$turb
@@ -236,11 +250,13 @@ for(sitecode in site.list){
   nsae <- min30.list$F_H$nsae
   qf <- min30.list$F_H$nsae.qfFinl ; nsae[qf == 1] <- NA
   FHdf = data.frame(datetime = as.POSIXct((as.numeric(as.POSIXct(strptime(min30.list$F_H$timeBgn, 
-                                                                          format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))) +
-                                             as.numeric(as.POSIXct(strptime(min30.list$F_H$timeEnd, 
-                                                                            format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))))/2,
-                                          origin = '1970-01-01',tz='GMT'),
-                    H_turb_interp = turb, H_stor_interp = stor, H_nsae_interp = nsae)
+                                                                          format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))) +
+                                           as.numeric(as.POSIXct(strptime(min30.list$F_H$timeEnd, 
+                                                                          format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))))/2,
+                                          origin = '1970-01-01', tz = 'GMT'),
+                    H_turb_interp = turb, 
+                    H_stor_interp = stor, 
+                    H_nsae_interp = nsae)
   
   # turbulence vars
   ustar <- min30.list$Ufric$veloFric
@@ -249,11 +265,12 @@ for(sitecode in site.list){
   ustar[qf == 1] <- NA
   roughLength[qf==1] <- NA
   turbdf = data.frame(datetime = as.POSIXct((as.numeric(as.POSIXct(strptime(min30.list$Ufric$timeBgn, 
-                                                                            format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))) +
-                                               as.numeric(as.POSIXct(strptime(min30.list$Ufric$timeEnd, 
-                                                                              format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'))))/2,
-                                            origin = '1970-01-01',tz='GMT'),
-                      ustar_interp = ustar, roughLength_interp = roughLength)
+                                                                            format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))) +
+                                             as.numeric(as.POSIXct(strptime(min30.list$Ufric$timeEnd, 
+                                                                            format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))))/2,
+                                            origin = '1970-01-01', tz = 'GMT'),
+                      ustar_interp = ustar, 
+                      roughLength_interp = roughLength)
   
   # Join data.table objects with datetime key
   data.table::setDT(turbdf); data.table::setDT(FHdf)
@@ -267,7 +284,7 @@ for(sitecode in site.list){
   
   # Align two top tower dConc values to 30-min flux data
   # by assigning to the nearest flux half-hour interval
-  min30Diff.list <- lapply(min30Diff.list,FUN=function(var){
+  min30Diff.list <- lapply(min30Diff.list, FUN = function(var){
     var$datetime <- var$match_time
     var <- var[as.numeric(var$TowerHeight_A) == max(as.numeric(var$TowerHeight_A)) &
                  as.numeric(var$TowerHeight_B) != min(as.numeric(var$TowerHeight_B)),]
@@ -282,65 +299,65 @@ for(sitecode in site.list){
   # ------ Aggregate the 1-min MET and 2-min ubar data to each window of paired concentrations -----
   numCoreAvail <- parallel::detectCores()
   numCoreUse <- numCoreAvail # Adjust as desired
-  message(paste0(Sys.time(),': ', numCoreUse, ' of ',numCoreAvail, ' available cores will be used for parallelization...'))
+  message(paste0(Sys.time(), ': ', numCoreUse, ' of ', numCoreAvail, ' available cores will be used for parallelization...'))
   doParallel::registerDoParallel(numCoreUse)
   
   # --- First, merge together the 1-min RH, air pressure, and 3D wind data so we can input a single data frame (MUCH faster than doing each individually) 
-  message(paste0(Sys.time(),': Combining the data frames of the 1-min MET data. This should take 5-10 min...'))
+  message(paste0(Sys.time(), ': Combining the data frames of the 1-min MET data. This should take 5-10 min...'))
   
   # RH (round times to minute mark)
   # Restrict to tower top
   RH_1min <- min1.list$RH
   setTT <- RH_1min$TowerPosition == attr.df$LvlMeasTow[1] # Keep only tower top value
   RH_1min <- RH_1min[setTT,]
-  RH_1min$timeBgn <- as.POSIXct(round(RH_1min$startDateTime,units='mins'))
-  RH_1min$timeEnd <- as.POSIXct(round(RH_1min$endDateTime,units='mins'))
+  RH_1min$timeBgn <- as.POSIXct(round(RH_1min$startDateTime, units = 'mins'))
+  RH_1min$timeEnd <- as.POSIXct(round(RH_1min$endDateTime, units = 'mins'))
   RH_1min$RH <- RH_1min$RHMean
   RH_1min$RH[RH_1min$RHFinalQF==1] <- NA # filter
-  RH_1min <- RH_1min[,c('timeBgn','timeEnd','RH')]
+  RH_1min <- RH_1min[,c('timeBgn', 'timeEnd', 'RH')]
   
   # Air Pressure (round times to minute mark)
   P_kPa_1min <- min1.list$Press
-  P_kPa_1min$timeBgn <- as.POSIXct(round(strptime(P_kPa_1min$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'),units='mins'))
-  P_kPa_1min$timeEnd <- as.POSIXct(round(strptime(P_kPa_1min$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'),units='mins'))
+  P_kPa_1min$timeBgn <- as.POSIXct(round(strptime(P_kPa_1min$timeBgn, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'), units = 'mins'))
+  P_kPa_1min$timeEnd <- as.POSIXct(round(strptime(P_kPa_1min$timeEnd, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'), units = 'mins'))
   P_kPa_1min$P_kPa <- P_kPa_1min$mean
   P_kPa_1min$P_kPa[P_kPa_1min$qfFinl==1] <- NA # filter
-  P_kPa_1min <- P_kPa_1min[,c('timeBgn','timeEnd','P_kPa')]
+  P_kPa_1min <- P_kPa_1min[,c('timeBgn', 'timeEnd', 'P_kPa')]
   
   # PAR (round times to minute mark)
   # Restrict to tower top
   PAR_1min <- min1.list$PAR
   setTT <- PAR_1min$TowerPosition == attr.df$LvlMeasTow[1] # Keep only tower top value
   PAR_1min <- PAR_1min[setTT,]
-  PAR_1min$timeBgn <- as.POSIXct(round(PAR_1min$startDateTime,units='mins'))
-  PAR_1min$timeEnd <- as.POSIXct(round(PAR_1min$endDateTime,units='mins'))
+  PAR_1min$timeBgn <- as.POSIXct(round(PAR_1min$startDateTime, units = 'mins'))
+  PAR_1min$timeEnd <- as.POSIXct(round(PAR_1min$endDateTime, units = 'mins'))
   PAR_1min$PAR <- PAR_1min$PARMean
   PAR_1min$PAR[PAR_1min$PARFinalQF==1] <- NA # filter
-  PAR_1min <- PAR_1min[,c('timeBgn','timeEnd','PAR')]
+  PAR_1min <- PAR_1min[,c('timeBgn', 'timeEnd', 'PAR')]
   
   # Merge the 1-min MET data frames and clear space
-  MET_1min <- dplyr::full_join(RH_1min,P_kPa_1min)
-  MET_1min <- dplyr::full_join(MET_1min,PAR_1min)
-  rm('RH_1min','P_kPa_1min','PAR_1min')
+  MET_1min <- dplyr::full_join(RH_1min, P_kPa_1min)
+  MET_1min <- dplyr::full_join(MET_1min, PAR_1min)
+  rm('RH_1min', 'P_kPa_1min', 'PAR_1min')
   
   # 3D wind (round times to minute mark)
   lvlTow <- attr.df$LvlMeasTow[1] # how many measurement levels
-  nameWS3D <- paste0('ubar',lvlTow) # This is what we will eventually name the 3D wind
+  nameWS3D <- paste0('ubar', lvlTow) # This is what we will eventually name the 3D wind
   WS3D_1min <- min1.list$WS3D
-  WS3D_1min$timeBgn <- as.POSIXct(round(strptime(WS3D_1min$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'),units='mins'))
-  WS3D_1min$timeEnd <- as.POSIXct(round(strptime(WS3D_1min$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'),units='mins'))
+  WS3D_1min$timeBgn <- as.POSIXct(round(strptime(WS3D_1min$timeBgn, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'), units = 'mins'))
+  WS3D_1min$timeEnd <- as.POSIXct(round(strptime(WS3D_1min$timeEnd, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'), units = 'mins'))
   WS3D_1min$WS3D <- WS3D_1min$mean
   WS3D_1min$WS3D[WS3D_1min$qfFinl==1] <- NA # filter
-  WS3D_1min <- WS3D_1min[,c('timeBgn','timeEnd','WS3D')]
+  WS3D_1min <- WS3D_1min[,c('timeBgn', 'timeEnd', 'WS3D')]
   names(WS3D_1min)[3] <- nameWS3D
   
   # Merge the 1-min MET data frames and clear space. 
-  MET_1min <- dplyr::full_join(MET_1min,WS3D_1min)
+  MET_1min <- dplyr::full_join(MET_1min, WS3D_1min)
   rm('WS3D_1min')
   
   # Tair profile 
-  timeBgn <- as.POSIXct(round(strptime(min1.list$Tair$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'),units='mins'))
-  timeEnd <- as.POSIXct(round(strptime(min1.list$Tair$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ',tz='GMT'),units='mins'))
+  timeBgn <- as.POSIXct(round(strptime(min1.list$Tair$timeBgn,format='%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'), units = 'mins'))
+  timeEnd <- as.POSIXct(round(strptime(min1.list$Tair$timeEnd,format='%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'), units = 'mins'))
   Tair <- min1.list$Tair$mean
   qf <- min1.list$Tair$qfFinl # quality flag
   Tair[qf == 1] <- NA # filter
@@ -349,27 +366,27 @@ for(sitecode in site.list){
     Tair_df <- data.frame(timeBgn = timeBgn[setLvl],
                           timeEnd = timeEnd[setLvl],
                           Tair = Tair[setLvl])
-    names(Tair_df)[3] <- paste0('Tair',idxLvl)
+    names(Tair_df)[3] <- paste0('Tair', idxLvl)
     
     if(idxLvl == 1){
       Tair_1min <- Tair_df
     } else {
-      Tair_1min <- base::merge(Tair_1min,Tair_df,all=TRUE)
+      Tair_1min <- base::merge(Tair_1min, Tair_df, all = TRUE)
     }
   }
   
   # Merge the 1-min MET data frames and clear space
-  MET_1min <- dplyr::full_join(MET_1min,Tair_1min)
-  rm('Tair_1min','Tair_df','Tair','qf')
+  MET_1min <- dplyr::full_join(MET_1min, Tair_1min)
+  rm('Tair_1min', 'Tair_df', 'Tair', 'qf')
   
   # Get rid of rows with all missing values (for some reason they are in here)
-  rowNotNa <- rowSums(!is.na(MET_1min[,c(-1,-2)]),na.rm=TRUE) > 0 # Remove rows with all NA
+  rowNotNa <- rowSums(!is.na(MET_1min[,c(-1,-2)]), na.rm = TRUE) > 0 # Remove rows with all NA
   MET_1min <- MET_1min[rowNotNa,] 
-  MET_1min <- MET_1min[order(MET_1min$timeBgn,decreasing=FALSE),] 
+  MET_1min <- MET_1min[order(MET_1min$timeBgn, decreasing = FALSE),] 
 
   # 2-min ubar profile 
-  timeBgn <- as.POSIXct(round(WS2D2min$startDateTime,units='mins'))
-  timeEnd <- as.POSIXct(round(WS2D2min$endDateTime,units='mins'))
+  timeBgn <- as.POSIXct(round(WS2D2min$startDateTime, units = 'mins'))
+  timeEnd <- as.POSIXct(round(WS2D2min$endDateTime, units = 'mins'))
   ubar <- WS2D2min$windSpeedMean
   qf <- WS2D2min$windSpeedFinalQF # quality flag
   ubar[qf == 1] <- NA # filter
@@ -378,72 +395,72 @@ for(sitecode in site.list){
     ubar_df <- data.frame(timeBgn = timeBgn[setLvl],
                           timeEnd = timeEnd[setLvl],
                           ubar = ubar[setLvl])
-    names(ubar_df)[3] <- paste0('ubar',idxLvl)
+    names(ubar_df)[3] <- paste0('ubar', idxLvl)
     
     if(idxLvl == 1){
       ubar_2min <- ubar_df
     } else {
-      ubar_2min <- base::merge(ubar_2min,ubar_df,all=TRUE)
+      ubar_2min <- base::merge(ubar_2min, ubar_df, all = TRUE)
     }
   }
-  rowNotNa <- rowSums(!is.na(ubar_2min[,c(-1,-2)]),na.rm=TRUE) > 0 # Remove rows with all NA
+  rowNotNa <- rowSums(!is.na(ubar_2min[,c(-1,-2)]), na.rm = TRUE) > 0 # Remove rows with all NA
   ubar_2min <- ubar_2min[rowNotNa,]
-  ubar_2min <- ubar_2min[order(ubar_2min$timeBgn,decreasing=FALSE),] # Sort
+  ubar_2min <- ubar_2min[order(ubar_2min$timeBgn, decreasing = FALSE),] # Sort
   
   
   # Aggregate!
-  message(paste0(Sys.time(),': Aggregating 1-min MET data to each paired profile window. This should take 5-10 min...'))
+  message(paste0(Sys.time(), ': Aggregating 1-min MET data to each paired profile window. This should take 5-10 min...'))
   
   #for debugging PAR NAs; currently showing up in MET_agr for all 3 gas concentrations
   #idxDf = "CH4"
   
   MET_agr_list <- foreach::foreach(idxDf = names(min30Diff.list)) %dopar% {
-    message(paste0(Sys.time(),': Aggregating 1-min MET data to 30 min flux windows for ',idxDf,' data frame. This will take a while...'))
+    message(paste0(Sys.time(), ': Aggregating 1-min MET data to 30 min flux windows for ', idxDf, ' data frame. This will take a while...'))
     
     # use the 30-min flux window to anchor the met aggregation
     timeAgrBgn <- min30Diff.list[[idxDf]]$datetime-(15*60-1)
     timeAgrEnd <- min30Diff.list[[idxDf]]$datetime+(15*60+1)
     
     # Aggregate the 1-min data to the combined window of the profile pair
-    MET_agr <- aggregate.averages(timeBgn=MET_1min$timeBgn,
-                                  timeEnd=MET_1min$timeEnd,
-                                  meas=MET_1min[,-c(1,2)],
-                                  timeAgrBgn=timeAgrBgn,
-                                  timeAgrEnd=timeAgrEnd,
-                                  na.rm=TRUE)
+    MET_agr <- aggregate.averages(timeBgn = MET_1min$timeBgn,
+                                  timeEnd = MET_1min$timeEnd,
+                                  meas = MET_1min[,-c(1,2)],
+                                  timeAgrBgn = timeAgrBgn,
+                                  timeAgrEnd = timeAgrEnd,
+                                  na.rm = TRUE)
     
   }
   
-  message(paste0(Sys.time(),': Aggregating 2-min ubar data to each paired profile window. This should take 5-10 min...'))
+  message(paste0(Sys.time(), ': Aggregating 2-min ubar data to each paired profile window. This should take 5-10 min...'))
   
   ubar_agr_list <- foreach::foreach(idxDf = names(min30Diff.list)) %dopar% {
-    message(paste0(Sys.time(),': Aggregating 2-min ubar data to paired profile windows for ',idxDf,' data frame. This will take a while...'))
+    message(paste0(Sys.time(), ': Aggregating 2-min ubar data to paired profile windows for ', idxDf, ' data frame. This will take a while...'))
     
     # use the 30-min flux window to anchor the met aggregation
     timeAgrBgn <- min30Diff.list[[idxDf]]$datetime-(15*60-1)
     timeAgrEnd <- min30Diff.list[[idxDf]]$datetime+(15*60+1)
     
     # Aggregate the 1-min data to the combined window of the profile pair
-    ubar_agr <- aggregate.averages(timeBgn=ubar_2min$timeBgn,
-                                   timeEnd=ubar_2min$timeEnd,
-                                   meas=ubar_2min[,-c(1,2)],
-                                   timeAgrBgn=timeAgrBgn,
-                                   timeAgrEnd=timeAgrEnd,
-                                   na.rm=TRUE)
+    ubar_agr <- aggregate.averages(timeBgn = ubar_2min$timeBgn,
+                                   timeEnd = ubar_2min$timeEnd,
+                                   meas = ubar_2min[,-c(1,2)],
+                                   timeAgrBgn = timeAgrBgn,
+                                   timeAgrEnd = timeAgrEnd,
+                                   na.rm = TRUE)
     
   }
   
   # Add aggregated output to the concentration diffs
   nameGas <- names(min30Diff.list)
   for (idxGas in 1:length(nameGas)){
-    min30Diff.list[[nameGas[idxGas]]] <- cbind(min30Diff.list[[nameGas[idxGas]]],MET_agr_list[[idxGas]],ubar_agr_list[[idxGas]])
+    min30Diff.list[[nameGas[idxGas]]] <- cbind(min30Diff.list[[nameGas[idxGas]]], MET_agr_list[[idxGas]], ubar_agr_list[[idxGas]])
   }
   rm('MET_agr_list','ubar_agr_list')
   
   # Compute vegetation height based on turbulence measurements
   # These equations stem from Eqn. 9.7.1b in Stull
-  min30Diff.list <- lapply(min30Diff.list,FUN=function(var){
-    var$z_veg_aero <- 10*as.numeric(attr.df$DistZaxsLvlMeasTow[attr.df$TowerPosition == lvlTow])/(exp(0.4*var[[paste0('ubar',lvlTow)]]/var$ustar_interp)+6.6) # m - aerodynamic vegetation height
+  min30Diff.list <- lapply(min30Diff.list, FUN = function(var){
+    var$z_veg_aero <- 10*as.numeric(attr.df$DistZaxsLvlMeasTow[attr.df$TowerPosition == lvlTow])/(exp(0.4*var[[paste0('ubar', lvlTow)]]/var$ustar_interp)+6.6) # m - aerodynamic vegetation height
     var$z_displ_calc <- 0.66*var$z_veg_aero # m - zero plane displacement height
     var$roughLength_calc <- 0.1*var$z_veg_aero # m - roughness length
     return(var)
@@ -451,10 +468,10 @@ for(sitecode in site.list){
   
   
   # -------------- Compute water flux from LE --------------------
-  min30Diff.list <- lapply(min30Diff.list,FUN=function(var){
+  min30Diff.list <- lapply(min30Diff.list, FUN = function(var){
     
     # Grab Tair at tower top
-    Tair_C <- var[[paste0('Tair',lvlTow)]]
+    Tair_C <- var[[paste0('Tair', lvlTow)]]
     
     # Variables to calculate air physics vars & convert H and LE to flux
     P_pa = var$P_kPa*1000  #Atmospheric pressure [Pa]
@@ -482,7 +499,7 @@ for(sitecode in site.list){
     var$FH2O_interp <- var$LE_turb_interp/var$lambda/mv*1000 # mmol m-2 s-1
     
     # Monin-Obukhov length & stability parameter (z/L)
-    var$L_obukhov <- calc.MO.length(var$P_kPa,Tair_C,var$H_turb_interp,var$LE_turb_interp,var$ustar_interp)$L
+    var$L_obukhov <- calc.MO.length(var$P_kPa, Tair_C, var$H_turb_interp, var$LE_turb_interp, var$ustar_interp)$L
     var$zoL <- as.numeric(attr.df$DistZaxsTow[1])/var$L_obukhov
     
     var = as.data.frame(var) 
@@ -495,12 +512,14 @@ for(sitecode in site.list){
   min30Diff.list$H2O = as.data.frame(min30Diff.list$H2O)
   
   # -------- Save and zip the file to the temp directory. Upload to google drive. -------
-  fileSave <- fs::path(dirTmp,paste0( sitecode ,'_aligned_conc_flux_30min.RData'))
-  fileZip <- fs::path(dirTmp,paste0(  sitecode ,'_aligned_conc_flux_30min.zip'))
-  save(min30Diff.list,file=fileSave)
+  fileSave <- fs::path(dirTmp, paste0(sitecode, '_aligned_conc_flux_30min.RData'))
+  fileZip <- fs::path(dirTmp, paste0(sitecode, '_aligned_conc_flux_30min.zip'))
+  save(min30Diff.list, file = fileSave)
   wdPrev <- getwd()
   setwd(dirTmp)
-  utils::zip(zipfile=fileZip,files=paste0( sitecode ,'_aligned_conc_flux_30min.RData'))
+  utils::zip(zipfile = fileZip, files = paste0(sitecode, '_aligned_conc_flux_30min.RData'))
   setwd(wdPrev)
-  googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folder$id[data_folder$name==  sitecode ]) # path might need work
+  googledrive::drive_upload(media = fileZip, 
+                            overwrite = T, 
+                            path = data_folder$id[data_folder$name==sitecode])
 }
