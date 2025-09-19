@@ -4,7 +4,7 @@
 # Purpose:
 # Develops the validation dataframes needed to perform the evaluation
 
-# Ouput(s):
+# Output(s):
 # SITE_Evaluation.RDATA (local & Google Drive)
 # Site_Attributes.csv (local & Google Drive)
 
