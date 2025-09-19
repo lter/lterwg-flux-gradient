@@ -5,6 +5,14 @@
 # Uses the aligned concentration file combined with the 30min and 9min data files to calculates fluxes and saves locally. 
 # You must download the aligned concentration data using flow.download.aligned.conc.flux.R.
 
+# Output(s):
+# SITE_AE_9min.Rdata (local & Google Drive)
+# SITE_AE_9min.zip (local)
+# SITE_MBR_9min.RData (local)
+# SITE_MBR_9min.zip (local & Google Drive)
+# SITE_WP_9min.Rdata (local)
+# SITE_WP_9min.zip (local & Google Drive)
+
 # Load packages
 library(fs)
 library(googledrive)

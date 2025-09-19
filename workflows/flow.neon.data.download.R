@@ -1,3 +1,9 @@
+## --------------------------------------------- ##
+#               Housekeeping -----
+## --------------------------------------------- ##
+# Purpose:
+# Downloads NEON data
+
 # NOTE IMPORTANT INFORMATION: 
 # all of the flow scripts are written assuming the end user has connected their R studio project to the lterwg-flux-gradient GitHub repo 
 # AND that they have created a data folder 
@@ -30,6 +36,10 @@ enddate <- "2024-06"
 # site.list <- c("WOOD", "WREF", "YELL")
 
 # Set include.provisional = T to get full time series of data up to present
+
+## --------------------------------------------- ##
+#               Downloading -----
+## --------------------------------------------- ##
 
 for (sitecode in site.list){
   

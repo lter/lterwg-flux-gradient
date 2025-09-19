@@ -1,3 +1,7 @@
+## --------------------------------------------- ##
+#               Housekeeping -----
+## --------------------------------------------- ##
+# Purpose:
 # Uses output from flow.neon.data.extract.R from Google Drive. 
 #
 # Merges together NEON flux, met, and profile concentration data. Aligns the profile 
@@ -16,6 +20,10 @@
 #
 # Saves output as SITE_aligned_conc_flux_30min.RData, where SITE is the NEON site code. 
 # Zips and uploads to Google Drive.
+#
+# Outputs: 
+# SITE_aligned_conc_flux_30min.RData (local)
+# SITE_aligned_conc_flux_30min.zip (local & Google Drive)
 
 # Set local dir
 #setwd('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient')
@@ -54,7 +62,11 @@ source(file.path("functions", "aggregate.averages.R"))
 source(file.path("functions", "calc.MO.length.R"))
 
 # Final note: This script takes approx 45 min to run per site. 
-# -------------------------------------------------------
+
+## --------------------------------------------- ##
+#                Align Data -----
+## --------------------------------------------- ##
+
 for(sitecode in site.list){
   
   site <- sitecode 

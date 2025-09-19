@@ -1,6 +1,8 @@
 ## --------------------------------------------- ##
 #               Housekeeping -----
 ## --------------------------------------------- ##
+# Purpose:
+# Downloads aligned concentration data and site attribute data from Google Drive
 
 # Load packages
 library(tidyverse)

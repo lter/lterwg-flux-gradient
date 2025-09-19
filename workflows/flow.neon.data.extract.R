@@ -1,3 +1,21 @@
+## --------------------------------------------- ##
+#               Housekeeping -----
+## --------------------------------------------- ##
+# Purpose:
+# Extracts from the downloaded, unzipped NEON data files
+
+# Output(s):
+# SITE_1min.Rdata (local)
+# SITE_1min.zip (local & Google Drive)
+# SITE_9min.Rdata (local)
+# SITE_9min.zip (local & Google Drive)
+# SITE_30min.Rdata (local)
+# SITE_30min.zip (local & Google Drive)
+# SITE_attr.Rdata (local)
+# SITE_attr.zip (local & Google Drive)
+# SITE_WS2D2min.Rdata (local)
+# SITE_WS2D2min.zip (local & Google Drive)
+
 # NOTE IMPORTANT INFORMATION: 
 # all of the flow scripts are written assuming the end user has connected their R studio project to the lterwg-flux-gradient GitHub repo 
 # AND that they have created a data folder 
@@ -50,6 +68,10 @@ data_folder <- googledrive::drive_ls(path = drive_url)
 # site.list <- c("STEI", "STER", "TALL", "TEAK")
 # site.list <- c("TOOL", "TREE", "UKFS", "UNDE")
 # site.list <- c("WOOD", "WREF", "YELL")
+
+## --------------------------------------------- ##
+#               Data Extraction -----
+## --------------------------------------------- ##
 
 for (sitecode in site.list){
   

@@ -1,3 +1,7 @@
+## --------------------------------------------- ##
+#               Housekeeping -----
+## --------------------------------------------- ##
+# Purpose:
 # Uses output from flow.neon.data.extract.R from Google Drive. 
 #
 # Merges together NEON flux, met, and profile concentration data. Aligns the profile 
@@ -13,6 +17,11 @@
 #
 # Saves output as SITE_aligned_conc_flux_9min.RData, where SITE is the NEON site code. 
 # Zips and uploads to Google Drive.
+#
+# Outputs: 
+# SITE_aligned_conc_flux_9min.RData (local)
+# SITE_aligned_conc_flux_9min.zip (local & Google Drive)
+
 rm(list=ls())
 
 # Pull data from google drive
@@ -47,7 +56,11 @@ source(file.path("functions", "aggregate.averages.R"))
 source(file.path("functions", "calc.MO.length.R"))
 
 # Final note: This script takes approx 45 min to run per site. 
-# -------------------------------------------------------
+
+## --------------------------------------------- ##
+#                Align Data -----
+## --------------------------------------------- ##
+
 for (site in sites){
   
   rm('min9.list', 'min30.list', 'attr.df', 'min1.list', 'min9Diff.list')

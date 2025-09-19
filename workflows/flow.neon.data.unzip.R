@@ -1,3 +1,9 @@
+## --------------------------------------------- ##
+#               Housekeeping -----
+## --------------------------------------------- ##
+# Purpose:
+# Unzips downloaded NEON data files
+
 # NOTE IMPORTANT INFORMATION: 
 # all of the flow scripts are written assuming the end user has connected their R studio project to the lterwg-flux-gradient GitHub repo 
 # AND that they have created a data folder 
@@ -22,6 +28,10 @@ site.list <- c("ABBY", "BARR", "BART", "BLAN",
                "STEI", "STER", "TALL", "TEAK",
                "TOOL", "TREE", "UKFS", "UNDE",
                "WOOD", "WREF", "YELL")
+
+## --------------------------------------------- ##
+#                Unzipping -----
+## --------------------------------------------- ##
 
 for(sitecode in site.list){
   
