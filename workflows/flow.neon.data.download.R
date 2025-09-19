@@ -3,6 +3,10 @@
 # AND that they have created a data folder 
 # AND that within that data folder there are site folders named with the NEON sitecode
 
+# Add local directory for downloaded data here:
+#localdir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient'
+#setwd(localdir)
+
 # Load libraries
 library(neonUtilities)
 library(dplyr)
@@ -24,10 +28,6 @@ enddate <- "2024-06"
 # site.list <- c("STEI", "STER", "TALL", "TEAK")
 # site.list <- c("TOOL", "TREE", "UKFS", "UNDE")
 # site.list <- c("WOOD", "WREF", "YELL")
-
-# Add local directory for downloaded data here:
-#localdir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient'
-#setwd(localdir)
 
 # Set include.provisional = T to get full time series of data up to present
 
