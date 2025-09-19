@@ -69,7 +69,7 @@ for (site in sites){
     file_id <- subset(site_folder, name == focal_file)
     
     # Download that file
-    pathDnld <- fs::path(dirTmp,focal_file)
+    pathDnld <- fs::path(dirTmp, focal_file)
     googledrive::drive_download(file = file_id$id, 
                                 path = pathDnld,
                                 overwrite = T)
@@ -106,8 +106,8 @@ for (site in sites){
       # Remove the rows where mean, qfFinl, min, max, vari, and numSamp are missing 
       dplyr::filter(!(is.na(mean) & is.na(qfFinl) & is.na(min) & is.na(max) & is.na(vari) & is.na(numSamp)))
     scalar = names(min9.list)[idx]
-    var$timeBgn <- as.POSIXct(strptime(var$timeBgn, format='%Y-%m-%dT%H:%M:%OSZ', tz='GMT'))
-    var$timeEnd <- as.POSIXct(strptime(var$timeEnd, format='%Y-%m-%dT%H:%M:%OSZ', tz='GMT'))
+    var$timeBgn <- as.POSIXct(strptime(var$timeBgn, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))
+    var$timeEnd <- as.POSIXct(strptime(var$timeEnd, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))
     var <- dplyr::arrange(var, timeBgn)
     var$TowerPosition <- as.numeric(var$TowerPosition)
     
@@ -127,14 +127,14 @@ for (site in sites){
       OUTidx[1:(nrow-diffRowIdx),(ncol+1):(ncol*2)] <- OUTidx[(1+diffRowIdx):(nrow),]
       OUTidx <- OUTidx[1:(nrow-diffRowIdx),] #last row removed because becomes NA
       
-      names(OUTidx)[1:ncol] <- paste0(vars,'_A')
-      names(OUTidx)[(ncol+1):(ncol*2)] <- paste0(vars,'_B')
+      names(OUTidx)[1:ncol] <- paste0(vars, '_A')
+      names(OUTidx)[(ncol+1):(ncol*2)] <- paste0(vars, '_B')
       
       # Combine results
       if(diffRowIdx == 1){
         OUT <- OUTidx
       } else {
-        OUT <- rbind(OUT,OUTidx)
+        OUT <- rbind(OUT, OUTidx)
       }
     }
     
@@ -154,7 +154,7 @@ for (site in sites){
     OUT[idxNeg,1:ncol] <- B
     OUT[idxNeg,(ncol+1):(ncol*2)] <- A
     OUT$diffTowerPosition<- OUT$TowerPosition_A-OUT$TowerPosition_B
-    OUT$dLevelsAminusB <- paste0(OUT$TowerPosition_A,'_',OUT$TowerPosition_B)
+    OUT$dLevelsAminusB <- paste0(OUT$TowerPosition_A, '_', OUT$TowerPosition_B)
     
     # Compute concentration diffs
     OUT$dConc <- OUT$mean_A-OUT$mean_B
@@ -222,7 +222,7 @@ for (site in sites){
   flux <- min30.list$F_co2$stor
   qf <- min30.list$F_co2$stor.qfFinl # filter
   flux[qf == 1] <- NA
-  min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
+  min9Diff.list <- lapply(min9Diff.list, FUN = function(var){
     timePred <- var$timeMid
     fluxPred <- interp.flux(timeBgn, timeEnd, flux, timePred)
     var$FC_stor_interp <- fluxPred
@@ -421,7 +421,7 @@ for (site in sites){
   rm('Tair_1min', 'Tair_df', 'Tair', 'qf')
   
   # Get rid of rows with all missing values (for some reason they are in here)
-  rowNotNa <- rowSums(!is.na(MET_1min[,c(-1,-2)]),na.rm=TRUE) > 0 # Remove rows with all NA
+  rowNotNa <- rowSums(!is.na(MET_1min[,c(-1,-2)]), na.rm = TRUE) > 0 # Remove rows with all NA
   MET_1min <- MET_1min[rowNotNa,] 
   MET_1min <- MET_1min[order(MET_1min$timeBgn,decreasing=FALSE),] 
                        
@@ -507,7 +507,7 @@ for (site in sites){
   # Compute vegetation height based on turbulence measurements
   # These equations stem from Eqn. 9.7.1b in Stull
   min9Diff.list <- lapply(min9Diff.list, FUN = function(var){
-    var$z_veg_aero <- 10*as.numeric(attr.df$DistZaxsLvlMeasTow[attr.df$TowerPosition == lvlTow])/(exp(0.4*var[[paste0('ubar',lvlTow)]]/var$ustar_interp)+6.6) # m - aerodynamic vegetation height
+    var$z_veg_aero <- 10*as.numeric(attr.df$DistZaxsLvlMeasTow[attr.df$TowerPosition == lvlTow])/(exp(0.4*var[[paste0('ubar', lvlTow)]]/var$ustar_interp)+6.6) # m - aerodynamic vegetation height
     var$z_displ_calc <- 0.66*var$z_veg_aero # m - zero plane displacement height
     var$roughLength_calc <- 0.1*var$z_veg_aero # m - roughness length
     return(var)
@@ -560,7 +560,7 @@ for (site in sites){
   save(min9Diff.list, file = fileSave)
   wdPrev <- getwd()
   setwd(dirTmp)
-  utils::zip(zipfile = fileZip, files = paste0(site,'_aligned_conc_flux_9min.RData'))
+  utils::zip(zipfile = fileZip, files = paste0(site, '_aligned_conc_flux_9min.RData'))
   setwd(wdPrev)
   googledrive::drive_upload(media = fileZip, 
                             overwrite = T, 
