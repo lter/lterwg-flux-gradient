@@ -58,10 +58,10 @@ for(site in site.list){
   print(sitecode)
   
   # Load Data:
-  load(fs::path(paste(localdir1, site, sep = "/"), paste0(site, '_aligned_conc_flux_30min.RData')))
-  load(fs::path(paste(localdir1, site, sep = "/"), paste0(site, '_aligned_conc_flux_9min.RData')))
+  load(fs::path(localdir1, site, paste0(site, '_aligned_conc_flux_30min.RData')))
+  load(fs::path(localdir1, site, paste0(site, '_aligned_conc_flux_9min.RData')))
 
-  dirTmp <- paste(localdir1, site, sep = "/")
+  dirTmp <- file.path(localdir1, site)
     
   print('Data Loaded')
   
