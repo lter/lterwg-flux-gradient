@@ -77,9 +77,9 @@ lterwg-flux-gradient/
 
 ### Concentration Processing
 
-4. `flow.neon.data.format.conc.diffs.R` & `flow.neon.data.format.conc.diffs.30m.R`: Grabs output from `flow.neon.data.extract.R` from Google Drive. Align the 9-min or 30-min concentration data among adjacent tower levels (and also the bottom-top levels). `flow.neon.data.format.conc.diffs.R` interpolates 30-min eddy flux and MET data to the 9-min/6-min concentrations, including but not limited to u*, ubar (profile), roughness length. `flow.neon.data.format.conc.diffs.30m.R` connects the nearest 9-min/6-min data to each 30-min eddy covariance measurement. Also derives kinematic water flux (LE -> w'q'), heat flux (w'T'), aerodynamic canopy height, displacement height, that are needed for the various methods. Differences the concentrations for CH4, CO2, and H2O for adjacent tower levels (and bottom-top). Saves output as `SITE_aligned_conc_flux_9min.RData` and `SITE_aligned_conc_flux_30min.RData`. Zips and uploads to Google Drive.
+4. `flow.neon.data.format.conc.diffs.R` & `flow.neon.data.format.conc.diffs.30m.R`: Downloads output from `flow.neon.data.extract.R` from Google Drive. Align the 9-min or 30-min concentration data among adjacent tower levels (and also the bottom-top levels). `flow.neon.data.format.conc.diffs.R` interpolates 30-min eddy flux and MET data to the 9-min/6-min concentrations, including but not limited to u*, ubar (profile), roughness length. `flow.neon.data.format.conc.diffs.30m.R` connects the nearest 9-min/6-min data to each 30-min eddy covariance measurement. Also derives kinematic water flux (LE -> w'q'), heat flux (w'T'), aerodynamic canopy height, displacement height, that are needed for the various methods. Differences the concentrations for CH4, CO2, and H2O for adjacent tower levels (and bottom-top). Saves output as `SITE_aligned_conc_flux_9min.RData` and `SITE_aligned_conc_flux_30min.RData`. Zips and uploads to Google Drive.
 
-5. `flow.download.aligned.conc.flux.R`: Downloads and unzips `SITE_aligned_conc_flux_9min.zip`, `SITE_aligned_conc_flux_30min.zip`, and `SITE_attr.zip` from Google Drive. 
+5. `flow.download.aligned.conc.flux.R`: Downloads output from `flow.neon.data.format.conc.diffs.R` and `flow.neon.data.format.conc.diffs.30m.R` from Google Drive and unzips them.
 
    ```
    SITE_9min.zip, SITE_30min.zip, SITE_1min.zip, SITE_WS2D2min.zip, SITE_attr.zip →
@@ -90,7 +90,7 @@ lterwg-flux-gradient/
    flow.neon.data.format.conc.diffs.30m.R →
    SITE_aligned_conc_flux_30min.RData (.zip equivalent uploaded to Google Drive)
    
-   flow.download.aligned.conc.flux.R (downloads and unzips `SITE_aligned_conc_flux_9min.zip`, `SITE_aligned_conc_flux_30min.zip`, `SITE_attr.zip`)
+   flow.download.aligned.conc.flux.R (downloads and unzips SITE_aligned_conc_flux_9min.zip, SITE_aligned_conc_flux_30min.zip, SITE_attr.zip)
    ```
 
 ### Exploratory Workflows
