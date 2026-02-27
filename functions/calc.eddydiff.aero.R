@@ -35,7 +35,7 @@ calc.eddydiff.aero <- function(sitecode, min9){
   for(j in 1:dim(H2O)[1]){
     c.name <- paste0("ubar", as.character(H2O[j,"TowerPosition_A"]))
     ubar = as.numeric(H2O[j,grep(c.name, names(H2O))])
-    zd = as.numeric(H2O[j,"TowerHeight_A"])
+    zd = as.numeric(H2O[j,"effective_h"])
     zo= as.numeric(H2O[j,"roughLength_calc"])
     phih=H2O[j,"phih"]
     
@@ -66,7 +66,7 @@ calc.eddydiff.aero <- function(sitecode, min9){
   for(j in 1:dim(CO2)[1]){
     c.name <- paste0("ubar", as.character(CO2[j,"TowerPosition_A"]))
     ubar = as.numeric(CO2[j,grep(c.name, names(CO2))])
-    zd = as.numeric(CO2[j,"TowerHeight_A"])
+    zd = as.numeric(CO2[j,"effective_h"])
     zo= as.numeric(CO2[j,"roughLength_calc"])
     phih=CO2[j,"phih"]
     
@@ -98,7 +98,7 @@ calc.eddydiff.aero <- function(sitecode, min9){
   for(j in 1:dim(CH4)[1]){
     c.name <- paste0("ubar", as.character(CH4[j,"TowerPosition_A"]))
     ubar = as.numeric(CH4[j,grep(c.name, names(CH4))])
-    zd = as.numeric(CH4[j,"TowerHeight_A"])
+    zd = as.numeric(CH4[j,"effective_h"])
     zo= as.numeric(CH4[j,"roughLength_calc"])
     phih=CH4[j,"phih"]
     
