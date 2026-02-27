@@ -24,9 +24,9 @@ calc.eddydiff.aero <- function(sitecode, min9){
   #assuming von karman constant is 0.4
   k = 0.4
 
-  # EDDY DIFF AERO: 
-  # H2O$EddyDiff = (k*as.numeric(H2O$ustar_interp)*as.numeric(H2O$effective_h))/as.numeric(H2O$phih) 
-  H2O$EddyDiff = (k*as.numeric(H2O$ustar_interp)*as.numeric(H2O$effective_h))
+  # EDDY DIFF AERO (include stability correction): 
+  H2O$EddyDiff = (k*as.numeric(H2O$ustar_interp)*as.numeric(H2O$effective_h))/as.numeric(H2O$phih) 
+  #H2O$EddyDiff = (k*as.numeric(H2O$ustar_interp)*as.numeric(H2O$effective_h))
   
   # EDDY DIFF WP: create column to store wind profile eddy diffusivity with Wind Profiler Method
   H2O$EddyDiff_WP <- "hold"
