@@ -42,7 +42,7 @@ calc.gas.aero.windprof.flux <- function(min9.K, eddy.diff.name = "EddyDiff",
   CO2.FG <- calc.eqn.aero.windprof.flux(min9 = CO2, eddy.diff.name = eddy.diff.name,
                                      bootstrap, nsamp)
   
-  #calculate CO2 fluxes
+  #calculate CH4 fluxes
   CH4 <- min9.K[[which(names(min9.K) == "CH4")]]
   #calculate difference in tower heights
   CH4$dHeight <- as.numeric(CH4$TowerHeight_A) - as.numeric(CH4$TowerHeight_B)

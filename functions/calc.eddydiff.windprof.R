@@ -32,8 +32,9 @@ calc.eddydiff.windprof <- function(sitecode, min9){
     c.name <- paste0("ubar", as.character(H2O[j,"TowerPosition_A"]))
     ubar = as.numeric(H2O[j,grep(c.name, names(H2O))])
     z = as.numeric(H2O[j,"TowerHeight_A"])
+    zd = as.numeric(H2O[j,"effective_h"])
     
-    H2O[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(H2O[j,"GeometricMean_AB"])/(log(z/as.numeric(H2O[j,"roughLength_interp"]))*H2O[j,"phih"]))
+    H2O[j,"EddyDiff"] <- ((k^2)*ubar*zd/(log(zd/as.numeric(H2O[j,"roughLength_calc"]))*H2O[j,"phih"]))
 
     #H2O[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(H2O[j,"GeometricMean_AB"])/(log(z/as.numeric(H2O[j,"roughLength_interp"]))))
     
@@ -58,11 +59,13 @@ calc.eddydiff.windprof <- function(sitecode, min9){
     c.name <- paste0("ubar", as.character(CO2[j,"TowerPosition_A"]))
     ubar = as.numeric(CO2[j,grep(c.name, names(CO2))])
     z = as.numeric(CO2[j,"TowerHeight_A"])
+    zd = as.numeric(CO2[j,"effective_h"])
     
-    CO2[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(CO2[j,"GeometricMean_AB"])/(log(z/as.numeric(CO2[j,"roughLength_interp"]))*CO2[j,"phih"]))
+    CO2[j,"EddyDiff"] <- ((k^2)*ubar*zd/(log(zd/as.numeric(CO2[j,"roughLength_calc"]))*CO2[j,"phih"]))
   }
   #set EddyDiff as numeric
   CO2$EddyDiff <- as.numeric(CO2$EddyDiff)
+  
   #grab CH4
   CH4 <- min9[[which(names(min9) == "CH4")]]
   #remove NAs
@@ -81,8 +84,9 @@ calc.eddydiff.windprof <- function(sitecode, min9){
     c.name <- paste0("ubar", as.character(CH4[j,"TowerPosition_A"]))
     ubar = as.numeric(CH4[j,grep(c.name, names(CH4))])
     z = as.numeric(CH4[j,"TowerHeight_A"])
+    zd = as.numeric(CH4[j,"effective_h"])
     
-    CH4[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(CH4[j,"GeometricMean_AB"])/(log(z/as.numeric(CH4[j,"roughLength_interp"]))*CH4[j,"phih"]))
+    CH4[j,"EddyDiff"] <- ((k^2)*ubar*zd/(log(zd/as.numeric(CH4[j,"roughLength_calc"]))*CH4[j,"phih"]))
   }
   #set EddyDiff as numeric
   CH4$EddyDiff <- as.numeric(CH4$EddyDiff)
