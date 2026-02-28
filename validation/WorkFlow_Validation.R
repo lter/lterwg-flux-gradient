@@ -10,11 +10,11 @@ library(sf)
 # -------------- Change this stuff -------------
 
 # Add local directory for downloaded data here:
-localdir1 <- '/Volumes/MaloneLab/Research/FluxGradient/FluxData' # MaloneLab Server
+localdir <- '/Volumes/MaloneLab/Research/FluxGradient/FluxData' # MaloneLab Server
 
 # Add local directory for your Flux repo here:
-localdir2 <- "/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient"
-setwd(localdir2)
+DirRepo <- "/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient"
+setwd(DirRepo)
 
 DnldFromGoogleDrive <- FALSE # Enter TRUE to grab files listed in dnld_files from Google Drive. Enter FALSE if you have the most up-to-date versions locally in localdir
 email <- 'sparklelmalone@gmail.com'
@@ -26,13 +26,13 @@ data_folder <- googledrive::drive_ls(path = drive_url)
 # Create Files in the NEON format for validation sites: ####
 # Files saved to the localdir!
 
-setwd(localdir2 )
+setwd(DirRepo )
 sitelist <- c('SE-Sto', 'SE-Svb', 'US-Uaf')
-dirTmp <- localdir1 
-#source(paste(localdir2, '/validation/flow.FI-Hyy.data.format.conc.diffs.R', sep="") )
-source(paste(localdir2, '/validation/flow.SE-Sto.data.format.conc.diffs.R', sep="") )
-source(paste(localdir2, '/validation/flow.SE-Svb.data.format.conc.diffs.R', sep="") )
-source(paste(localdir2, '/validation/flow.US-Uaf.data.format.conc.diffs.R', sep="") )
+dirTmp <- localdir 
+#source(paste(DirRepo, '/validation/flow.FI-Hyy.data.format.conc.diffs.R', sep="") )
+source(paste(DirRepo, '/validation/flow.SE-Sto.data.format.conc.diffs.R', sep="") )
+source(paste(DirRepo, '/validation/flow.SE-Svb.data.format.conc.diffs.R', sep="") )
+source(paste(DirRepo, '/validation/flow.US-Uaf.data.format.conc.diffs.R', sep="") )
 
 # Calculate Gradient Fluxes: ####
 ## --------------------------------------------- ##
@@ -60,15 +60,15 @@ library(tidyverse)
 # GF Calculation:  ####
 for(site in site.list){
   
-  setwd(localdir2)
+  setwd(DirRepo)
   
   sitecode <- site
   print(sitecode)
   
   # Load Data:
-  load(fs::path(localdir1, site, paste0(site, '_aligned_conc_flux_9min.RData')))
+  load(fs::path(localdir, site, paste0(site, '_aligned_conc_flux_9min.RData')))
   
-  dirTmp <- file.path(localdir1, site)
+  dirTmp <- file.path(localdir, site)
   
   print('Data Loaded')
   
@@ -76,7 +76,7 @@ for(site in site.list){
   source(file.path("workflows", "flow.calc.flag.mbr.batch.R"))
   print('MBR Done')
 
-  setwd(localdir2)
+  setwd(DirRepo)
   print('Running AE + WP')
  source(file.path("workflows", "flow.calc.flag.aero.batch.R"))
   #print('AE +WP Done')
@@ -91,7 +91,7 @@ for(site in site.list){
   
   site <- site
   
-  setwd(file.path(localdir1, site))
+  setwd(file.path(localdir, site))
   load(paste(site, "_WP_9min.Rdata", sep = ""))
   load(paste(site, "_AE_9min.Rdata", sep = ""))
   load(paste(site, "_MBR_9min.Rdata", sep = ""))
@@ -170,7 +170,7 @@ for(site in site.list){
     MBR_9min.df.final$ustar_threshold <- ustar
   }
   # Save the files
-  site.dir <- file.path(localdir1, site)
+  site.dir <- file.path(localdir, site)
   
   save(WP_9min.df.final,
        AE_9min.df.final,
