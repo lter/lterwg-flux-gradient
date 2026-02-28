@@ -19,11 +19,21 @@ calc.stability.correction <- function(gas){
   #remove NAs
   #gas <- gas[, data.cols]
   
-  # Define top level where fluxes are measured
-  maxL=max(min9$H2O$TowerPosition_A)
-  nextL = sort(unique(min9Diff.list$H2O$TowerPosition_A),
-       decreasing = TRUE)[2]
-  TopLevel = paste0(maxL,"_",nextL)
+  if( site == "US-Uaf"){
+    # Define top level where fluxes are measured
+    maxL=max(min9$H2O$TowerPosition_A)
+    nextL = sort(unique(min9Diff.list$H2O$TowerPosition_B),
+                 decreasing = TRUE)
+    TopLevel = paste0(maxL,"_",nextL)
+  } else{
+    # Define top level where fluxes are measured
+    maxL=max(min9$H2O$TowerPosition_A)
+    nextL = sort(unique(min9Diff.list$H2O$TowerPosition_A),
+                 decreasing = TRUE)[2]
+    TopLevel = paste0(maxL,"_",nextL)
+  }
+  
+  
   
   #calculate obukov length (Obukhov length)
   
@@ -52,8 +62,17 @@ calc.stability.correction <- function(gas){
   L=gas$L[gas$dLevelsAminusB == TopLevel]
   
   maxL=max(min9$H2O$TowerPosition_A)
-  nextL = sort(unique(min9Diff.list$H2O$TowerPosition_A),
-               decreasing = TRUE)[2]
+  
+  
+  if( site == "US-Uaf"){
+    # Define top level where fluxes are measured
+    nextL = sort(unique(min9Diff.list$H2O$TowerPosition_B),
+                 decreasing = TRUE)
+  } else{
+    # Define top level where fluxes are measured
+    nextL = sort(unique(min9Diff.list$H2O$TowerPosition_A),
+                 decreasing = TRUE)[2]
+  }
   TopLevel = paste0(maxL,"_",nextL)
   
   # Get Tair column name at tower top
@@ -105,8 +124,8 @@ calc.stability.correction <- function(gas){
   gas$phim = rep(NA,nrow(gas))
   
   #Eq 4.37 Lee. Stability coefficient for wind shear
-  gas$phih[gas$MO.param>0&!is.na(gas$MO.param>0)] = 1+5*gas$MO.param[gas$MO.param>0&!is.na(gas$MO.param>0)] 
-  gas$phim[gas$MO.param>0&!is.na(gas$MO.param>0)] = 1+5*gas$MO.param[gas$MO.param>0&!is.na(gas$MO.param>0)] 
+  gas$phih[gas$MO.param>0 &!is.na(gas$MO.param>0)] = 1+5*gas$MO.param[gas$MO.param>0&!is.na(gas$MO.param>0)] 
+  gas$phim[gas$MO.param>0 &!is.na(gas$MO.param>0)] = 1+5*gas$MO.param[gas$MO.param>0&!is.na(gas$MO.param>0)] 
   
   #Eq 4.35 Lee. Stability correction function for wind shear
   gas$phim[gas$MO.param<=0&!is.na(gas$MO.param>0)]=(1-16*gas$MO.param[gas$MO.param<=0&!is.na(gas$MO.param>0)])^(-0.25)  

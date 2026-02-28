@@ -5,13 +5,13 @@ format.MBR <- function(df){
   
   df <- df %>% distinct(match_time, .keep_all = TRUE)
   names <- df %>% names
-
+  
   dConc.names <- names %>% str_detect('dConc') %>% keep(names, .)
   co2.names.1 <- names %>% str_detect('_CO2$') %>% keep(names, .) %>% setdiff(  dConc.names )
   h2o.names.1 <- names %>% str_detect('_H2O$') %>% keep(names, .) 
   ch4.names.1 <- names %>% str_detect('_CH4$') %>% keep(names, .) 
   mbr.names.1 <- names %>% str_detect('_MBR_') %>% keep(names, .) 
-
+  
   
   co2.names <- co2.names.1 %>% setdiff(  c(dConc.names,h2o.names.1, ch4.names.1,mbr.names.1 ))
   
@@ -69,7 +69,7 @@ format.MBR <- function(df){
   
   # EC Fluxes:
   flux.df.ec <- function( df, common.names, flux.names, gas){
-
+    
     common.names <- common.names[ common.names !='match_time']
     F.df <- df %>% select(all_of(common.names), all_of(flux.names))
     flux.names.new = gsub(paste('_', gas, sep=''), '', flux.names)
@@ -81,13 +81,11 @@ format.MBR <- function(df){
     
   }
   
-
-  
   Fco2.df <- flux.df.ec(df, common.names, co2.names, gas= 'CO2' )
   Fh2o.df <- flux.df.ec(df, common.names, h2o.names, gas= 'H2O' )
   Fch4.df <- flux.df.ec(df, common.names, ch4.names, gas= 'CH4' )
-
-
+  
+  
   ec.fluxes <- rbind(Fco2.df, Fh2o.df, Fch4.df  )
   
   # MBR FLuxes:
@@ -103,82 +101,96 @@ format.MBR <- function(df){
   }
   
   mbr.ch4.df.tco2 <- fg.df( df = df, common.names, 
-                        flux.names = c(mbr.ch4.mean.co2.names, mbr.ch4.sd.co2.names), 
-                        gas = "CH4", 
-                        tracer = 'CO2')
- 
+                            flux.names = c(mbr.ch4.mean.co2.names, mbr.ch4.sd.co2.names), 
+                            gas = "CH4", 
+                            tracer = 'CO2')
+  
   mbr.ch4.df.th20 <- fg.df( df = df, common.names, 
-                        flux.names = c(mbr.ch4.mean.h2o.names, mbr.ch4.sd.h2o.names), 
-                        gas = "CH4", 
-                        tracer = 'H2O')
- 
+                            flux.names = c(mbr.ch4.mean.h2o.names, mbr.ch4.sd.h2o.names), 
+                            gas = "CH4", 
+                            tracer = 'H2O')
+  
   mbr.co2.df.th2o <- fg.df( df = df, common.names, 
                             flux.names = c(mbr.co2.mean.h2o.names, mbr.co2.sd.h2o.names), 
                             gas = "CO2", 
                             tracer = 'H2O')
-
+  
   mbr.h2o.df.tco2 <- fg.df( df = df, common.names, 
                             flux.names = c(mbr.h2o.mean.co2.names, mbr.h2o.sd.co2.names), 
                             gas = "H2O", 
                             tracer = 'CO2')
   
-
-#dConc
+  
+  #dConc
   dConc.df <- function( df, common.names, 
                         flux.names, 
                         gas){
     
     F.df <- df %>% select(all_of(common.names), all_of(flux.names))
-    flux.names.new = c('dConc', 'dConc_pvalue', 'dConc_sd', 'dConc_bin')
-    names( F.df ) = c( common.names, flux.names.new )
+    
+    if( length( flux.names) == 4){
+      flux.names.new = c('dConc', 'dConc_pvalue', 'dConc_sd', 'dConc_bin')
+      names( F.df ) = c( common.names, flux.names.new )
+    }else{
+      flux.names.new = c('dConc', 'dConc_sd', 'dConc_bin')
+      names( F.df ) = c( common.names, flux.names.new )
+    }
+    
     F.df$gas <- gas
     return(F.df )
     
   }
-
+  
   
   
   dConc.CO2.df <- dConc.df( df, common.names, 
-                        flux.names=c(dConc.CO2.mean.names, dConc.CO2.pvalue.names, dConc.CO2.sd.names, dConc.CO2.bin.names), 
-                        gas = 'CO2')
+                            flux.names=c(dConc.CO2.mean.names, dConc.CO2.pvalue.names, dConc.CO2.sd.names, dConc.CO2.bin.names), 
+                            gas = 'CO2')
   
   dConc.CH4.df <- dConc.df( df, common.names, 
-                        flux.names=c(dConc.CH4.mean.names, dConc.CH4.pvalue.names, dConc.CH4.sd.names, dConc.CH4.bin.names), 
-                        gas = 'CH4')
+                            flux.names=c(dConc.CH4.mean.names, dConc.CH4.pvalue.names, dConc.CH4.sd.names, dConc.CH4.bin.names), 
+                            gas = 'CH4')
   
   dConc.H2O.df <- dConc.df( df, common.names, 
-                        flux.names=c(dConc.H2O.mean.names, dConc.H2O.pvalue.names, dConc.H2O.sd.names, dConc.H2O.bin.names), 
-                        gas = 'H2O')
+                            flux.names=c(dConc.H2O.mean.names, dConc.H2O.pvalue.names, dConc.H2O.sd.names, dConc.H2O.bin.names), 
+                            gas = 'H2O')
   
   
   
   # Create a dConc.tracer data frame for each gas
   dConc.tracer.df <- function( df, common.names, 
-                        flux.names, 
-                        tracer){
+                               flux.names, 
+                               tracer){
     
     F.df <- df %>% select(all_of(common.names), all_of(flux.names))
-    flux.names.new = c('dConc.tracer', 'dConc.tracer_pvalue', 'dConc.tracer_sd', 'dConc.tracer_bin')
+    
+    if( length(flux.names) ==4){
+      flux.names.new = c('dConc.tracer', 'dConc.tracer_pvalue', 'dConc.tracer_sd', 'dConc.tracer_bin')
+    } else {
+      flux.names.new = c('dConc.tracer', 'dConc.tracer_sd', 'dConc.tracer_bin')
+    }
+    
     names( F.df ) = c( common.names, flux.names.new )
     F.df$tracer <- tracer
     return(F.df )
     
   }
+  
   dConc.tracer.CO2.df <- dConc.tracer.df( df, common.names, 
-                            flux.names=c(dConc.CO2.mean.names, dConc.CO2.pvalue.names, dConc.CO2.sd.names, dConc.CO2.bin.names), 
-                            tracer = 'CO2')
+                                          flux.names=c(dConc.CO2.mean.names, dConc.CO2.pvalue.names, dConc.CO2.sd.names, dConc.CO2.bin.names), 
+                                          tracer = 'CO2')
   
   dConc.tracer.CH4.df <- dConc.tracer.df( df, common.names, 
-                            flux.names=c(dConc.CH4.mean.names, dConc.CH4.pvalue.names, dConc.CH4.sd.names, dConc.CH4.bin.names), 
-                            tracer = 'CH4')
+                                          flux.names=c(dConc.CH4.mean.names, dConc.CH4.pvalue.names, dConc.CH4.sd.names, dConc.CH4.bin.names), 
+                                          tracer = 'CH4')
   
   dConc.tracer.H2O.df <- dConc.tracer.df( df, common.names, 
-                            flux.names=c(dConc.H2O.mean.names, dConc.H2O.pvalue.names, dConc.H2O.sd.names, dConc.H2O.bin.names), 
-                            tracer = 'H2O')
+                                          flux.names=c(dConc.H2O.mean.names, dConc.H2O.pvalue.names, dConc.H2O.sd.names, dConc.H2O.bin.names), 
+                                          tracer = 'H2O')
   
   
   # Combine these MBR and dConc:
-
+  
   mbr.co2.df.th2o.j <- full_join(mbr.co2.df.th2o,   dConc.CO2.df, by = c(common.names,"gas"))
   mbr.h2o.df.tco2.j <- full_join(mbr.h2o.df.tco2,   dConc.H2O.df, by = c(common.names,"gas"))
   mbr.ch4.df.th20.j <- full_join(mbr.ch4.df.th20,   dConc.CH4.df, by = c(common.names,"gas"))
@@ -190,13 +202,13 @@ format.MBR <- function(df){
   mbr.ch4.df.th20.k <- full_join(mbr.ch4.df.th20.j,   dConc.tracer.H2O.df, by = c(common.names, "tracer")) 
   mbr.ch4.df.tco2.k <- full_join(mbr.ch4.df.tco2.j,   dConc.tracer.CO2.df, by = c(common.names, "tracer"))
   
-
+  
   g.fluxes <-  rbind( mbr.co2.df.th2o.k, mbr.h2o.df.tco2.k, mbr.ch4.df.th20.k,  mbr.ch4.df.tco2.k)
-
+  
   mbr.ec <- full_join( g.fluxes ,  ec.fluxes, by = c(common.names,'gas'))
   
-return(mbr.ec )
- }
+  return(mbr.ec )
+}
 
 apply.format.MBR <- function(site.list){
   

@@ -36,6 +36,18 @@ if (DoWP==1){
                                                     nsamp = 1000)
   #min30.FG.WP.list <- calc.gas.aero.windprof.flux.WP(min9.K = min30.K.AE.list,
   #                                                bootstrap = 1, nsamp = 1000)
+  
+  fileSave <- fs::path(dirTmp, paste0(site, "_WP_9min.Rdata"))
+  fileZip <- fs::path(dirTmp, paste0(site, "_WP_9min.zip"))
+  save(min9.FG.WP.list, file = fileSave)
+  wdPrev <- getwd()
+  setwd(dirTmp)
+  utils::zip(zipfile = fileZip, files = paste0(site, "_WP_9min.Rdata"))
+  setwd(wdPrev)
+  #googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folder$id[data_folder$name==site]) # path might need work
+  googledrive::drive_upload(media = fileSave, 
+                            overwrite = T, 
+                            path = data_folder$id[data_folder$name==site]) 
 }
 
 

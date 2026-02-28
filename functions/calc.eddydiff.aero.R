@@ -31,19 +31,20 @@ calc.eddydiff.aero <- function(sitecode, min9){
   # EDDY DIFF WP: create column to store wind profile eddy diffusivity with Wind Profiler Method
   H2O$EddyDiff_WP <- "hold"
   
-  #TO DO: REFORMAT ubar COLUMNS SO THAT WE CAN SELECT FOR CORRECT ubar USING TowerPosition
+  # TO DO: REFORMAT ubar COLUMNS SO THAT WE CAN SELECT FOR CORRECT ubar USING TowerPosition
   for(j in 1:dim(H2O)[1]){
+    print(j)
     c.name <- paste0("ubar", as.character(H2O[j,"TowerPosition_A"]))
     ubar = as.numeric(H2O[j,grep(c.name, names(H2O))])
     zd = as.numeric(H2O[j,"effective_h"])
     zo= as.numeric(H2O[j,"roughLength_calc"])
     phih=H2O[j,"phih"]
     
-    H2O[j,"EddyDiff_WP"] <- ((k^2)*ubar*zd)/(log(zd/zo)*phih)
+    try(H2O[j,"EddyDiff_WP"] <- ((k^2)*ubar*zd)/(log(zd/zo)*phih) , silent=T)
   }
   #set EddyDiff as numeric
   H2O$EddyDiff_WP <- as.numeric(H2O$EddyDiff_WP)
-  
+
   ### CO2 ###
   
   #grab CO2 gas concentration
@@ -52,6 +53,7 @@ calc.eddydiff.aero <- function(sitecode, min9){
   #CO2 <- CO2[complete.cases(CO2[,data.cols]),]
   #calculate obukhov length and stability parameters
   CO2 <- calc.stability.correction(gas = CO2)
+  
   #calculate eddy diffusivity
   #we need: von karman constant (k), friction velocity (u_star), geometric mean of upper and lower heights (z_g), stability parameter (phih)
   #assuming von karman constant is 0.4
@@ -64,13 +66,14 @@ calc.eddydiff.aero <- function(sitecode, min9){
   CO2$EddyDiff_WP <- "hold"
   #TO DO: REFORMAT ubar COLUMNS SO THAT WE CAN SELECT FOR CORRECT ubar USING TowerPosition
   for(j in 1:dim(CO2)[1]){
+    print(j)
     c.name <- paste0("ubar", as.character(CO2[j,"TowerPosition_A"]))
     ubar = as.numeric(CO2[j,grep(c.name, names(CO2))])
     zd = as.numeric(CO2[j,"effective_h"])
     zo= as.numeric(CO2[j,"roughLength_calc"])
     phih=CO2[j,"phih"]
     
-    CO2[j,"EddyDiff_WP"] <- ((k^2)*ubar*zd)/(log(zd/zo)*phih)
+    try(CO2[j,"EddyDiff_WP"] <- ((k^2)*ubar*zd)/(log(zd/zo)*phih), silent=T)
   }
   #set EddyDiff as numeric
   CO2$EddyDiff_WP <- as.numeric(CO2$EddyDiff_WP)
@@ -102,7 +105,7 @@ calc.eddydiff.aero <- function(sitecode, min9){
     zo= as.numeric(CH4[j,"roughLength_calc"])
     phih=CH4[j,"phih"]
     
-   CH4[j,"EddyDiff_WP"] <- ((k^2)*ubar*zd)/(log(zd/zo)*phih)
+   try(CH4[j,"EddyDiff_WP"] <- ((k^2)*ubar*zd)/(log(zd/zo)*phih), silent=T)
   }
  
   #set EddyDiff as numeric

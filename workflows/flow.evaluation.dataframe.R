@@ -70,7 +70,7 @@ for(site in site.list){
   load(paste(site, "_AE_9min.Rdata", sep = ""))
   load(paste(site, "_MBR_9min.Rdata", sep = ""))
   
-  
+
   # Add information to the files to make one large dataframe
   min9.FG.WP.list$H2O$gas <- "H2O"
   min9.FG.WP.list$H2O$site <- paste0(site)
@@ -86,6 +86,9 @@ for(site in site.list){
   min9.FG.AE.list$CH4$gas <- "CH4"
   min9.FG.AE.list$CH4$site <- paste0(site)
   
+ # ECmean:
+  min9.FG.AE.list$H2O$EC_mean <- min9.FG.AE.list$H2O$
+  
   MBRflux_align$site <- paste0(site)
   
   WP_9min.df <- bind_rows(min9.FG.WP.list) #bind list into df
@@ -94,7 +97,8 @@ for(site in site.list){
   
   MBR_9min.df <- bind_rows(MBRflux_align)
   
-  
+  MBR_9min.df$
+
   # Add flags to dataframe:
   WP_9min.df.flag <- flag.all.gas.stability(flux.df = WP_9min.df, 
                                             L = 'L_obukhov', 
@@ -123,9 +127,10 @@ for(site in site.list){
   AE_9min.df.final <- Bad_Eddy(AE_9min.df.CG, "EddyDiff")
   WP_9min.df.final <- Bad_Eddy(WP_9min.df.CG, "EddyDiff")
   
+  MBR_9min.df.flag
   # Additional Formatting for the MBR:
   MBR_9min.df.final <- format.MBR(MBR_9min.df.flag)
-  
+
   # Ustar Threshold:
   ustar.Threshold <- ustar.neon.sites %>% filter(Site_Id.NEON == site ) %>% select(Threshold.final)
   
