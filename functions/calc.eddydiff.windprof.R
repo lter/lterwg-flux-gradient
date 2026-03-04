@@ -36,8 +36,10 @@ calc.eddydiff.windprof <- function(sitecode, min9){
     zd = as.numeric(H2O[j,"effective_h"])
     
     #H2O[j,"EddyDiff"] <- ((k^2)*ubar*zd/(log(zd/as.numeric(H2O[j,"roughLength_calc"]))*H2O[j,"phih"]))
+   
+     try(H2O[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(H2O[j,"GeometricMean_AB"])/(log(z/as.numeric(H2O[j,"roughLength_interp"]))*H2O[j,"phih"])), silent=T)
     
-    try(H2O[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(H2O[j,"GeometricMean_AB"])/(log(z/as.numeric(H2O[j,"roughLength_interp"])))), silent=T)
+     #try(H2O[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(H2O[j,"GeometricMean_AB"])/(log(z/as.numeric(H2O[j,"roughLength_interp"])))), silent=T)
 
     
   }
