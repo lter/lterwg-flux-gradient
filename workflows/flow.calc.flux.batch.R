@@ -50,7 +50,7 @@ data_folder <- googledrive::drive_ls(path = drive_url)
 #         Gradient Flux Calculations -----
 ## --------------------------------------------- ##
 
-for(site in site.list[47]){
+for(site in site.list){
   
   setwd(DirRepo)
   
