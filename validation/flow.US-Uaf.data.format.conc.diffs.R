@@ -32,6 +32,7 @@ library(dplyr)
 # Load functions in this repo
 source(file.path("functions/interp.flux.R"))
 source(file.path("functions/aggregate.averages.R"))
+source(file.path(paste(DirRepo, "/functions/calc.MO.length.R", sep="")))
 
 # Final note: This script takes approx 45 min to run per site. 
 # -------------------------------------------------------
@@ -42,7 +43,7 @@ drive_url_extSiteData <- googledrive::as_id("https://drive.google.com/drive/fold
 data_folder <- googledrive::drive_ls(path = drive_url_extSiteData)
 site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==site])
 
-dirTmp <- fs::path(localdir1,site)
+dirTmp <- fs::path(localdir,site)
 dir.create(dirTmp)
 
 

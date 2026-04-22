@@ -27,11 +27,11 @@ site.list <- metadata$Site_Id.NEON %>% unique()
 ustar.neon.sites <- read.csv("/Volumes/MaloneLab/Research/FluxGradient/UstarNeonSites.csv" )
 
 # Add local directory for downloaded data here:
-localdir1 <- '/Volumes/MaloneLab/Research/FluxGradient/FluxData'
+localdir <- '/Volumes/MaloneLab/Research/FluxGradient/FluxData'
 
 # Add local directory for your Flux repo here:
-localdir2 <- "/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient"
-setwd(localdir2)
+DirRepo <- "/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient"
+setwd(DirRepo)
 
 # Add local directory for your attribute data here:
 localdir3 <- '/Volumes/MaloneLab/Research/FluxGradient/Attributes'
@@ -65,7 +65,7 @@ for(site in site.list){
   
   site <- site
   
-  setwd(file.path(localdir1, site))
+  setwd(file.path(localdir, site))
   load(paste(site, "_WP_9min.Rdata", sep = ""))
   load(paste(site, "_AE_9min.Rdata", sep = ""))
   load(paste(site, "_MBR_9min.Rdata", sep = ""))
@@ -87,7 +87,7 @@ for(site in site.list){
   min9.FG.AE.list$CH4$site <- paste0(site)
   
  # ECmean:
-  min9.FG.AE.list$H2O$EC_mean <- min9.FG.AE.list$H2O$
+  min9.FG.AE.list$H2O$EC_mean <- min9.FG.AE.list$H2O$FH2O_interp
   
   MBRflux_align$site <- paste0(site)
   
@@ -97,7 +97,6 @@ for(site in site.list){
   
   MBR_9min.df <- bind_rows(MBRflux_align)
   
-  MBR_9min.df$
 
   # Add flags to dataframe:
   WP_9min.df.flag <- flag.all.gas.stability(flux.df = WP_9min.df, 
@@ -139,7 +138,7 @@ for(site in site.list){
   MBR_9min.df.final$ustar_threshold <- ustar.Threshold$Threshold.final
   
   # Save the files
-  site.dir <- file.path(localdir1, site)
+  site.dir <- file.path(localdir, site)
   
   save(WP_9min.df.final,
        AE_9min.df.final,

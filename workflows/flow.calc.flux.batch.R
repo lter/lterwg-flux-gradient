@@ -27,11 +27,11 @@ metadata <- read.csv('/Volumes/MaloneLab/Research/FluxGradient/Site_Attributes.c
 site.list <- metadata$Site %>% unique()
 
 # Add local directory for downloaded data here:
-localdir1 <- '/Volumes/MaloneLab/Research/FluxGradient/FluxData' # MaloneLab Server
+localdir <- '/Volumes/MaloneLab/Research/FluxGradient/FluxData' # MaloneLab Server
 
 # Add local directory for your Flux repo here:
-localdir2 <- "/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient"
-setwd(localdir2)
+DirRepo <- "/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient"
+setwd(DirRepo)
 
 ## --------------------------------------------- ##
 #               Authenticate -----
@@ -50,18 +50,18 @@ data_folder <- googledrive::drive_ls(path = drive_url)
 #         Gradient Flux Calculations -----
 ## --------------------------------------------- ##
 
-for(site in site.list){
+for(site in site.list[47]){
   
-  setwd(localdir2)
+  setwd(DirRepo)
   
   sitecode <- site
   print(sitecode)
   
   # Load Data:
-  load(fs::path(localdir1, site, paste0(site, '_aligned_conc_flux_30min.RData')))
-  load(fs::path(localdir1, site, paste0(site, '_aligned_conc_flux_9min.RData')))
+  load(fs::path(localdir, site, paste0(site, '_aligned_conc_flux_30min.RData')))
+  load(fs::path(localdir, site, paste0(site, '_aligned_conc_flux_9min.RData')))
 
-  dirTmp <- file.path(localdir1, site)
+  dirTmp <- file.path(localdir, site)
     
   print('Data Loaded')
   
@@ -69,12 +69,12 @@ for(site in site.list){
   source(file.path("workflows", "flow.calc.flag.mbr.batch.R"))
   print('MBR Done')
   
-  setwd(localdir2)
+  setwd(DirRepo)
   print('Running AE')
   source(file.path("workflows", "flow.calc.flag.aero.batch.R"))
   print('AE Done')
   
-  setwd(localdir2)
+  setwd(DirRepo)
   print('Running WP')
   source(file.path("workflows", "flow.calc.flag.windprof.batch.R"))
   print('WP Done')

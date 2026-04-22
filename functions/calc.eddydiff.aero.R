@@ -24,9 +24,9 @@ calc.eddydiff.aero <- function(sitecode, min9){
   #assuming von karman constant is 0.4
   k = 0.4
 
-  # EDDY DIFF AERO (include stability correction): 
-  H2O$EddyDiff = (k*as.numeric(H2O$ustar_interp)*as.numeric(H2O$effective_h))/as.numeric(H2O$phih) 
-  #H2O$EddyDiff = (k*as.numeric(H2O$ustar_interp)*as.numeric(H2O$effective_h))
+  # EDDY DIFF AERO: 
+  # H2O$EddyDiff = (k*as.numeric(H2O$ustar_interp)*as.numeric(H2O$effective_h))/as.numeric(H2O$phih) 
+  H2O$EddyDiff = (k*as.numeric(H2O$ustar_interp)*as.numeric(H2O$effective_h))
   
   # EDDY DIFF WP: create column to store wind profile eddy diffusivity with Wind Profiler Method
   H2O$EddyDiff_WP <- "hold"
@@ -36,7 +36,7 @@ calc.eddydiff.aero <- function(sitecode, min9){
     print(j)
     c.name <- paste0("ubar", as.character(H2O[j,"TowerPosition_A"]))
     ubar = as.numeric(H2O[j,grep(c.name, names(H2O))])
-    zd = as.numeric(H2O[j,"effective_h"])
+    zd = as.numeric(H2O[j,"TowerHeight_A"])
     zo= as.numeric(H2O[j,"roughLength_calc"])
     phih=H2O[j,"phih"]
     
@@ -69,7 +69,7 @@ calc.eddydiff.aero <- function(sitecode, min9){
     print(j)
     c.name <- paste0("ubar", as.character(CO2[j,"TowerPosition_A"]))
     ubar = as.numeric(CO2[j,grep(c.name, names(CO2))])
-    zd = as.numeric(CO2[j,"effective_h"])
+    zd = as.numeric(CO2[j,"TowerHeight_A"])
     zo= as.numeric(CO2[j,"roughLength_calc"])
     phih=CO2[j,"phih"]
     
@@ -101,7 +101,7 @@ calc.eddydiff.aero <- function(sitecode, min9){
   for(j in 1:dim(CH4)[1]){
     c.name <- paste0("ubar", as.character(CH4[j,"TowerPosition_A"]))
     ubar = as.numeric(CH4[j,grep(c.name, names(CH4))])
-    zd = as.numeric(CH4[j,"effective_h"])
+    zd = as.numeric(CH4[j,"TowerHeight_A"])
     zo= as.numeric(CH4[j,"roughLength_calc"])
     phih=CH4[j,"phih"]
     

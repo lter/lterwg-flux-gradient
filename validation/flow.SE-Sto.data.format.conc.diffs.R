@@ -36,9 +36,9 @@ library(dplyr)
 library(lubridate)
 
 # Load functions in this repo
-source(file.path(paste(localdir2, "/functions/interp.flux.R", sep="")))
-source(file.path(paste(localdir2, "/functions/aggregate.averages.R", sep="")))
-
+source(file.path(paste(DirRepo, "/functions/interp.flux.R", sep="")))
+source(file.path(paste(DirRepo, "/functions/aggregate.averages.R", sep="")))
+source(file.path(paste(DirRepo, "/functions/calc.MO.length.R", sep="")))
 
 # Final note: This script takes approx 45 min to run per site. 
 # -------------------------------------------------------
@@ -47,7 +47,7 @@ googledrive::drive_auth(email = email) # Likely will not work on RStudio Server.
 drive_url_extSiteData <- googledrive::as_id("https://drive.google.com/drive/folders/1jrOJIu5WfdzmlbL9vMkUNfzBpRC-W0Wd")
 data_folder <- googledrive::drive_ls(path = drive_url_extSiteData)
 site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==site])
-dirTmp <- fs::path(localdir1,site)
+dirTmp <- fs::path(localdir,site)
 dir.create(dirTmp)
 focal_files <- site_folder$name # Default - downloads all files to the temp folder
 focal_files <- c('SE-Sto_met_30min.csv',

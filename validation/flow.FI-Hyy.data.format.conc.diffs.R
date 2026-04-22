@@ -11,8 +11,10 @@ library(purrr)
 library(googledrive)  # For Google Drive integration
 library(fs)           # For file path handling
 
+source(file.path(paste(DirRepo, "/functions/calc.MO.length.R", sep="")))
+
 # Set up temporary directory for file downloads
-dirTmp <- fs::path(localdir1, site)
+dirTmp <- fs::path(localdir, site)
 dir.create(dirTmp, recursive = TRUE)
 
 # Authenticate with Google Drive and get site data

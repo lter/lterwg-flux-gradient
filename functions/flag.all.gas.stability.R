@@ -16,10 +16,12 @@ flag.all.gas.stability <- function(flux.df, L, z, d){
   z = flux.df %>% select(all_of(z))
   d = flux.df %>% select(all_of(d))
   
-  flux.df$zeta = (z-d)/L
+  zeta = (z-d)/L
   
   #use obukov length to filter for stable, neutral, unstable atmospheric conditions
   #use 100m and 500m as threshold for comparison
+ flux.df$zeta = zeta$z_veg_aero
+ flux.df$L = L[,1]
   flux.df <- flux.df %>% mutate( Stability_100 = case_when( abs(L) > 100 ~ "neutral",
                                                             L < 100 & L > 0 ~ "stable", 
                                                             L > -100 & L < 0 ~  "unstable"),
@@ -27,9 +29,9 @@ flag.all.gas.stability <- function(flux.df, L, z, d){
                                                             L < 500 & L > 0 ~ "stable", 
                                                             L > -500 & L < 0 ~  "unstable"),
                                  Stability_Exteme = case_when( abs(zeta) > 1 ~ "extreme",
-                                                               abs(zeta) <= 1 ~ "stable")) 
+                                          abs(zeta) <= 1 ~ "stable"))                            
   
-  flux.df$Stability_Exteme
+ 
   #calculate amount of data in each condition
   percent.neutral100 <- round(length(flux.df[which(flux.df$Stability_100=="neutral"), 1])/length(flux.df[,1]), 3)*100
   percent.stable100 <- round(length(flux.df[which(flux.df$Stability_100=="stable"),1])/length(flux.df[,1]), 3)*100
