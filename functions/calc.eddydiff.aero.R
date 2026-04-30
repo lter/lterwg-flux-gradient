@@ -9,6 +9,34 @@
 #' 
 calc.eddydiff.aero <- function(sitecode, min9){
   #currently hard coded to calculate for all gas concentrations
+
+  calc_wp_diffusivity <- function(gas_df, k_const){
+    gas_df$EddyDiff_WP <- NA_real_
+    ubar_cols <- grep("^ubar", names(gas_df), value = TRUE)
+
+    if(length(ubar_cols) == 0){
+      return(gas_df)
+    }
+
+    ubar_lookup <- suppressWarnings(as.integer(sub("^ubar", "", ubar_cols)))
+    tower_pos <- suppressWarnings(as.integer(as.character(gas_df$TowerPosition_A)))
+    ubar_idx <- match(tower_pos, ubar_lookup)
+    valid_idx <- which(!is.na(ubar_idx))
+
+    if(length(valid_idx) == 0){
+      return(gas_df)
+    }
+
+    ubar_mat <- as.matrix(gas_df[, ubar_cols, drop = FALSE])
+    ubar <- rep(NA_real_, nrow(gas_df))
+    ubar[valid_idx] <- ubar_mat[cbind(valid_idx, ubar_idx[valid_idx])]
+
+    zd <- as.numeric(gas_df$effective_h)
+    zo <- as.numeric(gas_df$roughLength_calc)
+    phih <- as.numeric(gas_df$phih)
+    gas_df$EddyDiff_WP <- ((k_const^2) * ubar * zd) / (log(zd / zo) * phih)
+    gas_df
+  }
   
   ### H2O ###
   #grab H2O gas concentration
@@ -29,21 +57,7 @@ calc.eddydiff.aero <- function(sitecode, min9){
   #H2O$EddyDiff = (k*as.numeric(H2O$ustar_interp)*as.numeric(H2O$effective_h))
   
   # EDDY DIFF WP: create column to store wind profile eddy diffusivity with Wind Profiler Method
-  H2O$EddyDiff_WP <- "hold"
-  
-  # TO DO: REFORMAT ubar COLUMNS SO THAT WE CAN SELECT FOR CORRECT ubar USING TowerPosition
-  for(j in 1:dim(H2O)[1]){
-    print(j)
-    c.name <- paste0("ubar", as.character(H2O[j,"TowerPosition_A"]))
-    ubar = as.numeric(H2O[j,grep(c.name, names(H2O))])
-    zd = as.numeric(H2O[j,"effective_h"])
-    zo= as.numeric(H2O[j,"roughLength_calc"])
-    phih=H2O[j,"phih"]
-    
-    try(H2O[j,"EddyDiff_WP"] <- ((k^2)*ubar*zd)/(log(zd/zo)*phih) , silent=T)
-  }
-  #set EddyDiff as numeric
-  H2O$EddyDiff_WP <- as.numeric(H2O$EddyDiff_WP)
+  H2O <- calc_wp_diffusivity(H2O, k)
 
   ### CO2 ###
   
@@ -63,20 +77,7 @@ calc.eddydiff.aero <- function(sitecode, min9){
   CO2$EddyDiff = (k*as.numeric(CO2$ustar_interp)*as.numeric(CO2$effective_h))/as.numeric(CO2$phih)
   
   # EDDY DIFF WP: create column for store wind profile eddy diffusivity with Wind Profiler Method
-  CO2$EddyDiff_WP <- "hold"
-  #TO DO: REFORMAT ubar COLUMNS SO THAT WE CAN SELECT FOR CORRECT ubar USING TowerPosition
-  for(j in 1:dim(CO2)[1]){
-    print(j)
-    c.name <- paste0("ubar", as.character(CO2[j,"TowerPosition_A"]))
-    ubar = as.numeric(CO2[j,grep(c.name, names(CO2))])
-    zd = as.numeric(CO2[j,"effective_h"])
-    zo= as.numeric(CO2[j,"roughLength_calc"])
-    phih=CO2[j,"phih"]
-    
-    try(CO2[j,"EddyDiff_WP"] <- ((k^2)*ubar*zd)/(log(zd/zo)*phih), silent=T)
-  }
-  #set EddyDiff as numeric
-  CO2$EddyDiff_WP <- as.numeric(CO2$EddyDiff_WP)
+  CO2 <- calc_wp_diffusivity(CO2, k)
   
   
   ### CH4 ###
@@ -94,20 +95,7 @@ calc.eddydiff.aero <- function(sitecode, min9){
   CH4$EddyDiff = (k*as.numeric(CH4$ustar_interp)*as.numeric(CH4$effective_h))/as.numeric(CH4$phih)
   
   # EDDY DIFF WP: create column for store wind profile eddy diffusivity with Wind Profiler Method
- CH4$EddyDiff_WP <- "hold"
-  #TO DO: REFORMAT ubar COLUMNS SO THAT WE CAN SELECT FOR CORRECT ubar USING TowerPosition
-  for(j in 1:dim(CH4)[1]){
-    c.name <- paste0("ubar", as.character(CH4[j,"TowerPosition_A"]))
-    ubar = as.numeric(CH4[j,grep(c.name, names(CH4))])
-    zd = as.numeric(CH4[j,"effective_h"])
-    zo= as.numeric(CH4[j,"roughLength_calc"])
-    phih=CH4[j,"phih"]
-    
-   try(CH4[j,"EddyDiff_WP"] <- ((k^2)*ubar*zd)/(log(zd/zo)*phih), silent=T)
-  }
- 
-  #set EddyDiff as numeric
- CH4$EddyDiff_WP <- as.numeric(CH4$EddyDiff_WP)
+  CH4 <- calc_wp_diffusivity(CH4, k)
   
   #add to list
   min9.K.AE.list <- list(H2O = H2O, CO2 = CO2, CH4 = CH4)

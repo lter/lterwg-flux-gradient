@@ -8,6 +8,35 @@
 #' @return list of gas concentration dataframes containing variables associated with wind profile eddy diffusivity calculation
 #' 
 calc.eddydiff.windprof <- function(sitecode, min9){
+  calc_wp_eddy_diff <- function(gas_df, k_const){
+    gas_df$GeometricMean_AB <- sqrt(as.numeric(gas_df$TowerHeight_A) * as.numeric(gas_df$TowerHeight_B))
+    gas_df$EddyDiff <- NA_real_
+    ubar_cols <- grep("^ubar", names(gas_df), value = TRUE)
+
+    if(length(ubar_cols) == 0){
+      return(gas_df)
+    }
+
+    ubar_lookup <- suppressWarnings(as.integer(sub("^ubar", "", ubar_cols)))
+    tower_pos <- suppressWarnings(as.integer(as.character(gas_df$TowerPosition_A)))
+    ubar_idx <- match(tower_pos, ubar_lookup)
+    valid_idx <- which(!is.na(ubar_idx))
+
+    if(length(valid_idx) == 0){
+      return(gas_df)
+    }
+
+    ubar_mat <- as.matrix(gas_df[, ubar_cols, drop = FALSE])
+    ubar <- rep(NA_real_, nrow(gas_df))
+    ubar[valid_idx] <- ubar_mat[cbind(valid_idx, ubar_idx[valid_idx])]
+
+    z <- as.numeric(gas_df$TowerHeight_A)
+    phih <- as.numeric(gas_df$phih)
+    rough_length <- as.numeric(gas_df$roughLength_interp)
+    gas_df$EddyDiff <- ((k_const^2) * ubar * as.numeric(gas_df$GeometricMean_AB)) /
+      (log(z / rough_length) * phih)
+    gas_df
+  }
   
   #currently hard coded to calculate for all gas concentrations
   #grab H2O
@@ -22,29 +51,7 @@ calc.eddydiff.windprof <- function(sitecode, min9){
   #calculate eddy diffusivty using WP
   #assuming von karman constant is 0.4
   k = 0.4
-  #why are we using geometric mean instead of regular mean?
-  H2O$GeometricMean_AB <- sqrt(as.numeric(H2O$TowerHeight_A)*as.numeric(H2O$TowerHeight_B))
-  
-  #create column for store wind profile eddy diffusivity
-  H2O$EddyDiff <- "hold"
-  #TO DO: REFORMAT ubar COLUMNS SO THAT WE CAN SELECT FOR CORRECT ubar USING TowerPosition
-  for(j in 1:dim(H2O)[1]){
-    print(j)
-    c.name <- paste0("ubar", as.character(H2O[j,"TowerPosition_A"]))
-    ubar = as.numeric(H2O[j,grep(c.name, names(H2O))])
-    z = as.numeric(H2O[j,"TowerHeight_A"])
-    zd = as.numeric(H2O[j,"effective_h"])
-    
-    #H2O[j,"EddyDiff"] <- ((k^2)*ubar*zd/(log(zd/as.numeric(H2O[j,"roughLength_calc"]))*H2O[j,"phih"]))
-   
-     try(H2O[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(H2O[j,"GeometricMean_AB"])/(log(z/as.numeric(H2O[j,"roughLength_interp"]))*H2O[j,"phih"])), silent=T)
-    
-     #try(H2O[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(H2O[j,"GeometricMean_AB"])/(log(z/as.numeric(H2O[j,"roughLength_interp"])))), silent=T)
-
-    
-  }
-  #set EddyDiff as numeric
-  H2O$EddyDiff <- as.numeric(H2O$EddyDiff)
+  H2O <- calc_wp_eddy_diff(H2O, k)
   #grab CO2
   CO2 <- min9[[which(names(min9) == "CO2")]]
   #remove NAs
@@ -54,24 +61,7 @@ calc.eddydiff.windprof <- function(sitecode, min9){
   #calculate eddy diffusivty using WP
   #assuming von karman constant is 0.4
   k = 0.4
-  #why are we using geometric mean instead of regular mean?
-  CO2$GeometricMean_AB <- sqrt(as.numeric(CO2$TowerHeight_A)*as.numeric(CO2$TowerHeight_B))
-  
-  #create column for store wind profile eddy diffusivity
-  CO2$EddyDiff <- "hold"
-  for(j in 1:dim(CO2)[1]){
-    c.name <- paste0("ubar", as.character(CO2[j,"TowerPosition_A"]))
-    ubar = as.numeric(CO2[j,grep(c.name, names(CO2))])
-    z = as.numeric(CO2[j,"TowerHeight_A"])
-    zd = as.numeric(CO2[j,"effective_h"])
-    
-    #CO2[j,"EddyDiff"] <- ((k^2)*ubar*zd/(log(zd/as.numeric(CO2[j,"roughLength_calc"]))*CO2[j,"phih"]))
-
-    try(CO2[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(CO2[j,"GeometricMean_AB"])/(log(z/as.numeric(CO2[j,"roughLength_interp"]))*CO2[j,"phih"])), silent=T)
-
-  }
-  #set EddyDiff as numeric
-  CO2$EddyDiff <- as.numeric(CO2$EddyDiff)
+  CO2 <- calc_wp_eddy_diff(CO2, k)
   
   #grab CH4
   CH4 <- min9[[which(names(min9) == "CH4")]]
@@ -82,26 +72,7 @@ calc.eddydiff.windprof <- function(sitecode, min9){
   #calculate eddy diffusivty using WP
   #assuming von karman constant is 0.4
   k = 0.4
-  #why are we using geometric mean instead of regular mean?
-  CH4$GeometricMean_AB <- sqrt(as.numeric(CH4$TowerHeight_A)*as.numeric(CH4$TowerHeight_B))
-  
-  #create column for store wind profile eddy diffusivity
-  CH4$EddyDiff <- "hold"
-  for(j in 1:dim(CH4)[1]){
-    c.name <- paste0("ubar", as.character(CH4[j,"TowerPosition_A"]))
-    ubar = as.numeric(CH4[j,grep(c.name, names(CH4))])
-    z = as.numeric(CH4[j,"TowerHeight_A"])
-    zd = as.numeric(CH4[j,"effective_h"])
-    
-
-    #CH4[j,"EddyDiff"] <- ((k^2)*ubar*zd/(log(zd/as.numeric(CH4[j,"roughLength_calc"]))*CH4[j,"phih"]))
-
-    try(CH4[j,"EddyDiff"] <- ((k^2)*ubar*as.numeric(CH4[j,"GeometricMean_AB"])/(log(z/as.numeric(CH4[j,"roughLength_interp"]))*CH4[j,"phih"])), silent=T)
-
-  }
-  
-  #set EddyDiff as numeric
-  CH4$EddyDiff <- as.numeric(CH4$EddyDiff)
+  CH4 <- calc_wp_eddy_diff(CH4, k)
   #add to list
   min9.K.WP.list <- list(H2O = H2O, CO2 = CO2, CH4 = CH4)
   return(min9.K.WP.list)

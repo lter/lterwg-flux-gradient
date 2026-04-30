@@ -26,6 +26,9 @@ calc.eqn.aero.windprof.flux <- function(min9, eddy.diff.name, bootstrap, nsamp){
     # Remove missing data
     # min9 <- min9[complete.cases(min9[,data.cols]),]
     nsamp = nsamp # number of bootstrap samples
+    k_all <- as.numeric(min9[, paste0(eddy.diff.name)])
+    rho_mol_all <- as.numeric(min9$rhoa_kgm3) / .0289
+    diff_heights_all <- as.numeric(min9$dHeight)
     
     # Storage for flux & concentration diff mean & variance 
     FG_mean = FG_sd = vector()
@@ -48,20 +51,14 @@ calc.eqn.aero.windprof.flux <- function(min9, eddy.diff.name, bootstrap, nsamp){
       
       # Pull sampled dConc through the flux gradient calculation
       # for the aerodynamic or wind profile method
-      diff.heights <- as.numeric(min9$dHeight)[i] # m
-      k <- as.numeric(min9[,paste0(eddy.diff.name)])[i]
-      rho <- as.numeric(min9$rhoa_kgm3)[i] #kg m-3
-      rho_mol <- rho/.0289 # mol m-3 (divided by molar mass of dry air 0.0289 kg/mol)
-      
-      # loop over each sampled dConc at one timestep to apply FG equation
-      FG = vector()
-      for(j in 1:nsamp){ 
-        
-        # Apply equation for the aero/windprof method
-        # CO2 umol m-2 s-1, CH4 nmol m-2 s-1, H2O mmol m-2 s-1
-        FG[j] <- rho_mol*(-k)*(dConc[j])/(diff.heights) 
-        
-      }
+      diff.heights <- diff_heights_all[i] # m
+      k <- k_all[i]
+      rho_mol <- rho_mol_all[i] # mol m-3 (divided by molar mass of dry air 0.0289 kg/mol)
+
+      # Apply equation for the aero/windprof method
+      # CO2 umol m-2 s-1, CH4 nmol m-2 s-1, H2O mmol m-2 s-1
+      FG <- rho_mol * (-k) * dConc / diff.heights
+
       # Calculate the mean & sd of calculated flux at one timestep 
       # from sampled dConc values
       FG_mean[i] = mean(FG)

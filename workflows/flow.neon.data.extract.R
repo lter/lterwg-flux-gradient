@@ -42,32 +42,14 @@ library(googledrive)
 # BiocManager::install("rhdf5")
 
 # Load in data compiling functions
-source(file.path("functions", "compile.neon.data.R"))
-source(file.path("functions", "compile.neon.site.attr.R"))
-source(file.path("functions", "grab.neon.gas.9min.6min.R"))
-source(file.path("functions", "grab.neon.met.flux.30min.R"))
-source(file.path("functions", "grab.neon.met.1min.R"))
-source(file.path("functions", "compile.neon.data.1min.R"))
-source(file.path("functions", "compile.neon.data.30min.R"))
-source(file.path("functions", "compile.neon.data.9min.6min.R"))
-
-# Point to the data folder on the shared Google Drive
-drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
-data_folder <- googledrive::drive_ls(path = drive_url)
-
-# Add all sites here:
-# site.list <- c("ABBY", "BARR", "BART", "BLAN")
-# site.list <- c("BONA", "CLBJ", "CPER", "DCFS")
-# site.list <- c("DEJU", "DELA", "DSNY", "GRSM")
-# site.list <- c("GUAN", "HARV", "HEAL", "JERC")
-# site.list <- c("JORN", "KONA", "KONZ", "LAJA")
-# site.list <- c("LENO", "MLBS", "MOAB", "NIWO")
-# site.list <- c("NOGP", "OAES", "ONAQ", "ORNL")
-# site.list <- c("OSBS", "PUUM", "RMNP", "SCBI")
-# site.list <- c("SERC", "SJER", "SOAP", "SRER")
-# site.list <- c("STEI", "STER", "TALL", "TEAK")
-# site.list <- c("TOOL", "TREE", "UKFS", "UNDE")
-# site.list <- c("WOOD", "WREF", "YELL")
+source(file.path(DirRepo,"functions", "compile.neon.data.R"))
+source(file.path(DirRepo,"functions", "compile.neon.site.attr.R"))
+source(file.path(DirRepo,"functions", "grab.neon.gas.9min.6min.R"))
+source(file.path(DirRepo,"functions", "grab.neon.met.flux.30min.R"))
+source(file.path(DirRepo,"functions", "grab.neon.met.1min.R"))
+source(file.path(DirRepo,"functions", "compile.neon.data.1min.R"))
+source(file.path(DirRepo,"functions", "compile.neon.data.30min.R"))
+source(file.path(DirRepo,"functions", "compile.neon.data.9min.6min.R"))
 
 ## --------------------------------------------- ##
 #               Data Extraction -----
@@ -78,7 +60,7 @@ for (sitecode in site.list){
   print(sitecode)
   
   # Grab h5 files to be passed to SiteAttributes and SiteDF
-  h5files <- list.files(path = file.path("data", sitecode, "filesToStack00200"), 
+  h5files <- list.files(path = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, "filesToStack00200"), 
                         pattern = ".h5$", 
                         full.names = T)
   
@@ -115,27 +97,27 @@ for (sitecode in site.list){
   min30.list$PAR <- PAR30min
   
   # Save as Rdata objects
-  save(min1.list, file = file.path("data", sitecode, paste0(sitecode, "_1min.Rdata")))
-  save(min9.list, file = file.path("data", sitecode, paste0(sitecode, "_9min.Rdata")))
-  save(min30.list, file = file.path("data", sitecode, paste0(sitecode, "_30min.Rdata")))
-  save(attr.df, file = file.path("data", sitecode, paste0(sitecode, "_attr.Rdata")))
+  save(min1.list, file = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_1min.Rdata")))
+  save(min9.list, file = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_9min.Rdata")))
+  save(min30.list, file = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_30min.Rdata")))
+  save(attr.df, file = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_attr.Rdata")))
   save(WS2D2min, file = file.path("data", sitecode, paste0(sitecode, "_WS2D2min.Rdata")))
   
   # Zip Rdata objects
-  zip(zipfile = file.path("data", sitecode, paste0(sitecode, "_1min.zip")), 
+  zip(zipfile = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_1min.zip")), 
       files = file.path("data", sitecode, paste0(sitecode, "_1min.Rdata")))
   
-  zip(zipfile = file.path("data", sitecode, paste0(sitecode, "_9min.zip")), 
-      files = file.path("data", sitecode, paste0(sitecode, "_9min.Rdata")))
+  zip(zipfile = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_9min.zip")), 
+      files = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_9min.Rdata")))
   
-  zip(zipfile = file.path("data", sitecode, paste0(sitecode, "_30min.zip")), 
+  zip(zipfile = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_30min.zip")), 
       files = file.path("data", sitecode, paste0(sitecode, "_30min.Rdata")))
   
   zip(zipfile = file.path("data", sitecode, paste0(sitecode, "_attr.zip")), 
       files = file.path("data", sitecode, paste0(sitecode, "_attr.Rdata")))
   
-  zip(zipfile = file.path("data", sitecode, paste0(sitecode, "_WS2D2min.zip")), 
-      files = file.path("data", sitecode, paste0(sitecode, "_WS2D2min.Rdata")))
+  zip(zipfile = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_WS2D2min.zip")), 
+      files = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_WS2D2min.Rdata")))
   
   # Upload to Google Drive
   # IMPORTANT REMINDER:
@@ -144,23 +126,23 @@ for (sitecode in site.list){
   # NOTE: you will be asked to re authenticate if your OAuth token is stale, select your already authenticated email from the list
   site_folder <- data_folder$id[data_folder$name==sitecode]
   
-  googledrive::drive_upload(media = file.path("data", sitecode, paste0(sitecode, "_1min.zip")), 
+  googledrive::drive_upload(media = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_1min.zip")), 
                             overwrite = T, 
                             path = site_folder)
   
-  googledrive::drive_upload(media = file.path("data", sitecode, paste0(sitecode, "_9min.zip")), 
+  googledrive::drive_upload(media = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_9min.zip")), 
                             overwrite = T, 
                             path = site_folder)
   
-  googledrive::drive_upload(media = file.path("data", sitecode, paste0(sitecode, "_30min.zip")), 
+  googledrive::drive_upload(media = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_30min.zip")), 
                             overwrite = T, 
                             path = site_folder)
   
-  googledrive::drive_upload(media = file.path("data", sitecode, paste0(sitecode, "_attr.zip")), 
+  googledrive::drive_upload(media = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_attr.zip")), 
                             overwrite = T, 
                             path = site_folder)
   
-  googledrive::drive_upload(media = file.path("data", sitecode, paste0(sitecode, "_WS2D2min.zip")), 
+  googledrive::drive_upload(media = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_WS2D2min.zip")), 
                             overwrite = T, 
                             path = site_folder)
 }
