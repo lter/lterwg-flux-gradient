@@ -28,7 +28,9 @@ metadata <- read.csv('/Volumes/MaloneLab/Research/FluxGradient/Site_Attributes.c
 site.list <- metadata$Site %>% unique()
 
 # Add local directory for downloaded data here:
-localdir <- '/Volumes/MaloneLab/Research/FluxGradient/FluxData' # MaloneLab Server
+localdir <-  '/Volumes/MaloneLab/Research/FluxGradient/NEON_Aligned_Concentrations' # MaloneLab Server
+
+localdir2 <- '/Volumes/MaloneLab/Research/FluxGradient/Attributes' # MaloneLab Server
 
 # Add local directory for your Flux repo here:
 DirRepo <- "/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient"

@@ -21,20 +21,6 @@ library(dplyr)
 startdate <- "2021-08"
 enddate <- "2024-06"
 
-# Add all sites here:
-# site.list <- c("ABBY", "BARR", "BART", "BLAN")
-# site.list <- c("BONA", "CLBJ", "CPER", "DCFS")
-# site.list <- c("DEJU", "DELA", "DSNY", "GRSM")
-# site.list <- c("GUAN", "HARV", "HEAL", "JERC")
-# site.list <- c("JORN", "KONA", "KONZ", "LAJA")
-# site.list <- c("LENO", "MLBS", "MOAB", "NIWO")
-# site.list <- c("NOGP", "OAES", "ONAQ", "ORNL")
-# site.list <- c("OSBS", "PUUM", "RMNP", "SCBI")
-# site.list <- c("SERC", "SJER", "SOAP", "SRER")
-# site.list <- c("STEI", "STER", "TALL", "TEAK")
-# site.list <- c("TOOL", "TREE", "UKFS", "UNDE")
-# site.list <- c("WOOD", "WREF", "YELL")
-
 # Set include.provisional = T to get full time series of data up to present
 
 ## --------------------------------------------- ##
@@ -156,7 +142,8 @@ for (sitecode in site.list){
                                package = "expanded", 
                                check.size = F, 
                                savepath = file.path("data", sitecode), 
-                               include.provisional = T)
+                               include.provisional = T,
+                               release = "RELEASE-2025")
   
 }
 

@@ -8,8 +8,6 @@
 # SITE_Evaluation.RDATA (local & Google Drive)
 # Site_Attributes.csv (local & Google Drive)
 
-rm(list=ls())
-
 # Load packages
 library(fs)
 library(googledrive)
@@ -27,8 +25,8 @@ site.list <- metadata$Site_Id.NEON %>% unique()
 ustar.neon.sites <- read.csv("/Volumes/MaloneLab/Research/FluxGradient/UstarNeonSites.csv" )
 
 # Add local directory for downloaded data here:
-localdir <- '/Volumes/MaloneLab/Research/FluxGradient/FluxData'
-
+localdir.savedata <- '/Volumes/MaloneLab/Research/FluxGradient/NEON_GradientFlux_Data'
+localdir.ac <-  '/Volumes/MaloneLab/Research/FluxGradient/NEON_Aligned_Concentrations' 
 # Add local directory for your Flux repo here:
 DirRepo <- "/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient"
 setwd(DirRepo)
@@ -65,7 +63,7 @@ for(site in site.list){
   
   site <- site
   
-  setwd(file.path(localdir, site))
+  setwd(file.path(localdir.ac, site))
   load(paste(site, "_WP_9min.Rdata", sep = ""))
   load(paste(site, "_AE_9min.Rdata", sep = ""))
   load(paste(site, "_MBR_9min.Rdata", sep = ""))
@@ -138,8 +136,10 @@ for(site in site.list){
   MBR_9min.df.final$ustar_threshold <- ustar.Threshold$Threshold.final
   
   # Save the files
-  site.dir <- file.path(localdir, site)
-  
+  setwd(localdir.savedata)
+  site.dir <- file.path(localdir.savedata, site)
+  dir.create(site.dir)
+ 
   save(WP_9min.df.final,
        AE_9min.df.final,
        MBR_9min.df.final, file = file.path(site.dir, paste0(site, "_Evaluation.RDATA")))
@@ -173,60 +173,6 @@ for(site in site.list){
   
 }
 
-#Import all validation data of interest 
-#all.site.list <- metadata$Site_Id.NEON %>% unique
-
-# There were issues with a few sites: Until addressed remove them:
-#site.list <- all.site.list[ all.site.list != 'TEAK'&
-#                              all.site.list !='TOOL'&
-#                              all.site.list!= 'WREF']
-
-# Add local directory for downloaded data here:
-#localdir <- '/Volumes/MaloneLab/Research/FluxGradient/FluxData'
-
-#SITES_WP_9min <- list()
-#SITES_AE_9min <- list()
-#SITES_MBR_9min <- list()
-
-#for ( site in site.list){
-#  print(site)
-  
-#  site.dir <- paste(localdir, "/", site, sep="")
-  
-#  load(file = file.path(paste(site.dir ,paste(site,"_Validation.RDATA", sep=""), sep="/"))  )
-  
-#  SITES_MBR_9min[[site]] <- MBR_9min.df.final
-#  SITES_WP_9min[[site]] <- WP_9min.df.final
-# SITES_AE_9min[[site]] <- AE_9min.df.final
-
-#  rm( MBR_9min.df.final, WP_9min.df.final, AE_9min.df.final )
-  
-#  print(paste(site, "done", sep=""))
-#}
-
-# Save files locally and push to google drive:
-# Save .Rdata locally:
-
-
-#save(SITES_WP_9min, file = file.path(paste(localdir, "SITES_WP_9min.Rdata", sep="/")))
-#save(SITES_AE_9min, file = file.path(paste(localdir, "SITES_AE_9min.Rdata", sep="/")))
-#save(SITES_MBR_9min, file = file.path(paste(localdir, "SITES_MBR_9min.Rdata", sep="/")))
-
-#load("/Volumes/MaloneLab/Research/FluxGradient/FluxData/SITES_MBR_9min.Rdata")
-#load("/Volumes/MaloneLab/Research/FluxGradient/FluxData/SITES_AE_9min.Rdata")
-#load("/Volumes/MaloneLab/Research/FluxGradient/FluxData/SITES_WP_9min.Rdata")
-
-# Save Files on google drive: 
-#drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/14Ga9sLRMlQVvorZdHBiYxCbUybiGwPNp")
-
-#fileSave <- file.path(paste(localdir, "SITES_WP_9min.Rdata", sep="/"))
-#googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
-
-#fileSave <- file.path(paste(localdir, "SITES_AE_9min.Rdata", sep="/"))
-#googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
-
-#fileSave <- file.path(paste(localdir, "SITES_MBR_9min.Rdata", sep="/"))
-#googledrive::drive_upload(media = fileSave, overwrite = T, path = drive_url)
 
 ## --------------------------------------------- ##
 #           Compile Attribute Data -----
