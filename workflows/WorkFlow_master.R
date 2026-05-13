@@ -43,6 +43,9 @@ source( paste(DirRepo, '/workflows/flow.neon.data.extract.V2.R', sep=""))
 # STEP 2: Gradient Flux Calculation ####
 source( paste(DirRepo, '/workflows/flow.calc.flux.batch.R', sep=""))
 
+localdir.savedata <- '/Volumes/MaloneLab/Research/FluxGradient/NEON_GradientFlux_Data'
+localdir.ac <-  '/Volumes/MaloneLab/Research/FluxGradient/NEON_Aligned_Concentrations' 
+
 source( paste(DirRepo, '/workflows/flow.evaluation.dataframe.R', sep="")) # Dataframe
 source( paste(DirRepo, '/workflows/flow.evaluation.dataframe_EDI.R', sep="")) # Dataframe
 # -------------------------------------------------------

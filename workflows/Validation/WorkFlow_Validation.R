@@ -10,8 +10,8 @@ library(sf)
 # -------------- Change this stuff -------------
 
 # Add local directory for downloaded data here:
-localdir <- '/Volumes/MaloneLab/Research/FluxGradient/FluxData' # MaloneLab Server
-
+local.dir <- '/Volumes/MaloneLab/Research/FluxGradient/Validation_Sites'# MaloneLab Server
+localdir <- '/Volumes/MaloneLab/Research/FluxGradient/Validation_Sites'# MaloneLab Server
 # Add local directory for your Flux repo here:
 DirRepo <- "/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient"
 setwd(DirRepo)
@@ -28,11 +28,11 @@ data_folder <- googledrive::drive_ls(path = drive_url)
 
 setwd(DirRepo )
 site.list <- c('SE-Sto', 'SE-Svb', 'US-Uaf')
-dirTmp <- localdir 
+dirTmp <- localdir
 #source(paste(DirRepo, '/validation/flow.FI-Hyy.data.format.conc.diffs.R', sep="") )
-source(paste(DirRepo, '/validation/flow.SE-Sto.data.format.conc.diffs.R', sep="") )
-source(paste(DirRepo, '/validation/flow.SE-Svb.data.format.conc.diffs.R', sep="") )
-source(paste(DirRepo, '/validation/flow.US-Uaf.data.format.conc.diffs.R', sep="") )
+source(paste(DirRepo, '/workflows/validation/flow.SE-Sto.data.format.conc.diffs.R', sep="") )
+source(paste(DirRepo, '/workflows/validation/flow.SE-Svb.data.format.conc.diffs.R', sep="") )
+source(paste(DirRepo, '/workflows/validation/flow.US-Uaf.data.format.conc.diffs.R', sep="") )
 
 # Calculate Gradient Fluxes: ####
 ## --------------------------------------------- ##
@@ -91,8 +91,11 @@ source(paste(DirRepo,file.path("/functions", "flag.all.gas.stability.R"),sep="")
 source(paste(DirRepo,file.path("/functions", "calc.cross.gradient.R"),sep=""))
 source(paste(DirRepo,file.path("/functions", "calc.bad.eddy.R"),sep=""))
 source(paste(DirRepo,file.path("/functions", "calc.format.MBR.R"),sep=""))
-source(paste(DirRepo,file.path("/workflows", "flow.evaluation.dataframe.R"),sep=""))
 
+localdir.savedata <- local.dir <- '/Volumes/MaloneLab/Research/FluxGradient/Validation_Sites'
+localdir.ac <-  localdir.savedata 
+
+source(paste(DirRepo,file.path("/workflows", "flow.evaluation.dataframe.R"),sep=""))
 
 for(site in site.list){
   print(site)   
@@ -211,4 +214,4 @@ for(site in site.list){
   
 }
 
-message("Next filter the data with ....") 
+message("Next go to the lterwg-flux-gradient-methane repo") 

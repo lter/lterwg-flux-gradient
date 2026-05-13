@@ -15,21 +15,11 @@ library(dplyr)
 library(stringr)
 library(tidyverse)
 
-# Has a list of all the sites
-metadata <- read.csv('/Volumes/MaloneLab/Research/FluxGradient/Ameriflux_NEON field-sites.csv')
-
-# Get unique sites
-site.list <- metadata$Site_Id.NEON %>% unique()
-
 # Ustar Threshold:
 ustar.neon.sites <- read.csv("/Volumes/MaloneLab/Research/FluxGradient/UstarNeonSites.csv" )
 
 # Add local directory for downloaded data here:
-localdir.savedata <- '/Volumes/MaloneLab/Research/FluxGradient/NEON_GradientFlux_Data'
-localdir.ac <-  '/Volumes/MaloneLab/Research/FluxGradient/NEON_Aligned_Concentrations' 
-# Add local directory for your Flux repo here:
-DirRepo <- "/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient"
-setwd(DirRepo)
+
 
 # Add local directory for your attribute data here:
 localdir3 <- '/Volumes/MaloneLab/Research/FluxGradient/Attributes'
