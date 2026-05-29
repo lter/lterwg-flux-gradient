@@ -60,6 +60,8 @@ lterwg-flux-gradient/
 
 ## Main Flux Workflow
 
+The script `Workflow_master.R` will run the files below in the order required to produce the file needed for the repository: https://github.com/lter/lterwg-flux-gradient-eval
+
 ### Data Acquisition and Processing
 
 1. `flow.neon.data.download.R`: Workflow script that downloads NEON HDF5 (eddy covariance files) files for all sites and time periods of interest. ALSO downloads all required MET data products that are not in the bundled HDF5 file. 

@@ -38,16 +38,13 @@ data/
 Data/
 ### Ignore testing folder for scripts. Roisin added
 testing/
-.RDataTmp1
-.RDataTmp2
-.RDataTmp3
+.RData*
 .Rdata
 .Rhistory
 # Ignore certain file types
 *.gz
 *.xml
 *.Rdata
-.RDataTmp
 *.jpeg
 *.jpg
 *.png
