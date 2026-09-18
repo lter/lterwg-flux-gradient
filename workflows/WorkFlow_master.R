@@ -31,7 +31,7 @@ source( paste(DirRepo, '/workflows/flow.neon.data.download.R', sep=""))
 # Unzip and Stack Data: 
 source( paste(DirRepo, '/workflows/flow.neon.data.unzip.R', sep=""))
 #flow.neon.data.extract.R:
-source( paste(DirRepo, '/workflows/flow.neon.data.extract.V2.R', sep=""))
+source( paste(DirRepo, '/workflows/flow.neon.data.extract.v2.R', sep=""))
 
 #flow.neon.data.format.conc.diffs.R`
 #`flow.neon.data.format.conc.diffs.30m.R`

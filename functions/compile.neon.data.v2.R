@@ -162,7 +162,7 @@ compile.neon.data.v2.extract.month <- function(hd.file,
 #' errors. It returns a data frame showing which monthly file fails.
 #'
 #' @return Data frame with file, frequency, status, and error columns.
-test.neon.data.V2.files <- function(h5files,
+test.neon.data.v2.files <- function(h5files,
                                     sitecode,
                                     frequency,
                                     startdate = NULL,
@@ -215,5 +215,3 @@ test.neon.data.V2.files <- function(h5files,
 }
 
 
-# Backward-compatible alias for calls using compile.neon.data.V2().
-compile.neon.data.V2 <- compile.neon.data.v2

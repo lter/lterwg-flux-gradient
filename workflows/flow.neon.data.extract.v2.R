@@ -42,7 +42,7 @@ library(googledrive)
 # BiocManager::install("rhdf5")
 
 # Load in data compiling functions
-source(file.path(DirRepo,"functions", "compile.neon.data.V2.R"))
+source(file.path(DirRepo,"functions", "compile.neon.data.v2.R"))
 source(file.path(DirRepo,"functions", "compile.neon.site.attr.R"))
 source(file.path(DirRepo,"functions", "grab.neon.gas.9min.6min.R"))
 source(file.path(DirRepo,"functions", "grab.neon.met.flux.30min.R"))
@@ -69,18 +69,18 @@ for (sitecode in site.list){
   
   # Grab gas concentration and met data at desired frequency (1min, 9min, 30min)
   
-  min9.list <- compile.neon.data.V2(
+  min9.list <- compile.neon.data.v2(
     h5files = h5files,
     sitecode = sitecode,
     frequency = "9min",
     skip_errors = TRUE)
   
-  min1.list <- compile.neon.data.V2(
+  min1.list <- compile.neon.data.v2(
     h5files = h5files,
     sitecode = sitecode,
     frequency = "1min" ,
     skip_errors = TRUE)
-  min30.list <- compile.neon.data.V2(
+  min30.list <- compile.neon.data.v2(
     h5files = h5files,
     sitecode = sitecode,
     frequency = "30min",
