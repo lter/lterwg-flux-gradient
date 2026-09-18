@@ -150,7 +150,7 @@ grab.neon.met.1min <- function(hd.file, sitecode, startdate, enddate){
   rm(soil, qfqm)
   
 
-  met = list(TAir = df_temp, Press = P.all, WS3D = Sonic.all, SWin = SWin.all, SWout = SWout.all, LWin = LWin.all, LWout = LWout.all, SoilHF = df_soil)
+  met = list(Tair = df_temp, Press = P.all, WS3D = Sonic.all, SWin = SWin.all, SWout = SWout.all, LWin = LWin.all, LWout = LWout.all, SoilHF = df_soil)
   
   return(met)
 }
