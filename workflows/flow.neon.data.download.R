@@ -21,6 +21,10 @@ library(dplyr)
 startdate <- "2021-08"
 enddate <- "2024-06"
 
+# Set your NEON token by creating an account at https://www.neonscience.org/
+# Then go to the "My Account" page to copy your API Token
+my_token <- "SET YOUR OWN TOKEN, DO NOT COMMIT YOUR TOKEN TO GITHUB"
+
 # Set include.provisional = T to get full time series of data up to present
 
 ## --------------------------------------------- ##
@@ -39,7 +43,8 @@ for (sitecode in site.list){
                                          startdate = startdate, 
                                          enddate = enddate,
                                          check.size = F, 
-                                         include.provisional = T)
+                                         include.provisional = T,
+                                         token = my_token)
   
   RH1min <- RH1min$RH_1min %>%
     dplyr::filter(horizontalPosition == "000") %>%
@@ -54,7 +59,8 @@ for (sitecode in site.list){
                                           startdate = startdate, 
                                           enddate = enddate,
                                           check.size = F, 
-                                          include.provisional = T)
+                                          include.provisional = T,
+                                          token = my_token)
   
   RH30min <- RH30min$RH_30min %>%
     dplyr::filter(horizontalPosition == "000") %>%
@@ -69,7 +75,8 @@ for (sitecode in site.list){
                                             startdate = startdate, 
                                             enddate = enddate,
                                             check.size = F, 
-                                            include.provisional = T)
+                                            include.provisional = T,
+                                            token = my_token)
   
   WS2D30min <- WS2D30min$twoDWSD_30min %>%
     dplyr::mutate(TowerPosition = as.numeric(verticalPosition)/10) %>%
@@ -83,7 +90,8 @@ for (sitecode in site.list){
                                            startdate = startdate, 
                                            enddate = enddate,
                                            check.size = F, 
-                                           include.provisional = T)
+                                           include.provisional = T,
+                                           token = my_token)
   
   WS2D2min <- WS2D2min$twoDWSD_2min %>%
     dplyr::mutate(TowerPosition = as.numeric(verticalPosition)/10) %>%
@@ -97,7 +105,8 @@ for (sitecode in site.list){
                                           startdate = startdate, 
                                           enddate = enddate,
                                           check.size = F, 
-                                          include.provisional = T)
+                                          include.provisional = T,
+                                          token = my_token)
   
   PAR1min <- PAR1min$PARPAR_1min %>%
     dplyr::mutate(TowerPosition = as.numeric(verticalPosition)/10) %>%
@@ -111,7 +120,8 @@ for (sitecode in site.list){
                                            startdate = startdate, 
                                            enddate = enddate,
                                            check.size = F, 
-                                           include.provisional = T)
+                                           include.provisional = T,
+                                           token = my_token)
   
   PAR30min <- PAR30min$PARPAR_30min %>%
     dplyr::mutate(TowerPosition = as.numeric(verticalPosition)/10) %>%
@@ -143,7 +153,8 @@ for (sitecode in site.list){
                                check.size = F, 
                                savepath = file.path("data", sitecode), 
                                include.provisional = T,
-                               release = "RELEASE-2025")
+                               release = "RELEASE-2025",
+                               token = my_token)
   
 }
 

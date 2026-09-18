@@ -1,6 +1,6 @@
 
-DoWP = 1 # Do Wind Profile Method here as well? 1 for true O for False.
-Savecsv = 0 # Save csv files to analyze in matlab? 1 for true 0 for False.
+DoWP <- 0 # Do Wind Profile Method here as well? 1 for true 0 for False.
+Savecsv <- 0 # Save csv files to analyze in matlab? 1 for true 0 for False.
 
 # Optional: specify path to save csv files for matlab
 #path_for_matlab <- "Q:/My Drive/NC-State/flux_gradient/data"
@@ -14,7 +14,6 @@ source(file.path("functions", "calc.eqn.aero.windprof.flux.R"))
 source(file.path("functions", "calc.stability.correction.R"))
 source(file.path("functions", "calc.aerodynamic.canopy.height.R"))
 
-min9 = min9Diff.list
 # Calculate eddy diffusivity with the aerodynamic method
 min9.K.AE.list <- calc.eddydiff.aero(sitecode = sitecode, min9 = min9Diff.list)
 
@@ -31,9 +30,9 @@ min9.FG.AE.list <- calc.gas.aero.windprof.flux(min9.K = min9.K.AE.list,
 
 if (DoWP==1){
   # Apply Wind Profile Method
-  min9.FG.WP.list <- calc.gas.aero.windprof.flux.WP(min9.K = min9.K.AE.list,
-                                                    bootstrap = 1, 
-                                                    nsamp = 1000)
+  min9.FG.WP.list <- calc.gas.aero.windprof.flux(min9.K = min9.K.AE.list,
+                                                 bootstrap = 1, 
+                                                 nsamp = 1000)
   #min30.FG.WP.list <- calc.gas.aero.windprof.flux.WP(min9.K = min30.K.AE.list,
   #                                                bootstrap = 1, nsamp = 1000)
   
