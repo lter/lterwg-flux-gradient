@@ -550,53 +550,53 @@ for (site in sites){
   
   # _____________________Storage Flux Calculation_______________________________
 
-  Storage_Flux <- lapply(min9Diff.list, FUN = function(var){
-  
-   var.sub <- var %>% select( timeEnd_A, timeBgn_A, TowerPosition_A, min_A, max_A, ubar1, 
-                              z_displ_calc, TowerHeight_A ) %>% distinct() %>% 
-     # To remove any duplicates
-     reframe( .by=c(timeEnd_A, timeBgn_A, min_A, max_A),
-              ubar1 = mean(ubar1, na.rm=T), z_displ_calc = mean( z_displ_calc, na.rm=T)) %>% mutate(
-                delta.conc = max_A - min_A) %>% 
-     # the time used to interpolate to the half hour:
-     mutate( timePred = timeEnd_A %>% as.POSIXct( format="%Y-%m-%d %H:%M:%S", tz="GMT") %>% lubridate::round_date(unit="30-minutes"))  # combines. information across levels
-                                  
-   
-   # Linear Interpolation of delta.conc
-   timeBgn <- var.sub$timeBgn
-   timeEnd <- var.sub$timeEnd
-   flux <- var.sub$delta.conc
-   timePred <- var.sub$timePred
-   fluxPred <- interp.flux(timeBgn, timeEnd, flux, timePred)
-   
-   var.sub$delta.conc_interp <- fluxPred
-    
-   
-   var.sub.interp <- var.sub %>% 
-     reframe( .by = timePred, z_displ_calc = mean( z_displ_calc, na.rm=T),
-              delta.conc_interp = mean(delta.conc_interp))
-   
-   var.sub.interp$tower.height <- attr.df[,4] %>% as.numeric %>% max()
-
-   
-   var.sub.interp$F_storage <-  var.sub.interp$delta.conc_interp * ( var.sub.interp$tower.height -  var.sub.interp$z_displ_calc)
-   
-   approx <- zoo::na.approx(var.sub.interp$F_storage %>% as.vector, , na.rm=FALSE, rule=1, f=0)  
-   return(var.sub.interp)
-    
-   var.sub.interp$F_storage_filled <- approx
-    
-  })
-
-  
-  fileSave <- fs::path(dirTmp, paste0(site, '_storagefluxes.RData'))
-  fileZip <- fs::path(dirTmp, paste0(site, '_storagefluxes.zip'))
-  save(StorageFlux, file = fileSave)
-  wdPrev <- getwd()
-  setwd(dirTmp)
-  utils::zip(zipfile = fileZip, files = paste0(site, '_storagefluxes.RData'))
-  setwd(wdPrev)
-  googledrive::drive_upload(media = fileZip, 
-                            overwrite = T, 
-                            path = data_folder$id[data_folder$name==site])
+  # Storage_Flux <- lapply(min9Diff.list, FUN = function(var){
+  # 
+  #  var.sub <- var %>% select( timeEnd_A, timeBgn_A, TowerPosition_A, min_A, max_A, ubar1, 
+  #                             z_displ_calc, TowerHeight_A ) %>% distinct() %>% 
+  #    # To remove any duplicates
+  #    reframe( .by=c(timeEnd_A, timeBgn_A, min_A, max_A),
+  #             ubar1 = mean(ubar1, na.rm=T), z_displ_calc = mean( z_displ_calc, na.rm=T)) %>% mutate(
+  #               delta.conc = max_A - min_A) %>% 
+  #    # the time used to interpolate to the half hour:
+  #    mutate( timePred = timeEnd_A %>% as.POSIXct( format="%Y-%m-%d %H:%M:%S", tz="GMT") %>% lubridate::round_date(unit="30-minutes"))  # combines. information across levels
+  #                                 
+  #  
+  #  # Linear Interpolation of delta.conc
+  #  timeBgn <- var.sub$timeBgn
+  #  timeEnd <- var.sub$timeEnd
+  #  flux <- var.sub$delta.conc
+  #  timePred <- var.sub$timePred
+  #  fluxPred <- interp.flux(timeBgn, timeEnd, flux, timePred)
+  #  
+  #  var.sub$delta.conc_interp <- fluxPred
+  #   
+  #  
+  #  var.sub.interp <- var.sub %>% 
+  #    reframe( .by = timePred, z_displ_calc = mean( z_displ_calc, na.rm=T),
+  #             delta.conc_interp = mean(delta.conc_interp))
+  #  
+  #  var.sub.interp$tower.height <- attr.df[,4] %>% as.numeric %>% max()
+  # 
+  #  
+  #  var.sub.interp$F_storage <-  var.sub.interp$delta.conc_interp * ( var.sub.interp$tower.height -  var.sub.interp$z_displ_calc)
+  #  
+  #  approx <- zoo::na.approx(var.sub.interp$F_storage %>% as.vector, , na.rm=FALSE, rule=1, f=0)  
+  #  return(var.sub.interp)
+  #   
+  #  var.sub.interp$F_storage_filled <- approx
+  #   
+  # })
+  # 
+  # 
+  # fileSave <- fs::path(dirTmp, paste0(site, '_storagefluxes.RData'))
+  # fileZip <- fs::path(dirTmp, paste0(site, '_storagefluxes.zip'))
+  # save(StorageFlux, file = fileSave)
+  # wdPrev <- getwd()
+  # setwd(dirTmp)
+  # utils::zip(zipfile = fileZip, files = paste0(site, '_storagefluxes.RData'))
+  # setwd(wdPrev)
+  # googledrive::drive_upload(media = fileZip, 
+  #                           overwrite = T, 
+  #                           path = data_folder$id[data_folder$name==site])
 }
