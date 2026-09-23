@@ -55,13 +55,10 @@ MBRflux_align = calc.mbr(min9 = min9Diff.list,
 #   theme_minimal()
 
 # -------- Save and zip the file to the temp directory. Upload to google drive. -------
-setwd(dirTmp)
 fileSave <- fs::path(dirTmp, paste0(site, '_MBR_9min.RData'))
 fileZip <- fs::path(dirTmp, paste0(site, '_MBR_9min.zip'))
 save(MBRflux_align, file = fileSave)
-wdPrev <- getwd()
-utils::zip(zipfile = fileZip, files = paste0(site, '_MBR_9min.RData'))
-setwd(wdPrev)
+utils::zip(zipfile = fileZip, files = fileSave)
 googledrive::drive_upload(media = fileZip, 
                           overwrite = T, 
                           path = data_folder$id[data_folder$name==site]) 

@@ -54,10 +54,7 @@ if (DoWP==1){
 fileSave <- fs::path(dirTmp, paste0(site, "_AE_9min.Rdata"))
 fileZip <- fs::path(dirTmp, paste0(site, "_AE_9min.zip"))
 save(min9.FG.AE.list, file = fileSave)
-wdPrev <- getwd()
-setwd(dirTmp)
-utils::zip(zipfile = fileZip, files = paste0(site, "_AE_9min.Rdata"))
-setwd(wdPrev)
+utils::zip(zipfile = fileZip, files = fileSave)
 #googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folder$id[data_folder$name==site]) # path might need work
 googledrive::drive_upload(media = fileSave, 
                           overwrite = T, 

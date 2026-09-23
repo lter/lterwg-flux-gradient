@@ -26,10 +26,7 @@ min9.FG.WP.list <- calc.gas.aero.windprof.flux(min9.K = min9.K.WP.list,
 fileSave <- fs::path(dirTmp, paste0(site, "_WP_9min.Rdata"))
 fileZip <- fs::path(dirTmp, paste0(site, "_WP_9min.zip"))
 save(min9.FG.WP.list, file = fileSave)
-wdPrev <- getwd()
-setwd(dirTmp)
-utils::zip(zipfile = fileZip, files = paste0(site, "_WP_9min.Rdata"))
-setwd(wdPrev)
+utils::zip(zipfile = fileZip, files = fileSave)
 googledrive::drive_upload(media = fileZip, 
                           overwrite = T, 
                           path = data_folder$id[data_folder$name==site]) 
