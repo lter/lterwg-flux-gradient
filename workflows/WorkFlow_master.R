@@ -30,7 +30,7 @@ setwd(paste(data.local.dir,"/NEON_Tower_Data", sep="")) # Data will be saved her
 source( paste(DirRepo, '/workflows/flow.neon.data.download.R', sep=""))
 # Unzip and Stack Data: 
 source( paste(DirRepo, '/workflows/flow.neon.data.unzip.R', sep=""))
-#flow.neon.data.extract.R:
+#flow.neon.data.extract.v2.R:
 source( paste(DirRepo, '/workflows/flow.neon.data.extract.v2.R', sep=""))
 
 #flow.neon.data.format.conc.diffs.R`

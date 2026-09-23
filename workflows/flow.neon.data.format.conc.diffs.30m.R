@@ -2,7 +2,7 @@
 #               Housekeeping -----
 ## --------------------------------------------- ##
 # Purpose:
-# Uses output from flow.neon.data.extract.R from Google Drive. 
+# Uses output from flow.neon.data.extract.v2.R from Google Drive. 
 #
 # Merges together NEON flux, met, and profile concentration data. Aligns the profile 
 # concentration data (CH4, CO2, and H2O) among adjacent tower levels (and also the bottom-top 

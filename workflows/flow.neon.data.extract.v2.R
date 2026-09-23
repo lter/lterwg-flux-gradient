@@ -47,9 +47,6 @@ source(file.path(DirRepo,"functions", "compile.neon.site.attr.R"))
 source(file.path(DirRepo,"functions", "grab.neon.gas.9min.6min.R"))
 source(file.path(DirRepo,"functions", "grab.neon.met.flux.30min.R"))
 source(file.path(DirRepo,"functions", "grab.neon.met.1min.R"))
-source(file.path(DirRepo,"functions", "compile.neon.data.1min.R"))
-source(file.path(DirRepo,"functions", "compile.neon.data.30min.R"))
-source(file.path(DirRepo,"functions", "compile.neon.data.9min.6min.R"))
 
 ## --------------------------------------------- ##
 #               Data Extraction -----
