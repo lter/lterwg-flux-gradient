@@ -104,20 +104,20 @@ for (sitecode in site.list){
   save(min9.list, file = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_9min.Rdata")))
   save(min30.list, file = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_30min.Rdata")))
   save(attr.df, file = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_attr.Rdata")))
-  save(WS2D2min, file = file.path("data", sitecode, paste0(sitecode, "_WS2D2min.Rdata")))
+  save(WS2D2min, file = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_WS2D2min.Rdata")))
   
   # Zip Rdata objects
   zip(zipfile = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_1min.zip")), 
-      files = file.path("data", sitecode, paste0(sitecode, "_1min.Rdata")))
+      files = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_1min.Rdata")))
   
   zip(zipfile = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_9min.zip")), 
       files = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_9min.Rdata")))
   
   zip(zipfile = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_30min.zip")), 
-      files = file.path("data", sitecode, paste0(sitecode, "_30min.Rdata")))
+      files = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_30min.Rdata")))
   
-  zip(zipfile = file.path("data", sitecode, paste0(sitecode, "_attr.zip")), 
-      files = file.path("data", sitecode, paste0(sitecode, "_attr.Rdata")))
+  zip(zipfile = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_attr.zip")), 
+      files = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_attr.Rdata")))
   
   zip(zipfile = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_WS2D2min.zip")), 
       files = file.path(data.local.dir, "NEON_Tower_Data/data", sitecode, paste0(sitecode, "_WS2D2min.Rdata")))
