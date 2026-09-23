@@ -2,7 +2,7 @@
 #               Housekeeping -----
 ## --------------------------------------------- ##
 # Purpose:
-# Uses output from flow.neon.data.extract.R from Google Drive. 
+# Uses output from flow.neon.data.extract.v2.R from Google Drive. 
 #
 # Merges together NEON flux, met, and profile concentration data. Aligns the profile 
 # concentration data (CH4, CO2, and H2O) among adjacent tower levels (and also the bottom-top 
@@ -527,10 +527,7 @@ for(sitecode in site.list){
   fileSave <- fs::path(dirTmp, paste0(sitecode, '_aligned_conc_flux_30min.RData'))
   fileZip <- fs::path(dirTmp, paste0(sitecode, '_aligned_conc_flux_30min.zip'))
   save(min30Diff.list, file = fileSave)
-  wdPrev <- getwd()
-  setwd(dirTmp)
-  utils::zip(zipfile = fileZip, files = paste0(sitecode, '_aligned_conc_flux_30min.RData'))
-  setwd(wdPrev)
+  utils::zip(zipfile = fileZip, files = fileSave)
   googledrive::drive_upload(media = fileZip, 
                             overwrite = T, 
                             path = data_folder$id[data_folder$name==sitecode])
