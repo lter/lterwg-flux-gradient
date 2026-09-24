@@ -25,27 +25,13 @@
 # SITE_aligned_conc_flux_30min.RData (local)
 # SITE_aligned_conc_flux_30min.zip (local & Google Drive)
 
-# Set local dir
-#setwd('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient')
+# See WorkFlow_master.R to set the variables needed to run this script
+# Variables needed: gh_repo, download_google, download_extract_dir (if download_google == 0),
+# save_temp, aligned_conc_dir (if save_temp == 0), export_aligned_google, 
+# data_folder (if download_google == 1 | export_aligned_google == 1),
+# site.list
 
-# Pull data from google drive
-# email <- 'csturtevant@battelleecology.org'
-# email <- 'jaclyn_matthes@g.harvard.edu'
-# email <- 'sparkle.malone@yale.edu'
-
-# Add all sites here:
-# site.list <- c("ABBY", "BARR", "BART", "BLAN")
-# site.list <- c("BONA", "CLBJ", "CPER", "DCFS")
-# site.list <- c("DEJU", "DELA", "DSNY", "GRSM")
-# site.list <- c("GUAN", "HARV", "HEAL", "JERC")
-# site.list <- c("JORN", "KONA", "KONZ", "LAJA")
-# site.list <- c("LENO", "MLBS", "MOAB", "NIWO")
-# site.list <- c("NOGP", "OAES", "ONAQ", "ORNL")
-# site.list <- c("OSBS", "PUUM", "RMNP", "SCBI")
-# site.list <- c("SERC", "SJER", "SOAP", "SRER")
-# site.list <- c("STEI", "STER", "TALL", "TEAK")
-# site.list <- c("TOOL", "TREE", "UKFS", "UNDE")
-# site.list <- c("WOOD", "WREF", "YELL")
+rm(list=ls())
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: fs, googledrive
@@ -53,13 +39,10 @@ library(foreach)
 library(doParallel)
 library(dplyr)
 
-# Authenticate with Google Drive and get site data
-googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
-
 # Load functions in this repo
-source(file.path("functions", "interp.flux.R"))
-source(file.path("functions", "aggregate.averages.R"))
-source(file.path("functions", "calc.MO.length.R"))
+source(file.path(gh_repo, "functions", "interp.flux.R"))
+source(file.path(gh_repo, "functions", "aggregate.averages.R"))
+source(file.path(gh_repo, "functions", "calc.MO.length.R"))
 
 # Final note: This script takes approx 45 min to run per site. 
 
@@ -67,53 +50,63 @@ source(file.path("functions", "calc.MO.length.R"))
 #                Align Data -----
 ## --------------------------------------------- ##
 
-for(sitecode in site.list){
+for(site in site.list){
   
-  site <- sitecode 
   rm('min9.list', 'min30.list', 'attr.df', 'min1.list', 'min9Diff.list')
   
-  drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
-  data_folder <- googledrive::drive_ls(path = drive_url)
-  site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==sitecode])
-  
-  focal_files = paste0(sitecode,c('_9min.zip', '_30min.zip', '_1min.zip', '_WS2D2min.zip', '_attr.zip'))
-
-  dirTmp <- fs::path(tempdir(), sitecode)
-  dir.create(dirTmp)
-  
-  for(focal_file in focal_files){
+  if (download_google == 0){
+    load(file.path(download_extract_dir, "data", site, paste0(site, "_1min.Rdata")))
+    load(file.path(download_extract_dir, "data", site, paste0(site, "_9min.Rdata")))
+    load(file.path(download_extract_dir, "data", site, paste0(site, "_30min.Rdata")))
+    load(file.path(download_extract_dir, "data", site, paste0(site, "_WS2D2min.Rdata")))
+    load(file.path(download_extract_dir, "data", site, paste0(site, "_attr.Rdata")))
     
-    # Find the file identifier for that file
-    file_id <- subset(site_folder, name == focal_file)
-     
-    # Download that file
-    pathDnld <- fs::path(dirTmp, focal_file)
-    googledrive::drive_download(file = file_id$id, 
-                                path = pathDnld,
-                                overwrite = T)
-    # Unzip
-    if(grepl(pattern = '.zip', focal_file)){
-      utils::unzip(pathDnld, exdir = dirTmp)
+  } else if (download_google == 1){
+    
+    # Authenticate with Google Drive and get site data
+    # googledrive::drive_auth(email = TRUE) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
+    # drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
+    # data_folder <- googledrive::drive_ls(path = drive_url)
+    site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==site])
+    
+    focal_files = paste0(site,c('_9min.zip', '_30min.zip', '_1min.zip', '_WS2D2min.zip', '_attr.zip'))
+    
+    dirTmp <- fs::path(tempdir(), site)
+    dir.create(dirTmp)
+    
+    for(focal_file in focal_files){
+      
+      # Find the file identifier for that file
+      file_id <- subset(site_folder, name == focal_file)
+      
+      # Download that file
+      pathDnld <- fs::path(dirTmp, focal_file)
+      googledrive::drive_download(file = file_id$id, 
+                                  path = pathDnld,
+                                  overwrite = T)
+      # Unzip
+      if(grepl(pattern = '.zip', focal_file)){
+        utils::unzip(pathDnld, exdir = dirTmp)
+      }
+      
     }
     
+    # Extract data in 1, 2, 9, and 30 min & attribute files
+    fileIn <- fs::path(dirTmp, 'data', site, paste0(site, '_9min.Rdata'))
+    load(fileIn)
+    
+    fileIn <- fs::path(dirTmp, 'data', site, paste0(site, '_30min.Rdata'))
+    load(fileIn)
+    
+    fileIn <- fs::path(dirTmp, 'data', site, paste0(site, '_1min.Rdata'))
+    load(fileIn)
+    
+    fileIn <- fs::path(dirTmp, 'data', site, paste0(site, '_WS2D2min.Rdata'))
+    load(fileIn)
+    
+    fileIn <- fs::path(dirTmp, 'data', site, paste0(site, '_attr.Rdata'))
+    load(fileIn)
   }
-  
-  # Extract data in 1, 2, 9, and 30 min & attribute files
-  fileIn <- fs::path(dirTmp, 'data', sitecode, paste0(sitecode, '_9min.Rdata'))
-  load(fileIn)
-  
-  fileIn <- fs::path(dirTmp, 'data', sitecode, paste0(sitecode, '_30min.Rdata'))
-  load(fileIn)
-  
-  fileIn <- fs::path(dirTmp, 'data', sitecode, paste0(sitecode, '_1min.Rdata'))
-  load(fileIn)
-  
-  fileIn <- fs::path(dirTmp, 'data', sitecode, paste0(sitecode, '_WS2D2min.Rdata'))
-  load(fileIn)
-  
-  fileIn <- fs::path(dirTmp, 'data', sitecode, paste0(sitecode, '_attr.Rdata'))
-  load(fileIn)
-  
   # ------------------- Get concentration diffs for subsequent tower levels --------------
   message(paste0(Sys.time(), ': Computing concentration profile differences among subsequent levels...'))
   
@@ -524,11 +517,26 @@ for(sitecode in site.list){
   min30Diff.list$H2O = as.data.frame(min30Diff.list$H2O)
   
   # -------- Save and zip the file to the temp directory. Upload to google drive. -------
-  fileSave <- fs::path(dirTmp, paste0(sitecode, '_aligned_conc_flux_30min.RData'))
-  fileZip <- fs::path(dirTmp, paste0(sitecode, '_aligned_conc_flux_30min.zip'))
-  save(min30Diff.list, file = fileSave)
-  utils::zip(zipfile = fileZip, files = fileSave)
-  googledrive::drive_upload(media = fileZip, 
-                            overwrite = T, 
-                            path = data_folder$id[data_folder$name==sitecode])
+  
+  if (save_temp == 0){
+    dir.create(fs::path(aligned_conc_dir, site))
+    fileSave <- fs::path(aligned_conc_dir, site, paste0(site, '_aligned_conc_flux_30min.RData'))
+    fileZip <- fs::path(aligned_conc_dir, site, paste0(site, '_aligned_conc_flux_30min.zip'))
+    save(min30Diff.list, file = fileSave)
+    utils::zip(zipfile = fileZip, files = fileSave)
+    
+  } else if (save_temp == 1){
+    dirTmp <- fs::path(tempdir(), site)
+    dir.create(dirTmp)
+    fileSave <- fs::path(dirTmp, paste0(site, '_aligned_conc_flux_30min.RData'))
+    fileZip <- fs::path(dirTmp, paste0(site, '_aligned_conc_flux_30min.zip'))
+    save(min30Diff.list, file = fileSave)
+    utils::zip(zipfile = fileZip, files = fileSave)
+  }
+  
+  if (export_aligned_google == 1){
+    googledrive::drive_upload(media = fileZip, 
+                              overwrite = T, 
+                              path = data_folder$id[data_folder$name==site])
+  }
 }
