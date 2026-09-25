@@ -8,6 +8,10 @@
 # SITE_Evaluation.RDATA (local & Google Drive)
 # Site_Attributes.csv (local & Google Drive)
 
+# See WorkFlow_master.R to set the variables needed to run this script
+# Variables needed: gh_repo, aligned_conc_dir, eval_dir, export_eval_google,
+# data_folder (if export_eval_google == 1), ustar.neon.sites, site.list
+
 # Load packages
 library(fs)
 library(googledrive)
@@ -15,33 +19,11 @@ library(dplyr)
 library(stringr)
 library(tidyverse)
 
-# Ustar Threshold:
-ustar.neon.sites <- read.csv("/Volumes/MaloneLab/Research/FluxGradient/UstarNeonSites.csv" )
-
-# Add local directory for downloaded data here:
-
-
-# Add local directory for your attribute data here:
-localdir3 <- '/Volumes/MaloneLab/Research/FluxGradient/Attributes'
-
 # Load functions
-source(file.path("functions", "flag.all.gas.stability.R"))
-source(file.path("functions", "calc.cross.gradient.R"))
-source(file.path("functions", "calc.bad.eddy.R"))
-source(file.path("functions", "calc.format.MBR.R"))
-
-## --------------------------------------------- ##
-#               Authenticate -----
-## --------------------------------------------- ##
-
-email <- 'sparklelmalone@gmail.com'
-googledrive::drive_auth(email = TRUE) 
-
-# Authenticate with Google Drive
-drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3") # The Data 
-
-# Data on google drive
-data_folder <- googledrive::drive_ls(path = drive_url)
+source(file.path(gh_repo, "functions", "flag.all.gas.stability.R"))
+source(file.path(gh_repo, "functions", "calc.cross.gradient.R"))
+source(file.path(gh_repo, "functions", "calc.bad.eddy.R"))
+source(file.path(gh_repo, "functions", "calc.format.MBR.R"))
 
 ## --------------------------------------------- ##
 #               Compile Fluxes -----
@@ -51,12 +33,9 @@ data_folder <- googledrive::drive_ls(path = drive_url)
 for(site in site.list){
   print(site)
   
-  site <- site
-  
-  setwd(file.path(localdir.ac, site))
-  load(paste(site, "_WP_9min.Rdata", sep = ""))
-  load(paste(site, "_AE_9min.Rdata", sep = ""))
-  load(paste(site, "_MBR_9min.Rdata", sep = ""))
+  load(file.path(aligned_conc_dir, site, paste(site, "_WP_9min.Rdata")))
+  load(file.path(aligned_conc_dir, site, paste(site, "_AE_9min.Rdata")))
+  load(file.path(aligned_conc_dir, site, paste(site, "_MBR_9min.Rdata")))
   
 
   # Add information to the files to make one large dataframe
@@ -126,8 +105,7 @@ for(site in site.list){
   MBR_9min.df.final$ustar_threshold <- ustar.Threshold$Threshold.final
   
   # Save the files
-  setwd(localdir.savedata)
-  site.dir <- file.path(localdir.savedata, site)
+  site.dir <- file.path(eval_dir, site)
   dir.create(site.dir)
  
   save(WP_9min.df.final,
@@ -155,9 +133,11 @@ for(site in site.list){
   # Upload to the google drive:
   fileZip <- fs::path(site.dir, paste0(site, "_Evaluation.RDATA"))
   
-  googledrive::drive_upload(media = fileZip, 
-                            overwrite = T, 
-                            path = data_folder$id[data_folder$name==site])
+  if (export_eval_google == 1){
+    googledrive::drive_upload(media = fileZip, 
+                              overwrite = T, 
+                              path = data_folder$id[data_folder$name==site])
+  }
   
   print(paste("Done with", site))
   
@@ -167,33 +147,37 @@ for(site in site.list){
 ## --------------------------------------------- ##
 #           Compile Attribute Data -----
 ## --------------------------------------------- ##
+# Move to new script?
 
-# Attribute file
-
-# There were issues with a few sites: Until addressed remove them:
-site.list <- metadata$Site_Id.NEON %>% unique()
-
-setwd(localdir3)
-
-# Import and compile the attribute data!!
-site.att <- data.frame()
-
-for(site in site.list){
-  print(site)
-  
-  dir <- file.path("data", site, paste0(site, "_attr.Rdata"))
-  
-  load(dir)
-  
-  site.att <- site.att %>% rbind(attr.df)
-}
-
-write.csv(site.att, '/Volumes/MaloneLab/Research/FluxGradient/Site_Attributes.csv' )
-
-fileSave <- file.path('/Volumes/MaloneLab/Research/FluxGradient/Site_Attributes.csv')
-
-googledrive::drive_upload(media = fileSave, 
-                          overwrite = T, 
-                          path = drive_url)
+# # Attribute file
+# 
+# # There were issues with a few sites: Until addressed remove them:
+# site.list <- metadata$Site_Id.NEON %>% unique()
+# 
+# # Add local directory for your attribute data here:
+# localdir3 <- '/Volumes/MaloneLab/Research/FluxGradient/Attributes'
+# 
+# setwd(localdir3)
+# 
+# # Import and compile the attribute data!!
+# site.att <- data.frame()
+# 
+# for(site in site.list){
+#   print(site)
+#   
+#   dir <- file.path("data", site, paste0(site, "_attr.Rdata"))
+#   
+#   load(dir)
+#   
+#   site.att <- site.att %>% rbind(attr.df)
+# }
+# 
+# write.csv(site.att, '/Volumes/MaloneLab/Research/FluxGradient/Site_Attributes.csv' )
+# 
+# fileSave <- file.path('/Volumes/MaloneLab/Research/FluxGradient/Site_Attributes.csv')
+# 
+# googledrive::drive_upload(media = fileSave, 
+#                           overwrite = T, 
+#                           path = drive_url)
 
 message("Next run flow.evaluation.batch in the lterwg-flux-gradient-eval repo: ") 

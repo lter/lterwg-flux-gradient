@@ -14,6 +14,10 @@
 # SITE_WP_9min.Rdata (local)
 # SITE_WP_9min.zip (local & Google Drive)
 
+# See WorkFlow_master.R to set the variables needed to run this script
+# Variables needed: gh_repo, aligned_conc_dir, save_calc_temp, export_calc_google,
+# data_folder (if export_calc_google == 1), site.list
+
 # Load packages
 library(fs)
 library(googledrive)
@@ -21,65 +25,35 @@ library(dplyr)
 library(stringr)
 library(tidyverse)
 
-# Add all sites here:
-metadata <- read.csv('/Volumes/MaloneLab/Research/FluxGradient/Site_Attributes.csv') # has a list of all the sites
-
-# Get unique sites
-site.list <- metadata$Site %>% unique()
-
-# Add local directory for downloaded data here:
-localdir <-  '/Volumes/MaloneLab/Research/FluxGradient/NEON_Aligned_Concentrations' # MaloneLab Server
-
-localdir2 <- '/Volumes/MaloneLab/Research/FluxGradient/Attributes' # MaloneLab Server
-
-# Add local directory for your Flux repo here:
-DirRepo <- "/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient"
-setwd(DirRepo)
-
-## --------------------------------------------- ##
-#               Authenticate -----
-## --------------------------------------------- ##
-
-email <- 'sparklelmalone@gmail.com'
-googledrive::drive_auth(email = TRUE) 
-
-# Authenticate with Google Drive
-drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3") # The Data 
-
-# Data on google drive
-data_folder <- googledrive::drive_ls(path = drive_url)
-
 ## --------------------------------------------- ##
 #         Gradient Flux Calculations -----
 ## --------------------------------------------- ##
 
 for(site in site.list){
   
-  setwd(DirRepo)
-  
-  sitecode <- site
-  print(sitecode)
-  
   # Load Data:
-  load(fs::path(localdir, site, paste0(site, '_aligned_conc_flux_30min.RData')))
-  load(fs::path(localdir, site, paste0(site, '_aligned_conc_flux_9min.RData')))
-
-  dirTmp <- file.path(localdir, site)
-    
+  load(fs::path(aligned_conc_dir, site, paste0(site, '_aligned_conc_flux_30min.RData')))
+  load(fs::path(aligned_conc_dir, site, paste0(site, '_aligned_conc_flux_9min.RData')))
+   
+  if (save_calc_temp == 0){
+    dirTmp <- file.path(aligned_conc_dir, site)
+  }
+  else if (save_calc_temp == 1){
+    dirTmp <- fs::path(tempdir(), site)
+    dir.create(dirTmp)
+  }
   print('Data Loaded')
   
   print('Running MBR')
-  source(file.path("workflows", "flow.calc.flag.mbr.batch.R"))
+  source(file.path(gh_repo, "workflows", "flow.calc.flag.mbr.batch.R"))
   print('MBR Done')
   
-  setwd(DirRepo)
   print('Running AE')
-  source(file.path("workflows", "flow.calc.flag.aero.batch.R"))
+  source(file.path(gh_repo, "workflows", "flow.calc.flag.aero.batch.R"))
   print('AE Done')
   
-  setwd(DirRepo)
   print('Running WP')
-  source(file.path("workflows", "flow.calc.flag.windprof.batch.R"))
+  source(file.path(gh_repo, "workflows", "flow.calc.flag.windprof.batch.R"))
   print('WP Done')
   
   print('done')
