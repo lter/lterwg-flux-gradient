@@ -21,10 +21,10 @@
 # This step downloads data from NEON. 
 # Working group members can skip this and download aligned concentrations from the Google Drive. 
 
-# Load packages
-library(tidyverse)
 # Clear workspace
 rm(list=ls())
+# Load packages
+library(tidyverse)
 
 # Path to lterwg-flux-gradient GitHub repo
 gh_repo <- "[CTRL+F INSERT GH REPO HERE]"
@@ -54,10 +54,10 @@ source(file.path(gh_repo, "workflows", "flow.neon.data.download.R"))
 # This step unzips the downloaded data from NEON. 
 # Working group members can skip this and download aligned concentrations from the Google Drive. 
 
-# Load packages
-library(tidyverse)
 # Clear workspace
 rm(list=ls())
+# Load packages
+library(tidyverse)
 
 # Path to lterwg-flux-gradient GitHub repo
 gh_repo <- "[CTRL+F INSERT GH REPO HERE]"
@@ -79,10 +79,10 @@ source(file.path(gh_repo, "workflows", "flow.neon.data.unzip.R"))
 # This step extracts the downloaded data from NEON.
 # Working group members can skip this and download aligned concentrations from the Google Drive. 
 
-# Load packages
-library(tidyverse)
 # Clear workspace
 rm(list=ls())
+# Load packages
+library(tidyverse)
 
 # Path to lterwg-flux-gradient GitHub repo
 gh_repo <- "[CTRL+F INSERT GH REPO HERE]"
@@ -118,10 +118,10 @@ source(file.path(gh_repo, "workflows", "flow.neon.data.extract.v2.R"))
 
 # This step aligns the concentration data
 
-# Load packages
-library(tidyverse)
 # Clear workspace
 rm(list=ls())
+# Load packages
+library(tidyverse)
 
 # Path to lterwg-flux-gradient GitHub repo
 gh_repo <- "[CTRL+F INSERT GH REPO HERE]"
@@ -177,15 +177,16 @@ source(file.path(gh_repo, "workflows", "flow.neon.data.format.conc.diffs.30m.R")
 
 # This step calculates the gradient fluxes
 
-# Load packages
-library(tidyverse)
 # Clear workspace
 rm(list=ls())
+# Load packages
+library(tidyverse)
 
 # Path to lterwg-flux-gradient GitHub repo
 gh_repo <- "[CTRL+F INSERT GH REPO HERE]"
 
-# Path to aligned concentration folder
+# Path to aligned concentration folder 
+# This is also where calculated fluxes will be saved if save_calc_temp == 0
 aligned_conc_dir <- "[CTRL+F INSERT ALIGNED CONC DIR HERE]"
 
 # Do you want to save the calculated fluxes to a temp directory?
@@ -193,7 +194,7 @@ aligned_conc_dir <- "[CTRL+F INSERT ALIGNED CONC DIR HERE]"
 # Set 0 for no I want to save it to aligned_conc_dir so I can have it on my own computer forever
 save_calc_temp <- 0
 
-# Do you want to export the calculated fluxes concentration data to Google Drive?
+# Do you want to export the calculated fluxes to Google Drive?
 # Set 1 for yes I want to export it to Google Drive, 0 for no
 export_calc_google <- 0
 
@@ -220,15 +221,15 @@ source(file.path(gh_repo, "workflows", "flow.calc.flux.batch.R"))
 
 # This step creates the validation dataframes needed for evaluation
 
-# Load packages
-library(tidyverse)
 # Clear workspace
 rm(list=ls())
+# Load packages
+library(tidyverse)
 
 # Path to lterwg-flux-gradient GitHub repo
 gh_repo <- "[CTRL+F INSERT GH REPO HERE]"
 
-# Path to aligned concentration folder
+# Path to aligned concentration and calculated fluxes folder
 aligned_conc_dir <- "[CTRL+F INSERT ALIGNED CONC DIR HERE]"
 
 # Path to folder where evaluation data will be saved
@@ -264,10 +265,10 @@ source(file.path(gh_repo, "workflows", "flow.evaluation.dataframe.R"))
 
 # This step formats the evaluation data for publication on EDI
 
-# Load packages
-library(tidyverse)
 # Clear workspace
 rm(list=ls())
+# Load packages
+library(tidyverse)
 
 # Path to lterwg-flux-gradient GitHub repo
 gh_repo <- "[CTRL+F INSERT GH REPO HERE]"
