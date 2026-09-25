@@ -50,14 +50,22 @@ source(file.path(gh_repo, "functions", "calc.MO.length.R"))
 
 for(site in site.list){
   
-  rm('min9.list', 'min30.list', 'attr.df', 'min1.list', 'min9Diff.list')
+  #rm('min9.list', 'min30.list', 'attr.df', 'min1.list', 'min9Diff.list')
+  rm(list = setdiff(ls(), c("gh_repo", "download_google", "download_extract_dir", 
+                            "save_temp", "aligned_conc_dir", "export_aligned_google", 
+                            "my_email", "drive_url", "data_folder", "metadata", "site.list")))
   
   if (download_google == 0){
     load(file.path(download_extract_dir, "data", site, paste0(site, "_1min.Rdata")))
+    Sys.sleep(3) # Wait 3 seconds to prevent lag
     load(file.path(download_extract_dir, "data", site, paste0(site, "_9min.Rdata")))
+    Sys.sleep(3)
     load(file.path(download_extract_dir, "data", site, paste0(site, "_30min.Rdata")))
+    Sys.sleep(3)
     load(file.path(download_extract_dir, "data", site, paste0(site, "_WS2D2min.Rdata")))
+    Sys.sleep(3)
     load(file.path(download_extract_dir, "data", site, paste0(site, "_attr.Rdata")))
+    Sys.sleep(3)
     
   } else if (download_google == 1){
     
