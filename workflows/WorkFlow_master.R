@@ -8,7 +8,7 @@
 # FIRST-TIME INSTRUCTIONS:
 # Replace every [CTRL+F INSERT ... HERE] instance with your own existing absolute file paths!
 # This workflow involves many different locations, so make sure your paths are absolute (not relative)!
-# You can control+F to find and replace every [CTRL+F INSERT ... HERE] instance with your own existing paths.
+# You can control+F to find and replace every [CTRL+F INSERT ... HERE] instance with your own existing paths or info.
 # Since this is a long workflow, it is more convenient to set the paths at each step (even if there are repeated paths) 
 # so you can easily jump in where you left off in the workflow.
 
@@ -20,6 +20,11 @@
 
 # This step downloads data from NEON. 
 # Working group members can skip this and download aligned concentrations from the Google Drive. 
+
+# Load packages
+library(tidyverse)
+# Clear workspace
+rm(list=ls())
 
 # Path to lterwg-flux-gradient GitHub repo
 gh_repo <- "[CTRL+F INSERT GH REPO HERE]"
@@ -37,7 +42,7 @@ my_startdate <- "2021-08"
 my_enddate <- "2024-06"
 # Set your NEON token by creating an account at https://www.neonscience.org/
 # Then go to the "My Account" page to copy your API Token
-neon_token <- "SET YOUR OWN TOKEN, DO NOT COMMIT YOUR TOKEN TO GITHUB"
+neon_token <- "[INSERT YOUR OWN TOKEN HERE, DO NOT COMMIT YOUR TOKEN TO GITHUB]"
 
 # Download the data
 source(file.path(gh_repo, "workflows", "flow.neon.data.download.R"))
@@ -48,6 +53,11 @@ source(file.path(gh_repo, "workflows", "flow.neon.data.download.R"))
 
 # This step unzips the downloaded data from NEON. 
 # Working group members can skip this and download aligned concentrations from the Google Drive. 
+
+# Load packages
+library(tidyverse)
+# Clear workspace
+rm(list=ls())
 
 # Path to lterwg-flux-gradient GitHub repo
 gh_repo <- "[CTRL+F INSERT GH REPO HERE]"
@@ -68,6 +78,11 @@ source(file.path(gh_repo, "workflows", "flow.neon.data.unzip.R"))
 
 # This step extracts the downloaded data from NEON.
 # Working group members can skip this and download aligned concentrations from the Google Drive. 
+
+# Load packages
+library(tidyverse)
+# Clear workspace
+rm(list=ls())
 
 # Path to lterwg-flux-gradient GitHub repo
 gh_repo <- "[CTRL+F INSERT GH REPO HERE]"
@@ -102,6 +117,11 @@ source(file.path(gh_repo, "workflows", "flow.neon.data.extract.v2.R"))
 ## -------------------------------------------------- ##
 
 # This step aligns the concentration data
+
+# Load packages
+library(tidyverse)
+# Clear workspace
+rm(list=ls())
 
 # Path to lterwg-flux-gradient GitHub repo
 gh_repo <- "[CTRL+F INSERT GH REPO HERE]"
@@ -157,6 +177,11 @@ source(file.path(gh_repo, "workflows", "flow.neon.data.format.conc.diffs.30m.R")
 
 # This step calculates the gradient fluxes
 
+# Load packages
+library(tidyverse)
+# Clear workspace
+rm(list=ls())
+
 # Path to lterwg-flux-gradient GitHub repo
 gh_repo <- "[CTRL+F INSERT GH REPO HERE]"
 
@@ -194,6 +219,11 @@ source(file.path(gh_repo, "workflows", "flow.calc.flux.batch.R"))
 ## -------------------------------------------------- ##
 
 # This step creates the validation dataframes needed for evaluation
+
+# Load packages
+library(tidyverse)
+# Clear workspace
+rm(list=ls())
 
 # Path to lterwg-flux-gradient GitHub repo
 gh_repo <- "[CTRL+F INSERT GH REPO HERE]"
@@ -233,6 +263,11 @@ source(file.path(gh_repo, "workflows", "flow.evaluation.dataframe.R"))
 ## -------------------------------------------------- ##
 
 # This step formats the evaluation data for publication on EDI
+
+# Load packages
+library(tidyverse)
+# Clear workspace
+rm(list=ls())
 
 # Path to lterwg-flux-gradient GitHub repo
 gh_repo <- "[CTRL+F INSERT GH REPO HERE]"

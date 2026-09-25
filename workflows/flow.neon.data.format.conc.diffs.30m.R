@@ -31,8 +31,6 @@
 # data_folder (if download_google == 1 | export_aligned_google == 1),
 # site.list
 
-rm(list=ls())
-
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: fs, googledrive
 library(foreach)
