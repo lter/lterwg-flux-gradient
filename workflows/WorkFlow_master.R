@@ -251,7 +251,7 @@ if (export_eval_google == 1){
 
 # Ustar Threshold:
 # Also found at /Volumes/MaloneLab/Research/FluxGradient/UstarNeonSites.csv
-ustar.neon.sites <- read.csv(file.path(gh_repo, "UstarNeonSites.csv"))
+ustar.neon.sites <- read.csv(file.path(gh_repo, "metadata", "UstarNeonSites.csv"))
 
 # Grab list of sites
 metadata <- read.csv(file.path(gh_repo, "metadata", "Ameriflux_NEON field-sites.csv"))
