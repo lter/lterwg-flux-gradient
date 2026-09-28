@@ -33,9 +33,9 @@ source(file.path(gh_repo, "functions", "calc.format.MBR.R"))
 for(site in site.list){
   print(site)
   
-  load(file.path(aligned_conc_dir, site, paste(site, "_WP_9min.Rdata")))
-  load(file.path(aligned_conc_dir, site, paste(site, "_AE_9min.Rdata")))
-  load(file.path(aligned_conc_dir, site, paste(site, "_MBR_9min.Rdata")))
+  load(file.path(aligned_conc_dir, site, paste0(site, "_WP_9min.Rdata")))
+  load(file.path(aligned_conc_dir, site, paste0(site, "_AE_9min.Rdata")))
+  load(file.path(aligned_conc_dir, site, paste0(site, "_MBR_9min.Rdata")))
   
 
   # Add information to the files to make one large dataframe
