@@ -47,7 +47,7 @@ calc.eddydiff.windprof <- function(sitecode, min9){
   #remove NAs
   #H2O <- H2O[complete.cases(H2O[,data.cols]),]
   #calculate obukhov length and stability parameters
-  H2O <- calc.stability.correction(gas = H2O)
+  H2O <- calc.stability.correction(sitecode = sitecode, gas = H2O, min9 = min9)
   #calculate eddy diffusivty using WP
   #assuming von karman constant is 0.4
   k = 0.4
@@ -57,7 +57,7 @@ calc.eddydiff.windprof <- function(sitecode, min9){
   #remove NAs
   #CO2 <- CO2[complete.cases(CO2[,data.cols]),]
   #calculate obukhov length and stability columns
-  CO2 <- calc.stability.correction(gas = CO2)
+  CO2 <- calc.stability.correction(sitecode = sitecode, gas = CO2, min9 = min9)
   #calculate eddy diffusivty using WP
   #assuming von karman constant is 0.4
   k = 0.4
@@ -68,7 +68,7 @@ calc.eddydiff.windprof <- function(sitecode, min9){
   #remove NAs
   #CH4 <- CH4[complete.cases(CH4[,data.cols]),]
   #calculate obukhov length and stability parameter
-  CH4 <- calc.stability.correction(gas = CH4)
+  CH4 <- calc.stability.correction(sitecode = sitecode, gas = CH4, min9 = min9)
   #calculate eddy diffusivty using WP
   #assuming von karman constant is 0.4
   k = 0.4

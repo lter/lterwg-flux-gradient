@@ -46,7 +46,7 @@ calc.eddydiff.aero <- function(sitecode, min9){
   data.cols <- c("z_displ_calc")
   #H2O <- H2O[complete.cases(H2O[,data.cols]),]
   #calculate Obukhov length and stability parameters
-  H2O <- calc.stability.correction(gas = H2O)
+  H2O <- calc.stability.correction(sitecode = sitecode, gas = H2O, min9 = min9)
   #calculate eddy diffusivity
   #we need: von karman constant (k), friction velocity (u_star), geometric mean of upper and lower heights (z_g), stability parameter (phih)
   #assuming von karman constant is 0.4
@@ -66,7 +66,7 @@ calc.eddydiff.aero <- function(sitecode, min9){
   #remove NAs
   #CO2 <- CO2[complete.cases(CO2[,data.cols]),]
   #calculate obukhov length and stability parameters
-  CO2 <- calc.stability.correction(gas = CO2)
+  CO2 <- calc.stability.correction(sitecode = sitecode, gas = CO2, min9 = min9)
   
   #calculate eddy diffusivity
   #we need: von karman constant (k), friction velocity (u_star), geometric mean of upper and lower heights (z_g), stability parameter (phih)
@@ -86,7 +86,7 @@ calc.eddydiff.aero <- function(sitecode, min9){
   #remove NAs
   #CH4 <- CH4[complete.cases(CH4[,data.cols]),]
   #calculate obukhov length and stability parameters
-  CH4 <- calc.stability.correction(gas = CH4)
+  CH4 <- calc.stability.correction(sitecode = sitecode, gas = CH4, min9 = min9)
   #calculate eddy diffusivity
   #we need: von karman constant (k), friction velocity (u_star), geometric mean of upper and lower heights (z_g), stability parameter (phih)
   #assuming von karman constant is 0.4
