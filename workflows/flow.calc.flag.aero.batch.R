@@ -9,7 +9,6 @@ Savecsv <- 0 # Save csv files to analyze in matlab? 1 for true 0 for False.
 source(file.path(gh_repo, "functions", "calc.MO.length.R"))
 source(file.path(gh_repo, "functions", "calc.eddydiff.aero.R"))
 source(file.path(gh_repo, "functions", "calc.gas.aero.windprof.flux.R"))
-source(file.path(gh_repo, "functions", "calc.gas.aero.windprof.flux.WP.R"))
 source(file.path(gh_repo, "functions", "calc.eqn.aero.windprof.flux.R"))
 source(file.path(gh_repo, "functions", "calc.stability.correction.R"))
 source(file.path(gh_repo, "functions", "calc.aerodynamic.canopy.height.R"))
