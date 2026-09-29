@@ -285,9 +285,31 @@ site.list <- metadata$Site_Id.NEON %>% unique()
 
 source(file.path(gh_repo, "workflows", "flow.evaluation.dataframe_EDI.R"))
 
-# -------------------------------------------------------
-# Storage Flux ####
-# source(file.path(gh_repo, "workflows", "flow.neon.storage.R"))
+## -------------------------------------------------- ##
+#            Step 8: flow.neon.storage.R ----- 
+## -------------------------------------------------- ##
+
+# This step calculates the storage fluxes 
+
+# Clear workspace
+rm(list=ls())
+# Load packages
+library(tidyverse)
+
+# Path to lterwg-flux-gradient GitHub repo
+gh_repo <- "[CTRL+F INSERT GH REPO HERE]"
+
+# Path to aligned concentration and calculated fluxes folder
+data_dir <- "[CTRL+F INSERT ALIGNED CONC DIR HERE]"
+
+# Path to folder where attribute data is stored
+# This may be the inner "data" folder inside download_extract_dir
+attr_data_dir <- "[CTRL+F INSERT ATTR DIR HERE]"
+
+# Path to folder where storage fluxes will be saved
+output_dir <- "[CTRL+F INSERT STORAGE DIR HERE]"
+
+source(file.path(gh_repo, "workflows", "flow.neon.storage.R"))
 
 # -------------------------------------------------------
 # Canopy Complexity Workflow ####
