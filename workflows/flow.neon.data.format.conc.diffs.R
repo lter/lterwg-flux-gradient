@@ -47,10 +47,10 @@ source(file.path(gh_repo, "functions", "calc.MO.length.R"))
 
 for (site in site.list){
   
-  #rm('min9.list', 'min30.list', 'attr.df', 'min1.list', 'min9Diff.list')
-  rm(list = setdiff(ls(), c("gh_repo", "download_google", "download_extract_dir", 
-                            "save_temp", "aligned_conc_dir", "export_aligned_google", 
-                            "my_email", "drive_url", "data_folder", "metadata", "site.list")))
+  rm(min9.list, min30.list, attr.df, min1.list, min9Diff.list,
+     flux_interp_specs, MET_1min, ubar_2min, ubar_df, WS2D2min)
+  
+  message(site)
   
   if (download_google == 0){
     load(file.path(download_extract_dir, "data", site, paste0(site, "_1min.Rdata")))

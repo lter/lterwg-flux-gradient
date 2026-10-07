@@ -55,6 +55,8 @@ source(file.path(gh_repo, "functions", "grab.neon.met.1min.R"))
 
 for (sitecode in site.list){
   
+  rm(attr.df, DATA, min1.list, min30.list, min9.list, PAR1min, PAR30min, RH1min, RH30min, WS2D2min, WS2D30min)
+  
   print(sitecode)
   
   # Grab h5 files to be passed to SiteAttributes and SiteDF
