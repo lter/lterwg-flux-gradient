@@ -60,7 +60,7 @@ lterwg-flux-gradient/
 
 ## Main Flux Workflow
 
-The script `Workflow_master.R` will run the files below in the order required to produce the file needed for the repository: https://github.com/lter/lterwg-flux-gradient-eval
+The script `WorkFlow_master.R` will run the files below in the order required to produce the file needed for the repository: https://github.com/lter/lterwg-flux-gradient-eval. To get started, open `WorkFlow_master.R` and read the instructions carefully. 
 
 ```mermaid
 graph TD
