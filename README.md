@@ -60,59 +60,43 @@ lterwg-flux-gradient/
 
 ## Main Flux Workflow
 
-The script `Workflow_master.R` will run the files below in the order required to produce the file needed for the repository: https://github.com/lter/lterwg-flux-gradient-eval
+The script `WorkFlow_master.R` will run the files below in the order required to produce the file needed for the repository: https://github.com/lter/lterwg-flux-gradient-eval. To get started, open `WorkFlow_master.R` and read the instructions carefully. 
 
-### Data Acquisition and Processing
+```mermaid
+graph TD
+  A["flow.neon.data.download.R"] --> B["flow.neon.data.unzip.R"]
+  B --> C["flow.neon.data.extract.v2.R (exports SITE_9min.Rdata, SITE_30min.Rdata, SITE_1min.Rdata, SITE_WS2D2min.Rdata, SITE_attr.Rdata)"]
+  C --> D["flow.neon.data.format.conc.diffs.R (exports SITE_aligned_conc_flux_9min.RData) & flow.neon.data.format.conc.diffs.30m.R (exports SITE_aligned_conc_flux_30min.RData)"]
+  D --> E["flow.calc.flux.batch.R (exports SITE_AE_9min.Rdata, SITE_MBR_9min.RData, SITE_WP_9min.Rdata)"]
+  E --> F["flow.evaluation.dataframe.R (exports SITE_Evaluation.RDATA)"]
+  F --> G["flow.evaluation.dataframe_EDI.R (exports SITE_AE_9min.df.final.csv, SITE_MBR_9min.df.final.csv, SITE_WP_9min.df.final.csv)"]
+  G --> H["flow.neon.storage.R (exports SITE_storage_flux.csv, NEON_storage.RData)"]
+```
+
+### Data Acquisition and Extraction
 
 1. `flow.neon.data.download.R`: Workflow script that downloads NEON HDF5 (eddy covariance files) files for all sites and time periods of interest. ALSO downloads all required MET data products that are not in the bundled HDF5 file. 
 
 2. `flow.neon.data.unzip.R`: Unzips all downloaded NEON data files.
 
-3. `flow.neon.data.extract.v2.R`: Extracts and stacks downloaded and unzipped data into R objects for each data averaging interval, saved in their own RData file. These are currently `SITE_9min.Rdata` (9-min/6-min concentrations), `SITE_30min.Rdata` (30-min met and flux data), `SITE_1min.Rdata` (1-min met data), and `SITE_WS2D2min.Rdata` (2D wind speed data), where `SITE` is the NEON site code. Also extracts and saves site attributes from the HDF5 files into `SITE_attr.Rdata`. Zips and uploads to Google Drive. For example, `googledrive::drive_upload(media = path to the local file to upload, overwrite = T, path = googledrive::as_id("url to Drive folder"))`.
-
-   ```
-   flow.neon.data.download.R →
-   flow.neon.data.unzip.R →
-   flow.neon.data.extract.v2.R →
-   SITE_9min.Rdata, SITE_30min.Rdata, SITE_1min.Rdata, SITE_WS2D2min.Rdata, SITE_attr.Rdata (.zip equivalents uploaded to Google Drive)
-   ```
+3. `flow.neon.data.extract.v2.R`: Extracts and stacks downloaded and unzipped data into R objects for each data averaging interval, saved in their own RData file. These are currently `SITE_9min.Rdata` (9-min/6-min concentrations), `SITE_30min.Rdata` (30-min met and flux data), `SITE_1min.Rdata` (1-min met data), and `SITE_WS2D2min.Rdata` (2D wind speed data), where `SITE` is the NEON site code. Also extracts and saves site attributes from the HDF5 files into `SITE_attr.Rdata`. Zips and optionally uploads to Google Drive.
 
 ### Concentration Processing
 
-4. `flow.neon.data.format.conc.diffs.R` & `flow.neon.data.format.conc.diffs.30m.R`: Downloads output from `flow.neon.data.extract.v2.R` from Google Drive. Align the 9-min or 30-min concentration data among adjacent tower levels (and also the bottom-top levels). `flow.neon.data.format.conc.diffs.R` interpolates 30-min eddy flux and MET data to the 9-min/6-min concentrations, including but not limited to u*, ubar (profile), roughness length. `flow.neon.data.format.conc.diffs.30m.R` connects the nearest 9-min/6-min data to each 30-min eddy covariance measurement. Also derives kinematic water flux (LE -> w'q'), heat flux (w'T'), aerodynamic canopy height, displacement height, that are needed for the various methods. Differences the concentrations for CH4, CO2, and H2O for adjacent tower levels (and bottom-top). Saves output as `SITE_aligned_conc_flux_9min.RData` and `SITE_aligned_conc_flux_30min.RData`. Zips and uploads to Google Drive.
+4. `flow.neon.data.format.conc.diffs.R` & `flow.neon.data.format.conc.diffs.30m.R`: Align the 9-min or 30-min concentration data among adjacent tower levels (and also the bottom-top levels). `flow.neon.data.format.conc.diffs.R` interpolates 30-min eddy flux and MET data to the 9-min/6-min concentrations, including but not limited to u*, ubar (profile), roughness length. `flow.neon.data.format.conc.diffs.30m.R` connects the nearest 9-min/6-min data to each 30-min eddy covariance measurement. Also derives kinematic water flux (LE -> w'q'), heat flux (w'T'), aerodynamic canopy height, displacement height, that are needed for the various methods. Differences the concentrations for CH4, CO2, and H2O for adjacent tower levels (and bottom-top). Saves output as `SITE_aligned_conc_flux_9min.RData` and `SITE_aligned_conc_flux_30min.RData`. Zips and optionally uploads to Google Drive.
 
-5. `flow.download.aligned.conc.flux.R`: Downloads output from `flow.neon.data.format.conc.diffs.R` and `flow.neon.data.format.conc.diffs.30m.R` from Google Drive and unzips them.
+Note: if you need to download the output from `flow.neon.data.format.conc.diffs.R` and `flow.neon.data.format.conc.diffs.30m.R` off Google Drive, you can run `flow.download.aligned.conc.flux.R`. 
 
-   ```
-   SITE_9min.zip, SITE_30min.zip, SITE_1min.zip, SITE_WS2D2min.zip, SITE_attr.zip →
-   flow.neon.data.format.conc.diffs.R →
-   SITE_aligned_conc_flux_9min.RData (.zip equivalent uploaded to Google Drive)
+### Flux Calculation
 
-   SITE_9min.zip, SITE_30min.zip, SITE_1min.zip, SITE_WS2D2min.zip, SITE_attr.zip →
-   flow.neon.data.format.conc.diffs.30m.R →
-   SITE_aligned_conc_flux_30min.RData (.zip equivalent uploaded to Google Drive)
+5. `flow.calc.flux.batch.R`: Loads aligned concentration & flux data locally and calculates the fluxes using MBR (`flow.calc.flag.mbr.batch.R`), AE (`flow.calc.flag.aero.batch.R`), and WP (`flow.calc.flag.windprof.batch.R`) methods and adds quality flag columns, month, hour, residual, rmse for calculated fluxes. Saves output as `SITE_AE_9min.Rdata`, `SITE_MBR_9min.RData`, and `SITE_WP_9min.Rdata`. Zips and optionally uploads to Google Drive, except `SITE_AE_9min.zip` was not able to export to Google Drive so `SITE_AE_9min.Rdata` was exported instead.
+
+6. `flow.evaluation.dataframe.R`: Loads flux calculations locally and standardizes the data format from the MBR, AE, and WP. Develops the validation dataframes needed to perform the evaluation. Saves output as `SITE_Evaluation.RDATA`. Optionally uploads to Google Drive.
    
-   flow.download.aligned.conc.flux.R (downloads and unzips SITE_aligned_conc_flux_9min.zip, SITE_aligned_conc_flux_30min.zip, SITE_attr.zip)
-   ```
+7. `flow.evaluation.dataframe_EDI.R`: Formats the validation data for EDI publication. Saves output as `SITE_AE_9min.df.final.csv`, `SITE_MBR_9min.df.final.csv`, and `SITE_WP_9min.df.final.csv`.
 
-### Exploratory Workflows
+8. `flow.neon.storage.R`: Calculates storage fluxes. Saves output as `SITE_storage_flux.csv`. All the combined storage fluxes are also saved as `NEON_storage.RData`.
 
-6. `flow.calc.flux.batch.R`: Loads aligned concentration & flux data locally and calculates the fluxes using MBR (`flow.calc.flag.mbr.batch.R`), AE (`flow.calc.flag.aero.batch.R`), and WP (`flow.calc.flag.windprof.batch.R`) methods and adds quality flag columns, month, hour, residual, rmse for calculated fluxes. Saves output as `SITE_AE_9min.Rdata`, `SITE_MBR_9min.RData`, and `SITE_WP_9min.Rdata`. Zips and uploads to Google Drive, except `SITE_AE_9min.zip` was not able to export to Google Drive so `SITE_AE_9min.Rdata` was exported instead.
-
-7. `flow.evaluation.dataframe.R`: Loads flux calculations locally and standardizes the data format from the MBR, AE, and WP. This file uses the product of `flow.calc.flux.batch.R` to develop the validation dataframes needed to perform the evaluation. This file produces a list of dataframes in an object called `SITE_Evaluation.RDATA`. Also compiles attribute data into `Site_Attributes.csv`. Uploads to Google Drive.
-   
-   ```
-   SITE_aligned_conc_flux_9min.RData, SITE_aligned_conc_flux_30min.RData →
-   flow.calc.flux.batch.R  →
-      ├─ flow.calc.flag.mbr.batch.R
-      ├─ flow.calc.flag.aero.batch.R 
-      └─ flow.calc.flag.windprof.batch.R
-   SITE_AE_9min.Rdata, SITE_MBR_9min.RData, SITE_WP_9min.Rdata (.zip equivalents uploaded to Google Drive except for SITE_AE_9min.zip)
-   
-   SITE_AE_9min.Rdata, SITE_MBR_9min.RData, SITE_WP_9min.Rdata →
-   flow.evaluation.dataframe.R →
-   SITE_Evaluation.RDATA, Site_Attributes.csv (uploaded to Google Drive as-is)
-   ```
 ## Other Workflows
 
 ### Non-NEON Processing
@@ -146,10 +130,11 @@ The script `Workflow_master.R` will run the files below in the order required to
 ## Deprecated Folder
 - This is where unused workflows and functions are stored
 
-**NOTE**: Feel free to contact Nick and Angel during their office hours for coding/git help
-
 ## NEON Data Products
-ADD LINKS TO NEON DATA PRODUCTS PAGE
+- Relative humidity: https://data.neonscience.org/data-products/DP1.00098.001
+- 2D wind speed and direction: https://data.neonscience.org/data-products/DP1.00001.001
+- Photosynthetically active radiation (PAR): https://data.neonscience.org/data-products/DP1.00024.001
+- Bundled data products - eddy covariance: https://data.neonscience.org/data-products/DP4.00200.001
 
 ## Related Repositories
 

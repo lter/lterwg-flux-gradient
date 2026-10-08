@@ -1,61 +1,343 @@
-# Workflow:
+## -------------------------------------------------- ##
+#                  Housekeeping -----
+## -------------------------------------------------- ##
+# Purpose:
+# This master script will run the main workflow scripts to 
+# download, unzip, extract, format, calculate gradient fluxes, 
+# create validation dataframes for evaluation, format data for EDI, and calculate storage fluxes in order.
+
+# FIRST-TIME INSTRUCTIONS:
+# 1) First make your own copy of this script so you can freely edit it. You do not need to commit your own copy to GitHub.
+
+# 2) Then create your own folders to store data. The 5 data folders needed to run this entire workflow include folders where:
+#    - NEON data will be downloaded and extracted 
+#      (named as "NEON_Tower_Data_[startdate]_[enddate]" on MaloneLab Server)
+#    - aligned concentration and calculated gradient fluxes will be saved 
+#      (named as "NEON_Aligned_Concentrations_[startdate]_[enddate]" on MaloneLab Server)
+#    - validation dataframes for evaluation will be saved 
+#      (named as "NEON_GradientFlux_Data_[startdate]_[enddate]" on MaloneLab Server)
+#    - EDI-ready data will be saved 
+#      (named as "NEON_GradientFlux_EDI_[startdate]_[enddate]" on MaloneLab Server)
+#    - storage fluxes will be saved 
+#      (named as "NEON_Storage_Flux_[startdate]_[enddate]" on MaloneLab Server)
+
+# 3) Replace every [CTRL+F INSERT ... HERE] instance with your own existing absolute file paths!
+#    This workflow involves many different locations, so make sure your paths are absolute (not relative)!
+#    You can control+F to find and replace every [CTRL+F INSERT ... HERE] instance with your own existing paths or info.
+#    Depending on the section, you may need to also insert other info like your email. Please read carefully.
+#    Since this is a long workflow, it is more convenient to set the paths at each step (even if there are repeated paths) 
+#    so you can easily jump in where you left off in the workflow.
+
+# Throughout the workflow, inner folders will be automatically created under your listed paths.
+
+# Currently, data for these date ranges have already been acquired:
+# Round 1: 2021-08 to 2024-06
+# Round 2: 2024-07 to 2026-08
+
+## -------------------------------------------------- ##
+#       Step 1: flow.neon.data.download.R -----
+## -------------------------------------------------- ##
+
+# This step downloads data from NEON
+# Working group members can skip this and download aligned concentrations from the Google Drive
+
+# Clear workspace
+rm(list=ls())
+# Load packages
 library(tidyverse)
 
+# Path to lterwg-flux-gradient GitHub repo
+gh_repo <- "[CTRL+F INSERT GH REPO HERE]"
 
-# Paths
-data.local.dir <- '/Volumes/MaloneLab/Research/FluxGradient'
-DirRepo <-"/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient"
+# Path to folder where NEON data will be downloaded and extracted
+# Note: an inner "data" folder will be created under download_extract_dir 
+download_extract_dir <- "[CTRL+F INSERT DOWNLOAD DIR HERE]"
 
-googledrive::drive_auth(email = TRUE) 
-drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3") 
+# Grab list of sites
+# Also found at /Volumes/MaloneLab/Research/FluxGradient/Ameriflux_NEON field-sites.csv
+metadata <- read.csv(file.path(gh_repo, "metadata", "Ameriflux_NEON field-sites.csv"))
+site.list <- metadata$Site_Id.NEON %>% unique()
 
-# The Data 
-data_folder <- googledrive::drive_ls(path = drive_url)
+# Set your start date, for example "2021-08"
+my_startdate <- "[INSERT A START DATE HERE IN YYYY-MM FORMAT]"
+# Set your end date, for example "2024-06"
+my_enddate <- "[INSERT AN END DATE HERE IN YYYY-MM FORMAT]"
 
+# Set your NEON token by creating an account at https://www.neonscience.org/
+# Then go to the "My Account" page to copy your API Token.
+# Go back to RStudio, make sure you're working in the lterwg-flux-gradient repo, and create a new text file there (File -> New File -> Text File).
+# Paste your token inside the new text file and save the file exactly as "neon_token.txt" with the .txt extension
+neon_token <- readr::read_lines(file.path(gh_repo, "neon_token.txt"))
 
-# Import Data:
-metadata <- read.csv(paste( data.local.dir, '/Ameriflux_NEON field-sites.csv', sep="")) # has a list of all the sites
+# Download the data
+source(file.path(gh_repo, "workflows", "flow.neon.data.download.R"))
+
+## -------------------------------------------------- ##
+#         Step 2: flow.neon.data.unzip.R ----- 
+## -------------------------------------------------- ##
+
+# This step unzips the downloaded data from NEON
+# Working group members can skip this and download aligned concentrations from the Google Drive
+
+# Clear workspace
+rm(list=ls())
+# Load packages
+library(tidyverse)
+
+# Path to lterwg-flux-gradient GitHub repo
+gh_repo <- "[CTRL+F INSERT GH REPO HERE]"
+
+# Path to folder where NEON data will be downloaded and extracted
+download_extract_dir <- "[CTRL+F INSERT DOWNLOAD DIR HERE]"
+
+# Grab list of sites
+metadata <- read.csv(file.path(gh_repo, "metadata", "Ameriflux_NEON field-sites.csv"))
+site.list <- metadata$Site_Id.NEON %>% unique()
+
+# Unzip and stack data
+source(file.path(gh_repo, "workflows", "flow.neon.data.unzip.R"))
+
+## -------------------------------------------------- ##
+#       Step 3: flow.neon.data.extract.v2.R ----- 
+## -------------------------------------------------- ##
+
+# This step extracts the downloaded data from NEON
+# Working group members can skip this and download aligned concentrations from the Google Drive
+
+# Clear workspace
+rm(list=ls())
+# Load packages
+library(tidyverse)
+
+# Path to lterwg-flux-gradient GitHub repo
+gh_repo <- "[CTRL+F INSERT GH REPO HERE]"
+
+# Path to folder where NEON data will be downloaded and extracted
+download_extract_dir <- "[CTRL+F INSERT DOWNLOAD DIR HERE]"
+
+# Do you want to export the extracted 1min, 9min, 30min, attr, WS2D2min to Google Drive? 
+# Set 1 for yes, 0 for no
+export_extracted_google <- 0
+
+if (export_extracted_google == 1){
+  # Set your Google Drive email
+  # Or you can set my_email <- TRUE if you want to manually authorize an email
+  my_email <- "[CTRL+F INSERT EMAIL HERE]"
+  
+  googledrive::drive_auth(email = my_email) 
+  drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3") 
+  data_folder <- googledrive::drive_ls(path = drive_url)
+}
+
+# Grab list of sites
+metadata <- read.csv(file.path(gh_repo, "metadata", "Ameriflux_NEON field-sites.csv"))
+site.list <- metadata$Site_Id.NEON %>% unique()
+
+# Extract to 1min, 9min, 30min, attr, WS2D2min
+source(file.path(gh_repo, "workflows", "flow.neon.data.extract.v2.R"))
+
+## -------------------------------------------------- ##
+# Step 4: flow.neon.data.format.conc.diffs.R -----
+#         flow.neon.data.format.conc.diffs.30m.R -----
+## -------------------------------------------------- ##
+
+# This step aligns the concentration data
+
+# Clear workspace
+rm(list=ls())
+# Load packages
+library(tidyverse)
+
+# Path to lterwg-flux-gradient GitHub repo
+gh_repo <- "[CTRL+F INSERT GH REPO HERE]"
+
+# Do you need to download the 1min, 9min, 30min, attr, WS2D2min data from Google Drive?
+# This would download the data to a temporary directory.
+# Set 1 for yes I need to download, 0 for no I can use local data
+download_google <- 0
+
+if (download_google == 0){
+  # Path to downloaded and extracted NEON data folder
+  download_extract_dir <- "[CTRL+F INSERT DOWNLOAD DIR HERE]"
+  
+} 
+
+# Do you want to save the concentration data to a temp directory?
+# Set 1 for yes I want to save it to a temp directory (files will disappear unless I also export to Google Drive),
+# Set 0 for no I want to save it to a permanent directory so I can have it on my own computer forever
+save_temp <- 0
+
+if (save_temp == 0){
+  # Path to folder where aligned concentration will be saved
+  aligned_conc_dir <- "[CTRL+F INSERT ALIGNED CONC DIR HERE]"
+}
+
+# Do you want to export the aligned concentration data to Google Drive?
+# Set 1 for yes I want to export it to Google Drive, 0 for no
+export_aligned_google <- 0
+
+if (download_google == 1 | export_aligned_google == 1){
+  # Set your Google Drive email
+  # Or you can set my_email <- TRUE if you want to manually authorize an email
+  my_email <- "[CTRL+F INSERT EMAIL HERE]"
+  
+  googledrive::drive_auth(email = my_email) 
+  drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3") 
+  data_folder <- googledrive::drive_ls(path = drive_url)
+}
+
+# Grab list of sites
+metadata <- read.csv(file.path(gh_repo, "metadata", "Ameriflux_NEON field-sites.csv"))
+site.list <- metadata$Site_Id.NEON %>% unique()
+
+# Align 9min concentration data
+source(file.path(gh_repo, "workflows", "flow.neon.data.format.conc.diffs.R"))
+
+# Align 30min concentration data
+source(file.path(gh_repo, "workflows", "flow.neon.data.format.conc.diffs.30m.R"))
+
+## -------------------------------------------------- ##
+#        Step 5: flow.calc.flux.batch.R -----
+## -------------------------------------------------- ##
+
+# This step calculates the gradient fluxes
+
+# Clear workspace
+rm(list=ls())
+# Load packages
+library(tidyverse)
+
+# Path to lterwg-flux-gradient GitHub repo
+gh_repo <- "[CTRL+F INSERT GH REPO HERE]"
+
+# Path to aligned concentration folder 
+# This is also where calculated fluxes will be saved if save_calc_temp == 0
+aligned_conc_dir <- "[CTRL+F INSERT ALIGNED CONC DIR HERE]"
+
+# Do you want to save the calculated fluxes to a temp directory?
+# Set 1 for yes I want to save it to a temp directory (files will disappear unless I also export to Google Drive),
+# Set 0 for no I want to save it to aligned_conc_dir so I can have it on my own computer forever
+save_calc_temp <- 0
+
+# Do you want to export the calculated fluxes to Google Drive?
+# Set 1 for yes I want to export it to Google Drive, 0 for no
+export_calc_google <- 0
+
+if (export_calc_google == 1){
+  # Set your Google Drive email
+  # Or you can set my_email <- TRUE if you want to manually authorize an email
+  my_email <- "[CTRL+F INSERT EMAIL HERE]"
+  
+  googledrive::drive_auth(email = my_email) 
+  drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3") 
+  data_folder <- googledrive::drive_ls(path = drive_url)
+}
+
+# Grab list of sites
+metadata <- read.csv(file.path(gh_repo, "metadata", "Ameriflux_NEON field-sites.csv"))
+site.list <- metadata$Site_Id.NEON %>% unique()
+
+# Calculate gradient fluxes
+source(file.path(gh_repo, "workflows", "flow.calc.flux.batch.R"))
+
+## -------------------------------------------------- ##
+#      Step 6: flow.evaluation.dataframe.R ----- 
+## -------------------------------------------------- ##
+
+# This step creates the validation dataframes needed for evaluation
+
+# Clear workspace
+rm(list=ls())
+# Load packages
+library(tidyverse)
+
+# Path to lterwg-flux-gradient GitHub repo
+gh_repo <- "[CTRL+F INSERT GH REPO HERE]"
+
+# Path to aligned concentration and calculated fluxes folder
+aligned_conc_dir <- "[CTRL+F INSERT ALIGNED CONC DIR HERE]"
+
+# Path to folder where evaluation data will be saved
+eval_dir <- "[CTRL+F INSERT EVAL DIR HERE]"
+
+# Do you want to export the evaluation data to Google Drive?
+# Set 1 for yes I want to export it to Google Drive, 0 for no
+export_eval_google <- 0
+
+if (export_eval_google == 1){
+  # Set your Google Drive email
+  # Or you can set my_email <- TRUE if you want to manually authorize an email
+  my_email <- "[CTRL+F INSERT EMAIL HERE]"
+  
+  googledrive::drive_auth(email = my_email) 
+  drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3") 
+  data_folder <- googledrive::drive_ls(path = drive_url)
+}
+
+# Ustar Threshold:
+# Also found at /Volumes/MaloneLab/Research/FluxGradient/UstarNeonSites.csv
+ustar.neon.sites <- read.csv(file.path(gh_repo, "metadata", "UstarNeonSites.csv"))
+
+# Grab list of sites
+metadata <- read.csv(file.path(gh_repo, "metadata", "Ameriflux_NEON field-sites.csv"))
+site.list <- metadata$Site_Id.NEON %>% unique()
+
+source(file.path(gh_repo, "workflows", "flow.evaluation.dataframe.R"))
+message("If you do not need to format the data for EDI or calculate storage fluxes,
+        feel free to move onto the lterwg-flux-gradient-eval repo for next steps.")
+
+## -------------------------------------------------- ##
+#      Step 7: flow.evaluation.dataframe_EDI.R ----- 
+## -------------------------------------------------- ##
+
+# This step formats the evaluation data for publication on EDI
+
+# Clear workspace
+rm(list=ls())
+# Load packages
+library(tidyverse)
+
+# Path to lterwg-flux-gradient GitHub repo
+gh_repo <- "[CTRL+F INSERT GH REPO HERE]"
+
+# Path to evaluation data folder
+eval_dir <- "[CTRL+F INSERT EVAL DIR HERE]"
+
+# Path to folder where the EDI-ready data will be saved
+edi_dir <- "[CTRL+F INSERT EDI DIR HERE]"
+
+# Grab list of sites
+metadata <- read.csv(file.path(gh_repo, "metadata", "Ameriflux_NEON field-sites.csv"))
+site.list <- metadata$Site_Id.NEON %>% unique()
+
+source(file.path(gh_repo, "workflows", "flow.evaluation.dataframe_EDI.R"))
+
+## -------------------------------------------------- ##
+#            Step 8: flow.neon.storage.R ----- 
+## -------------------------------------------------- ##
+
+# This step calculates the storage fluxes 
+
+# Clear workspace
+rm(list=ls())
+# Load packages
+library(tidyverse)
+
+# Path to lterwg-flux-gradient GitHub repo
+gh_repo <- "[CTRL+F INSERT GH REPO HERE]"
+
+# Path to aligned concentration and calculated fluxes folder
+data_dir <- "[CTRL+F INSERT ALIGNED CONC DIR HERE]"
+
+# Path to folder where attribute data is stored
+# This may be the inner "data" folder inside download_extract_dir
+attr_data_dir <- "[CTRL+F INSERT ATTR DIR HERE]"
+
+# Path to folder where storage fluxes will be saved
+output_dir <- "[CTRL+F INSERT STORAGE DIR HERE]"
+
+source(file.path(gh_repo, "workflows", "flow.neon.storage.R"))
 
 # -------------------------------------------------------
-site.list <- metadata$Site_Id.NEON %>% unique
-
-# -------------------------------------------------------
-
-# Step 1: Download NEON DATA: ####
-
-# This section downloads data from NEON, reformat and aligns the concentration. Working group members can skip this and download aligned concentrations from the google drive. 
-
-dir.create(paste(data.local.dir,"/NEON_Tower_Data", sep="" ))
-setwd(paste(data.local.dir,"/NEON_Tower_Data", sep="")) # Data will be saved here
-source( paste(DirRepo, '/workflows/flow.neon.data.download.R', sep=""))
-# Unzip and Stack Data: 
-source( paste(DirRepo, '/workflows/flow.neon.data.unzip.R', sep=""))
-#flow.neon.data.extract.v2.R:
-source( paste(DirRepo, '/workflows/flow.neon.data.extract.v2.R', sep=""))
-
-#flow.neon.data.format.conc.diffs.R`
-#`flow.neon.data.format.conc.diffs.30m.R`
-
-# -------------------------------------------------------
-# If you skipped STEP 1: ####
-
-# -------------------------------------------------------
-# STEP 2: Gradient Flux Calculation ####
-source( paste(DirRepo, '/workflows/flow.calc.flux.batch.R', sep=""))
-
-localdir.savedata <- '/Volumes/MaloneLab/Research/FluxGradient/NEON_GradientFlux_Data'
-localdir.ac <-  '/Volumes/MaloneLab/Research/FluxGradient/NEON_Aligned_Concentrations' 
-
-source( paste(DirRepo, '/workflows/flow.evaluation.dataframe.R', sep="")) # Dataframe
-source( paste(DirRepo, '/workflows/flow.evaluation.dataframe_EDI.R', sep="")) # Dataframe
-# -------------------------------------------------------
-# STEP 3: Storage Flux ####
-source( paste(DirRepo, '/workflows/flow.neon.storage.R', sep=""))
-# -------------------------------------------------------
-# STEP 4: Canopy Complexity Workflow ####
-
-# -------------------------------------------------------
-# STEP 5: Format Data for Evaluation Workflow ####
-
-#flow.evaluation.dataframe.R
-# Edit this to also produce a site CSV that will be used in the Evaluation workflow:
+# Canopy Complexity Workflow ####
+# ...

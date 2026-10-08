@@ -34,15 +34,18 @@
 # Optional command-line use:
 #   Rscript workflows/flow.neon.storage.R [data_dir] [output_dir] [attr_data_dir]
 
+# See WorkFlow_master.R to set the variables needed to run this script
+# Variables needed: gh_repo, data_dir, attr_data_dir, output_dir
+
 library(dplyr)
 library(fs)
 library(lubridate)
 library(tibble)
 
+# data_dir <- "/Volumes/MaloneLab/Research/FluxGradient/NEON_Aligned_Concentrations"
+# output_dir <- "/Volumes/MaloneLab/Research/FluxGradient/NEON_Storage_Flux"
+# attr_data_dir <- "/Volumes/MaloneLab/Research/FluxGradient/Attributes/data"
 
-data_dir <- "/Volumes/MaloneLab/Research/FluxGradient/NEON_Aligned_Concentrations"
-output_dir <- "/Volumes/MaloneLab/Research/FluxGradient/NEON_Storage_Flux"
-attr_data_dir <- "/Volumes/MaloneLab/Research/FluxGradient/Attributes/data"
 allow_eddy4r_stor_fallback <- identical(Sys.getenv("NEON_ALLOW_EDDY4R_STOR_FALLBACK"), "TRUE")
 min_valid_levels <- 3L
 

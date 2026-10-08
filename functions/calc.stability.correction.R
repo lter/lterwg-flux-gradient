@@ -1,14 +1,16 @@
 
 #' calc.stability.correction
-#'
+#' 
+#' @param sitecode  NEON site code
 #' @param gas dataframe of gas taken from min9
+#' @param min9 9min interpolated data file for given site
 #'
 #' @return dataframe with stability parameter cols
 #' 
 #'
 #' @author Alexis Helgeson, Samuel Jurado, Roisin Commane, and Camilo Rey-Sanchez, Sparkle L. Malone
 
-calc.stability.correction <- function(gas){
+calc.stability.correction <- function(sitecode, gas, min9){
   #remove NAs from data columns used in calculation for AE this includes: P_kPa, Tair1, H_turb_interp, LE_turb_interp, ustar_interp, z_displ_calc
   
   #select for data columns -> remember there are as many ubar cols as there are TowerPositions for a given site
@@ -19,7 +21,7 @@ calc.stability.correction <- function(gas){
   #remove NAs
   #gas <- gas[, data.cols]
   
-  if( site == "US-Uaf"){
+  if( sitecode == "US-Uaf"){
     # Define top level where fluxes are measured
     maxL=max(min9$H2O$TowerPosition_A)
     nextL = sort(unique(min9Diff.list$H2O$TowerPosition_B),
@@ -64,7 +66,7 @@ calc.stability.correction <- function(gas){
   maxL=max(min9$H2O$TowerPosition_A)
   
   
-  if( site == "US-Uaf"){
+  if( sitecode == "US-Uaf"){
     # Define top level where fluxes are measured
     nextL = sort(unique(min9Diff.list$H2O$TowerPosition_B),
                  decreasing = TRUE)
