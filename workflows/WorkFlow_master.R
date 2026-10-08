@@ -3,23 +3,43 @@
 ## -------------------------------------------------- ##
 # Purpose:
 # This master script will run the main workflow scripts to 
-# download, unzip, extract, format, and calculate gradient fluxes in order.
+# download, unzip, extract, format, calculate gradient fluxes, 
+# create validation dataframes for evaluation, format data for EDI, and calculate storage fluxes in order.
 
 # FIRST-TIME INSTRUCTIONS:
-# Replace every [CTRL+F INSERT ... HERE] instance with your own existing absolute file paths!
-# This workflow involves many different locations, so make sure your paths are absolute (not relative)!
-# You can control+F to find and replace every [CTRL+F INSERT ... HERE] instance with your own existing paths or info.
-# Since this is a long workflow, it is more convenient to set the paths at each step (even if there are repeated paths) 
-# so you can easily jump in where you left off in the workflow.
+# 1) First make your own copy of this script so you can freely edit it. You do not need to commit your own copy to GitHub.
+
+# 2) Then create your own folders to store data. The 5 data folders needed to run this entire workflow include folders where:
+#    - NEON data will be downloaded and extracted 
+#      (named as "NEON_Tower_Data_[startdate]_[enddate]" on MaloneLab Server)
+#    - aligned concentration and calculated gradient fluxes will be saved 
+#      (named as "NEON_Aligned_Concentrations_[startdate]_[enddate]" on MaloneLab Server)
+#    - validation dataframes for evaluation will be saved 
+#      (named as "NEON_GradientFlux_Data_[startdate]_[enddate]" on MaloneLab Server)
+#    - EDI-ready data will be saved 
+#      (named as "NEON_GradientFlux_EDI_[startdate]_[enddate]" on MaloneLab Server)
+#    - storage fluxes will be saved 
+#      (named as "NEON_Storage_Flux_[startdate]_[enddate]" on MaloneLab Server)
+
+# 3) Replace every [CTRL+F INSERT ... HERE] instance with your own existing absolute file paths!
+#    This workflow involves many different locations, so make sure your paths are absolute (not relative)!
+#    You can control+F to find and replace every [CTRL+F INSERT ... HERE] instance with your own existing paths or info.
+#    Depending on the section, you may need to also insert other info like your email. Please read carefully.
+#    Since this is a long workflow, it is more convenient to set the paths at each step (even if there are repeated paths) 
+#    so you can easily jump in where you left off in the workflow.
 
 # Throughout the workflow, inner folders will be automatically created under your listed paths.
+
+# Currently, data for these date ranges have already been acquired:
+# Round 1: 2021-08 to 2024-06
+# Round 2: 2024-07 to 2026-08
 
 ## -------------------------------------------------- ##
 #       Step 1: flow.neon.data.download.R -----
 ## -------------------------------------------------- ##
 
-# This step downloads data from NEON. 
-# Working group members can skip this and download aligned concentrations from the Google Drive. 
+# This step downloads data from NEON
+# Working group members can skip this and download aligned concentrations from the Google Drive
 
 # Clear workspace
 rm(list=ls())
@@ -38,11 +58,16 @@ download_extract_dir <- "[CTRL+F INSERT DOWNLOAD DIR HERE]"
 metadata <- read.csv(file.path(gh_repo, "metadata", "Ameriflux_NEON field-sites.csv"))
 site.list <- metadata$Site_Id.NEON %>% unique()
 
-my_startdate <- "2021-08"
-my_enddate <- "2024-06"
+# Set your start date, for example "2021-08"
+my_startdate <- "[INSERT A START DATE HERE IN YYYY-MM FORMAT]"
+# Set your end date, for example "2024-06"
+my_enddate <- "[INSERT AN END DATE HERE IN YYYY-MM FORMAT]"
+
 # Set your NEON token by creating an account at https://www.neonscience.org/
-# Then go to the "My Account" page to copy your API Token
-neon_token <- "[INSERT YOUR OWN TOKEN HERE, DO NOT COMMIT YOUR TOKEN TO GITHUB]"
+# Then go to the "My Account" page to copy your API Token.
+# Go back to RStudio, make sure you're working in the lterwg-flux-gradient repo, and create a new text file there (File -> New File -> Text File).
+# Paste your token inside the new text file and save the file exactly as "neon_token.txt" with the .txt extension
+neon_token <- readr::read_lines(file.path(gh_repo, "neon_token.txt"))
 
 # Download the data
 source(file.path(gh_repo, "workflows", "flow.neon.data.download.R"))
@@ -51,8 +76,8 @@ source(file.path(gh_repo, "workflows", "flow.neon.data.download.R"))
 #         Step 2: flow.neon.data.unzip.R ----- 
 ## -------------------------------------------------- ##
 
-# This step unzips the downloaded data from NEON. 
-# Working group members can skip this and download aligned concentrations from the Google Drive. 
+# This step unzips the downloaded data from NEON
+# Working group members can skip this and download aligned concentrations from the Google Drive
 
 # Clear workspace
 rm(list=ls())
@@ -76,8 +101,8 @@ source(file.path(gh_repo, "workflows", "flow.neon.data.unzip.R"))
 #       Step 3: flow.neon.data.extract.v2.R ----- 
 ## -------------------------------------------------- ##
 
-# This step extracts the downloaded data from NEON.
-# Working group members can skip this and download aligned concentrations from the Google Drive. 
+# This step extracts the downloaded data from NEON
+# Working group members can skip this and download aligned concentrations from the Google Drive
 
 # Clear workspace
 rm(list=ls())
@@ -258,6 +283,8 @@ metadata <- read.csv(file.path(gh_repo, "metadata", "Ameriflux_NEON field-sites.
 site.list <- metadata$Site_Id.NEON %>% unique()
 
 source(file.path(gh_repo, "workflows", "flow.evaluation.dataframe.R"))
+message("If you do not need to format the data for EDI or calculate storage fluxes,
+        feel free to move onto the lterwg-flux-gradient-eval repo for next steps.")
 
 ## -------------------------------------------------- ##
 #      Step 7: flow.evaluation.dataframe_EDI.R ----- 
