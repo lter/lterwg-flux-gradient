@@ -64,13 +64,13 @@ The script `Workflow_master.R` will run the files below in the order required to
 
 ```mermaid
 graph TD
-  A[flow.neon.data.download.R] --> B[flow.neon.data.unzip.R]
-  B --> C["flow.neon.data.extract.v2.R (exports SITE_9min.Rdata, SITE_30min.Rdata, SITE_1min.Rdata, SITE_WS2D2min.Rdata, SITE_attr.Rdata)"]
-  C --> D["flow.neon.data.format.conc.diffs.R (exports SITE_aligned_conc_flux_9min.RData) & flow.neon.data.format.conc.diffs.30m.R (exports SITE_aligned_conc_flux_30min.RData)"]
-  D --> E["flow.calc.flux.batch.R (exports SITE_AE_9min.Rdata, SITE_MBR_9min.RData, SITE_WP_9min.Rdata)"]
-  E --> F["flow.evaluation.dataframe.R (exports SITE_Evaluation.RDATA)"]
-  F --> G["flow.evaluation.dataframe_EDI.R (exports SITE_AE_9min.df.final.csv, SITE_MBR_9min.df.final.csv, SITE_WP_9min.df.final.csv)"]
-  G --> H["flow.neon.storage.R (exports SITE_storage_flux.csv, NEON_storage.RData)"]
+  A["`<u>flow.neon.data.download.R</u>`"] --> B["`<u>flow.neon.data.unzip.R</u>`"]
+  B --> C["`<u>flow.neon.data.extract.v2.R</u> (exports SITE_9min.Rdata, SITE_30min.Rdata, SITE_1min.Rdata, SITE_WS2D2min.Rdata, SITE_attr.Rdata)`"]
+  C --> D["`<u>flow.neon.data.format.conc.diffs.R</u> (exports SITE_aligned_conc_flux_9min.RData) & <u>flow.neon.data.format.conc.diffs.30m.R</u> (exports SITE_aligned_conc_flux_30min.RData)`"]
+  D --> E["`<u>flow.calc.flux.batch.R</u> (exports SITE_AE_9min.Rdata, SITE_MBR_9min.RData, SITE_WP_9min.Rdata)`"]
+  E --> F["`<u>flow.evaluation.dataframe.R</u> (exports SITE_Evaluation.RDATA)`"]
+  F --> G["`<u>flow.evaluation.dataframe_EDI.R</u> (exports SITE_AE_9min.df.final.csv, SITE_MBR_9min.df.final.csv, SITE_WP_9min.df.final.csv)`"]
+  G --> H["`<u>flow.neon.storage.R</u> (exports SITE_storage_flux.csv, NEON_storage.RData)`"]
 ```
 
 ### Data Acquisition and Extraction
@@ -85,7 +85,7 @@ graph TD
 
 4. `flow.neon.data.format.conc.diffs.R` & `flow.neon.data.format.conc.diffs.30m.R`: Align the 9-min or 30-min concentration data among adjacent tower levels (and also the bottom-top levels). `flow.neon.data.format.conc.diffs.R` interpolates 30-min eddy flux and MET data to the 9-min/6-min concentrations, including but not limited to u*, ubar (profile), roughness length. `flow.neon.data.format.conc.diffs.30m.R` connects the nearest 9-min/6-min data to each 30-min eddy covariance measurement. Also derives kinematic water flux (LE -> w'q'), heat flux (w'T'), aerodynamic canopy height, displacement height, that are needed for the various methods. Differences the concentrations for CH4, CO2, and H2O for adjacent tower levels (and bottom-top). Saves output as `SITE_aligned_conc_flux_9min.RData` and `SITE_aligned_conc_flux_30min.RData`. Zips and optionally uploads to Google Drive.
 
-`flow.download.aligned.conc.flux.R` (optional): Downloads output from `flow.neon.data.format.conc.diffs.R` and `flow.neon.data.format.conc.diffs.30m.R` from Google Drive and unzips them.
+Note: if you need to download the output from `flow.neon.data.format.conc.diffs.R` and `flow.neon.data.format.conc.diffs.30m.R` off Google Drive, you can run `flow.download.aligned.conc.flux.R`. 
 
 ### Flux Calculation
 
