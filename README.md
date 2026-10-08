@@ -64,13 +64,13 @@ The script `Workflow_master.R` will run the files below in the order required to
 
 ```mermaid
 graph TD
-  A["`<u>flow.neon.data.download.R</u>`"] --> B["`<u>flow.neon.data.unzip.R</u>`"]
-  B --> C["`<u>flow.neon.data.extract.v2.R</u> (exports SITE_9min.Rdata, SITE_30min.Rdata, SITE_1min.Rdata, SITE_WS2D2min.Rdata, SITE_attr.Rdata)`"]
-  C --> D["`<u>flow.neon.data.format.conc.diffs.R</u> (exports SITE_aligned_conc_flux_9min.RData) & <u>flow.neon.data.format.conc.diffs.30m.R</u> (exports SITE_aligned_conc_flux_30min.RData)`"]
-  D --> E["`<u>flow.calc.flux.batch.R</u> (exports SITE_AE_9min.Rdata, SITE_MBR_9min.RData, SITE_WP_9min.Rdata)`"]
-  E --> F["`<u>flow.evaluation.dataframe.R</u> (exports SITE_Evaluation.RDATA)`"]
-  F --> G["`<u>flow.evaluation.dataframe_EDI.R</u> (exports SITE_AE_9min.df.final.csv, SITE_MBR_9min.df.final.csv, SITE_WP_9min.df.final.csv)`"]
-  G --> H["`<u>flow.neon.storage.R</u> (exports SITE_storage_flux.csv, NEON_storage.RData)`"]
+  A["flow.neon.data.download.R"] --> B["flow.neon.data.unzip.R"]
+  B --> C["flow.neon.data.extract.v2.R (exports SITE_9min.Rdata, SITE_30min.Rdata, SITE_1min.Rdata, SITE_WS2D2min.Rdata, SITE_attr.Rdata)"]
+  C --> D["flow.neon.data.format.conc.diffs.R (exports SITE_aligned_conc_flux_9min.RData) & flow.neon.data.format.conc.diffs.30m.R (exports SITE_aligned_conc_flux_30min.RData)"]
+  D --> E["flow.calc.flux.batch.R (exports SITE_AE_9min.Rdata, SITE_MBR_9min.RData, SITE_WP_9min.Rdata)"]
+  E --> F["flow.evaluation.dataframe.R (exports SITE_Evaluation.RDATA)"]
+  F --> G["flow.evaluation.dataframe_EDI.R (exports SITE_AE_9min.df.final.csv, SITE_MBR_9min.df.final.csv, SITE_WP_9min.df.final.csv)"]
+  G --> H["flow.neon.storage.R (exports SITE_storage_flux.csv, NEON_storage.RData)"]
 ```
 
 ### Data Acquisition and Extraction
