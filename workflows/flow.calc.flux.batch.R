@@ -3,7 +3,6 @@
 ## --------------------------------------------- ##
 # Purpose:
 # Uses the aligned concentration file combined with the 30min and 9min data files to calculates fluxes and saves locally. 
-
 # You must download the aligned concentration data using flow.download.aligned.conc.flux.R.
 
 # Output(s):
@@ -28,13 +27,11 @@ metadata <- read.csv('/Volumes/MaloneLab/Research/FluxGradient/Site_Attributes.c
 site.list <- metadata$Site %>% unique()
 
 # Add local directory for downloaded data here:
-localdir <-  '/Volumes/MaloneLab/Research/FluxGradient/NEON_Aligned_Concentrations' # MaloneLab Server
-
-localdir2 <- '/Volumes/MaloneLab/Research/FluxGradient/Attributes' # MaloneLab Server
+localdir1 <- '/Volumes/MaloneLab/Research/FluxGradient/FluxData' # MaloneLab Server
 
 # Add local directory for your Flux repo here:
-DirRepo <- "/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient"
-setwd(DirRepo)
+localdir2 <- "/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient"
+setwd(localdir2)
 
 ## --------------------------------------------- ##
 #               Authenticate -----
@@ -55,16 +52,16 @@ data_folder <- googledrive::drive_ls(path = drive_url)
 
 for(site in site.list){
   
-  setwd(DirRepo)
+  setwd(localdir2)
   
   sitecode <- site
   print(sitecode)
   
   # Load Data:
-  load(fs::path(localdir, site, paste0(site, '_aligned_conc_flux_30min.RData')))
-  load(fs::path(localdir, site, paste0(site, '_aligned_conc_flux_9min.RData')))
+  load(fs::path(localdir1, site, paste0(site, '_aligned_conc_flux_30min.RData')))
+  load(fs::path(localdir1, site, paste0(site, '_aligned_conc_flux_9min.RData')))
 
-  dirTmp <- file.path(localdir, site)
+  dirTmp <- file.path(localdir1, site)
     
   print('Data Loaded')
   
@@ -72,12 +69,12 @@ for(site in site.list){
   source(file.path("workflows", "flow.calc.flag.mbr.batch.R"))
   print('MBR Done')
   
-  setwd(DirRepo)
+  setwd(localdir2)
   print('Running AE')
   source(file.path("workflows", "flow.calc.flag.aero.batch.R"))
   print('AE Done')
   
-  setwd(DirRepo)
+  setwd(localdir2)
   print('Running WP')
   source(file.path("workflows", "flow.calc.flag.windprof.batch.R"))
   print('WP Done')

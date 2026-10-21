@@ -15,9 +15,7 @@ site.list <- metadata$Site_Id.NEON %>% unique()
 
 # Flux Data Download:
 # Local Directory:
-dir.create(paste(data.local.dir,"/NEON_Aligned_Concentrations", sep="" ))
-
-localdir1 <-  '/Volumes/MaloneLab/Research/FluxGradient/NEON_Aligned_Concentrations' # MaloneLab Server
+localdir1 <- '/Volumes/MaloneLab/Research/FluxGradient/FluxData' # MaloneLab Server
 
 # Attribute Data Download
 # Local Directory:
