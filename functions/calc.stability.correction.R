@@ -104,8 +104,9 @@ calc.stability.correction <- function(gas){
   gas$z_displ_calc = gas$z_veg_aero*0.66
   gas$roughLength_calc = gas$z_veg_aero*0.1
   
-  #set z as mean of tower positions A & B
-  z = exp(mean(c(log(as.numeric(gas$TowerHeight_A)), log(as.numeric(gas$TowerHeight_B)))))
+  #set z as the geometric mean of tower positions A & B, row by row (one value per sampling-height pair).
+  #Previously exp(mean(c(log(A), log(B)))) collapsed all rows to a single site-wide value.
+  z <- sqrt(as.numeric(gas$TowerHeight_A) * as.numeric(gas$TowerHeight_B))
   
   #calculate obukhov parameter
   gas$effective_h = z - as.numeric(gas$z_displ_calc)

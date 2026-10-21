@@ -1,3 +1,5 @@
+# Keep bootstrap warnings summarized instead of printing once per missing observation.
+options(warn = 0)
 
 DoWP = 1 # Do Wind Profile Method here as well? 1 for true O for False.
 Savecsv = 0 # Save csv files to analyze in matlab? 1 for true 0 for False.
@@ -34,6 +36,14 @@ if (DoWP==1){
   min9.FG.WP.list <- calc.gas.aero.windprof.flux.WP(min9.K = min9.K.AE.list,
                                                     bootstrap = 1, 
                                                     nsamp = 1000)
+  # WP (Eq. 7): K_WP = k^2 (z - d) u / (phi_h ln((z - d)/z0)), z0 = 0.1 h, from calc.eddydiff.aero().
+  # Store it as EddyDiff so downstream code (Bad_Eddy, cross-gradient, evaluation) uses the WP K;
+  # the aerodynamic K is kept as EddyDiff_AE for reference.
+  min9.FG.WP.list <- lapply(min9.FG.WP.list, function(d) {
+    d$EddyDiff_AE <- d$EddyDiff
+    d$EddyDiff <- d$EddyDiff_WP
+    d
+  })
   #min30.FG.WP.list <- calc.gas.aero.windprof.flux.WP(min9.K = min30.K.AE.list,
   #                                                bootstrap = 1, nsamp = 1000)
   
@@ -45,7 +55,7 @@ if (DoWP==1){
   utils::zip(zipfile = fileZip, files = paste0(site, "_WP_9min.Rdata"))
   setwd(wdPrev)
   #googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folder$id[data_folder$name==site]) # path might need work
-  googledrive::drive_upload(media = fileSave, 
+  if (!exists("upload.drive") || isTRUE(upload.drive)) googledrive::drive_upload(media = fileSave, 
                             overwrite = T, 
                             path = data_folder$id[data_folder$name==site]) 
 }
@@ -60,7 +70,7 @@ setwd(dirTmp)
 utils::zip(zipfile = fileZip, files = paste0(site, "_AE_9min.Rdata"))
 setwd(wdPrev)
 #googledrive::drive_upload(media = fileZip, overwrite = T, path = data_folder$id[data_folder$name==site]) # path might need work
-googledrive::drive_upload(media = fileSave, 
+if (!exists("upload.drive") || isTRUE(upload.drive)) googledrive::drive_upload(media = fileSave, 
                           overwrite = T, 
                           path = data_folder$id[data_folder$name==site]) # couldn't make zip work (crs)
 

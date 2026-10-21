@@ -9,11 +9,10 @@
 # AND that they have created a data folder 
 # AND that within that data folder there are site folders named with the NEON sitecode
 
-# Set local dir
-#setwd('/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient/lterwg-flux-gradient')
+
 
 # Source unzip.neon fcn
-source(file.path("functions", "unzip.neon.R"))
+source(file.path(DirRepo,"functions", "unzip.neon.R"))
 
 # Add all sites here:
 site.list <- c("ABBY", "BARR", "BART", "BLAN",
@@ -38,8 +37,8 @@ for(sitecode in site.list){
   print(sitecode)
   
   # Unzip eddy-co bundled files
-  unzip.neon(in_path = file.path("data", sitecode, "filesToStack00200"), 
-             out_path = file.path("data", sitecode), 
+  unzip.neon(in_path = file.path(data.local.dir,"/NEON_Tower_Data/data", sitecode, "filesToStack00200"), 
+             out_path = file.path(data.local.dir,"/NEON_Tower_Data/data", sitecode), 
              quiet = FALSE)
   
 }

@@ -1,3 +1,5 @@
+# Keep bootstrap warnings summarized instead of printing once per missing observation.
+options(warn = 0)
 source(file.path("functions", "calc.mbr.R"))
 
 # Calculate MBR flux combos 9 min (CO2 with H2O trace, CH4 with H2O trace, etc)
@@ -62,7 +64,7 @@ save(MBRflux_align, file = fileSave)
 wdPrev <- getwd()
 utils::zip(zipfile = fileZip, files = paste0(site, '_MBR_9min.RData'))
 setwd(wdPrev)
-googledrive::drive_upload(media = fileZip, 
+if (!exists("upload.drive") || isTRUE(upload.drive)) googledrive::drive_upload(media = fileZip, 
                           overwrite = T, 
                           path = data_folder$id[data_folder$name==site]) 
 

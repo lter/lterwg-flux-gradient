@@ -8,9 +8,10 @@
 #' @param min9 gas concentration data frame, passed from computeFG.AE.WP.R (now calc.gas.aero.windprof.flux.R)
 #' @param eddy.diff.name name of which eddy diffusivity to use, passed from computeFG.AE.WP.R (now calc.gas.aero.windprof.flux.R)
 #'
-#'  Code inputs molar mixing ratio: # CO2 umol mol-1, CH4 nmol mol-1, H2O mmol mol-1
-#'  Code outputs molar flux: # CO2 umol m-2 s-1, CH4 nmol m-2 s-1, H2O mmol m-2 s-1
+#'  Code inputs molar mixing ratio: # CO2 umol mol-1, CH4 umol mol-1, H2O mmol mol-1
+#'  Code outputs molar flux: # CO2 umol m-2 s-1, CH4 umol m-2 s-1, H2O mmol m-2 s-1
 #'  min9$dConc is a mixing ratio not a concentration
+#'  (CH4 corrected from nmol to umol in Oct 2026: NEON CH4 dry mole fraction is in umol mol-1, ~2.0)
 #'  
 #' @author Samuel Jurado, Alexis Helgeson, Camilo Rey, Roisin Commane, Jackie Matthes
 #' 
@@ -26,6 +27,9 @@ calc.eqn.aero.windprof.flux <- function(min9, eddy.diff.name, bootstrap, nsamp){
     # Remove missing data
     # min9 <- min9[complete.cases(min9[,data.cols]),]
     nsamp = nsamp # number of bootstrap samples
+    k_all <- as.numeric(min9[, paste0(eddy.diff.name)])
+    rho_mol_all <- as.numeric(min9$rhoa_kgm3) / .0289
+    diff_heights_all <- as.numeric(min9$dHeight)
     
     # Storage for flux & concentration diff mean & variance 
     FG_mean = FG_sd = vector()
@@ -48,20 +52,14 @@ calc.eqn.aero.windprof.flux <- function(min9, eddy.diff.name, bootstrap, nsamp){
       
       # Pull sampled dConc through the flux gradient calculation
       # for the aerodynamic or wind profile method
-      diff.heights <- as.numeric(min9$dHeight)[i] # m
-      k <- as.numeric(min9[,paste0(eddy.diff.name)])[i]
-      rho <- as.numeric(min9$rhoa_kgm3)[i] #kg m-3
-      rho_mol <- rho/.0289 # mol m-3 (divided by molar mass of dry air 0.0289 kg/mol)
-      
-      # loop over each sampled dConc at one timestep to apply FG equation
-      FG = vector()
-      for(j in 1:nsamp){ 
-        
-        # Apply equation for the aero/windprof method
-        # CO2 umol m-2 s-1, CH4 nmol m-2 s-1, H2O mmol m-2 s-1
-        FG[j] <- rho_mol*(-k)*(dConc[j])/(diff.heights) 
-        
-      }
+      diff.heights <- diff_heights_all[i] # m
+      k <- k_all[i]
+      rho_mol <- rho_mol_all[i] # mol m-3 (divided by molar mass of dry air 0.0289 kg/mol)
+
+      # Apply equation for the aero/windprof method
+      # CO2 umol m-2 s-1, CH4 umol m-2 s-1, H2O mmol m-2 s-1
+      FG <- rho_mol * (-k) * dConc / diff.heights
+
       # Calculate the mean & sd of calculated flux at one timestep 
       # from sampled dConc values
       FG_mean[i] = mean(FG)
@@ -74,14 +72,14 @@ calc.eqn.aero.windprof.flux <- function(min9, eddy.diff.name, bootstrap, nsamp){
     min9$dConc_sd = dConc_sd
   } 
   else{ # do not bootstrap, just use the dConc mean
-    diff.conc <- as.numeric(min9$dConc) # CO2 umol mol-1, CH4 nmol mol-1, H2O mmol mol-1
+    diff.conc <- as.numeric(min9$dConc) # CO2 umol mol-1, CH4 umol mol-1, H2O mmol mol-1
     diff.heights <- as.numeric(min9$dHeight) # m
     
     #select for desired eddy diffusivity using eddy.diff.name
     k <- as.numeric(min9[,paste0(eddy.diff.name)]) #m-2 s-1
     rho <- as.numeric(min9$rhoa_kgm3) #kg m-3
     rho_mol <- rho/.0289 # mol m-3 (divided by molar mass of dry air 0.0289 kg/mol)
-    min9$FG_mean <- rho_mol*(-k)*(diff.conc)/(diff.heights) # CO2 umol m-2 s-1, CH4 nmol m-2 s-1, H2O mmol m-2 s-1
+    min9$FG_mean <- rho_mol*(-k)*(diff.conc)/(diff.heights) # CO2 umol m-2 s-1, CH4 umol m-2 s-1, H2O mmol m-2 s-1
     min9$FG_sd <- NA # does not exist for non-bootstrap
     min9$dConc_sd <- NA # does not exist for non-bootstrap
   }
@@ -92,7 +90,7 @@ calc.eqn.aero.windprof.flux <- function(min9, eddy.diff.name, bootstrap, nsamp){
 # #remove NAs
 # data.cols <- c("dConc", "rhoa_kgm3", "dHeight")
 # min9 <- min9[complete.cases(min9[,data.cols]),]
-# diff.conc <- as.numeric(min9$dConc) # CO2 umol mol-1, CH4 nmol mol-1, H2O mmol mol-1
+# diff.conc <- as.numeric(min9$dConc) # CO2 umol mol-1, CH4 umol mol-1, H2O mmol mol-1
 # diff.heights <- as.numeric(min9$dHeight) # m
 # #does this eddy diffisivity need a direction correction?
 # #DEPRECIATED CODE
@@ -102,4 +100,4 @@ calc.eqn.aero.windprof.flux <- function(min9, eddy.diff.name, bootstrap, nsamp){
 # rho <- as.numeric(min9$rhoa_kgm3) #kg m-3
 # rho_mol <- rho*.0289 # mol m-3
 # 
-# min9$FG <- rho_mol*(-k)*(diff.conc)/(diff.heights) # CO2 umol m-2 s-1, CH4 nmol m-2 s-1, H2O mmol m-2 s-1
+# min9$FG <- rho_mol*(-k)*(diff.conc)/(diff.heights) # CO2 umol m-2 s-1, CH4 umol m-2 s-1, H2O mmol m-2 s-1

@@ -114,7 +114,9 @@ for (site in sites){
   
   # For each concentration, compute difference in concentration among tower levels
   list.idx = seq_len(length(min9.list))
+  
   min9Diff.list <- lapply(list.idx, FUN = function(idx){
+    
     var <- min9.list[[idx]] %>%
       # Remove the rows where mean, qfFinl, min, max, vari, and numSamp are missing 
       dplyr::filter(!(is.na(mean) & is.na(qfFinl) & is.na(min) & is.na(max) & is.na(vari) & is.na(numSamp)))
@@ -132,6 +134,7 @@ for (site in sites){
     # row difference up to N/2 (rounding down), where N is the number of tower levels.
     # This ensures that we have every combination of tower levels, while restricting the
     # data to when those two tower levels are measured closest in time
+    
     for (diffRowIdx in seq_len(floor(max(attr.df$LvlMeasTow, na.rm = TRUE)/2))){
       OUTidx <- var
       vars <- names(OUTidx)
@@ -212,143 +215,111 @@ for (site in sites){
   # Reassign names from original list
   names(min9Diff.list) = names(min9.list)
   
-
   # ----- Interpolate the 30-min flux data to 9 min or 6 min concentration midpoints ------
   message(paste0(Sys.time(), ': Interpolating fluxes to midpoint of each paired profile window...'))
-  
-  # FC_turb
-  timeBgn <- as.POSIXct(strptime(min30.list$F_co2$timeBgn, format='%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))
-  timeEnd <- as.POSIXct(strptime(min30.list$F_co2$timeEnd, format='%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))
-  flux <- min30.list$F_co2$turb
-  qf <- min30.list$F_co2$turb.qfFinl # filter
-  flux[qf == 1] <- NA
-  min9Diff.list <- lapply(min9Diff.list, FUN = function(var){
-    timePred <- var$timeMid
-    fluxPred <- interp.flux(timeBgn, timeEnd, flux, timePred)
-    var$FC_turb_interp <- fluxPred
-    return(var)
-  })
-  
-  # FC_stor
-  timeBgn <- as.POSIXct(strptime(min30.list$F_co2$timeBgn, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))
-  timeEnd <- as.POSIXct(strptime(min30.list$F_co2$timeEnd, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))
-  flux <- min30.list$F_co2$stor
-  qf <- min30.list$F_co2$stor.qfFinl # filter
-  flux[qf == 1] <- NA
-  min9Diff.list <- lapply(min9Diff.list, FUN = function(var){
-    timePred <- var$timeMid
-    fluxPred <- interp.flux(timeBgn, timeEnd, flux, timePred)
-    var$FC_stor_interp <- fluxPred
-    return(var)
-  })
-  
-  # FC_nee
-  timeBgn <- as.POSIXct(strptime(min30.list$F_co2$timeBgn, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))
-  timeEnd <- as.POSIXct(strptime(min30.list$F_co2$timeEnd, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))
-  flux <- min30.list$F_co2$nsae
-  qf <- min30.list$F_co2$stor.qfFinl # filter
-  flux[qf == 1] <- NA
-  min9Diff.list <- lapply(min9Diff.list, FUN = function(var){
-    timePred <- var$timeMid
-    fluxPred <- interp.flux(timeBgn, timeEnd, flux, timePred)
-    var$FC_nee_interp <- fluxPred
-    return(var)
-  })
-  
-  # LE_turb
-  timeBgn <- as.POSIXct(strptime(min30.list$F_LE$timeBgn, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))
-  timeEnd <- as.POSIXct(strptime(min30.list$F_LE$timeEnd, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))
-  flux <- min30.list$F_LE$turb
-  qf <- min30.list$F_LE$turb.qfFinl # filter
-  flux[qf == 1] <- NA
-  min9Diff.list <- lapply(min9Diff.list, FUN = function(var){
-    timePred <- var$timeMid
-    fluxPred <- interp.flux(timeBgn, timeEnd, flux, timePred)
-    var$LE_turb_interp <- fluxPred
-    return(var)
-  })
-  
-  # LE_stor
-  timeBgn <- as.POSIXct(strptime(min30.list$F_LE$timeBgn, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))
-  timeEnd <- as.POSIXct(strptime(min30.list$F_LE$timeEnd, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))
-  flux <- min30.list$F_LE$stor
-  qf <- min30.list$F_LE$stor.qfFinl # filter
-  flux[qf == 1] <- NA
-  min9Diff.list <- lapply(min9Diff.list, FUN = function(var){
-    timePred <- var$timeMid
-    fluxPred <- interp.flux(timeBgn, timeEnd, flux, timePred)
-    var$LE_stor_interp <- fluxPred
-    return(var)
-  })
-  
-  # LE_nsae
-  timeBgn <- as.POSIXct(strptime(min30.list$F_LE$timeBgn, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))
-  timeEnd <- as.POSIXct(strptime(min30.list$F_LE$timeEnd, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))
-  flux <- min30.list$F_LE$nsae
-  qf <- min30.list$F_LE$nsae.qfFinl # filter
-  flux[qf == 1] <- NA
-  min9Diff.list <- lapply(min9Diff.list, FUN = function(var){
-    timePred <- var$timeMid
-    fluxPred <- interp.flux(timeBgn, timeEnd, flux, timePred)
-    var$LE_nsae_interp <- fluxPred
-    return(var)
-  })
-  
-  # H_turb
-  timeBgn <- as.POSIXct(strptime(min30.list$F_H$timeBgn, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))
-  timeEnd <- as.POSIXct(strptime(min30.list$F_H$timeEnd, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))
-  flux <- min30.list$F_H$turb
-  qf <- min30.list$F_H$turb.qfFinl # filter
-  flux[qf == 1] <- NA
-  min9Diff.list <- lapply(min9Diff.list, FUN = function(var){
-    timePred <- var$timeMid
-    fluxPred <- interp.flux(timeBgn, timeEnd, flux, timePred)
-    var$H_turb_interp <- fluxPred
-    return(var)
-  })
-  
-  # H_stor
-  timeBgn <- as.POSIXct(strptime(min30.list$F_H$timeBgn, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))
-  timeEnd <- as.POSIXct(strptime(min30.list$F_H$timeEnd, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))
-  flux <- min30.list$F_H$stor
-  qf <- min30.list$F_H$stor.qfFinl # filter
-  flux[qf == 1] <- NA
-  min9Diff.list <- lapply(min9Diff.list, FUN = function(var){
-    timePred <- var$timeMid
-    fluxPred <- interp.flux(timeBgn, timeEnd, flux, timePred)
-    var$H_stor_interp <- fluxPred
-    return(var)
-  })
-  
-  # H_nsae
-  timeBgn <- as.POSIXct(strptime(min30.list$F_H$timeBgn, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))
-  timeEnd <- as.POSIXct(strptime(min30.list$F_H$timeEnd, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))
-  flux <- min30.list$F_H$nsae
-  qf <- min30.list$F_H$nsae.qfFinl # filter
-  flux[qf == 1] <- NA
-  min9Diff.list <- lapply(min9Diff.list, FUN = function(var){
-    timePred <- var$timeMid
-    fluxPred <- interp.flux(timeBgn, timeEnd, flux, timePred)
-    var$H_nsae_interp <- fluxPred
-    return(var)
-  })
-  
-  # ustar & roughness length
-  timeBgn <- as.POSIXct(strptime(min30.list$Ufric$timeBgn, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))
-  timeEnd <- as.POSIXct(strptime(min30.list$Ufric$timeEnd, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT'))
-  ustar <- min30.list$Ufric$veloFric
-  roughLength <- min30.list$FluxFoot$distZaxsRgh
-  qf <- min30.list$Ufric$qfFinl # filter
-  ustar[qf == 1] <- NA
-  roughLength[qf == 1] <- NA
-  min9Diff.list <- lapply(min9Diff.list, FUN = function(var){
-    timePred <- var$timeMid
-    ustarPred <- interp.flux(timeBgn, timeEnd, ustar, timePred)
-    var$ustar_interp <- ustarPred
-    roughLengthPred <- interp.flux(timeBgn, timeEnd, roughLength, timePred)
-    var$roughLength_interp <- roughLengthPred
-    return(var)
-  })
+
+  interpolate_to_profiles <- function(profile_list, interpolation_specs){
+    cleaned_specs <- lapply(interpolation_specs, FUN = function(spec){
+      flux_values <- spec$values
+      flux_values[spec$qf == 1] <- NA
+      spec$values <- flux_values
+      spec
+    })
+
+    lapply(profile_list, FUN = function(var){
+      for(spec in cleaned_specs){
+        var[[spec$output]] <- interp.flux(
+          timeBgn = spec$timeBgn,
+          timeEnd = spec$timeEnd,
+          flux = spec$values,
+          timePred = var$timeMid
+        )
+      }
+      var
+    })
+  }
+
+  flux_interp_specs <- list(
+    list(
+      output = "FC_turb_interp",
+      timeBgn = as.POSIXct(strptime(min30.list$F_co2$timeBgn, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT')),
+      timeEnd = as.POSIXct(strptime(min30.list$F_co2$timeEnd, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT')),
+      values = min30.list$F_co2$turb,
+      qf = min30.list$F_co2$turb.qfFinl
+    ),
+    list(
+      output = "FC_stor_interp",
+      timeBgn = as.POSIXct(strptime(min30.list$F_co2$timeBgn, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT')),
+      timeEnd = as.POSIXct(strptime(min30.list$F_co2$timeEnd, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT')),
+      values = min30.list$F_co2$stor,
+      qf = min30.list$F_co2$stor.qfFinl
+    ),
+    list(
+      output = "FC_nee_interp",
+      timeBgn = as.POSIXct(strptime(min30.list$F_co2$timeBgn, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT')),
+      timeEnd = as.POSIXct(strptime(min30.list$F_co2$timeEnd, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT')),
+      values = min30.list$F_co2$nsae,
+      qf = min30.list$F_co2$stor.qfFinl
+    ),
+    list(
+      output = "LE_turb_interp",
+      timeBgn = as.POSIXct(strptime(min30.list$F_LE$timeBgn, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT')),
+      timeEnd = as.POSIXct(strptime(min30.list$F_LE$timeEnd, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT')),
+      values = min30.list$F_LE$turb,
+      qf = min30.list$F_LE$turb.qfFinl
+    ),
+    list(
+      output = "LE_stor_interp",
+      timeBgn = as.POSIXct(strptime(min30.list$F_LE$timeBgn, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT')),
+      timeEnd = as.POSIXct(strptime(min30.list$F_LE$timeEnd, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT')),
+      values = min30.list$F_LE$stor,
+      qf = min30.list$F_LE$stor.qfFinl
+    ),
+    list(
+      output = "LE_nsae_interp",
+      timeBgn = as.POSIXct(strptime(min30.list$F_LE$timeBgn, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT')),
+      timeEnd = as.POSIXct(strptime(min30.list$F_LE$timeEnd, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT')),
+      values = min30.list$F_LE$nsae,
+      qf = min30.list$F_LE$nsae.qfFinl
+    ),
+    list(
+      output = "H_turb_interp",
+      timeBgn = as.POSIXct(strptime(min30.list$F_H$timeBgn, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT')),
+      timeEnd = as.POSIXct(strptime(min30.list$F_H$timeEnd, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT')),
+      values = min30.list$F_H$turb,
+      qf = min30.list$F_H$turb.qfFinl
+    ),
+    list(
+      output = "H_stor_interp",
+      timeBgn = as.POSIXct(strptime(min30.list$F_H$timeBgn, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT')),
+      timeEnd = as.POSIXct(strptime(min30.list$F_H$timeEnd, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT')),
+      values = min30.list$F_H$stor,
+      qf = min30.list$F_H$stor.qfFinl
+    ),
+    list(
+      output = "H_nsae_interp",
+      timeBgn = as.POSIXct(strptime(min30.list$F_H$timeBgn, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT')),
+      timeEnd = as.POSIXct(strptime(min30.list$F_H$timeEnd, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT')),
+      values = min30.list$F_H$nsae,
+      qf = min30.list$F_H$nsae.qfFinl
+    ),
+    list(
+      output = "ustar_interp",
+      timeBgn = as.POSIXct(strptime(min30.list$Ufric$timeBgn, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT')),
+      timeEnd = as.POSIXct(strptime(min30.list$Ufric$timeEnd, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT')),
+      values = min30.list$Ufric$veloFric,
+      qf = min30.list$Ufric$qfFinl
+    ),
+    list(
+      output = "roughLength_interp",
+      timeBgn = as.POSIXct(strptime(min30.list$Ufric$timeBgn, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT')),
+      timeEnd = as.POSIXct(strptime(min30.list$Ufric$timeEnd, format = '%Y-%m-%dT%H:%M:%OSZ', tz = 'GMT')),
+      values = min30.list$FluxFoot$distZaxsRgh,
+      qf = min30.list$Ufric$qfFinl
+    )
+  )
+
+  min9Diff.list <- interpolate_to_profiles(min9Diff.list, flux_interp_specs)
   
   # ------ Aggregate the 1-min MET and 2-min ubar data to each window of paired concentrations -----
   numCoreAvail <- parallel::detectCores()
@@ -518,17 +489,15 @@ for (site in sites){
   rm('MET_agr_list', 'ubar_agr_list')
   
   # Compute vegetation height based on turbulence measurements
-  # These equations stem from Eqn. 9.7.1b in Stull
+  # These equations stem from Eqn. 9.7.1b in Stull 
+  
   min9Diff.list <- lapply(min9Diff.list, FUN = function(var){
     var$z_veg_aero <- 10*as.numeric(attr.df$DistZaxsLvlMeasTow[attr.df$TowerPosition == lvlTow])/(exp(0.4*var[[paste0('ubar', lvlTow)]]/var$ustar_interp)+6.6) # m - aerodynamic vegetation height
     var$z_displ_calc <- 0.66*var$z_veg_aero # m - zero plane displacement height
     var$roughLength_calc <- 0.1*var$z_veg_aero # m - roughness length
     return(var)
   })
-  
-  
-  
-  
+ 
   # ---------- Compute water flux from LE & Monin-Obukhov length --------------
   min9Diff.list <- lapply(min9Diff.list, FUN = function(var){
     
@@ -566,7 +535,6 @@ for (site in sites){
     return(var)
   })
   
-
   # -------- Save and zip the file to the temp directory. Upload to google drive. -------
   fileSave <- fs::path(dirTmp, paste0(site, '_aligned_conc_flux_9min.RData'))
   fileZip <- fs::path(dirTmp, paste0(site, '_aligned_conc_flux_9min.zip'))
@@ -574,6 +542,59 @@ for (site in sites){
   wdPrev <- getwd()
   setwd(dirTmp)
   utils::zip(zipfile = fileZip, files = paste0(site, '_aligned_conc_flux_9min.RData'))
+  setwd(wdPrev)
+  googledrive::drive_upload(media = fileZip, 
+                            overwrite = T, 
+                            path = data_folder$id[data_folder$name==site])
+  
+  
+  # _____________________Storage Flux Calculation_______________________________
+
+  Storage_Flux <- lapply(min9Diff.list, FUN = function(var){
+  
+   var.sub <- var %>% select( timeEnd_A, timeBgn_A, TowerPosition_A, min_A, max_A, ubar1, 
+                              z_displ_calc, TowerHeight_A ) %>% distinct() %>% 
+     # To remove any duplicates
+     reframe( .by=c(timeEnd_A, timeBgn_A, min_A, max_A),
+              ubar1 = mean(ubar1, na.rm=T), z_displ_calc = mean( z_displ_calc, na.rm=T)) %>% mutate(
+                delta.conc = max_A - min_A) %>% 
+     # the time used to interpolate to the half hour:
+     mutate( timePred = timeEnd_A %>% as.POSIXct( format="%Y-%m-%d %H:%M:%S", tz="GMT") %>% lubridate::round_date(unit="30-minutes"))  # combines. information across levels
+                                  
+   
+   # Linear Interpolation of delta.conc
+   timeBgn <- var.sub$timeBgn
+   timeEnd <- var.sub$timeEnd
+   flux <- var.sub$delta.conc
+   timePred <- var.sub$timePred
+   fluxPred <- interp.flux(timeBgn, timeEnd, flux, timePred)
+   
+   var.sub$delta.conc_interp <- fluxPred
+    
+   
+   var.sub.interp <- var.sub %>% 
+     reframe( .by = timePred, z_displ_calc = mean( z_displ_calc, na.rm=T),
+              delta.conc_interp = mean(delta.conc_interp))
+   
+   var.sub.interp$tower.height <- attr.df[,4] %>% as.numeric %>% max()
+
+   
+   var.sub.interp$F_storage <-  var.sub.interp$delta.conc_interp * ( var.sub.interp$tower.height -  var.sub.interp$z_displ_calc)
+   
+   approx <- zoo::na.approx(var.sub.interp$F_storage %>% as.vector, , na.rm=FALSE, rule=1, f=0)  
+   return(var.sub.interp)
+    
+   var.sub.interp$F_storage_filled <- approx
+    
+  })
+
+  
+  fileSave <- fs::path(dirTmp, paste0(site, '_storagefluxes.RData'))
+  fileZip <- fs::path(dirTmp, paste0(site, '_storagefluxes.zip'))
+  save(StorageFlux, file = fileSave)
+  wdPrev <- getwd()
+  setwd(dirTmp)
+  utils::zip(zipfile = fileZip, files = paste0(site, '_storagefluxes.RData'))
   setwd(wdPrev)
   googledrive::drive_upload(media = fileZip, 
                             overwrite = T, 

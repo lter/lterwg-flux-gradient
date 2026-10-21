@@ -30,7 +30,7 @@ wdPrev <- getwd()
 setwd(dirTmp)
 utils::zip(zipfile = fileZip, files = paste0(site, "_WP_9min.Rdata"))
 setwd(wdPrev)
-googledrive::drive_upload(media = fileZip, 
+if (!exists("upload.drive") || isTRUE(upload.drive)) googledrive::drive_upload(media = fileZip, 
                           overwrite = T, 
                           path = data_folder$id[data_folder$name==site]) 
 
