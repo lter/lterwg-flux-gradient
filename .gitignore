@@ -54,3 +54,6 @@ methane/
 data/
 Data/
 testing/
+
+# Ignore NEON API token
+neon_token.txt

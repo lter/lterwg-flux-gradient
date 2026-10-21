@@ -19,7 +19,7 @@ library(dplyr)
 library(readr)
 library(lubridate)
 
-output_dir <- "/Volumes/MaloneLab/Research/FluxGradient/NEON_Storage_Flux"
+if (!exists("output_dir")) output_dir <- "/Volumes/MaloneLab/Research/FluxGradient/NEON_Storage_Flux"
 
 # Find all per-site CSVs
 csv_files <- list.files(output_dir, pattern = "_storage_flux\\.csv$", full.names = TRUE)

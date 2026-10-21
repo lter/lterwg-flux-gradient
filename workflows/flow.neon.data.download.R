@@ -9,17 +9,17 @@
 # AND that they have created a data folder 
 # AND that within that data folder there are site folders named with the NEON sitecode
 
-# Add local directory for downloaded data here:
-#localdir <- '/Users/sm3466/YSE Dropbox/Sparkle Malone/Research/FluxGradient'
-#setwd(localdir)
+# See WorkFlow_master.R to set the variables needed to run this script
+# Variables needed: gh_repo, download_extract_dir, site.list, my_startdate, my_enddate, neon_token
 
 # Load libraries
 library(neonUtilities)
 library(dplyr)
 
 # Set start and end dates for data, REMEMBER CH4 is only available (august 2021 - present)
-startdate <- "2021-08"
-enddate <- "2024-06"
+startdate <- my_startdate
+enddate <- my_enddate
+my_token <- neon_token
 
 # Set include.provisional = T to get full time series of data up to present
 
@@ -39,7 +39,8 @@ for (sitecode in site.list){
                                          startdate = startdate, 
                                          enddate = enddate,
                                          check.size = F, 
-                                         include.provisional = T)
+                                         include.provisional = T,
+                                         token = my_token)
   
   RH1min <- RH1min$RH_1min %>%
     dplyr::filter(horizontalPosition == "000") %>%
@@ -54,7 +55,8 @@ for (sitecode in site.list){
                                           startdate = startdate, 
                                           enddate = enddate,
                                           check.size = F, 
-                                          include.provisional = T)
+                                          include.provisional = T,
+                                          token = my_token)
   
   RH30min <- RH30min$RH_30min %>%
     dplyr::filter(horizontalPosition == "000") %>%
@@ -69,7 +71,8 @@ for (sitecode in site.list){
                                             startdate = startdate, 
                                             enddate = enddate,
                                             check.size = F, 
-                                            include.provisional = T)
+                                            include.provisional = T,
+                                            token = my_token)
   
   WS2D30min <- WS2D30min$twoDWSD_30min %>%
     dplyr::mutate(TowerPosition = as.numeric(verticalPosition)/10) %>%
@@ -83,7 +86,8 @@ for (sitecode in site.list){
                                            startdate = startdate, 
                                            enddate = enddate,
                                            check.size = F, 
-                                           include.provisional = T)
+                                           include.provisional = T,
+                                           token = my_token)
   
   WS2D2min <- WS2D2min$twoDWSD_2min %>%
     dplyr::mutate(TowerPosition = as.numeric(verticalPosition)/10) %>%
@@ -97,7 +101,8 @@ for (sitecode in site.list){
                                           startdate = startdate, 
                                           enddate = enddate,
                                           check.size = F, 
-                                          include.provisional = T)
+                                          include.provisional = T,
+                                          token = my_token)
   
   PAR1min <- PAR1min$PARPAR_1min %>%
     dplyr::mutate(TowerPosition = as.numeric(verticalPosition)/10) %>%
@@ -111,7 +116,8 @@ for (sitecode in site.list){
                                            startdate = startdate, 
                                            enddate = enddate,
                                            check.size = F, 
-                                           include.provisional = T)
+                                           include.provisional = T,
+                                           token = my_token)
   
   PAR30min <- PAR30min$PARPAR_30min %>%
     dplyr::mutate(TowerPosition = as.numeric(verticalPosition)/10) %>%
@@ -130,9 +136,9 @@ for (sitecode in site.list){
                PAR30min = PAR30min)
   
   # Create necessary sub-folder(s)
-  dir.create(path = file.path("data"), showWarnings = F)
-  dir.create(path = file.path("data", sitecode), showWarnings = F)
-  save(DATA, file = file.path("data", sitecode, paste0(sitecode, "_NonEddyMetVars.Rdata")))
+  dir.create(path = file.path(download_extract_dir, "data"), showWarnings = F)
+  dir.create(path = file.path(download_extract_dir, "data", sitecode), showWarnings = F)
+  save(DATA, file = file.path(download_extract_dir, "data", sitecode, paste0(sitecode, "_NonEddyMetVars.Rdata")))
   
   # Grab bundled eddy-covariance data
   neonUtilities::zipsByProduct(dpID = "DP4.00200.001", 
@@ -141,9 +147,9 @@ for (sitecode in site.list){
                                enddate = enddate, 
                                package = "expanded", 
                                check.size = F, 
-                               savepath = file.path("data", sitecode), 
+                               savepath = file.path(download_extract_dir, "data", sitecode), 
                                include.provisional = T,
-                               release = "RELEASE-2025")
+                               token = my_token)
   
 }
 

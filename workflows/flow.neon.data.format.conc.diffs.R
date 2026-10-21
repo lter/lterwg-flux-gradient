@@ -2,7 +2,7 @@
 #               Housekeeping -----
 ## --------------------------------------------- ##
 # Purpose:
-# Uses output from flow.neon.data.extract.R from Google Drive. 
+# Uses output from flow.neon.data.extract.v2.R from Google Drive. 
 #
 # Merges together NEON flux, met, and profile concentration data. Aligns the profile 
 # concentration data (CH4, CO2, and H2O) among adjacent tower levels (and also the bottom-top 
@@ -22,27 +22,11 @@
 # SITE_aligned_conc_flux_9min.RData (local)
 # SITE_aligned_conc_flux_9min.zip (local & Google Drive)
 
-rm(list=ls())
-
-# Pull data from google drive
-# email <- 'alexisrose0525@gmail.com'
-# email <- 'jaclyn_matthes@g.harvard.edu'
-# email <- 'csturtevant@battelleecology.org'
-email <- "angel777chen@gmail.com"
-
-# Add all sites here:
-# sites <- c("ABBY", "BARR", "BART", "BLAN")
-# sites <- c("BONA", "CLBJ", "CPER", "DCFS")
-# sites <- c("DEJU", "DELA", "DSNY", "GRSM")
-# sites <- c("GUAN", "HARV", "HEAL", "JERC")
-# sites <- c("JORN", "KONA", "KONZ", "LAJA")
-# sites <- c("LENO", "MLBS", "MOAB", "NIWO")
-# sites <- c("NOGP", "OAES", "ONAQ", "ORNL")
-# sites <- c("OSBS", "PUUM", "RMNP", "SCBI")
-# sites <- c("SERC", "SJER", "SOAP", "SRER")
-# sites <- c("STEI", "STER", "TALL", "TEAK")
-# sites <- c("TOOL", "TREE", "UKFS", "UNDE")
-# sites <- c("WOOD", "WREF", "YELL")
+# See WorkFlow_master.R to set the variables needed to run this script
+# Variables needed: gh_repo, download_google, download_extract_dir (if download_google == 0),
+# save_temp, aligned_conc_dir (if save_temp == 0), export_aligned_google, 
+# data_folder (if download_google == 1 | export_aligned_google == 1),
+# site.list
 
 # ------ Prerequisites! Make sure these packages are installed ----
 # Also requires packages: fs, googledrive
@@ -51,9 +35,9 @@ library(doParallel)
 library(dplyr)
 
 # Load functions in this repo
-source(file.path("functions", "interp.flux.R"))
-source(file.path("functions", "aggregate.averages.R"))
-source(file.path("functions", "calc.MO.length.R"))
+source(file.path(gh_repo, "functions", "interp.flux.R"))
+source(file.path(gh_repo, "functions", "aggregate.averages.R"))
+source(file.path(gh_repo, "functions", "calc.MO.length.R"))
 
 # Final note: This script takes approx 45 min to run per site. 
 
@@ -61,53 +45,71 @@ source(file.path("functions", "calc.MO.length.R"))
 #                Align Data -----
 ## --------------------------------------------- ##
 
-for (site in sites){
+for (site in site.list){
   
-  rm('min9.list', 'min30.list', 'attr.df', 'min1.list', 'min9Diff.list')
+  rm(min9.list, min30.list, attr.df, min1.list, min9Diff.list,
+     flux_interp_specs, MET_1min, ubar_2min, ubar_df, WS2D2min)
   
-  # Authenticate with Google Drive and get site data
-  googledrive::drive_auth(email = email) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
-  drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
-  data_folder <- googledrive::drive_ls(path = drive_url)
-  site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==site])
+  message(site)
   
-  focal_files = paste0(site, c('_9min.zip', '_30min.zip', '_1min.zip', '_WS2D2min.zip', '_attr.zip'))
-
-  dirTmp <- fs::path(tempdir(), site)
-  dir.create(dirTmp)
-  
-  for(focal_file in focal_files){
-  
-    # Find the file identifier for that file
-    file_id <- subset(site_folder, name == focal_file)
+  if (download_google == 0){
+    load(file.path(download_extract_dir, "data", site, paste0(site, "_1min.Rdata")))
+    Sys.sleep(3) # Wait 3 seconds to prevent lag
+    load(file.path(download_extract_dir, "data", site, paste0(site, "_9min.Rdata")))
+    Sys.sleep(3)
+    load(file.path(download_extract_dir, "data", site, paste0(site, "_30min.Rdata")))
+    Sys.sleep(3)
+    load(file.path(download_extract_dir, "data", site, paste0(site, "_WS2D2min.Rdata")))
+    Sys.sleep(3)
+    load(file.path(download_extract_dir, "data", site, paste0(site, "_attr.Rdata")))
+    Sys.sleep(3)
     
-    # Download that file
-    pathDnld <- fs::path(dirTmp, focal_file)
-    googledrive::drive_download(file = file_id$id, 
-                                path = pathDnld,
-                                overwrite = T)
-    # Unzip
-    if(grepl(pattern = '.zip', focal_file)){
-      utils::unzip(pathDnld, exdir = dirTmp)
+  } else if (download_google == 1){
+    
+    # Authenticate with Google Drive and get site data
+    # googledrive::drive_auth(email = TRUE) # Likely will not work on RStudio Server. If you get an error, try email=TRUE to open an interactive auth session.
+    # drive_url <- googledrive::as_id("https://drive.google.com/drive/folders/1Q99CT77DnqMl2mrUtuikcY47BFpckKw3")
+    # data_folder <- googledrive::drive_ls(path = drive_url)
+    site_folder <- googledrive::drive_ls(path = data_folder$id[data_folder$name==site])
+    
+    focal_files = paste0(site, c('_9min.zip', '_30min.zip', '_1min.zip', '_WS2D2min.zip', '_attr.zip'))
+    
+    dirTmp <- fs::path(tempdir(), site)
+    dir.create(dirTmp)
+    
+    for(focal_file in focal_files){
+      
+      # Find the file identifier for that file
+      file_id <- subset(site_folder, name == focal_file)
+      
+      # Download that file
+      pathDnld <- fs::path(dirTmp, focal_file)
+      googledrive::drive_download(file = file_id$id, 
+                                  path = pathDnld,
+                                  overwrite = T)
+      # Unzip
+      if(grepl(pattern = '.zip', focal_file)){
+        utils::unzip(pathDnld, exdir = dirTmp)
+      }
+      
     }
     
+    # Extract data in 1, 2, 9, and 30 min & attribute files
+    fileIn <- fs::path(dirTmp, 'data', site, paste0(site, '_9min.Rdata'))
+    load(fileIn)
+    
+    fileIn <- fs::path(dirTmp, 'data', site, paste0(site, '_30min.Rdata'))
+    load(fileIn)
+    
+    fileIn <- fs::path(dirTmp, 'data', site, paste0(site, '_1min.Rdata'))
+    load(fileIn)
+    
+    fileIn <- fs::path(dirTmp, 'data', site, paste0(site, '_WS2D2min.Rdata'))
+    load(fileIn)
+    
+    fileIn <- fs::path(dirTmp, 'data', site, paste0(site, '_attr.Rdata'))
+    load(fileIn)
   }
-  
-  # Extract data in 1, 2, 9, and 30 min & attribute files
-  fileIn <- fs::path(dirTmp, 'data', site, paste0(site, '_9min.Rdata'))
-  load(fileIn)
-  
-  fileIn <- fs::path(dirTmp, 'data', site, paste0(site, '_30min.Rdata'))
-  load(fileIn)
-  
-  fileIn <- fs::path(dirTmp, 'data', site, paste0(site, '_1min.Rdata'))
-  load(fileIn)
-  
-  fileIn <- fs::path(dirTmp, 'data', site, paste0(site, '_WS2D2min.Rdata'))
-  load(fileIn)
-  
-  fileIn <- fs::path(dirTmp, 'data', site, paste0(site, '_attr.Rdata'))
-  load(fileIn)
   
   # ------------------- Get concentration diffs for subsequent tower levels --------------
   message(paste0(Sys.time(), ': Computing concentration profile differences among subsequent levels...'))
@@ -536,67 +538,78 @@ for (site in sites){
   })
   
   # -------- Save and zip the file to the temp directory. Upload to google drive. -------
-  fileSave <- fs::path(dirTmp, paste0(site, '_aligned_conc_flux_9min.RData'))
-  fileZip <- fs::path(dirTmp, paste0(site, '_aligned_conc_flux_9min.zip'))
-  save(min9Diff.list, file = fileSave)
-  wdPrev <- getwd()
-  setwd(dirTmp)
-  utils::zip(zipfile = fileZip, files = paste0(site, '_aligned_conc_flux_9min.RData'))
-  setwd(wdPrev)
-  googledrive::drive_upload(media = fileZip, 
-                            overwrite = T, 
-                            path = data_folder$id[data_folder$name==site])
   
+  if (save_temp == 0){
+    dir.create(fs::path(aligned_conc_dir, site))
+    fileSave <- fs::path(aligned_conc_dir, site, paste0(site, '_aligned_conc_flux_9min.RData'))
+    fileZip <- fs::path(aligned_conc_dir, site, paste0(site, '_aligned_conc_flux_9min.zip'))
+    save(min9Diff.list, file = fileSave)
+    utils::zip(zipfile = fileZip, files = fileSave)
+    
+  } else if (save_temp == 1){
+    dirTmp <- fs::path(tempdir(), site)
+    dir.create(dirTmp)
+    fileSave <- fs::path(dirTmp, paste0(site, '_aligned_conc_flux_9min.RData'))
+    fileZip <- fs::path(dirTmp, paste0(site, '_aligned_conc_flux_9min.zip'))
+    save(min9Diff.list, file = fileSave)
+    utils::zip(zipfile = fileZip, files = fileSave)
+  }
+  
+  if (export_aligned_google == 1){
+    googledrive::drive_upload(media = fileZip, 
+                              overwrite = T, 
+                              path = data_folder$id[data_folder$name==site])
+  }
   
   # _____________________Storage Flux Calculation_______________________________
 
-  Storage_Flux <- lapply(min9Diff.list, FUN = function(var){
-  
-   var.sub <- var %>% select( timeEnd_A, timeBgn_A, TowerPosition_A, min_A, max_A, ubar1, 
-                              z_displ_calc, TowerHeight_A ) %>% distinct() %>% 
-     # To remove any duplicates
-     reframe( .by=c(timeEnd_A, timeBgn_A, min_A, max_A),
-              ubar1 = mean(ubar1, na.rm=T), z_displ_calc = mean( z_displ_calc, na.rm=T)) %>% mutate(
-                delta.conc = max_A - min_A) %>% 
-     # the time used to interpolate to the half hour:
-     mutate( timePred = timeEnd_A %>% as.POSIXct( format="%Y-%m-%d %H:%M:%S", tz="GMT") %>% lubridate::round_date(unit="30-minutes"))  # combines. information across levels
-                                  
-   
-   # Linear Interpolation of delta.conc
-   timeBgn <- var.sub$timeBgn
-   timeEnd <- var.sub$timeEnd
-   flux <- var.sub$delta.conc
-   timePred <- var.sub$timePred
-   fluxPred <- interp.flux(timeBgn, timeEnd, flux, timePred)
-   
-   var.sub$delta.conc_interp <- fluxPred
-    
-   
-   var.sub.interp <- var.sub %>% 
-     reframe( .by = timePred, z_displ_calc = mean( z_displ_calc, na.rm=T),
-              delta.conc_interp = mean(delta.conc_interp))
-   
-   var.sub.interp$tower.height <- attr.df[,4] %>% as.numeric %>% max()
-
-   
-   var.sub.interp$F_storage <-  var.sub.interp$delta.conc_interp * ( var.sub.interp$tower.height -  var.sub.interp$z_displ_calc)
-   
-   approx <- zoo::na.approx(var.sub.interp$F_storage %>% as.vector, , na.rm=FALSE, rule=1, f=0)  
-   return(var.sub.interp)
-    
-   var.sub.interp$F_storage_filled <- approx
-    
-  })
-
-  
-  fileSave <- fs::path(dirTmp, paste0(site, '_storagefluxes.RData'))
-  fileZip <- fs::path(dirTmp, paste0(site, '_storagefluxes.zip'))
-  save(StorageFlux, file = fileSave)
-  wdPrev <- getwd()
-  setwd(dirTmp)
-  utils::zip(zipfile = fileZip, files = paste0(site, '_storagefluxes.RData'))
-  setwd(wdPrev)
-  googledrive::drive_upload(media = fileZip, 
-                            overwrite = T, 
-                            path = data_folder$id[data_folder$name==site])
+  # Storage_Flux <- lapply(min9Diff.list, FUN = function(var){
+  # 
+  #  var.sub <- var %>% select( timeEnd_A, timeBgn_A, TowerPosition_A, min_A, max_A, ubar1, 
+  #                             z_displ_calc, TowerHeight_A ) %>% distinct() %>% 
+  #    # To remove any duplicates
+  #    reframe( .by=c(timeEnd_A, timeBgn_A, min_A, max_A),
+  #             ubar1 = mean(ubar1, na.rm=T), z_displ_calc = mean( z_displ_calc, na.rm=T)) %>% mutate(
+  #               delta.conc = max_A - min_A) %>% 
+  #    # the time used to interpolate to the half hour:
+  #    mutate( timePred = timeEnd_A %>% as.POSIXct( format="%Y-%m-%d %H:%M:%S", tz="GMT") %>% lubridate::round_date(unit="30-minutes"))  # combines. information across levels
+  #                                 
+  #  
+  #  # Linear Interpolation of delta.conc
+  #  timeBgn <- var.sub$timeBgn
+  #  timeEnd <- var.sub$timeEnd
+  #  flux <- var.sub$delta.conc
+  #  timePred <- var.sub$timePred
+  #  fluxPred <- interp.flux(timeBgn, timeEnd, flux, timePred)
+  #  
+  #  var.sub$delta.conc_interp <- fluxPred
+  #   
+  #  
+  #  var.sub.interp <- var.sub %>% 
+  #    reframe( .by = timePred, z_displ_calc = mean( z_displ_calc, na.rm=T),
+  #             delta.conc_interp = mean(delta.conc_interp))
+  #  
+  #  var.sub.interp$tower.height <- attr.df[,4] %>% as.numeric %>% max()
+  # 
+  #  
+  #  var.sub.interp$F_storage <-  var.sub.interp$delta.conc_interp * ( var.sub.interp$tower.height -  var.sub.interp$z_displ_calc)
+  #  
+  #  approx <- zoo::na.approx(var.sub.interp$F_storage %>% as.vector, , na.rm=FALSE, rule=1, f=0)  
+  #  return(var.sub.interp)
+  #   
+  #  var.sub.interp$F_storage_filled <- approx
+  #   
+  # })
+  # 
+  # 
+  # fileSave <- fs::path(dirTmp, paste0(site, '_storagefluxes.RData'))
+  # fileZip <- fs::path(dirTmp, paste0(site, '_storagefluxes.zip'))
+  # save(StorageFlux, file = fileSave)
+  # wdPrev <- getwd()
+  # setwd(dirTmp)
+  # utils::zip(zipfile = fileZip, files = paste0(site, '_storagefluxes.RData'))
+  # setwd(wdPrev)
+  # googledrive::drive_upload(media = fileZip, 
+  #                           overwrite = T, 
+  #                           path = data_folder$id[data_folder$name==site])
 }

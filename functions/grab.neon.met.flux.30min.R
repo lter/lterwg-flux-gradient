@@ -400,7 +400,7 @@ grab.neon.met.flux.30min <- function(hd.file, sitecode, startdate, enddate){
  
   
   
-var = list(TAir = df_temp, Press = P.all, WS3D = Sonic.all, SWin = SWin.all, SWout = SWout.all, LWin = LWin.all, LWout = LWout.all, SoilHF = df_soil, FluxFoot = fluxFoot.all, Ufric = Ufric.all, CH4 = CH4.clean, CO2 = CO2.clean, H2O = H2O.clean, H2O.850 = H2O.850.clean, CO2.850 = CO2.850.clean, F_co2 = F_co2.all, F_H = F_H.all, F_LE = F_LE.all)
+var = list(Tair = df_temp, Press = P.all, WS3D = Sonic.all, SWin = SWin.all, SWout = SWout.all, LWin = LWin.all, LWout = LWout.all, SoilHF = df_soil, FluxFoot = fluxFoot.all, Ufric = Ufric.all, CH4 = CH4.clean, CO2 = CO2.clean, H2O = H2O.clean, H2O.850 = H2O.850.clean, CO2.850 = CO2.850.clean, F_co2 = F_co2.all, F_H = F_H.all, F_LE = F_LE.all)
   
   return(var)
 }
