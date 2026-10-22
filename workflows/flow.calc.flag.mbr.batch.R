@@ -1,9 +1,18 @@
 # Keep bootstrap warnings summarized instead of printing once per missing observation.
 options(warn = 0)
 source(file.path(gh_repo, "functions", "calc.mbr.R"))
+source(file.path(gh_repo, "functions", "calc.MO.length.R"))
+source(file.path(gh_repo, "functions", "calc.stability.correction.R"))
+source(file.path(gh_repo, "functions", "calc.aerodynamic.canopy.height.R"))
+
+# Same aerodynamic canopy height (z_veg_aero), d (z_displ_calc), z0 (roughLength_calc), L and pair stability
+# terms as the AE and WP files. Without this, the MBR output kept the older wind-based canopy height from
+# flow.neon.data.format.conc.diffs.R. The MBR flux itself does not use these columns.
+min9Diff.list.mbr <- lapply(min9Diff.list, function(g)
+  calc.stability.correction(sitecode = site, gas = g, min9 = min9Diff.list))
 
 # Calculate MBR flux combos 9 min (CO2 with H2O trace, CH4 with H2O trace, etc)
-MBRflux_align = calc.mbr(min9 = min9Diff.list, 
+MBRflux_align = calc.mbr(min9 = min9Diff.list.mbr, 
                          bootstrap = 1,
                          nsamp = 1000)
 
@@ -55,6 +64,8 @@ MBRflux_align = calc.mbr(min9 = min9Diff.list,
 #   xlim(c(-100,100)) +
 #   labs(title=paste0(site, ' MBR method (levels 4-3); R-squared = ',round(RFCH4$estimate^2,2)*100,'%')) +
 #   theme_minimal()
+
+rm(min9Diff.list.mbr)
 
 # -------- Save and zip the file to the temp directory. Upload to google drive. -------
 fileSave <- fs::path(dirTmp, paste0(site, '_MBR_9min.RData'))

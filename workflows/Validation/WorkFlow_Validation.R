@@ -149,7 +149,9 @@ for(site in site.list){
   MBR_9min.df.flag <- flag.all.gas.stability(flux.df = MBR_9min.df, 
                                              L = 'L_obukhov_CO2', 
                                              z = 'z_veg_aero_CO2', 
-                                             d = 'z_displ_calc_CO2')
+                                             d = 'z_displ_calc_CO2',
+                                             zA = 'TowerHeight_A_CO2',
+                                             zB = 'TowerHeight_B_CO2')
   
   
   # Calculate the difference between EC and gradient FLux:

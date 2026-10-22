@@ -51,6 +51,10 @@ calc.stability.correction <- function(sitecode, gas, min9){
   #gas <- cbind(gas, MO.vars$rho, MO.vars$vpotflux, MO.vars$L)
   gas <- data.frame(gas, rho = MO.vars$rho, vpotflux = MO.vars$vpotflux, 
                     L = MO.vars$L)
+  # Keep L_obukhov (from the formatting step) identical to L, so the stability flags, zeta and phi_h
+  # all use the same Obukhov length (k = 0.4) even when the aligned files were made with the old k = 0.41.
+  if (all(c("zoL", "L_obukhov") %in% names(gas))) gas$zoL <- gas$zoL * gas$L_obukhov / gas$L   # tower-top z/L with the same L
+  gas$L_obukhov <- gas$L
   
   # Calculate Aerodynamic Canopy Height to later calculate d and zo
   daysAVG=20
@@ -119,7 +123,8 @@ calc.stability.correction <- function(sitecode, gas, min9){
   gas$MO.param <- as.numeric(gas$MO.param)
   
   #add canopy.flag
-  min.height <- as.numeric(min(gas$TowerHeight_A, gas$TowerHeight_B))
+  # lower inlet of each sampling-height pair (previously the lowest inlet at the site, the same for every row)
+  min.height <- pmin(as.numeric(gas$TowerHeight_A), as.numeric(gas$TowerHeight_B))
   gas$canopy.flag = rep(NA,nrow(gas))
   gas$canopy.flag[min.height < gas$z_displ_calc] = 0
   gas$canopy.flag[min.height >= gas$z_displ_calc] =1

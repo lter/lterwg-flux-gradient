@@ -16,7 +16,7 @@ calc.MO.length <- function(press,temp,H,LE,velofric){
   
   #Constants
   lambda = 2.26*10**3 # Latent Heat of Vaporization (J g-1)
-  k = .41        # Von Karmaan Constant (unitless)
+  k = 0.4        # von Karman constant (unitless); 0.4 as in the eddy diffusivity and canopy-height code
   g = 9.81       # Gravity (m s-2)
   cp = 1.005      # Specific Heat of Air J K-1 g-1
   R= 8.314462    # Universal gas constant m3 Pa K-1 mol-1

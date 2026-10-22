@@ -7,6 +7,9 @@
 #'
 #' @return list of gas concentration dataframes containing variables associated with modified bowen ratio calculation
 #' 
+# Bootstrap output (bootstrap = 1): the *_mean columns hold the MEDIAN of the nsamp draws of F1 * dC2 / dC1
+# (column names kept for compatibility). The mean of a ratio is unstable when the tracer gradient dC1 is
+# near zero; the median is not. *_lo and *_hi are the 2.5th and 97.5th percentiles of the draws.
 calc.mbr <- function(min9, bootstrap, nsamp){
   
   # Calculate modified Bowen ratio (MBR) gradient fluxes:
@@ -104,39 +107,31 @@ calc.mbr <- function(min9, bootstrap, nsamp){
                                    (dConc_CH4 / dConc_H2O), NA)
     
       # Remove infinite values - happens when denominator is missing/zero
-      FCO2_MBR_H2Otrace[is.infinite(FH2O_MBR_CO2trace)] = NA
+      FCO2_MBR_H2Otrace[is.infinite(FCO2_MBR_H2Otrace)] = NA
       FH2O_MBR_CO2trace[is.infinite(FH2O_MBR_CO2trace)] = NA
       FCH4_MBR_CO2trace[is.infinite(FCH4_MBR_CO2trace)] = NA
       FCH4_MBR_H2Otrace[is.infinite(FCH4_MBR_H2Otrace)] = NA
       
       #calculate lower and upper bounds of confidence interval
-      FCH4_MBR_H2Otrace_mean[i] = mean(FCH4_MBR_H2Otrace)
-      FCH4_MBR_H2Otrace_lo[i] = mean(FCH4_MBR_H2Otrace) -
-        qt(0.95,df=nsamp-1)*sd(FCH4_MBR_H2Otrace)/sqrt(nsamp)
-      FCH4_MBR_H2Otrace_hi[i] = mean(FCH4_MBR_H2Otrace) +
-        qt(0.95,df=nsamp-1)*sd(FCH4_MBR_H2Otrace)/sqrt(nsamp)
-      FCH4_MBR_H2Otrace_sd[i] = sd(FCH4_MBR_H2Otrace)
+      FCH4_MBR_H2Otrace_mean[i] = median(FCH4_MBR_H2Otrace, na.rm = TRUE)
+      FCH4_MBR_H2Otrace_lo[i] = unname(quantile(FCH4_MBR_H2Otrace, 0.025, na.rm = TRUE))
+      FCH4_MBR_H2Otrace_hi[i] = unname(quantile(FCH4_MBR_H2Otrace, 0.975, na.rm = TRUE))
+      FCH4_MBR_H2Otrace_sd[i] = sd(FCH4_MBR_H2Otrace, na.rm = TRUE)
       
-      FCH4_MBR_CO2trace_mean[i] = mean(FCH4_MBR_CO2trace)
-      FCH4_MBR_CO2trace_lo[i] = mean(FCH4_MBR_CO2trace) -
-        qt(0.95,df=nsamp-1)*sd(FCH4_MBR_CO2trace)/sqrt(nsamp)
-      FCH4_MBR_CO2trace_hi[i] = mean(FCH4_MBR_CO2trace) +
-        qt(0.95,df=nsamp-1)*sd(FCH4_MBR_CO2trace)/sqrt(nsamp)
-      FCH4_MBR_CO2trace_sd[i] = sd(FCH4_MBR_CO2trace)
+      FCH4_MBR_CO2trace_mean[i] = median(FCH4_MBR_CO2trace, na.rm = TRUE)
+      FCH4_MBR_CO2trace_lo[i] = unname(quantile(FCH4_MBR_CO2trace, 0.025, na.rm = TRUE))
+      FCH4_MBR_CO2trace_hi[i] = unname(quantile(FCH4_MBR_CO2trace, 0.975, na.rm = TRUE))
+      FCH4_MBR_CO2trace_sd[i] = sd(FCH4_MBR_CO2trace, na.rm = TRUE)
       
-      FCO2_MBR_H2Otrace_mean[i] = mean(FCO2_MBR_H2Otrace)
-      FCO2_MBR_H2Otrace_lo[i] = mean(FCO2_MBR_H2Otrace) -
-        qt(0.95,df=nsamp-1)*sd(FCO2_MBR_H2Otrace)/sqrt(nsamp)
-      FCO2_MBR_H2Otrace_hi[i] = mean(FCO2_MBR_H2Otrace) +
-        qt(0.95,df=nsamp-1)*sd(FCO2_MBR_H2Otrace)/sqrt(nsamp)
-      FCO2_MBR_H2Otrace_sd[i] = sd(FCO2_MBR_H2Otrace)
+      FCO2_MBR_H2Otrace_mean[i] = median(FCO2_MBR_H2Otrace, na.rm = TRUE)
+      FCO2_MBR_H2Otrace_lo[i] = unname(quantile(FCO2_MBR_H2Otrace, 0.025, na.rm = TRUE))
+      FCO2_MBR_H2Otrace_hi[i] = unname(quantile(FCO2_MBR_H2Otrace, 0.975, na.rm = TRUE))
+      FCO2_MBR_H2Otrace_sd[i] = sd(FCO2_MBR_H2Otrace, na.rm = TRUE)
       
-      FH2O_MBR_CO2trace_mean[i] = mean(FH2O_MBR_CO2trace)
-      FH2O_MBR_CO2trace_lo[i] = mean(FH2O_MBR_CO2trace) -
-        qt(0.95,df=nsamp-1)*sd(FH2O_MBR_CO2trace)/sqrt(nsamp)
-      FH2O_MBR_CO2trace_hi[i] = mean(FH2O_MBR_CO2trace) +
-        qt(0.95,df=nsamp-1)*sd(FH2O_MBR_CO2trace)/sqrt(nsamp)
-      FH2O_MBR_CO2trace_sd[i] = sd(FH2O_MBR_CO2trace)
+      FH2O_MBR_CO2trace_mean[i] = median(FH2O_MBR_CO2trace, na.rm = TRUE)
+      FH2O_MBR_CO2trace_lo[i] = unname(quantile(FH2O_MBR_CO2trace, 0.025, na.rm = TRUE))
+      FH2O_MBR_CO2trace_hi[i] = unname(quantile(FH2O_MBR_CO2trace, 0.975, na.rm = TRUE))
+      FH2O_MBR_CO2trace_sd[i] = sd(FH2O_MBR_CO2trace, na.rm = TRUE)
       
     }
     MBRflux_align$FCH4_MBR_H2Otrace_mean = FCH4_MBR_H2Otrace_mean

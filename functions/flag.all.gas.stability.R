@@ -1,27 +1,31 @@
 #' flag.all.gas.stability
 #'
 #' @param flux.df dataframe of calculated fluxes and L is the name of the column with obukov length 
-#' @param z canopy height as computed from ustar and wind speed at tower top, per Eqn. 9.7.1b in Stull 
-#' @param d zero plane displacement height, calculated as 2/3 of z_veg_aero
-#' @param L Obukov length
+#' @param z not used for zeta any more (kept so existing calls still work); was the aerodynamic canopy height
+#' @param d zero plane displacement height column (0.66 h)
+#' @param L Obukov length column
+#' @param zA,zB columns with the heights of the two inlets of the pair
+#' zeta is the stability parameter of each sampling-height pair, (z - d)/L with z = sqrt(zA zB) and
+#' z - d >= 0.1 m, as used for phi_h in calc.stability.correction(). It was previously (h - d)/L, which
+#' is the same for every pair at a given time.
 #' @return df with new column for stability conditions
 #' 
 #'
 #' @author Sparkle Malone
 #' 
 #' 
-flag.all.gas.stability <- function(flux.df, L, z, d){
+flag.all.gas.stability <- function(flux.df, L, z = NULL, d, zA = "TowerHeight_A", zB = "TowerHeight_B"){
   
-  L = flux.df %>% select(all_of(L))
-  z = flux.df %>% select(all_of(z))
-  d = flux.df %>% select(all_of(d))
+  L.val <- as.numeric(flux.df[[L]])
+  d.val <- as.numeric(flux.df[[d]])
+  z.pair <- sqrt(as.numeric(flux.df[[zA]]) * as.numeric(flux.df[[zB]]))
   
-  zeta = (z-d)/L
+  zeta <- pmax(z.pair - d.val, 0.1) / L.val
   
   #use obukov length to filter for stable, neutral, unstable atmospheric conditions
   #use 100m and 500m as threshold for comparison
- flux.df$zeta = zeta$z_veg_aero
- flux.df$L = L[,1]
+ flux.df$zeta = zeta
+ flux.df$L = L.val
   flux.df <- flux.df %>% mutate( Stability_100 = case_when( abs(L) > 100 ~ "neutral",
                                                             L < 100 & L > 0 ~ "stable", 
                                                             L > -100 & L < 0 ~  "unstable"),
