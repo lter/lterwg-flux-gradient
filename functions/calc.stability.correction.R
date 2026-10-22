@@ -60,7 +60,9 @@ calc.stability.correction <- function(sitecode, gas, min9){
   ustar=gas$ustar_interp[gas$dLevelsAminusB == TopLevel]
   gas$mean_TowerH <- rowMeans((cbind(as.numeric(gas$TowerHeight_A), 
                                      as.numeric(gas$TowerHeight_B))), na.rm = TRUE)
-  z=mean(as.numeric((gas$mean_TowerH[gas$dLevelsAminusB == TopLevel])))
+  # z for the canopy-height estimate is the height where u is measured: the top inlet (TowerHeight_A of
+  # the uppermost pair). Previously the mean height of the uppermost pair was used, which biased h low.
+  z = as.numeric(gas$TowerHeight_A[gas$dLevelsAminusB == TopLevel])
   L=gas$L[gas$dLevelsAminusB == TopLevel]
   
   maxL=max(min9$H2O$TowerPosition_A)
@@ -98,7 +100,7 @@ calc.stability.correction <- function(sitecode, gas, min9){
   for(i in 1:length(levels)){
     iLevel=levels[i]
     Mdate_new=gas$timeEnd_A[gas$dLevelsAminusB == iLevel]
-    zh_interp <- approx(Mdate, AeroVars$zh_final, Mdate_new, method="linear", rule=2)$y
+    zh_interp <- approx(Mdate, AeroVars$zh_final, Mdate_new, method="linear", rule=2, ties=mean)$y
     gas$z_veg_aero[gas$dLevelsAminusB == iLevel] = zh_interp
   }
   
