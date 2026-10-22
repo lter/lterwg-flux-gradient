@@ -31,7 +31,9 @@ calc.eddydiff.aero <- function(sitecode, min9){
     ubar <- rep(NA_real_, nrow(gas_df))
     ubar[valid_idx] <- ubar_mat[cbind(valid_idx, ubar_idx[valid_idx])]
 
-    zd <- as.numeric(gas_df$effective_h)
+    # z - d WITHOUT the 0.1 m floor applied to effective_h (the floor is for the AE). With the floor, pairs
+    # whose true z - d is <= z0 were kept whenever z0 < 0.1 m (canopies under 1 m) instead of being set to NA.
+    zd <- sqrt(as.numeric(gas_df$TowerHeight_A) * as.numeric(gas_df$TowerHeight_B)) - as.numeric(gas_df$z_displ_calc)
     zo <- as.numeric(gas_df$roughLength_calc)
     phih <- as.numeric(gas_df$phih)
     gas_df$EddyDiff_WP <- ((k_const^2) * ubar * zd) / (log(zd / zo) * phih)
