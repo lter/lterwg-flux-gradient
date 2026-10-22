@@ -97,6 +97,30 @@ Note: if you need to download the output from `flow.neon.data.format.conc.diffs.
 
 8. `flow.neon.storage.R`: Calculates storage fluxes. Saves output as `SITE_storage_flux.csv`. All the combined storage fluxes are also saved as `NEON_storage.RData`.
 
+## Version 3 of the 2021–2026 fluxes (October 2026)
+
+Changes made for the ESSD revision (essd-2026-413). The published 2021–2026 results were calculated before them.
+`workflows/WorkFlow_rerun_2021_2026_v3.R` reruns Steps 5–7 with these changes and writes to new `_v3` folders
+(`NEON_Aligned_Concentrations_2021_2026_v3`, `NEON_GradientFlux_Data_2021_2026_v3`, `NEON_GradientFlux_EDI_2021_2026_v3`),
+so the published outputs are kept. Steps 1–4 do not need to be rerun.
+
+| Change | Where |
+|---|---|
+| Aerodynamic canopy height uses the height of the wind measurement (top inlet) instead of the mean height of the top inlet pair, d = 0.66 h (was 0.6 h inside the function) and a centred 20-day window (was 20 consecutive valid estimates) | `calc.aerodynamic.canopy.height.R`, `calc.stability.correction.R` |
+| MBR flux = median of the bootstrap draws of F1·ΔC2/ΔC1 (the `*_mean` columns keep their names); `*_lo`/`*_hi` = 2.5th/97.5th percentiles. The mean of a ratio is unstable when the tracer gradient is near zero | `calc.mbr.R` |
+| Infinite-value check on `FCO2_MBR_H2Otrace` tested the H2O column | `calc.mbr.R` |
+| MBR output carries the same aerodynamic canopy height, d, z0 and L as the AE and WP output (was the older wind-based estimate from the formatting step) | `flow.calc.flag.mbr.batch.R` |
+| von Kármán constant 0.4 everywhere (Obukhov length used 0.41); `L_obukhov` is set to the stability-correction L, so the aligned files need not be regenerated | `calc.MO.length.R`, `calc.stability.correction.R` |
+| `canopy.flag` uses each pair's lower inlet (was the lowest inlet at the site) | `calc.stability.correction.R` |
+| `zeta` and `Stability_Exteme` are each pair's (z − d)/L, z = √(zA·zB), z − d ≥ 0.1 m (was (h − d)/L, the same for every pair) | `flag.all.gas.stability.R` |
+| WP diffusivity uses z − d without the 0.1 m AE floor, so pairs with z − d ≤ z0 are NA as described | `calc.eddydiff.aero.R` |
+| WP fluxes (Eq. 7, z − d and z0 = 0.1 h) are calculated in the AE batch (`DoWP = 1`, column `EddyDiff_WP`); `flow.calc.flag.windprof.batch.R` (different K) is not run | `flow.calc.flag.aero.batch.R`, `flow.calc.flux.batch.R` |
+
+Known limitations (not changed):
+- **Stability ranges.** The stability corrections (φh = 1 + 5ζ for ζ > 0; (1 − 16ζ)^−1/2 for ζ ≤ 0) were derived for roughly −5 < ζ < 0 and 0 ≤ ζ < 1. That is their range of validity, not a filter: they are applied to all values. In the 2021–2026 run 0.07 % (AE) and 0.13 % (WP) of filtered values were outside it.
+- **Bootstrap SD.** The bootstrap draws use the variance of the 1-Hz concentrations within each 6-min sample, so `dConc_sd` (and the SNR = |ΔC|/sd(ΔC)) reflects within-sample variability, not the uncertainty of the 6-min mean.
+- **Air pressure** comes from the single barometer at mid-tower.
+
 ## Other Workflows
 
 ### Non-NEON Processing
