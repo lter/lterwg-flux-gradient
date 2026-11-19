@@ -721,7 +721,9 @@ min9Diff.list <- lapply(min9Diff.list,FUN=function(var){
   var$FH2O_interp <- var$LE_turb_interp/var$lambda/mv*1000 # mmol m-2 s-1
   
   # Monin-Obukhov length & stability parameter (z/L)
-  var$L_obukhov <- calc.MO.length(var$P_kPa, Tair_C, var$H_turb_interp, var$LE_turb_interp, var$ustar_interp)$L
+  # This formatter retains raw hPa in P_kPa. calc.MO.length requires kPa.
+  # Density above and the downstream storage correction already handle raw hPa.
+  var$L_obukhov <- calc.MO.length(var$P_kPa / 10, Tair_C, var$H_turb_interp, var$LE_turb_interp, var$ustar_interp)$L
   var$zoL <- as.numeric(attr.df$DistZaxsTow[1])/var$L_obukhov
   
   return(var)
