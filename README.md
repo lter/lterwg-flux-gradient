@@ -144,6 +144,8 @@ Known limitations (not changed):
 
 `flow.icos.data.1sec.summarize.R`: Aggregates ICOS high frequency data.
 
+`split_into_annual_files.R`: This script will split the combined 2021-2026 calculated gradient fluxes into annual files for submission to EDI.
+
 ## Function Folder
 - Use hierarchical naming with the active verb first, i.e. "flag.iqr.R"
 - This is where all functions called by flow. scripts in Workflow Folder are stored
