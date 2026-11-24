@@ -121,8 +121,6 @@ Known limitations (not changed):
 - **Bootstrap SD.** The bootstrap draws use the variance of the 1-Hz concentrations within each 6-min sample, so `dConc_sd` (and the SNR = |ΔC|/sd(ΔC)) reflects within-sample variability, not the uncertainty of the 6-min mean.
 - **Air pressure** comes from the single barometer at mid-tower.
 
-Note: Use `split_into_annual_files.R` if the combined 2021-2026 fluxes need to be split into annual files for submission to EDI.
-
 ## Other Workflows
 
 ### Non-NEON Processing
@@ -145,8 +143,6 @@ Note: Use `split_into_annual_files.R` if the combined 2021-2026 fluxes need to b
 `flow.flag.flux.stats.R`: Runs quality flag functions and calculates residuals. Uploads to Google Drive as `SITES_WP_val.Rdata`, `SITES_AE_val.Rdata`, and `SITES_MBR_val.zip`. 
 
 `flow.icos.data.1sec.summarize.R`: Aggregates ICOS high frequency data.
-
-`split_into_annual_files.R`: This script will split the combined 2021-2026 calculated gradient fluxes into annual files for submission to EDI.
 
 ## Function Folder
 - Use hierarchical naming with the active verb first, i.e. "flag.iqr.R"
