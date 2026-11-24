@@ -121,6 +121,8 @@ Known limitations (not changed):
 - **Bootstrap SD.** The bootstrap draws use the variance of the 1-Hz concentrations within each 6-min sample, so `dConc_sd` (and the SNR = |ΔC|/sd(ΔC)) reflects within-sample variability, not the uncertainty of the 6-min mean.
 - **Air pressure** comes from the single barometer at mid-tower.
 
+Note: Use `split_into_annual_files.R` if the combined 2021-2026 fluxes need to be split into annual files for submission to EDI.
+
 ## Other Workflows
 
 ### Non-NEON Processing
